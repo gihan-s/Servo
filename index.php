@@ -12,7 +12,8 @@
   <ul>
     <?php 
 
-    $conn = mysqli_connect("localhost", "webuser", "Pass@Servo2025", "servo");
+    include 'connection.php';
+
     $sql = "SHOW TABLES";
     $result = mysqli_query($conn, $sql);
     while ($data = mysqli_fetch_array($result)) {
@@ -21,6 +22,10 @@
     
     ?>
   </ul>
+
+  <div class="footer">
+    Last Update by Gihan
+  </div>
 </body>
 </html>
 
@@ -54,5 +59,16 @@
 
   h1{
     font-size: 5em;
+  }
+
+
+  .footer{
+    position: fixed;
+    width: 100%;
+    text-align: center;
+    font-size: 0.8em;
+    background-color: #1c1c1cff;
+    left: 0;
+    bottom: 0;
   }
 </style>
