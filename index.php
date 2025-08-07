@@ -70,5 +70,7 @@
     background-color: #1c1c1cff;
     left: 0;
     bottom: 0;
+    padding: 5px;
+    font-weight: bold;
   }
 </style>
