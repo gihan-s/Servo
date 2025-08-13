@@ -1,5 +1,14 @@
 <?php
 include 'dummydata.php';
+$ongoing = [];
+$finished = [];
+foreach ($projects as $p) {
+  if ($p['status'] === 'ongoing') {
+    $ongoing[] = $p;
+  } elseif ($p['status'] === 'finished') {
+    $finished[] = $p;
+  }
+}
 ?>
 
 <!DOCTYPE html>
@@ -10,10 +19,11 @@ include 'dummydata.php';
   <link rel="stylesheet" href="../styles.css">
 </head>
 <body>
-  <h1>Project Management</h1>
+  <h1>Projects</h1>
 
-  <h2>Ongoing Projects</h2>
-  <?php if (count($ongoingProjects) > 0): ?>
+  <h2>Ongoing</h2>
+  <?php if (count($ongoing) > 0): ?>
+  <!--project name, client name, start date, due date-->
     <table>
       <tr>
         <th>Project Name</th>
@@ -24,7 +34,7 @@ include 'dummydata.php';
         <th>Description</th>
         <th>Actions</th>
       </tr>
-      <?php foreach ($ongoingProjects as $project): ?>
+      <?php foreach ($ongoing as $project): ?>
         <tr>
           <td><?= htmlspecialchars($project['name']) ?></td>
           <td><?= htmlspecialchars($project['client']) ?></td>
@@ -43,8 +53,8 @@ include 'dummydata.php';
     <p>No ongoing projects.</p>
   <?php endif; ?>
 
-  <h2>Past Projects</h2>
-  <?php if (count($pastProjects) > 0): ?>
+  <h2>Finished</h2>
+  <?php if (count($finished) > 0): ?>
     <table>
       <tr>
         <th>Project Name</th>
@@ -55,7 +65,7 @@ include 'dummydata.php';
         <th>Description</th>
         <th>Actions</th>
       </tr>
-      <?php foreach ($pastProjects as $project): ?>
+      <?php foreach ($finished as $project): ?>
         <tr>
           <td><?= htmlspecialchars($project['name']) ?></td>
           <td><?= htmlspecialchars($project['client']) ?></td>
