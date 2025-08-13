@@ -26,7 +26,7 @@ $ongoingProjects = [
 $pastProjects = [
   [
     'id' => 3,
-    'name' => 'SEO Optimization',
+    'name' => 'SEO Optimization #Test',
     'client' => 'Gamma Inc',
     'start_date' => '2024-02-01',
     'due_date' => '2024-04-15',
