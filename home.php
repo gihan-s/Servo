@@ -48,15 +48,15 @@
   </style>
 </head>
 <body>
-  <header>
-    <h1>Welcome to Servo</h1>
-  </header>
   <nav>
-    <a href="#">Home</a>
+    <a href="#">Find providers</a>
     <a href="#">About</a>
     <a href="#">Services</a>
     <a href="#">Contact</a>
   </nav>
+  <header>
+    <h1>Welcome to Servo</h1>
+  </header>
   <main>
     <h2>Home Page</h2>
     <p>
