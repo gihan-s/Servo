@@ -58,7 +58,7 @@
     <h1>Welcome to Servo</h1>
   </header>
   <main>
-    <h2>Home Page</h2>
+    <h2>Himath pcya</h2>
     <p>
       This is a generic home page. Use this space to introduce your website, share your mission, or highlight important information.
     </p>
