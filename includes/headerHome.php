@@ -6,17 +6,17 @@
             <div class="options-wrapper">
                 <div class="option">
                     Find a Provider
-                    <i class="fa-solid fa-angle-down"></i>
+                    <!-- <i class="fa-solid fa-angle-down"></i> -->
                 </div>
 
                 <div class="option">
                     Find a Work
-                    <i class="fa-solid fa-angle-down"></i>
+                    <!-- <i class="fa-solid fa-angle-down"></i> -->
                 </div>
 
                 <div class="option">
                     About Us
-                    <i class="fa-solid fa-angle-down"></i>
+                    <!-- <i class="fa-solid fa-angle-down"></i> -->
                 </div>
             </div>
 
