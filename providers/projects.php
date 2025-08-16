@@ -13,24 +13,25 @@ foreach ($projects as $p) {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Provider Project Management</title>
   <link rel="stylesheet" href="../styles.css">
 </head>
+
 <body>
+  
   <h1>Projects</h1>
 
   <h2>Ongoing</h2>
   <?php if (count($ongoing) > 0): ?>
-  <!--project name, client name, start date, due date-->
     <table>
       <tr>
         <th>Project Name</th>
         <th>Client</th>
         <th>Start Date</th>
         <th>Due Date</th>
-        <th>Status</th>
         <th>Description</th>
         <th>Actions</th>
       </tr>
@@ -40,11 +41,11 @@ foreach ($projects as $p) {
           <td><?= htmlspecialchars($project['client']) ?></td>
           <td><?= htmlspecialchars($project['start_date']) ?></td>
           <td><?= htmlspecialchars($project['due_date']) ?></td>
-          <td><?= htmlspecialchars($project['status']) ?></td>
           <td class="desc"><?= htmlspecialchars($project['description']) ?></td>
           <td class="actions">
             <a href="edit_project.php?id=<?= $project['id'] ?>">Edit</a>
             <a href="mark_complete.php?id=<?= $project['id'] ?>">Mark as Complete</a>
+            <a href="view_updates.php?id=<?= $project['id'] ?>">View Updates</a>
           </td>
         </tr>
       <?php endforeach; ?>
@@ -61,7 +62,6 @@ foreach ($projects as $p) {
         <th>Client</th>
         <th>Start Date</th>
         <th>Due Date</th>
-        <th>Status</th>
         <th>Description</th>
         <th>Actions</th>
       </tr>
@@ -71,7 +71,6 @@ foreach ($projects as $p) {
           <td><?= htmlspecialchars($project['client']) ?></td>
           <td><?= htmlspecialchars($project['start_date']) ?></td>
           <td><?= htmlspecialchars($project['due_date']) ?></td>
-          <td><?= htmlspecialchars($project['status']) ?></td>
           <td class="desc"><?= htmlspecialchars($project['description']) ?></td>
           <td class="actions">
             <a href="view_project.php?id=<?= $project['id'] ?>">View</a>
