@@ -5,12 +5,12 @@
 
             <div class="options-wrapper">
                 <div class="option">
-                    Find a Provider
+                    Find A Provider
                     <!-- <i class="fa-solid fa-angle-down"></i> -->
                 </div>
 
                 <div class="option">
-                    Find a Work
+                    Find Work
                     <!-- <i class="fa-solid fa-angle-down"></i> -->
                 </div>
 
@@ -36,7 +36,5 @@
         </div>
 
     </div>
-
-
 
 </header>
