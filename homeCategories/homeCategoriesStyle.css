@@ -1,0 +1,161 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "DM Sans";
+}
+
+body {
+  background-color: #fff;
+}
+
+.category-section {
+  width: 100%;
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  background-color: #fff;
+}
+
+.category-section .section-title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #181818;
+}
+
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 2rem;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.button-section {
+  border-radius: 5rem;
+  border: 2px solid #28a745;
+  display: flex;
+  width: 300px;
+}
+
+
+.button-section .cat-button {
+  background-color: transparent;
+  color: #28a745;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 5rem;
+  width: 100%;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.button-section .bt-border{
+  border-radius: 5rem;
+  background-color: #28a745;
+  color: #fff;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.card {
+  cursor: pointer;
+  background-color: #fff;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  text-align: left;
+  box-shadow: 0 0 3px 0.5px rgba(0, 0, 0, 0.2);
+  outline: 1px solid transparent;
+  transition: outline-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.card .title {
+  color: #181818;
+  font-size: 1.2rem;
+}
+
+.card i {
+  font-size: 2.3rem;
+  margin-bottom: 15px;
+  color: #008500;
+}
+
+.card:hover {
+  outline-color: #28a745;
+  outline-width: 2px;
+  box-shadow: 0 4px 5px rgba(0, 0, 0, 0.1);
+  transform: scale(1.02);
+}
+
+@media (max-width: 1200px) {
+  .card-section {
+    max-width: 1200px;
+    padding: 1.5rem 0.75rem;
+  }
+
+  .grid-container {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 680px) {
+  .card-section {
+    max-width: 100%;
+    padding: 1rem 0.5rem;
+  }
+
+  
+  .button-section{
+    width: 100%;
+    justify-content: center;
+  }
+
+  .grid-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .card {
+    padding: 1rem;
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .section-grid {
+    padding: 0.5rem;
+  }
+
+  .grid-container {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .grid-item {
+    padding: 0.75rem;
+  }
+
+}
+
+.physical-section,
+.digital-section {
+  display: none;
+}
+
+.active {
+  display: grid;
+  transition: display 0.9s ease;
+}
