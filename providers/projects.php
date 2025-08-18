@@ -31,7 +31,7 @@ foreach ($projects as $p) {
   </div>
 
   <div class="main-content">
-    <h1>PROJECTS</h1>
+    <h1>Projects</h1>
 
     <h2>Ongoing Projects</h2>
     <?php if (count($ongoing) > 0): ?>
