@@ -1,0 +1,115 @@
+h1, h2 {
+  color: #05861a;
+}
+
+h1 {
+  margin: 2% 1% 1%;
+}
+
+h2 {
+  margin: 1% 1% -1% 1%;
+}
+
+p {
+  color: #333;
+  font-size: 0.95rem;
+  line-height: 1.2;
+}
+
+.main-content {
+  margin-left: 1%;
+  max-width: max-content;
+  margin-top: 60px;;
+}
+
+.search-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: #fff;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  transition: transform 0.3s;
+  z-index: 200;
+}
+
+.search-bar.hide {
+  transform: translateY(-100%);
+}
+
+/* Project Card Styles */
+.project-list {
+  margin: 1rem 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.project-card {
+  background: white;
+  /* border: 2px solid #05861a; */
+  border-radius: 12px;
+  box-shadow: 4px 8px 24px 0 rgba(5, 134, 26, 0.15);
+  padding: 1.5rem;
+  margin: 1rem 0;
+  /* transition: box-shadow 0.2s, transform 0.2s; */
+  flex: 1 1 300px;
+  max-width: 350px;
+  min-width: 250px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.project-card-title {
+  color: #05861a;
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.project-card:hover {
+  background: #05861a;
+  /* border: 2px solid white; */
+}
+
+.project-card:hover .project-card-title {
+  color: white;
+  font-weight: 600;
+}
+
+.project-card:hover .button {
+  color: #00ae00;
+  background-color: white;
+}
+
+.project-card:hover p {
+  color: white;
+}
+
+.project-card-description {
+  color: #333;
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
+.buttons {
+  margin-top: 1rem;
+}
+
+.button {
+  padding: 10px 15px;
+  border-radius: 10px;
+  border: none;
+  background-color: #008500;
+  color: white;
+  font-weight: 600;
+  font-size: 0.80em;
+  margin-top: 1rem;
+  margin-left: auto;
+  display: inline-block;
+  text-align: center;
+  text-decoration: none;
+}
