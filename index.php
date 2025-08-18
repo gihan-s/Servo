@@ -31,7 +31,7 @@
     <div class="top-area">
       <div class="overlay"></div>
 
-      <h1>All Your Services. One Powerful Platform</h1>
+      <h1>All Your Services.<br>One Powerful Platform.</h1>
       <h3>One platform to rule your projects, payments, communication and insights</h3>
 
       <div class="glass-wrapper">
