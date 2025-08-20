@@ -36,7 +36,7 @@ foreach ($projects as $p) {
     <h2>Ongoing Projects</h2>
     <?php if (count($ongoing) > 0): ?>
 
-      <div class="project-list">
+  <div class="project-list">
         <?php foreach ($ongoing as $project): ?>
           <div class="project-card">
             <h3 class="project-card-title"><?= htmlspecialchars($project['name']) ?></h3>
@@ -60,7 +60,7 @@ foreach ($projects as $p) {
     <h2>Finished Projects</h2>
     <?php if (count($finished) > 0): ?>
       
-      <div class="project-list">
+      <div class="finished-list">
         <?php foreach ($finished as $project): ?>
           <div class="project-card finished">
             <h3 class="project-card-title"><?= htmlspecialchars($project['name']) ?></h3>
