@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Link to external CSS files -->
-    <link rel="stylesheet" href="searchResultsStyle.css">
+    <link rel="stylesheet" href="searchForProviderStyle.css">
     <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
 
     <title>Search for services..</title>
@@ -18,7 +18,7 @@
 
         <div class="search-header">
             <div class="search-button">
-                <input type="text" placeholder="Search for services">
+                <input type="text" placeholder="Search for service providers...">
                 <button><i class="fa-light fa-magnifying-glass"></i></button>
             </div>
             <button class="filter"><i class="fa-light fa-filter-list"></i></button>
@@ -39,6 +39,15 @@
                         <li><input type="radio" name="rate" id="rate">$10 - $30</li>
                         <li><input type="radio" name="rate" id="rate">$30 - $60</li>
                         <li><input type="radio" name="rate" id="rate">$60 & above</li>
+                    </ul>
+                </div>
+                <div class="filter-item">
+                    <div class="filter-title"><span>Category</span><i class="fa-light fa-chevron-down"></i></div>
+                    <ul class="filter-options checkboxes">
+                        <li><input type="checkbox" name="category" id="category" checked>Web Developer</li>
+                        <li><input type="checkbox" name="category" id="category">Logo Designer</li>
+                        <li><input type="checkbox" name="category" id="category">Tamil</li>
+                        <li><input type="checkbox" name="category" id="category">Other</li>
                     </ul>
                 </div>
                 <div class="filter-item">
@@ -71,6 +80,7 @@
                         <li><input type="checkbox" name="language" id="language">Other</li>
                     </ul>
                 </div>
+                
                 <div class="button-apply">
                     <button>Apply filters</button>
                 </div>
@@ -79,17 +89,6 @@
 
             <div class="search-content">
                 <div class="advance-search">
-                    <div class="search-selection">
-                        <div class="search-by-category selection" id="category-pop-up"
-                            style="border-radius: 0.5rem 0 0 0.5rem;">
-                            <i class="fa-solid fa-tag"></i><span>Web Development</span>
-                        </div>
-                        <hr>
-                        <div class="search-by-location selection" id="location-pop-up"
-                            style="border-radius: 0 0 0.5rem 0.5rem ; ">
-                            <i class="fa-solid fa-location-dot"></i><span>All in SriLanka</span>
-                        </div>
-                    </div>
                     <div class="sort-selection">
                         <div class="selection-input-field">
                             <input type="selection-input" id="selection-input" name="sort" value="Sort By Relevence"
@@ -104,67 +103,94 @@
                 </div>
                 <!-- Search Results -->
 
-                <div class="item-list">
-                    <div class="search-item">
-                        <div class="item-head">
-                            <div class="item-img"><img src="sampleImg.jpg" alt=""></div>
-                            <div class="item-main-dets">
-                                <div class="item-name">Chethiya Bandara</div>
-                                <div class="item-title">Full Stack Web Developer - Expert in PHP, Laravel, and WordPress
-                                </div>
-                                <div class="item-district">Gampaha</div>
+                <section class="search-results-section">
+                    <div class="profiles-grid">
+                        <div class="profile-card">
+                            <img src="sampleImg.jpg" alt="Profile Image">
+                            <h3>Alex Brown</h3>
+                            <div class="categories">Data Analysis, Machine Learning</div>
+                            <hr>
+                            <div class="item-middle">
+                                <div class="rate">Rs.400/hr</div>
+                                <div class="success"><i class="fa-solid fa-shield-check"></i>90% Success</div>
+                                <div class="total-earn">$10K+ earned</div>
                             </div>
-                            <div class="button"><button>View profile</button></div>
-                        </div>
-                        <div class="item-middle">
-                            <div class="rate">$40/hr</div>
-                            <div class="success"><i class="fa-solid fa-shield-check"></i>90% Project Success</div>
-                            <div class="total-earn">$10K+ earned</div>
-                        </div>
-                        <div class="item-tags">
-                            <span>Conten SEO</span>
-                            <span>Adobe XD</span>
-                            <span>Web Design</span>
-                            <span>Shopify</span>
-                        </div>
-                        <div class="item-description">Turn Your Web App Idea into a Fast, Scalable, and Beautiful
-                            Reality —
-                            Delivered On Time, Every Time! Hi, I’m Junaid — a results-driven Full-Stack Web Application
-                            Developer specializing in React, Next.js, MERN stack, and API integrations. Whether you need
-                        </div>
-                        <div class="bottom-button"><button>View profile</button></div>
-                    </div>
-                    <hr>
-                    <div class="search-item">
-                        <div class="item-head">
-                            <div class="item-img"><img src="sampleImg.jpg" alt=""></div>
-                            <div class="item-main-dets">
-                                <div class="item-name">Chethiya Bandara</div>
-                                <div class="item-title">Full Stack Web Developer - Expert in PHP, Laravel, and WordPress
-                                </div>
-                                <div class="item-district">Gampaha</div>
+                            <hr>
+                            <div class="description">Data enthusiast with expertise in predictive modeling and
+                                statistical analysis.</div>
+                            <div class="languages">Speaks: Sinhala, Tamil, English</div>
+                            <div class="social-links">
+                                <a href="#" title="Twitter" style="background-color: #080808"><i class="fa-brands fa-x-twitter"></i></a>
+                                <a href="#" title="LinkedIn" style="background-color: #0077B5"><i class="fa-brands fa-linkedin-in"></i></a>
+                                <a href="#" title="Email" style="background-color: #EB483B"><i class="fa-solid fa-envelope"></i></a>
+                                <a href="#" title="Instagram" style="background-color: #E63D6A"><i class="fa-brands fa-instagram"></i></a>
                             </div>
-                            <div class="button"><button>View profile</button></div>
                         </div>
-                        <div class="item-middle">
-                            <div class="rate">$40/hr</div>
-                            <div class="success"><i class="fa-solid fa-shield-check"></i>90% Project Success</div>
-                            <div class="total-earn">$10K+ earned</div>
+                        <div class="profile-card">
+                            <img src="sampleImg.jpg" alt="Profile Image">
+                            <h3>Alex Brown</h3>
+                            <div class="categories">Data Analysis, Machine Learning</div>
+                            <hr>
+                            <div class="item-middle">
+                                <div class="rate">Rs.400/hr</div>
+                                <div class="success"><i class="fa-solid fa-shield-check"></i>90% Success</div>
+                                <div class="total-earn">$10K+ earned</div>
+                            </div>
+                            <hr>
+                            <div class="description">Data enthusiast with expertise in predictive modeling and
+                                statistical analysis.</div>
+                            <div class="languages">Speaks: Sinhala, Tamil, English</div>
+                            <div class="social-links">
+                                <a href="#" title="Twitter" style="background-color: #080808"><i class="fa-brands fa-x-twitter"></i></a>
+                                <a href="#" title="LinkedIn" style="background-color: #0077B5"><i class="fa-brands fa-linkedin-in"></i></a>
+                                <a href="#" title="Email" style="background-color: #EB483B"><i class="fa-solid fa-envelope"></i></a>
+                                <a href="#" title="Instagram" style="background-color: #E63D6A"><i class="fa-brands fa-instagram"></i></a>
+                            </div>
                         </div>
-                        <div class="item-tags">
-                            <span>Conten SEO</span>
-                            <span>Adobe XD</span>
-                            <span>Web Design</span>
-                            <span>Shopify</span>
+                        <div class="profile-card">
+                            <img src="sampleImg.jpg" alt="Profile Image">
+                            <h3>Alex Brown</h3>
+                            <div class="categories">Data Analysis, Machine Learning</div>
+                            <hr>
+                            <div class="item-middle">
+                                <div class="rate">Rs.400/hr</div>
+                                <div class="success"><i class="fa-solid fa-shield-check"></i>90% Success</div>
+                                <div class="total-earn">$10K+ earned</div>
+                            </div>
+                            <hr>
+                            <div class="description">Data enthusiast with expertise in predictive modeling and
+                                statistical analysis.</div>
+                            <div class="languages">Speaks: Sinhala, Tamil, English</div>
+                            <div class="social-links">
+                                <a href="#" title="Twitter" style="background-color: #080808"><i class="fa-brands fa-x-twitter"></i></a>
+                                <a href="#" title="LinkedIn" style="background-color: #0077B5"><i class="fa-brands fa-linkedin-in"></i></a>
+                                <a href="#" title="Email" style="background-color: #EB483B"><i class="fa-solid fa-envelope"></i></a>
+                                <a href="#" title="Instagram" style="background-color: #E63D6A"><i class="fa-brands fa-instagram"></i></a>
+                            </div>
                         </div>
-                        <div class="item-description">Turn Your Web App Idea into a Fast, Scalable, and Beautiful
-                            Reality —
-                            Delivered On Time, Every Time! Hi, I’m Junaid — a results-driven Full-Stack Web Application
-                            Developer specializing in React, Next.js, MERN stack, and API integrations. Whether you need
+                        <div class="profile-card">
+                            <img src="sampleImg.jpg" alt="Profile Image">
+                            <h3>Alex Brown</h3>
+                            <div class="categories">Data Analysis, Machine Learning</div>
+                            <hr>
+                            <div class="item-middle">
+                                <div class="rate">Rs.400/hr</div>
+                                <div class="success"><i class="fa-solid fa-shield-check"></i>90% Success</div>
+                                <div class="total-earn">$10K+ earned</div>
+                            </div>
+                            <hr>
+                            <div class="description">Data enthusiast with expertise in predictive modeling and
+                                statistical analysis.</div>
+                            <div class="languages">Speaks: Sinhala, Tamil, English</div>
+                            <div class="social-links">
+                                <a href="#" title="Twitter" style="background-color: #080808"><i class="fa-brands fa-x-twitter"></i></a>
+                                <a href="#" title="LinkedIn" style="background-color: #0077B5"><i class="fa-brands fa-linkedin-in"></i></a>
+                                <a href="#" title="Email" style="background-color: #EB483B"><i class="fa-solid fa-envelope"></i></a>
+                                <a href="#" title="Instagram" style="background-color: #E63D6A"><i class="fa-brands fa-instagram"></i></a>
+                            </div>
                         </div>
-                        <div class="bottom-button"><button>View profile</button></div>
                     </div>
-                </div>
+                </section>
             </div>
         </div>
     </div>
@@ -348,6 +374,6 @@
     </div>
 
 </body>
-<script src="searchResultsScript.js"></script>
+<script src="searchForProviderScript.js"></script>
 
 </html>
