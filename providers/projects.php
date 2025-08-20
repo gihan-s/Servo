@@ -1,5 +1,6 @@
 <?php
 include 'dummydata.php';
+$user = 'provider';
 $ongoing = [];
 $finished = [];
 foreach ($projects as $p) {
@@ -47,6 +48,9 @@ foreach ($projects as $p) {
             <p><strong>Due Date:</strong> <?= htmlspecialchars($project['due_date']) ?></p>
             <div class="buttons">
               <a class="button" href="#">View Updates</a>
+              <?php if ($user === 'provider'): ?>
+                <a class="button" href="#">Add Update</a>
+              <?php endif; ?>
             </div>
           </div>
         <?php endforeach; ?>
