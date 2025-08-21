@@ -48,6 +48,8 @@
   border-radius: 5px;
   background-color: transparent;
   width: 100%;
+
+  transition: all 0.3s;
 }
 
 .text-container input:active,
@@ -55,6 +57,31 @@
   outline: 2px solid var(--themeColor);
 }
 
+
+/* Text Field With Bottom Border */
+
+.text-container.border-bottom .label {
+  left: 0px;
+  padding-left: 2px;
+}
+
+.text-container.border-bottom .label-float {
+  left: -5px;
+}
+
+.text-container.border-bottom input {
+  border: none;
+  border-bottom: 1px solid var(--textFieldBorderColor);
+  border-radius: 0px;
+  padding: 15px 2px 8px 2px;
+}
+
+.text-container.border-bottom input:active,
+.text-container.border-bottom input:focus {
+  
+  border-bottom: 2px solid var(--themeColor);
+  outline: none;
+}
 
 
 /* DropDowns */
