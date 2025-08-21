@@ -78,11 +78,24 @@
 
 .text-container.border-bottom input:active,
 .text-container.border-bottom input:focus {
-  
-  border-bottom: 2px solid var(--themeColor);
   outline: none;
 }
 
+.text-container.border-bottom::after{
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background-color: var(--themeColor);
+  bottom: 0px;
+  left: 0px;
+  transition: all 0.2s;
+  transform: scaleX(0);
+}
+
+.text-container.border-bottom:focus-within:after{
+transform: scaleX(1);
+}
 
 /* DropDowns */
 .select-container {
