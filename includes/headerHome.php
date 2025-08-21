@@ -31,7 +31,7 @@
         </div>
 
         <div class="button-wrapper">
-            <button>Log in</button>
+            <a href="/servo/Servo/login.php"><button>Log in</button></a>
             <button>Sign Up</button>
         </div>
 
