@@ -8,27 +8,455 @@
     <link rel="stylesheet" href="assets/css/main.css">
     <link rel="stylesheet" href="assets/css/elements.css">
     <link rel="stylesheet" href="assets/css/GridTemplates.css">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
+
     <script src="assets/js/elements.js" defer></script>
 </head>
 
 <body>
 
-    <h2>Text Field</h2>
+    <div class="wrapper">
 
-    <div class="input-grid-2">
 
-        <div class="text-container">
-            <div class="label text-label">First Name</div>
-            <input type="text" class="text-field" name="" id="">
+        <h2>Text Field</h2>
+
+        <div class="input-grid-2">
+
+            <div class="text-container">
+                <div class="label text-label">First Name</div>
+                <input type="text" class="text-field" name="" id="">
+            </div>
+
+            <div class="text-container">
+                <div class="label text-label label-float">Last Name</div>
+                <input type="text" class="text-field" value="Gihan" name="" id="">
+            </div>
+
         </div>
 
-        <div class="text-container">
-            <div class="label text-label label-float">Last Name</div>
-            <input type="text" class="text-field" value="Gihan" name="" id="">
+        <h2>Date Field</h2>
+
+        <div class="input-grid-3">
+
+            <div class="text-container">
+                <div class="label text-label label-float">Date</div>
+                <input type="date" class="text-field" name="" id="">
+            </div>
+
+             <div class="text-container">
+                <div class="label text-label label-float">Time</div>
+                <input type="time" class="text-field" name="" id="">
+            </div>
+
+             <div class="text-container">
+                <div class="label text-label label-float">Date and Time</div>
+                <input type="datetime-local" class="text-field" name="" id="">
+            </div>
+
         </div>
+
+
+        <h2>Dropdown</h2>
+
+        <div class="input-grid-2">
+
+            <div class="select-container">
+
+                <div class="text-container">
+                    <div class="label dropdown-label">Work Type</div>
+                    <input type="text" class="text-field-dropdown" readonly name="" id="">
+                </div>
+
+
+                <div class="options">
+                    <div>Full Time</div>
+                    <div>Part Time</div>
+                    <div>Other</div>
+                </div>
+            </div>
+
+
+            <div class="select-container">
+
+                <div class="text-container">
+                    <div class="label dropdown-label label-float">Work Type</div>
+                    <input type="text" class="text-field-dropdown" value="Full Time" readonly name="" id="">
+                </div>
+
+
+                <div class="options">
+                    <div>Full Time</div>
+                    <div>Part Time</div>
+                    <div>Other</div>
+                </div>
+            </div>
+
+        </div>
+
+        <h2>Dropdown with Search</h2>
+
+        <div class="input-grid-2">
+
+            <div class="search-select-container">
+                <div class="text-container">
+                    <div class="label search-dropdown-label">Dropdown Title</div>
+                    <input type="text" class="text-field-search-dropdown" autocomplete="off" onkeydown="return false"
+                        name="" id="">
+                </div>
+
+                <div class="options">
+
+                    <span class="text-container">
+                        <input type="text" class="text-field-search">
+                    </span>
+
+                    <div class="option-list">
+
+                        <div>Option 1</div>
+                        <div>Option 2</div>
+                        <div>Option 3</div>
+                        <div>Option 4</div>
+                        <div>Option 5</div>
+
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="search-select-container">
+                <div class="text-container">
+                    <div class="label search-dropdown-label label-float">Dropdown Title</div>
+                    <input type="text" class="text-field-search-dropdown" autocomplete="off" onkeydown="return false"
+                        name="" id="" value="Option 2">
+                </div>
+
+                <div class="options">
+
+                    <span class="text-container">
+                        <input type="text" class="text-field-search">
+                    </span>
+
+                    <div class="option-list">
+
+                        <div>Option 1</div>
+                        <div>Option 2</div>
+                        <div>Option 3</div>
+                        <div>Option 4</div>
+                        <div>Option 5</div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+        <h2>Dropdown with Multiple Select</h2>
+
+        <div class="input-grid-2">
+
+            <div class="search-select-container multiple-selector">
+
+                <div class="text-container">
+                    <div class="label search-dropdown-label">Repair Fault</div>
+                    <input type="text" class="text-field-search-dropdown" autocomplete="off" onkeydown="return false"
+                        name="" id="">
+                </div>
+
+
+                <div class="options">
+
+                    <span class="text-container">
+                        <input type="text" class="text-field-search">
+                    </span>
+
+                    <div class="option-list">
+
+                        <div>
+                            <input type="checkbox" id="test1">
+                            <label for="test1">Display</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="test2">
+                            <label for="test2">Display AAA Grade</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="test3">
+                            <label for="test3">Display with Frame</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="test4">
+                            <label for="test4">Display with Touch panel</label>
+                        </div>
+
+
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="search-select-container multiple-selector">
+
+                <div class="text-container">
+                    <div class="label search-dropdown-label label-float">Repair Fault</div>
+                    <input type="text" class="text-field-search-dropdown" autocomplete="off" onkeydown="return false"
+                        name="" id="" value="Display, Display AAA Grade">
+                </div>
+
+
+                <div class="options">
+
+                    <span class="text-container">
+                        <input type="text" class="text-field-search">
+                    </span>
+
+                    <div class="option-list">
+
+                        <div>
+                            <input type="checkbox" id="test21" checked>
+                            <label for="test21">Display</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="test22" checked>
+                            <label for="test22">Display AAA Grade</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="test23">
+                            <label for="test23">Display with Frame</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="test24">
+                            <label for="test24">Display with Touch panel</label>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+        <h2>Dropdown with Add Option</h2>
+
+        <div class="input-grid-2">
+
+            <div class="search-select-container add-option">
+
+                <div class="text-container">
+                    <div class="label search-dropdown-label">Sizes</div>
+                    <input type="text" class="text-field-search-dropdown" autocomplete="off" onkeydown="return false">
+                </div>
+
+
+                <div class="options">
+
+                    <span class="text-container">
+                        <input type="text" class="text-field-search">
+                    </span>
+
+                    <div class="option-list">
+                        <div>1</div>
+                        <div>2</div>
+                        <div>3</div>
+                        <div>4</div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <h2>Dropdown with Options have IDs</h2>
+
+        <div class="input-grid-2">
+
+            <div class="search-select-container" data-idinput="Customer_Code">
+
+                <div class="text-container">
+                    <div class="label search-dropdown-label">Customers</div>
+                    <input type="text" class="text-field-search-dropdown" autocomplete="off" onkeydown="return false">
+                </div>
+
+                <div class="options">
+
+                    <span class="text-container">
+                        <input type="text" class="text-field-search">
+                    </span>
+
+                    <div class="option-list">
+                        <div data-id="1">Pasindu</div>
+                        <div data-id="2">Chethiya</div>
+                        <div data-id="3">Bhashitha</div>
+                        <div data-id="4">Himath</div>
+                        <div data-id="5">Akila</div>
+                    </div>
+
+                </div>
+            </div>
+
+            <input type="text" id="Customer_Code">
+
+        </div>
+
+
+        <h2>Check Boxes</h2>
+
+        <div class="input-grid-4">
+
+            <label class="checkbox-container">
+                <input type="checkbox" checked>
+                <span class="checkmark"></span>
+                <label for="">Sample 1</label>
+            </label>
+
+            <label class="checkbox-container">
+                <input type="checkbox">
+                <span class="checkmark"></span>
+                <label for="">Sample 2</label>
+            </label>
+
+            <label class="checkbox-container">
+                <input type="checkbox">
+                <span class="checkmark"></span>
+                <label for="">Sample 3</label>
+            </label>
+
+            <label class="checkbox-container">
+                <input type="checkbox">
+                <span class="checkmark"></span>
+                <label for="">Sample 4</label>
+            </label>
+
+        </div>
+
+
+        <h2>Radio Buttons</h2>
+
+        <div class="input-grid-4">
+            <label class="radio-container">
+                <input type="radio" name="radio">
+                <span class="checkmark"></span>
+                <label for="">Sample 1</label>
+            </label>
+
+            <label class="radio-container">
+                <input type="radio" name="radio">
+                <span class="checkmark"></span>
+                <label for="">Sample 2</label>
+            </label>
+
+            <label class="radio-container">
+                <input type="radio" name="radio" checked>
+                <span class="checkmark"></span>
+                <label for="">Sample 3</label>
+            </label>
+
+            <label class="radio-container">
+                <input type="radio" name="radio">
+                <span class="checkmark"></span>
+                <label for="">Sample 4</label>
+            </label>
+        </div>
+
+
+        <h2>Switches</h2>
+
+        <div class="input-grid-4">
+            <div class="switch-wrapper">
+                Advanced Mode:
+
+                <label class="switch">
+                    <input type="checkbox" checked>
+                    <span class="slider round"></span>
+                </label>
+            </div>
+
+
+            <div class="switch-wrapper">
+                Developer Mode:
+
+                <label class="switch">
+                    <input type="checkbox">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+
+            <div class="switch-wrapper">
+                Normal Mode:
+
+                <label class="switch">
+                    <input type="checkbox">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+
+
+            <div class="switch-wrapper">
+                Default Mode:
+
+                <label class="switch">
+                    <input type="checkbox">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+
+        </div>
+
+        <h2>Buttons</h2>
+
+        <div class="input-grid-4">
+            <button class="button">Button 1</button>
+            <button class="button outline">Button 2</button>
+            <button class="button">Button 1</button>
+            <button class="button outline">Button 2</button>
+        </div>
+
+
+        <h2>Dialog Box</h2>
+
+        <button class="button" onclick="viewDialogBox('SampleDialogBox')">Open Dialog</button>
+
+
+
+        <div class="dialog-box-2" id="SampleDialogBox">
+            <div class="dialog-content" style="width: 500px;">
+                <div class="dialog-title">
+                    <div class="title">Dialog Title</div>
+
+                    <div>
+                        <i class="fa-solid fa-xmark dialog-close-button-2"
+                            onclick="closeDialogBox('SampleDialogBox')"></i>
+                    </div>
+                </div>
+
+                Dialog Content Here
+
+            </div>
+
+        </div>
+
+
+
+
+
+
+
+        <h2>Snack Bar</h2>
+
+        <button class="button" onclick="showSnackbar('snackbar1')">Open Snack Bar</button>
+
+        <div class="snackbar" id="snackbar1">
+            Hi There!
+            <i class="fa-regular fa-xmark"></i>
+        </div>
+
 
     </div>
-
 
 </body>
 
@@ -39,7 +467,24 @@
         padding: 25px;
     }
 
-    h2{
+    h2 {
         margin-bottom: 15px;
+        margin-top: 50px;
+        border-bottom: 1px solid #00000010;
+        padding-bottom: 10px;
+    }
+
+
+    h2:first-child {
+        margin-top: 0px;
+    }
+
+    .wrapper {
+        max-width: 1000px;
+        margin: 0 auto;
+
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 5px 0px #00000020;
     }
 </style>
