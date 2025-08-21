@@ -1,0 +1,54 @@
+:root{
+    --themeColor: #008500;
+    --textFieldLabelColor: rgba(0, 0, 0, 0.6);
+    --textFieldTextColor: rgba(0, 0, 0, 0.85);
+    --textFieldBorderColor: rgb(224, 224, 224);
+    --textFieldBackgroundColor: white;
+}
+
+/* Text Fields */
+
+.text-container {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.text-container .label {
+  position: absolute;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 19px;
+  color: var(--textFieldLabelColor);
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  background-color: var(--textFieldBackgroundColor);
+  padding: 5px;
+  transition: all 0.2s;
+  pointer-events: none;
+}
+
+.text-container .label-float {
+  top: 0%;
+  left: 2px;
+  transform: translateY(-60%);
+  scale: 0.85;
+}
+
+.text-container input {
+  padding: 15px;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 19px;
+  color: var(--textFieldTextColor);
+  border: 1px solid var(--textFieldBorderColor);
+  border-radius: 5px;
+  background-color: transparent;
+  width: 100%;
+}
+
+.text-container input:active,
+.text-container input:focus {
+  outline: 2px solid var(--themeColor);
+}
