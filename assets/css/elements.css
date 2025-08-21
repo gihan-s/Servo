@@ -4,10 +4,12 @@
     --textFieldTextColor: rgba(0, 0, 0, 0.85);
     --textFieldBorderColor: rgb(224, 224, 224);
     --textFieldBackgroundColor: white;
+    --dropdownHoverColor: rgba(0, 0, 0, 0.03);
 }
 
-/* Text Fields */
 
+
+/* Text Fields */
 .text-container {
   position: relative;
   display: inline-block;
@@ -51,4 +53,67 @@
 .text-container input:active,
 .text-container input:focus {
   outline: 2px solid var(--themeColor);
+}
+
+
+
+/* DropDowns */
+.select-container {
+  display: inline-block;
+  position: relative;
+}
+
+.select-container input {
+  cursor: pointer;
+}
+
+.select-container::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border: 2px solid var(--textFieldLabelColor);
+  position: absolute;
+  z-index: 5;
+  border-top: none;
+  border-left: none;
+  transform: translateY(-80%) rotate(45deg);
+  top: 50%;
+  right: 15px;
+  transition: 0.2s;
+  pointer-events: none;
+}
+
+.dropdown-view::before {
+  transform: translateY(-20%) rotate(225deg);
+}
+
+.select-container .options {
+  position: absolute;
+  margin-top: 5px;
+  width: 100%;
+  box-shadow: 1px 1px 5px 0px rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+  background-color: var(--textFieldBackgroundColor);
+  display: none;
+  z-index: 50;
+  max-height: 200px;
+  overflow: auto;
+  border: 1px solid var(--textFieldBorderColor);
+}
+
+.dropdown-view .options {
+  display: block;
+}
+
+.select-container .options div {
+  padding: 10px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.select-container .options div:hover {
+  padding: 10px;
+  font-size: 13px;
+  background-color: var(--dropdownHoverColor);
 }
