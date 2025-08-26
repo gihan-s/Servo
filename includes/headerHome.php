@@ -31,8 +31,8 @@
         </div>
 
         <div class="button-wrapper">
-            <a href="/servo/Servo/login.php"><button>Log in</button></a>
-            <button>Sign Up</button>
+            <button onclick="window.location.href='login.php'">Log in</button>
+            <button onclick="window.location.href='signup.php'">Sign Up</button>
         </div>
 
     </div>
