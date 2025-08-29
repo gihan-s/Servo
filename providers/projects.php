@@ -13,76 +13,70 @@ foreach ($projects as $p) {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
-  <title>Provider Project Management</title>
-  <link rel="stylesheet" href="../styles.css">
+  <title>Projects</title>
+
+  <!-- CSS Files -->
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <link rel="stylesheet" href="../assets/css/projects.css">
+  <!-- JS Files -->
+  <script src="../assets/js/projects.js"></script>
 </head>
+
 <body>
-  <h1>Projects</h1>
+  <div class="search-bar">
+  <input type="text" placeholder="Search projects...">
+  </div>
 
-  <h2>Ongoing</h2>
-  <?php if (count($ongoing) > 0): ?>
-  <!--project name, client name, start date, due date-->
-    <table>
-      <tr>
-        <th>Project Name</th>
-        <th>Client</th>
-        <th>Start Date</th>
-        <th>Due Date</th>
-        <th>Status</th>
-        <th>Description</th>
-        <th>Actions</th>
-      </tr>
-      <?php foreach ($ongoing as $project): ?>
-        <tr>
-          <td><?= htmlspecialchars($project['name']) ?></td>
-          <td><?= htmlspecialchars($project['client']) ?></td>
-          <td><?= htmlspecialchars($project['start_date']) ?></td>
-          <td><?= htmlspecialchars($project['due_date']) ?></td>
-          <td><?= htmlspecialchars($project['status']) ?></td>
-          <td class="desc"><?= htmlspecialchars($project['description']) ?></td>
-          <td class="actions">
-            <a href="edit_project.php?id=<?= $project['id'] ?>">Edit</a>
-            <a href="mark_complete.php?id=<?= $project['id'] ?>">Mark as Complete</a>
-          </td>
-        </tr>
-      <?php endforeach; ?>
-    </table>
-  <?php else: ?>
-    <p>No ongoing projects.</p>
-  <?php endif; ?>
+  <div class="main-content">
+    <h1>PROJECTS</h1>
 
-  <h2>Finished</h2>
-  <?php if (count($finished) > 0): ?>
-    <table>
-      <tr>
-        <th>Project Name</th>
-        <th>Client</th>
-        <th>Start Date</th>
-        <th>Due Date</th>
-        <th>Status</th>
-        <th>Description</th>
-        <th>Actions</th>
-      </tr>
-      <?php foreach ($finished as $project): ?>
-        <tr>
-          <td><?= htmlspecialchars($project['name']) ?></td>
-          <td><?= htmlspecialchars($project['client']) ?></td>
-          <td><?= htmlspecialchars($project['start_date']) ?></td>
-          <td><?= htmlspecialchars($project['due_date']) ?></td>
-          <td><?= htmlspecialchars($project['status']) ?></td>
-          <td class="desc"><?= htmlspecialchars($project['description']) ?></td>
-          <td class="actions">
-            <a href="view_project.php?id=<?= $project['id'] ?>">View</a>
-          </td>
-        </tr>
-      <?php endforeach; ?>
-    </table>
-  <?php else: ?>
-    <p>No past projects.</p>
-  <?php endif; ?>
+    <h2>Ongoing Projects</h2>
+    <?php if (count($ongoing) > 0): ?>
 
-  <a href="add_project.php" class="add-btn">Add New Project</a>
+      <div class="project-list">
+        <?php foreach ($ongoing as $project): ?>
+          <div class="project-card">
+            <h3 class="project-card-title"><?= htmlspecialchars($project['name']) ?></h3>
+            <p class="project-card-description"><?= htmlspecialchars($project['description']) ?></p>
+            <br>
+            <p><strong>Client:</strong> <?= htmlspecialchars($project['client']) ?></p>
+            <p><strong>Start Date:</strong> <?= htmlspecialchars($project['start_date']) ?></p>
+            <p><strong>Due Date:</strong> <?= htmlspecialchars($project['due_date']) ?></p>
+            <div class="buttons">
+              <a class="button" href="#">View Updates</a>
+            </div>
+          </div>
+        <?php endforeach; ?>
+      </div>
+
+    <?php else: ?>
+      <p>No ongoing projects.</p>
+
+    <?php endif; ?>
+
+    <h2>Finished Projects</h2>
+    <?php if (count($finished) > 0): ?>
+      
+      <div class="project-list">
+        <?php foreach ($finished as $project): ?>
+          <div class="project-card finished">
+            <h3 class="project-card-title"><?= htmlspecialchars($project['name']) ?></h3>
+            <p class="project-card-description"><?= htmlspecialchars($project['description']) ?></p>
+            <br>
+            <p><strong>Client:</strong> <?= htmlspecialchars($project['client']) ?></p>
+            <p><strong>Start Date:</strong> <?= htmlspecialchars($project['start_date']) ?></p>
+            <p><strong>Due Date:</strong> <?= htmlspecialchars($project['due_date']) ?></p>
+          </div>
+        <?php endforeach; ?>
+      </div>
+
+    <?php else: ?>
+      <p>No past projects.</p>
+
+    <?php endif; ?>
+  </div>
 </body>
 </html>
