@@ -74,12 +74,6 @@ body.login-bg {
     cursor: pointer;
     transition: background 0.2s;
 }
-.fb-btn {
-    color: #4267B2;
-}
-.google-btn {
-    color: #DB4437;
-}
 .social-btn:hover {
     background: #eaeaea;
 }
