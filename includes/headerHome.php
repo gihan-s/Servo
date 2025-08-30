@@ -31,7 +31,7 @@
         </div>
 
         <div class="button-wrapper">
-            <button onclick="window.location.href='login.php'">Log in</button>
+            <button onclick="window.location.href='client/login.php'">Log in</button>
             <button onclick="window.location.href='signup.php'">Sign Up</button>
         </div>
 
