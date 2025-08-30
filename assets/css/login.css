@@ -1,0 +1,88 @@
+body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+}
+
+.login-wrapper {
+    width: 100%;
+    max-width: 500px;
+    margin: 0;
+    padding: 48px 64px;
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07);
+    position: relative;
+}
+
+.login-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-bottom: 12.5%;
+}
+
+.login-header h2 {
+    flex: 1;
+    text-align: center;
+    margin: 0;
+    font-size: 1.64rem;
+    color: #333;
+    font-weight: 600;
+}
+
+input {
+    width: 100%;
+    padding: 12px 44px;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    font-size: 0.92rem;
+    margin-bottom: 6px;
+}
+
+.input-group {
+    margin-bottom: 18px;
+    position: relative;
+}
+
+.input-group i {
+    left: 16px;
+    top: 50%;
+    position: absolute;
+    transform: translateY(-50%);
+    color: #333;
+    font-size: 1rem;
+    pointer-events: none;
+}
+
+.input-group .toggle-password {
+    left: auto;
+    right: 16px;
+    cursor: pointer;
+    z-index: 2;
+    pointer-events: all;
+}
+
+.button {
+    width: 100%;
+    font-size: 0.92rem;
+}
+
+.back-btn {
+    position: absolute;
+    left: 0px;
+    background: none;
+    border: none;
+    font-size: 1.7rem;
+    color: #888;
+    cursor: pointer;
+    z-index: 10;
+    transition: color 0.2s;
+}
+
+.back-btn:hover {
+    color: #14a800;
+}
