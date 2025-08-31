@@ -27,8 +27,8 @@ $error = isset($_GET['error']) ? $_GET['error'] : '';
         </div>
         <form class="login-form" method="POST" action="provider-login.php">
             <div class="input-group">
-                <i class="fa-solid fa-id-card"></i>
-                <input type="text" id="nic" name="nic" placeholder="NIC" aria-label="nic" required>
+                <i class="fa-solid fa-at"></i>
+                <input type="email" id="email" name="email" placeholder="Email" aria-label="email" required>
             </div>
             <div class="input-group">
                 <i class="fa-solid fa-key"></i>
@@ -58,12 +58,11 @@ $error = isset($_GET['error']) ? $_GET['error'] : '';
         const form = document.querySelector('.login-form');
         if (form) {
             form.addEventListener('submit', function(e) {
-                // nic validation
-                const nic = document.getElementById('nic').value;
-                // either 9 digits followed by 'V' or 'X' (case insensitive) or 12 digits
-                const nicPattern = /^([0-9]{9}[vVxX]|[0-9]{12})$/;
-                if (!nicPattern.test(nic)) {
-                    alert('Please enter a valid NIC number.');
+                // email validation
+                const email = document.getElementById('email').value;
+                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailPattern.test(email)) {
+                    alert('Please enter a valid email address.');
                     e.preventDefault();
                     return;
                 }
