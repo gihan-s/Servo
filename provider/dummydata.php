@@ -177,11 +177,11 @@ $projects = [
   [
     'id' => 20,
     'name' => "Client's Project",
-    "client" => "Client's Company",
-    "start_date" => "2024-08-01",
-    "due_date" => "2024-12-31",
-    "status" => "ongoing",
-    "description" => "A project specifically for the client."
+    'client' => "Client's Company",
+    'start_date' => '2024-08-01',
+    'due_date' => '2024-12-31',
+    'status' => 'ongoing',
+    'description' => 'A project specifically for the client.'
   ]
 ];
 ?>
