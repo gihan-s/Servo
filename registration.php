@@ -47,10 +47,10 @@
 			<input type="email" name="email" value="" placeholder="Email"><br>
 			<input type="text" name="nic" id="nicField" value="" placeholder="NIC Number" style="display:none;"><br>
 			<label for="gender">Gender: </label>
-			<input type="radio" name="gender" value="M">
-			<label for="gender">Male</label>
-			<input type="radio" name="gender" value="F">
-			<label for="gender">Female</label>
+			<input type="radio" name="gender" id="gender-male" value="M">
+			<label for="gender-male">Male</label>
+			<input type="radio" name="gender" id="gender-female" value="F">
+			<label for="gender-female">Female</label>
 		</div>
 		<button type="button" onclick="clearSection1()">Clear</button>
 	</div>
