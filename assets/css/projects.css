@@ -1,5 +1,5 @@
 h1, h2 {
-  color: #05861a;
+  color: #333;
 }
 
 h1 {
@@ -46,11 +46,37 @@ p {
   gap: 20px;
 }
 
+.finished-list {
+  display: flex;
+  flex-direction: row;
+  overflow-x: auto;
+  gap: 20px;
+  padding-bottom: 10px;
+  scrollbar-width: thin;
+  scrollbar-color: #05861a #e6f7eb;
+}
+
+.finished-list::-webkit-scrollbar {
+  height: 8px;
+}
+.finished-list::-webkit-scrollbar-thumb {
+  background: #05861a;
+  border-radius: 4px;
+}
+.finished-list::-webkit-scrollbar-track {
+  background: #e6f7eb;
+  border-radius: 4px;
+}
+
 .project-card {
   background: white;
   /* border: 2px solid #05861a; */
   border-radius: 12px;
-  box-shadow: 4px 8px 24px 0 rgba(5, 134, 26, 0.15);
+  /* box-shadow: 4px 8px 24px 0 rgba(51, 51, 51, 0.15); */
+  box-shadow: 0 0 .880517px rgba(0, 0, 0, .029), 
+              0 0 2.29197px rgba(0, 0, 0, .03), 
+              0 0 5.52px rgba(0, 0, 0, .054), 
+              0 0 11px rgba(0, 0, 0, .09);
   padding: 1.5rem;
   margin: 1rem 0;
   /* transition: box-shadow 0.2s, transform 0.2s; */
@@ -63,30 +89,34 @@ p {
   cursor: pointer;
 }
 
+.finished-list .project-card {
+  min-width: 300px;
+  max-width: 350px;
+  flex: 0 0 auto;
+}
+
 .project-card-title {
-  color: #05861a;
+  color: #333;
   font-size: 1.3rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
 }
 
+/* add more shadow when hovered */
 .project-card:hover {
-  background: #05861a;
-  /* border: 2px solid white; */
+  box-shadow: 0 0 .880517px rgba(0, 0, 0, .1), 
+              0 0 2.29197px rgba(0, 0, 0, .15), 
+              0 0 5.52px rgba(0, 0, 0, .2), 
+              0 0 11px rgba(0, 0, 0, .25);
 }
 
 .project-card:hover .project-card-title {
-  color: white;
-  font-weight: 600;
+  color: #05861a;
+  font-weight: 700;
 }
 
 .project-card:hover .button {
-  color: #00ae00;
-  background-color: white;
-}
-
-.project-card:hover p {
-  color: white;
+  background-color: #05861a;
 }
 
 .project-card-description {
@@ -103,7 +133,7 @@ p {
   padding: 10px 15px;
   border-radius: 10px;
   border: none;
-  background-color: #008500;
+  background-color: #333;
   color: white;
   font-weight: 600;
   font-size: 0.80em;

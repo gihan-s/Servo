@@ -1,5 +1,6 @@
 <?php
 include 'dummydata.php';
+$user = 'provider';
 $ongoing = [];
 $finished = [];
 foreach ($projects as $p) {
@@ -31,12 +32,12 @@ foreach ($projects as $p) {
   </div>
 
   <div class="main-content">
-    <h1>PROJECTS</h1>
+    <h1>Projects</h1>
 
     <h2>Ongoing Projects</h2>
     <?php if (count($ongoing) > 0): ?>
 
-      <div class="project-list">
+  <div class="project-list">
         <?php foreach ($ongoing as $project): ?>
           <div class="project-card">
             <h3 class="project-card-title"><?= htmlspecialchars($project['name']) ?></h3>
@@ -47,6 +48,9 @@ foreach ($projects as $p) {
             <p><strong>Due Date:</strong> <?= htmlspecialchars($project['due_date']) ?></p>
             <div class="buttons">
               <a class="button" href="#">View Updates</a>
+              <?php if ($user === 'provider'): ?>
+                <a class="button" href="#">Add Update</a>
+              <?php endif; ?>
             </div>
           </div>
         <?php endforeach; ?>
@@ -60,7 +64,7 @@ foreach ($projects as $p) {
     <h2>Finished Projects</h2>
     <?php if (count($finished) > 0): ?>
       
-      <div class="project-list">
+      <div class="finished-list">
         <?php foreach ($finished as $project): ?>
           <div class="project-card finished">
             <h3 class="project-card-title"><?= htmlspecialchars($project['name']) ?></h3>

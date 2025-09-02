@@ -137,6 +137,51 @@ $projects = [
     'due_date' => '2025-05-15',
     'status' => 'finished',
     'description' => 'Creating a virtual reality experience for Xi VR.'
+  ],
+  [
+    'id' => 16,
+    'name' => 'IoT Device Development',
+    'client' => 'Omicron IoT',
+    'start_date' => '2025-03-01',
+    'due_date' => '2025-06-15',
+    'status' => 'ongoing',
+    'description' => 'Developing IoT devices for Omicron IoT.'
+  ],
+  [
+    'id' => 17,
+    'name' => 'Digital Marketing Strategy',
+    'client' => 'Pi Marketing',
+    'start_date' => '2025-04-01',
+    'due_date' => '2025-07-15',
+    'status' => 'finished',
+    'description' => 'Creating a digital marketing strategy for Pi Marketing.'
+  ],
+  [
+    'id' => 18,
+    'name' => 'Game Development Project',
+    'client' => 'Rho Games',
+    'start_date' => '2025-05-01',
+    'due_date' => '2025-08-15',
+    'status' => 'ongoing',
+    'description' => 'Developing a new game for Rho Games.'
+  ],
+  [
+    'id' => 19,
+    'name' => 'Network Infrastructure Upgrade',
+    'client' => 'Sigma Networks',
+    'start_date' => '2025-06-01',
+    'due_date' => '2025-09-15',
+    'status' => 'finished',
+    'description' => 'Upgrading the network infrastructure for Sigma Networks.'
+  ],
+  [
+    'id' => 20,
+    'name' => "Client's Project",
+    'client' => "Client's Company",
+    'start_date' => '2024-08-01',
+    'due_date' => '2024-12-31',
+    'status' => 'ongoing',
+    'description' => 'A project specifically for the client.'
   ]
 ];
 ?>
