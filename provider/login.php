@@ -26,6 +26,17 @@ $error = isset($_GET['error']) ? $_GET['error'] : '';
             <h2>Log in to Servo</h2>
         </div>
         <form class="login-form" method="POST" action="provider-login.php">
+            <!-- add a toggle for provider and client -->
+            <div class="user-type-toggle">
+                <label>
+                    <input type="radio" name="user_type" value="provider" checked>
+                Provider
+                </label>
+                <label>
+                    <input type="radio" name="user_type" value="client">
+                    Client
+                </label>
+            </div>
             <div class="input-group">
                 <i class="fa-solid fa-at"></i>
                 <input type="email" id="email" name="email" placeholder="Email" aria-label="email" required>
