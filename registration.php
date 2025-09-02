@@ -35,7 +35,7 @@
 	<div class="section active">
 		<h1>SECTION 1</h1>
 		<h2>For Clients & Providers</h2>
-		<p>this contains a page where clients and providers are asked there basic information</p>
+		<p>this contains a page where clients and providers are asked their basic information</p>
 		<p>add a toggle in the first page, to choose whether the user is registering as a client or provider</p>
 		<div class="input-field">
 			<!-- Toggle for user type -->
