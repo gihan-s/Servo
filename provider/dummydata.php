@@ -1,0 +1,142 @@
+<?php
+// Dummy data for demonstration
+$usertype = 'client';
+
+$projects = [
+  [
+    'id' => 1,
+    'name' => 'Website Redesign',
+    'client' => 'Acme Corp',
+    'start_date' => '2024-05-01',
+    'due_date' => '2024-07-15',
+    'status' => 'ongoing',
+    'description' => 'Redesigning the corporate website for Acme Corp.'
+  ],
+  [
+    'id' => 2,
+    'name' => 'Mobile App Development',
+    'client' => 'Beta Ltd',
+    'start_date' => '2024-06-10',
+    'due_date' => '2024-09-01',
+    'status' => 'ongoing',
+    'description' => 'Developing a cross-platform mobile app.'
+  ],
+  [
+    'id' => 3,
+    'name' => 'SEO Optimization #Test',
+    'client' => 'Gamma Inc',
+    'start_date' => '2024-02-01',
+    'due_date' => '2024-04-15',
+    'status' => 'finished',
+    'description' => 'Improved SEO for Gamma Inc\'s e-commerce site.'
+  ],
+  [
+    'id' => 4,
+    'name' => 'Graphic Design Project',
+    'client' => 'Gamma Inc',
+    'start_date' => '2024-04-01',
+    'due_date' => '2024-05-15',
+    'status' => 'ongoing',
+    'description' => 'Creating marketing materials for Gamma Inc.'
+  ],
+  [
+    'id' => 5,
+    'name' => 'Video Production',
+    'client' => 'Delta Studios',
+    'start_date' => '2024-06-01',
+    'due_date' => '2024-08-15',
+    'status' => 'finished',
+    'description' => 'Producing a promotional video for Delta Studios.'
+  ],
+  [
+    'id' => 6,
+    'name' => 'Social Media Campaign',
+    'client' => 'Epsilon Agency',
+    'start_date' => '2024-05-01',
+    'due_date' => '2024-09-15',
+    'status' => 'ongoing',
+    'description' => 'Managing a social media campaign for Epsilon Agency.'
+  ],
+  [
+    'id' => 7,
+    'name' => 'Content Writing',
+    'client' => 'Zeta Publishing',
+    'start_date' => '2024-03-01',
+    'due_date' => '2024-06-15',
+    'status' => 'finished',
+    'description' => 'Writing articles and blog posts for Zeta Publishing.'
+  ],
+  [
+    'id' => 8,
+    'name' => 'Data Analysis Project',
+    'client' => 'Eta Analytics',
+    'start_date' => '2024-07-01',
+    'due_date' => '2024-10-15',
+    'status' => 'ongoing',
+    'description' => 'Analyzing data for Eta Analytics\' new product launch.'
+  ],
+  [
+    'id' => 9,
+    'name' => 'UI/UX Design',
+    'client' => 'Theta Tech',
+    'start_date' => '2024-08-01',
+    'due_date' => '2024-11-15',
+    'status' => 'finished',
+    'description' => 'Designing the user interface for Theta Tech\'s new app.'
+  ],
+  [
+    'id' => 10,
+    'name' => 'Cloud Migration',
+    'client' => 'Iota Solutions',
+    'start_date' => '2024-09-01',
+    'due_date' => '2024-12-15',
+    'status' => 'ongoing',
+    'description' => 'Migrating Iota Solutions\' infrastructure to the cloud.'
+  ],
+  [
+    'id' => 11,
+    'name' => 'Cybersecurity Audit',
+    'client' => 'Kappa Security',
+    'start_date' => '2024-10-01',
+    'due_date' => '2025-01-15',
+    'status' => 'finished',
+    'description' => 'Conducting a cybersecurity audit for Kappa Security.'
+  ],
+  [
+    'id' => 12,
+    'name' => 'Blockchain Development',
+    'client' => 'Lambda Blockchain',
+    'start_date' => '2024-11-01',
+    'due_date' => '2025-02-15',
+    'status' => 'ongoing',
+    'description' => 'Developing a blockchain solution for Lambda Blockchain.'
+  ],
+  [
+    'id' => 13,
+    'name' => 'AI Model Training',
+    'client' => 'Mu AI',
+    'start_date' => '2024-12-01',
+    'due_date' => '2025-03-15',
+    'status' => 'finished',
+    'description' => 'Training an AI model for Mu AI\'s new product.'
+  ],
+  [
+    'id' => 14,
+    'name' => 'E-commerce Platform Development',
+    'client' => 'Nu Commerce',
+    'start_date' => '2025-01-01',
+    'due_date' => '2025-04-15',
+    'status' => 'ongoing',
+    'description' => 'Developing a new e-commerce platform for Nu Commerce.'
+  ],
+  [
+    'id' => 15,
+    'name' => 'Virtual Reality Experience',
+    'client' => 'Xi VR',
+    'start_date' => '2025-02-01',
+    'due_date' => '2025-05-15',
+    'status' => 'finished',
+    'description' => 'Creating a virtual reality experience for Xi VR.'
+  ]
+];
+?>
