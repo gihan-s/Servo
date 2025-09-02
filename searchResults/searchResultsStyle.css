@@ -175,7 +175,7 @@ body {
   cursor: pointer;
 }
 
-.search-bottom .search-filters .button-apply button {
+.search-filters .button-apply button {
   background-color: #28a745;
   outline: none;
   border: none;
@@ -187,7 +187,7 @@ body {
   transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.search-bottom .search-filters .button-apply button:hover {
+.search-filters .button-apply button:hover {
   background-color: #186829;
   box-shadow: 0 0 5px rgba(40, 167, 69, 0.2);
 }

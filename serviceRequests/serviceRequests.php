@@ -19,7 +19,8 @@
                     <input type="text" placeholder="Search for Requests...">
                     <button><i class="fa-light fa-magnifying-glass"></i></button>
                 </div>
-                <button class="filter"><i class="fa-light fa-filter-list"></i><span>Filter</span></button>
+                <button class="filter" id="filter-pop-up"><i
+                        class="fa-light fa-filter-list"></i><span>Filter</span></button>
                 <div class="advance-search">
                     <div class="sort-selection">
                         <div class="selection-input-field">
@@ -53,7 +54,8 @@
                             </div>
                             <div class="button">
                                 <button title="Message"><i class="fa-light fa-messages"></i></button>
-                                <button title="Request Details"><i class="fa-light fa-memo-circle-info"></i></button>
+                                <button title="Request Details" id="request-det-pop-up"><i
+                                        class="fa-light fa-memo-circle-info"></i></button>
                                 <button class="decline"><i class="fa-regular fa-circle-xmark"
                                         style="padding-right:0.5rem"></i>Decline</button>
                                 <button class="accept"><i class="fa-regular fa-circle-check"
@@ -335,7 +337,8 @@
                             <div class="button" style="align-items:center;">
                                 <button title="Message"><i class="fa-light fa-messages"></i></button>
                                 <button title="Request Details"><i class="fa-light fa-memo-circle-info"></i></button>
-                                Status: <span style="background-color:red; padding:0 0.5rem; border-radius: 0.2rem; color: #fff; height:fit-content">Declined</span>
+                                Status: <span
+                                    style="background-color:red; padding:0 0.5rem; border-radius: 0.2rem; color: #fff; height:fit-content">Declined</span>
                             </div>
                         </div>
                         <div class="item-middle">
@@ -359,6 +362,115 @@
             </div>
         </div>
     </section>
+
+
+    <div class="pop-up-section filter-pop-up deactive">
+        <div class="pop-up deactive">
+            <div class="pop-up-header">
+                <div class="pop-up-title">Add Filters</div>
+                <i class="fa-light fa-xmark" id="filter-pop-up"></i>
+            </div>
+            <hr>
+            <div class="pop-up-content">
+                <div class="search-filters">
+                    <div class="filter-item">
+                        <div class="filter-title"><span>Hourly rate</span><i
+                                class="fa-light fa-chevron-down rotated"></i>
+                        </div>
+                        <ul class="filter-options active radios">
+                            <li><input type="radio" name="rate" id="rate" checked>Any hourly rate</li>
+                            <li><input type="radio" name="rate" id="rate">Less than $10</li>
+                            <li><input type="radio" name="rate" id="rate">$10 - $30</li>
+                            <li><input type="radio" name="rate" id="rate">$30 - $60</li>
+                            <li><input type="radio" name="rate" id="rate">$60 & above</li>
+                        </ul>
+                    </div>
+                    <div class="filter-item">
+                        <div class="filter-title"><span>Project success</span><i class="fa-light fa-chevron-down"></i>
+                        </div>
+                        <ul class="filter-options radios">
+                            <li><input type="radio" name="success" id="success" checked>Any success rate</li>
+                            <li><input type="radio" name="success" id="success">90% & up</li>
+                            <li><input type="radio" name="success" id="success">80% & up</li>
+                            <li><input type="radio" name="success" id="success">70% & up</li>
+                            <li><input type="radio" name="success" id="success">Less than 70%</li>
+                        </ul>
+                    </div>
+                    <div class="filter-item">
+                        <div class="filter-title"><span>Total Earnings</span><i class="fa-light fa-chevron-down"></i>
+                        </div>
+                        <ul class="filter-options radios">
+                            <li><input type="radio" name="earnings" id="earnings" checked>Any amount earned</li>
+                            <li><input type="radio" name="earnings" id="earnings">$1+ earned</li>
+                            <li><input type="radio" name="earnings" id="earnings">$100+ earned</li>
+                            <li><input type="radio" name="earnings" id="earnings">$1K+ earned</li>
+                            <li><input type="radio" name="earnings" id="earnings">$10K+ earned</li>
+                            <li><input type="radio" name="earnings" id="earnings">No earnings yet</li>
+                        </ul>
+                    </div>
+                    <div class="filter-item">
+                        <div class="filter-title"><span>Language</span><i class="fa-light fa-chevron-down"></i></div>
+                        <ul class="filter-options checkboxes">
+                            <li><input type="checkbox" name="language" id="language" checked>English</li>
+                            <li><input type="checkbox" name="language" id="language">Sinhala</li>
+                            <li><input type="checkbox" name="language" id="language">Tamil</li>
+                            <li><input type="checkbox" name="language" id="language">Other</li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+            <div class="button-apply">
+                <button>Apply filters</button>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="pop-up-section request-det-pop-up deactive">
+        <div class="pop-up deactive">
+            <div class="pop-up-header">
+                <div class="pop-up-title">Request Details</div>
+                <i class="fa-light fa-xmark" id="request-det-pop-up"></i>
+            </div>
+            <hr>
+            <div class="pop-up-content">
+                <div class="request-details">
+                    <ul>
+                        <li>
+                            <span class="det-title">Client :</span>
+                            <span class="det"><a href="">Chethiya Bandara</a></span>
+                        </li>
+                        <li>
+                            <span class="det-title">Title :</span>
+                            <span class="det">Need a Graphic designer to design class post</span>
+                        </li>
+                        <li>
+                            <span class="det-title">Description :</span>
+                            <span class="det">Turn Your Web App Idea into a Fast, Scalable, and Beautiful Reality —
+                                Delivered On Time, Every Time! Hi, I’m Junaid — a results-driven Full-Stack Web
+                                Application Developer specializing in React, Next.js, MERN stack, and API integrations.
+                                Whether you need</span>
+                        </li>
+                        <li>
+                            <span class="det-title">Requested Price :</span>
+                            <span class="det">$40/hr</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <hr>
+            <div class="button" style="width:100%">
+                <button class="decline"><i class="fa-regular fa-circle-xmark"
+                        style="padding-right:0.5rem"></i>Decline</button>
+                <button class="accept"><i class="fa-regular fa-circle-check"
+                        style="padding-right:0.5rem"></i>Accept</button>
+            </div>
+        </div>
+    </div>
+
+
+
 </body>
 
 <script src="serviceReqestsScript.js"></script>

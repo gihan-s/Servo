@@ -54,4 +54,81 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+
+    //filter accordion
+
+    document.querySelectorAll('.filter-item .filter-title').forEach(option => {
+        option.addEventListener('click', function() {
+            this.querySelector('i').classList.toggle('rotated');
+            if(this.nextElementSibling.clientHeight === 0) {
+                this.nextElementSibling.style.height = this.nextElementSibling.children[0].offsetHeight * this.nextElementSibling.childElementCount + 'px';
+            }
+            else {
+                this.nextElementSibling.style.height = '0';
+            }
+        });
+    });
+
+
+    // Toggle the radio button state when the label is clicked
+
+    document.querySelectorAll('.search-filters .filter-item .radios li').forEach(option => {
+        option.addEventListener('click', function() {
+            if (!this.querySelector('input').checked){
+                this.querySelector('input').checked = true;
+            }
+        });
+    });
+
+    // Toggle the checkbox state when the label is clicked
+
+    document.querySelectorAll('.search-filters .filter-item .checkboxes li').forEach(option => {
+        option.addEventListener('click', function() {
+            if (!this.querySelector('input').checked){
+                this.querySelector('input').checked = true;
+            }
+            else {
+                this.querySelector('input').checked = false;
+            }
+        });
+    });
+
+    // Toggle the checkbox state when the input is clicked
+
+    document.querySelectorAll('.search-filters .filter-item .checkboxes li input').forEach(option => {
+        option.addEventListener('click', function() {
+            if (!this.checked){
+                this.checked = true;
+            }
+            else {
+                this.checked = false;
+            }
+        });
+    });
+
+    
+
+    // Function to toggle the visibility of pop-up sections
+    // and the pop-up itself
+
+    function togglePopUp(popUpId) {
+        document.getElementsByClassName(popUpId)[0].classList.toggle('deactive');
+        document.getElementsByClassName(popUpId)[0].querySelector('.pop-up').classList.toggle('deactive');
+    }
+
+    document.querySelectorAll('button').forEach(selection => {
+        selection.addEventListener('click', function() {
+            togglePopUp(this.id);
+        });
+    }); 
+    
+    document.querySelectorAll('.pop-up-section .pop-up-header i').forEach(close => {
+        close.addEventListener('click', function() {
+            togglePopUp(this.id);
+        });
+    }); 
+
+
+    
+
 });
