@@ -477,8 +477,7 @@ transform: scaleX(1);
   color: white;
   font-weight: 500;
   cursor: pointer;
-
-  transition: all 0.3s;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .button:hover {
@@ -495,6 +494,22 @@ transform: scaleX(1);
 
 .button.outline:hover {
   background-color: var(--themeColor);
+  color: white;
+}
+
+.button i{
+  color: #fff;
+}
+
+.button:hover i{
+  color: #fff;
+}
+
+.button.outline i{
+  color: var(--themeColor);
+}
+
+.button.outline:hover i{
   color: white;
 }
 
