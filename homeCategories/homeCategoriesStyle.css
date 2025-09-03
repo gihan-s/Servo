@@ -42,7 +42,7 @@ body {
 
 .button-section {
   border-radius: 5rem;
-  border: 2px solid #28a745;
+  border: 2px solid #008500;
   display: flex;
   width: 300px;
 }
@@ -50,7 +50,7 @@ body {
 
 .button-section .cat-button {
   background-color: transparent;
-  color: #28a745;
+  color: #008500;
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 5rem;
@@ -61,7 +61,7 @@ body {
 
 .button-section .bt-border{
   border-radius: 5rem;
-  background-color: #28a745;
+  background-color: #008500;
   color: #fff;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
