@@ -23,7 +23,7 @@
 <body>
 
   <!-- Guest Header -->
-  <?php include 'includes/headerHome.php' ?>
+  <?php include 'includes/headerHome.php';?>
 
 
   <div class="content">

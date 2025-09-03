@@ -10,6 +10,7 @@ $projects = [
     'start_date' => '2024-05-01',
     'due_date' => '2024-07-15',
     'status' => 'ongoing',
+    'end_date' => '',
     'description' => 'Redesigning the corporate website for Acme Corp.'
   ],
   [
@@ -19,6 +20,7 @@ $projects = [
     'start_date' => '2024-06-10',
     'due_date' => '2024-09-01',
     'status' => 'ongoing',
+    'end_date' => '',
     'description' => 'Developing a cross-platform mobile app.'
   ],
   [
@@ -28,6 +30,7 @@ $projects = [
     'start_date' => '2024-02-01',
     'due_date' => '2024-04-15',
     'status' => 'finished',
+    'end_date' => '2024-04-20',
     'description' => 'Improved SEO for Gamma Inc\'s e-commerce site.'
   ],
   [
@@ -37,6 +40,7 @@ $projects = [
     'start_date' => '2024-04-01',
     'due_date' => '2024-05-15',
     'status' => 'ongoing',
+    'end_date' => '',
     'description' => 'Creating marketing materials for Gamma Inc.'
   ],
   [
@@ -46,6 +50,7 @@ $projects = [
     'start_date' => '2024-06-01',
     'due_date' => '2024-08-15',
     'status' => 'finished',
+    'end_date' => '2024-08-20',
     'description' => 'Producing a promotional video for Delta Studios.'
   ],
   [
@@ -55,6 +60,7 @@ $projects = [
     'start_date' => '2024-05-01',
     'due_date' => '2024-09-15',
     'status' => 'ongoing',
+    'end_date' => '',
     'description' => 'Managing a social media campaign for Epsilon Agency.'
   ],
   [
@@ -64,6 +70,7 @@ $projects = [
     'start_date' => '2024-03-01',
     'due_date' => '2024-06-15',
     'status' => 'finished',
+    'end_date' => '2024-06-20',
     'description' => 'Writing articles and blog posts for Zeta Publishing.'
   ],
   [
@@ -73,6 +80,7 @@ $projects = [
     'start_date' => '2024-07-01',
     'due_date' => '2024-10-15',
     'status' => 'ongoing',
+    'end_date' => '',
     'description' => 'Analyzing data for Eta Analytics\' new product launch.'
   ],
   [
@@ -82,6 +90,7 @@ $projects = [
     'start_date' => '2024-08-01',
     'due_date' => '2024-11-15',
     'status' => 'finished',
+    'end_date' => '2024-11-20',
     'description' => 'Designing the user interface for Theta Tech\'s new app.'
   ],
   [
@@ -91,6 +100,7 @@ $projects = [
     'start_date' => '2024-09-01',
     'due_date' => '2024-12-15',
     'status' => 'ongoing',
+    'end_date' => '',
     'description' => 'Migrating Iota Solutions\' infrastructure to the cloud.'
   ],
   [
@@ -100,6 +110,7 @@ $projects = [
     'start_date' => '2024-10-01',
     'due_date' => '2025-01-15',
     'status' => 'finished',
+    'end_date' => '2025-01-20',
     'description' => 'Conducting a cybersecurity audit for Kappa Security.'
   ],
   [
@@ -109,6 +120,7 @@ $projects = [
     'start_date' => '2024-11-01',
     'due_date' => '2025-02-15',
     'status' => 'ongoing',
+    'end_date' => '',
     'description' => 'Developing a blockchain solution for Lambda Blockchain.'
   ],
   [
@@ -118,6 +130,7 @@ $projects = [
     'start_date' => '2024-12-01',
     'due_date' => '2025-03-15',
     'status' => 'finished',
+    'end_date' => '2025-03-20',
     'description' => 'Training an AI model for Mu AI\'s new product.'
   ],
   [
@@ -127,6 +140,7 @@ $projects = [
     'start_date' => '2025-01-01',
     'due_date' => '2025-04-15',
     'status' => 'ongoing',
+    'end_date' => '',
     'description' => 'Developing a new e-commerce platform for Nu Commerce.'
   ],
   [
@@ -136,6 +150,7 @@ $projects = [
     'start_date' => '2025-02-01',
     'due_date' => '2025-05-15',
     'status' => 'finished',
+    'end_date' => '2025-05-20',
     'description' => 'Creating a virtual reality experience for Xi VR.'
   ],
   [
@@ -145,6 +160,7 @@ $projects = [
     'start_date' => '2025-03-01',
     'due_date' => '2025-06-15',
     'status' => 'ongoing',
+    'end_date' => '',
     'description' => 'Developing IoT devices for Omicron IoT.'
   ],
   [
@@ -154,6 +170,7 @@ $projects = [
     'start_date' => '2025-04-01',
     'due_date' => '2025-07-15',
     'status' => 'finished',
+    'end_date' => '2025-07-20',
     'description' => 'Creating a digital marketing strategy for Pi Marketing.'
   ],
   [
@@ -163,6 +180,7 @@ $projects = [
     'start_date' => '2025-05-01',
     'due_date' => '2025-08-15',
     'status' => 'ongoing',
+    'end_date' => '',
     'description' => 'Developing a new game for Rho Games.'
   ],
   [
@@ -172,6 +190,7 @@ $projects = [
     'start_date' => '2025-06-01',
     'due_date' => '2025-09-15',
     'status' => 'finished',
+    'end_date' => '2025-09-20',
     'description' => 'Upgrading the network infrastructure for Sigma Networks.'
   ],
   [
@@ -181,6 +200,7 @@ $projects = [
     'start_date' => '2024-08-01',
     'due_date' => '2024-12-31',
     'status' => 'ongoing',
+    'end_date' => '',
     'description' => 'A project specifically for the client.'
   ]
 ];
