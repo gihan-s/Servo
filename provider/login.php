@@ -18,24 +18,57 @@ $error = isset($_GET['error']) ? $_GET['error'] : '';
     <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
 
     <!-- <script src="assets/js/elements.js" defer></script> -->
+     <style>
+        .toggle-section {
+			display: flex;
+			justify-content: center;
+			margin: 10px auto;
+			margin-bottom: 40px;
+			border: 1px solid #33333380;
+			border-radius: 10px;
+			padding: 5px;
+		}
+
+		.toggle-button {
+			flex: 1;
+			padding: 10px;
+			cursor: pointer;
+			text-align: center;
+			border-radius: 10px;
+			font-weight: 600;
+			font-size: 16px;
+			color: #333;
+			transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+		}
+
+		.toggle-button i{
+			color: #333;
+		}
+
+		.toggle-button.active {
+			background-color: #008500;
+			color: white;
+			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+		}
+
+		.toggle-button.active i{
+			color: white;
+		}
+
+     </style>
 </head>
 <body>
-    <div class="login-wrapper">
+    <div class="main-section">
+        <img src="../assets/img/logo.png" alt="Servo">
         <div class="login-header">
             <button class="back-btn fa-solid fa-arrow-left" onclick="window.location.href='../index.php'"></button>
-            <h2>Log in to Servo</h2>
+            <h2>Log in to continue</h2>
         </div>
         <form class="login-form" method="POST" action="provider-login.php">
             <!-- add a toggle for provider and client -->
-            <div class="user-type-toggle">
-                <label>
-                    <input type="radio" name="user_type" value="provider" checked>
-                Provider
-                </label>
-                <label>
-                    <input type="radio" name="user_type" value="client">
-                    Client
-                </label>
+            <div class="toggle-section user-change">
+                <div class="toggle-button active"><i class="fa-solid fa-user" style="padding-right: 10px"></i>Client</div>
+                <div class="toggle-button"><i class="fa-solid fa-user-helmet-safety" style="padding-right: 10px"></i>Provider</div>
             </div>
             <div class="input-group">
                 <i class="fa-solid fa-at"></i>
