@@ -1,0 +1,22 @@
+<?php
+// set to true for local testing, false for server
+$isLocal = false;
+
+if ($isLocal) {
+    $DB_SERVER = "localhost";
+    $DB_USERNAME = "webuser";
+    $DB_PASSWORD = "Pass@Servo2025";
+    $DB_NAME = "servo";
+} else {
+    // need php mysqli extension enabled to locally testing
+    $DB_SERVER = "13.60.4.254";
+    $DB_USERNAME = "servodbuser";
+    $DB_PASSWORD = "Pass@Servo2025";
+    $DB_NAME = "servo";
+}
+
+$conn = mysqli_connect($DB_SERVER, $DB_USERNAME, $DB_PASSWORD, $DB_NAME);
+if (!$conn) {
+    die("Connection failed: " . mysqli_connect_error());
+}
+?>

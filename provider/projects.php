@@ -1,5 +1,5 @@
 <?php
-include '../dummyData/dummydata.php';
+include '../dummyData/projects.php';
 $user = 'provider';
 $ongoing = [];
 $finished = [];
