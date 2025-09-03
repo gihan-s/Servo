@@ -30,6 +30,14 @@
 			border-radius: 10px;
 		}
 
+		.main-section img{
+			width: 100%;
+			max-width: 200px;
+			margin: 0 auto;
+			display: block;
+			margin-bottom: 40px;
+		}
+
 		input:-webkit-autofill,
         input:-webkit-autofill:hover,
         input:-webkit-autofill:focus,
@@ -143,6 +151,7 @@
 <body>
 	<form id="registrationForm" class="form" action="" method="post" enctype="multipart/form-data">
 		<div class="main-section">
+			<img src="assets/img/logo.png" alt="">
 			<div class="section active">
 				<div class="input-field">
 					<!-- Toggle for user type -->
@@ -201,10 +210,7 @@
 			</div>
 
 			<div class="section">
-				<h1>SECTION 2</h1>
-				<h2>For Clients & Providers</h2>
-				<p>this section contains a section where users are asked their bio, profile picture and social links
-				</p>
+				
 				<div class="input-field">
 					<label for="profilePic">Profile Picture</label>
 					<input type="file" name="profilePic" accept="image/*"><br>
