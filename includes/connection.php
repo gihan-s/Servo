@@ -2,7 +2,7 @@
 // when running the website on localhost, you'd have to connect to the remote database server
 // set to true for locahost testing, false for deployment on web server
 // once done testing on localhost, set it back to false
-$isTestingLocally = false;
+$isTestingLocally = true;
 
 if ($isTestingLocally) {
     // need php mysqli extension enabled to locally testing

@@ -47,11 +47,11 @@ toggleBtn.forEach((btn) => {
         if (btn.textContent.trim().includes('Provider')) {
             isProvider = true;
             submitBtn.textContent = 'Continue as Provider';
-            form.action = 'provider-login.php';
+            form.action = 'includes/provider_login.php';
         } else {
             isProvider = false;
             submitBtn.textContent = 'Continue as Client';
-            form.action = 'client-login.php';
+            form.action = 'includes/client_login.php';
         }
     });
 });
