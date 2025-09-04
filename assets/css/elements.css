@@ -215,6 +215,7 @@ transform: scaleX(1);
 .search-select-container .options .option-list {
   max-height: 160px;
   overflow: auto;
+  text-align: left;
 }
 
 .search-select-container .options input {
@@ -619,4 +620,25 @@ transform: scaleX(1);
 
 .snackbar-view {
   transform: translateX(0%);
+}
+
+.text-container textarea {
+  padding: 15px;
+
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 30px;
+  color: var(--textFieldTextColor);
+
+  border: 1px solid var(--textFieldBorderColor);
+  border-radius: 5px;
+
+  background-color: transparent;
+
+  width: 100%;
+}
+
+.text-container textarea:active,
+.text-container textarea:focus {
+  outline: 2px solid var(--themeColor);
 }
