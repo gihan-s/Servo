@@ -1,6 +1,9 @@
 <html>
 
 <head>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="assets/css/elements.css">
 	<link rel="stylesheet" href="assets/css/GridTemplates.css">
 	<link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
@@ -17,7 +20,7 @@
 		}
 
 		body {
-			font-family: Arial, sans-serif;
+			font-family: "DM Sans", sans-serif;
 			background-color: var(--background-color);
 			margin: 0;
 			padding: 0;
@@ -911,56 +914,48 @@
 
 		// Password validation function
 		function validatePassword(password) {
-			// Check if password has at least one lowercase letter, one uppercase letter, and one number
+			// Check if password has all 5 requirements
 			const hasLowercase = /[a-z]/.test(password);
 			const hasUppercase = /[A-Z]/.test(password);
 			const hasNumber = /[0-9]/.test(password);
+			const hasSymbol = /[^a-zA-Z0-9]/.test(password);
+			const hasMinLength = password.length > 12;
 			
-			// Password must be at least 8 characters and have lowercase, uppercase, and numbers
-			return password.length >= 8 && hasLowercase && hasUppercase && hasNumber;
+			// Password must meet all 5 requirements for validation
+			return hasLowercase && hasUppercase && hasNumber && hasSymbol && hasMinLength;
 		}
 
 		// Calculate password strength
 		function calculatePasswordStrength(password) {
 			if (!password) return { strength: 'none', score: 0 };
 			
-			let score = 0;
-			const checks = {
-				length: password.length >= 8,
-				longLength: password.length > 12,
+			// Check the 5 key requirements
+			const requirements = {
 				lowercase: /[a-z]/.test(password),
 				uppercase: /[A-Z]/.test(password),
 				numbers: /[0-9]/.test(password),
-				symbols: /[^a-zA-Z0-9]/.test(password)
+				symbols: /[^a-zA-Z0-9]/.test(password),
+				longLength: password.length > 12
 			};
 			
-			// Only lowercase letters
-			if (checks.lowercase && !checks.uppercase && !checks.numbers && !checks.symbols) {
-				return { strength: 'very-weak', score: 1, text: 'Very Weak' };
-			}
+			// Count how many requirements are met
+			const metRequirements = Object.values(requirements).filter(Boolean).length;
 			
-			// Lowercase and uppercase
-			if (checks.lowercase && checks.uppercase && !checks.numbers && !checks.symbols) {
-				return { strength: 'weak', score: 2, text: 'Weak' };
+			// Determine strength based on number of requirements met
+			switch (metRequirements) {
+				case 1:
+					return { strength: 'very-weak', score: 1, text: 'Very Weak' };
+				case 2:
+					return { strength: 'weak', score: 2, text: 'Weak' };
+				case 3:
+					return { strength: 'medium', score: 3, text: 'Medium' };
+				case 4:
+					return { strength: 'strong', score: 4, text: 'Strong' };
+				case 5:
+					return { strength: 'very-strong', score: 5, text: 'Very Strong' };
+				default:
+					return { strength: 'very-weak', score: 1, text: 'Very Weak' };
 			}
-			
-			// Lowercase, uppercase, and numbers
-			if (checks.lowercase && checks.uppercase && checks.numbers && !checks.symbols) {
-				return { strength: 'medium', score: 3, text: 'Medium' };
-			}
-			
-			// Lowercase, uppercase, numbers, and symbols with length > 12
-			if (checks.lowercase && checks.uppercase && checks.numbers && checks.symbols && checks.longLength) {
-				return { strength: 'very-strong', score: 5, text: 'Very Strong' };
-			}
-			
-			// Lowercase, uppercase, numbers, and symbols (but length <= 12)
-			if (checks.lowercase && checks.uppercase && checks.numbers && checks.symbols && checks.length) {
-				return { strength: 'strong', score: 4, text: 'Strong' };
-			}
-			
-			// Default case - very weak
-			return { strength: 'very-weak', score: 1, text: 'Very Weak' };
 		}
 
 		// Update password strength indicator
@@ -1332,7 +1327,7 @@
 				showValidationTooltip(passwordInput, 'Password is required');
 				isValid = false;
 			} else if (!validatePassword(passwordValue)) {
-				showValidationTooltip(passwordInput, 'Password must contain at least 8 characters with lowercase, uppercase, and numbers');
+				showValidationTooltip(passwordInput, 'Password must contain lowercase, uppercase, numbers, symbols, and be more than 12 characters');
 				isValid = false;
 			}
 
