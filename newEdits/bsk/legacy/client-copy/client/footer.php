@@ -1,0 +1,344 @@
+<link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/styles.css">
+<style>
+    /* Enhanced Footer Styling (matches card & pagination theme) */
+    footer {
+        background: #0f172a;
+        color: #f1f5f9;
+        position: relative;
+        margin-top: 80px;
+        font-family: 'Inter', Arial, sans-serif;
+    }
+
+    footer::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #008500, #3b82f6);
+    }
+
+    .footer-content {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 56px 32px 36px;
+        display: grid;
+        gap: 40px;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .footer-brand h4 {
+        font-size: 22px;
+        margin: 0 0 10px;
+        font-weight: 800;
+        letter-spacing: .5px;
+        background: linear-gradient(90deg, #008500, #3b82f6);
+        -webkit-background-clip: text;
+        color: transparent;
+    }
+
+    .footer-brand p {
+        margin: 0 0 18px;
+        line-height: 1.55;
+        font-size: 14px;
+        color: #cbd5e1;
+    }
+
+    .footer-section h5 {
+        margin: 0 0 14px;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: #94a3b8;
+    }
+
+    .footer-links {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .footer-links a {
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        color: #e2e8f0;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        position: relative;
+        padding: 4px 0;
+        transition: color .25s ease;
+    }
+
+    .footer-links a::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        height: 2px;
+        width: 0;
+        background: #008500;
+        border-radius: 2px;
+        transition: width .3s ease;
+    }
+
+    .footer-links a:hover {
+        color: #fff;
+    }
+
+    .footer-links a:hover::after {
+        width: 36px;
+    }
+
+    .badge-new {
+        background: #008500;
+        color: #fff;
+        font-size: 10px;
+        font-weight: 600;
+        padding: 2px 6px;
+        border-radius: 8px;
+        letter-spacing: .5px;
+    }
+
+    .newsletter-form {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .newsletter-form input {
+        background: #1e293b;
+        border: 1px solid #334155;
+        color: #f1f5f9;
+        padding: 10px 14px;
+        border-radius: 10px;
+        font-size: 14px;
+        outline: none;
+        transition: border-color .25s ease, background .25s ease;
+    }
+
+    .newsletter-form input:focus {
+        border-color: #008500;
+        background: #0f1f34;
+    }
+
+    .newsletter-form button {
+        background: #008500;
+        border: 1px solid #008500;
+        color: #fff;
+        font-weight: 600;
+        font-size: 13px;
+        padding: 10px 16px;
+        border-radius: 10px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all .3s ease;
+    }
+
+    .newsletter-form button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 22px -6px rgba(0, 133, 0, .45);
+    }
+
+    .social-row {
+        display: flex;
+        gap: 14px;
+        margin-top: 6px;
+    }
+
+    .social-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: #1e293b;
+        border: 1px solid #334155;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #94a3b8;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all .3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .social-btn:hover {
+        color: #fff;
+        border-color: #008500;
+        box-shadow: 0 6px 18px -4px rgba(0, 133, 0, .45);
+    }
+
+    .social-btn::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(0, 133, 0, 0), rgba(0, 133, 0, .2));
+        opacity: 0;
+        transition: opacity .35s ease;
+    }
+
+    .social-btn:hover::after {
+        opacity: 1;
+    }
+
+    .footer-mini-stats {
+        display: flex;
+        gap: 18px;
+        flex-wrap: wrap;
+        margin-top: 18px;
+    }
+
+    .mini-stat {
+        background: #1e293b;
+        border: 1px solid #334155;
+        padding: 10px 14px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #94a3b8;
+    }
+
+    .mini-stat i {
+        color: #008500;
+    }
+
+    .footer-bottom {
+        border-top: 1px solid #1e293b;
+        margin-top: 30px;
+        padding: 22px 32px 34px;
+        text-align: center;
+        font-size: 13px;
+        color: #64748b;
+    }
+
+    .legal-links {
+        display: flex;
+        justify-content: center;
+        gap: 28px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+    }
+
+    .legal-links a {
+        color: #64748b;
+        font-size: 12px;
+        text-decoration: none;
+        position: relative;
+        padding: 4px 2px;
+    }
+
+    .legal-links a:hover {
+        color: #fff;
+    }
+
+    .legal-links a:focus-visible,
+    .footer-links a:focus-visible,
+    .social-btn:focus-visible,
+    .newsletter-form input:focus-visible,
+    .newsletter-form button:focus-visible {
+        outline: 2px solid #008500;
+        outline-offset: 2px;
+    }
+
+    @media (max-width:640px) {
+        .footer-content {
+            padding: 48px 22px 28px;
+        }
+    }
+        /* Remove gradient top bar from all client cards */
+        .card::before,
+        .search-item::before,
+        .metric-card::before,
+        .activity-card::before,
+        .action-card::before {
+            content: none !important;
+            background: none !important;
+            height: 0 !important;
+        }
+</style>
+<!-- Footer -->
+<footer aria-label="Site footer">
+    <div class="footer-content">
+        <div class="footer-brand">
+            <h4>ServiceHub</h4>
+            <p>Connecting clients with trusted providers. Manage projects, payments and communication securely.</p>
+            <div class="social-row" aria-label="Social links">
+                <button class="social-btn" aria-label="Twitter"><i class="fa-brands fa-x-twitter"></i></button>
+                <button class="social-btn" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></button>
+                <button class="social-btn" aria-label="GitHub"><i class="fa-brands fa-github"></i></button>
+                <button class="social-btn" aria-label="Dribbble"><i class="fa-brands fa-dribbble"></i></button>
+            </div>
+            <div class="footer-mini-stats">
+                <div class="mini-stat"><i class="fa-regular fa-briefcase"></i> 120+ Projects</div>
+                <div class="mini-stat"><i class="fa-regular fa-users"></i> 75 Providers</div>
+                <div class="mini-stat"><i class="fa-regular fa-shield-check"></i> Secure</div>
+            </div>
+        </div>
+        <div class="footer-section">
+            <h5>Navigation</h5>
+            <ul class="footer-links">
+                <li><a href="<?= BASE_URL ?>/client/Dashboard"><i class="fa-regular fa-gauge"></i> Dashboard</a></li>
+                <li><a href="<?= BASE_URL ?>/client/Projects"><i class="fa-regular fa-diagram-project"></i> Projects</a>
+                </li>
+                <li><a href="<?= BASE_URL ?>/client/Posts"><i class="fa-regular fa-clipboard-list"></i> Posts</a></li>
+                <li><a href="<?= BASE_URL ?>/client/Providers"><i class="fa-regular fa-user-tie"></i> Providers</a></li>
+                <li><a href="<?= BASE_URL ?>/client/Payments"><i class="fa-regular fa-file-invoice-dollar"></i> Payments
+                        <span class="badge-new">NEW</span></a></li>
+            </ul>
+        </div>
+        <div class="footer-section">
+            <h5>Support</h5>
+            <ul class="footer-links">
+                <li><a href="#"><i class="fa-regular fa-circle-question"></i> Help Center</a></li>
+                <li><a href="#"><i class="fa-regular fa-envelope"></i> Contact</a></li>
+                <li><a href="#"><i class="fa-regular fa-shield"></i> Privacy Policy</a></li>
+                <li><a href="#"><i class="fa-regular fa-scale-balanced"></i> Terms of Service</a></li>
+                <li><a href="#"><i class="fa-regular fa-shield-halved"></i> Trust & Safety</a></li>
+            </ul>
+        </div>
+        <div class="footer-section">
+            <h5>Stay Updated</h5>
+            <form class="newsletter-form" action="#" method="post"
+                onsubmit="event.preventDefault(); footerSubscribe();">
+                <input type="email" name="email" placeholder="Email address" aria-label="Email address" required />
+                <button type="submit"><i class="fa-regular fa-paper-plane"></i> Subscribe</button>
+            </form>
+            <ul class="footer-links" style="margin-top:14px;">
+                <li><a href="#"><i class="fa-regular fa-bell"></i> Notifications</a></li>
+                <li><a href="#"><i class="fa-regular fa-book"></i> Documentation</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <div>&copy; <?= date('Y') ?> ServiceHub. All rights reserved.</div>
+        <div class="legal-links" aria-label="Legal links">
+            <a href="#">Privacy</a>
+            <a href="#">Terms</a>
+            <a href="#">Security</a>
+            <a href="#">Status</a>
+        </div>
+    </div>
+</footer>
+<script>
+    function footerSubscribe() {
+        const form = document.querySelector('.newsletter-form');
+        const input = form.querySelector('input[name="email"]');
+        if (!input.value) return;
+        const btn = form.querySelector('button');
+        btn.disabled = true; btn.innerHTML = '<i class="fa-regular fa-check"></i> Subscribed';
+        btn.style.background = '#008500';
+        setTimeout(() => { btn.disabled = false; btn.innerHTML = '<i class="fa-regular fa-paper-plane"></i> Subscribe'; input.value = ''; }, 4000);
+    }
+</script>
