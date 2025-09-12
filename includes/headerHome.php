@@ -31,8 +31,8 @@
         </div>
 
         <div class="button-wrapper">
-            <button>Log in</button>
-            <button>Sign Up</button>
+            <button onclick="window.location.href='login.php'">Log in</button>
+            <button onclick="window.location.href='registration.php'">Sign Up</button>
         </div>
 
     </div>

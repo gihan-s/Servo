@@ -1,5 +1,5 @@
 <?php
-include 'dummydata.php';
+include '../dummyData/projects.php';
 $user = 'provider';
 $ongoing = [];
 $finished = [];
@@ -72,7 +72,7 @@ foreach ($projects as $p) {
             <br>
             <p><strong>Client:</strong> <?= htmlspecialchars($project['client']) ?></p>
             <p><strong>Start Date:</strong> <?= htmlspecialchars($project['start_date']) ?></p>
-            <p><strong>Due Date:</strong> <?= htmlspecialchars($project['due_date']) ?></p>
+            <p><strong>Ended Date:</strong> <?= htmlspecialchars($project['end_date']) ?></p>
           </div>
         <?php endforeach; ?>
       </div>
