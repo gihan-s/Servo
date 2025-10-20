@@ -37,6 +37,23 @@ switch ($url) {
         $controller->step2submit();
         break;
 
+    case 'register/password':
+        $controller = new RegisterController();
+        $controller->password();
+        break;
+
+    case 'register/passwordsubmit':
+        $controller = new RegisterController();
+        $controller->passwordsubmit();
+        break;
+
+    case 'register/check-email':
+        require_once '../app/controllers/RegisterController.php';
+        $controller = new RegisterController();
+        $controller->checkEmail();
+        break;
+
+
     default:
         $controller = new NotFoundController();
         $controller->index();

@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/../models/ClientModel.php';
+
 class RegisterController
 {
     public function step1()
@@ -39,6 +41,53 @@ class RegisterController
                 $_SESSION['register']['profile_picture'] = $filename; // just store the filename in session
             }
         }
-        
+
+        if ($_SESSION['register']['user_type'] == "client") {
+
+            header('Location: password');
+            exit;
+        } else {
+        }
+    }
+
+
+    public function password()
+    {
+        include __DIR__ . '/../views/register/password.php';
+    }
+
+    public function passwordsubmit()
+    {
+        $_SESSION['register']['password'] = $_POST['password'] ?? '';
+        $data = $_SESSION['register'] ?? [];
+
+        if ($_SESSION['register']['user_type'] == 'client') {
+            $model = new UserModel();
+            $userId = $model->insertUser($data);
+            if ($userId) {
+                $_SESSION["New_Register"] = true;
+                header('Location: ../login');
+                exit;
+            }
+        }
+    }
+
+
+    public function checkEmail() {
+        header('Content-Type: application/json');
+
+        if (!isset($_POST['email'])) {
+            echo json_encode(['status' => 'error', 'message' => 'No email provided']);
+            return;
+        }
+
+        $email = trim($_POST['email']);
+        $model = new UserModel();
+
+        if ($model->emailExists($email)) {
+            echo json_encode(['status' => 'exists', 'message' => 'Email already exists']);
+        } else {
+            echo json_encode(['status' => 'ok', 'message' => 'Email available']);
+        }
     }
 }
