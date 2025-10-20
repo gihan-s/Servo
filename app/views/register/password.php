@@ -29,7 +29,7 @@ $BaseURL = "..";
 
     <?php include 'header.php' ?>
 
-    <form id="registrationForm2" class="form" action="./profilesubmit" method="post" enctype="multipart/form-data" novalidate>
+    <form id="registrationForm3" class="form" action="./passwordsubmit" method="post" enctype="multipart/form-data" novalidate>
 
         <div class="main-section">
 
@@ -37,8 +37,8 @@ $BaseURL = "..";
 
                 <div class="input-field">
 
-                    <div class="hr-title-container">
-                        <span class="hr-title">Profile Information</span>
+                    <div class="hr-title-container" style="margin-bottom: 30px;">
+                        <span class="hr-title">Account Security</span>
                         <hr class="hr-line">
                     </div>
 
@@ -55,40 +55,47 @@ $BaseURL = "..";
                     <input type="hidden" name="user_type" id="user_type" value="<?= getFromSession("user_type") ?>">
 
 
-                    <!-- Input fields -->
-
                     <div class="input-field">
-                        <div class="profile-container">
-                            <div class="profile-photo" id="profilePhoto">
-                                <i class="fas fa-user"></i>
 
-                                <img id="profileImage" src="<?= "/file/temp-images/" . getFromSession('profile_picture') ?>" alt="Profile Picture">
+                        <div class="input-grid-1" style="gap: 5px !important;">
+
+                            <div class="text-container">
+                                <div class="label text-label">Password *</div>
+                                <input type="password" class="text-field" name="password" id="password">
+                                <button type="button" class="password-toggle" onclick="togglePassword('password')">
+                                    <i class="fa-solid fa-eye" id="password-icon"></i>
+                                </button>
                             </div>
-                            <label for="fileInput" class="upload-button"><i class="fa-solid fa-circle-plus"></i></label>
-                            <input type="file" id="fileInput" name="profile_picture" accept="image/*">
+
+                            <div class="password-strength" id="passwordStrength" style="display: none;">
+                                <div class="password-strength-bar">
+                                    <div class="password-strength-fill" id="passwordStrengthFill"></div>
+                                </div>
+                                <div class="password-strength-text" id="passwordStrengthText">Enter a password</div>
+                            </div>
+                            
                         </div>
 
                         <div class="input-grid-1">
                             <div class="text-container">
-                                <div class="label text-label">Bio</div>
-                                <textarea class="text-field" name="bio" spellcheck="false"><?= getFromSession('bio') ?></textarea>
+                                <div class="label text-label">Confirm Password *</div>
+                                <input type="password" class="text-field" name="repassword" id="repassword">
+                                <button type="button" class="password-toggle" onclick="togglePassword('repassword')">
+                                    <i class="fa-solid fa-eye" id="repassword-icon"></i>
+                                </button>
                             </div>
                         </div>
-                        <div class="input-grid-1">
-                            <div class="text-container">
-                                <div class="label text-label">Website</div>
-                                <input type="text" class="text-field" name="website" value="<?= getFromSession('website') ?>" id="">
-                            </div>
-                        </div>
+
                     </div>
+
 
                     <div class="button-section">
 
-                        <button type="button" onclick="window.location = `../register`" class="button outline">Back
+                        <button type="button" onclick="window.location = `../register/profile`" class="button outline">Back
                             <i class="fa-regular fa-arrow-left" style="padding-left: 5px"></i>
                         </button>
 
-                        <button type="submit" class="button" id="nextBtn">Next
+                        <button type="submit" class="button" id="nextBtn">Register
                             <i class="fa-regular fa-arrow-right" style="padding-left: 5px"></i>
                         </button>
                     </div>
@@ -103,17 +110,3 @@ $BaseURL = "..";
 
 </html>
 
-
-<?php
-if (getFromSession('profile_picture') != '') {
-?>
-    <script>
-        window.addEventListener("load", () => {
-            const profilePhoto = document.getElementById('profilePhoto');
-            const profileImage = document.getElementById('profileImage');
-            profileImage.style.display = 'block'; // Show the image
-            profilePhoto.querySelector('i').style.display = 'none';
-        })
-    </script>
-<?php
-}

@@ -6,6 +6,7 @@ require_once '../app/controllers/HomeController.php';
 require_once '../app/controllers/RegisterController.php';
 require_once '../app/controllers/NotFoundController.php';
 require_once '../app/controllers/ProfileController.php';
+require_once '../app/controllers/FileController.php';
 
 // Get the URL path
 $url = $_GET['url'] ?? 'home';
@@ -37,9 +38,26 @@ switch ($url) {
         $controller->step2submit();
         break;
 
-    case 'profile':
-        $controller = new ProfileController();
-        $controller->view();
+    case 'register/password':
+        $controller = new RegisterController();
+        $controller->password();
+        break;
+
+    case 'register/passwordsubmit':
+        $controller = new RegisterController();
+        $controller->passwordsubmit();
+        break;
+
+    case 'register/check-email':
+        require_once '../app/controllers/RegisterController.php';
+        $controller = new RegisterController();
+        $controller->checkEmail();
+        break;
+
+
+    case (preg_match('#^file/temp-images/(.+)$#', $url, $matches) ? true : false):
+        $controller = new FileController();
+        $controller->showUserImage($matches[1]);
         break;
 
     default:

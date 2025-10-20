@@ -16,7 +16,15 @@ for (let i = 0; i < userTypeToggles.length; i++) {
 const inputs = document.querySelectorAll("input");
 for (let i = 0; i < inputs.length; i++) {
     const element = inputs[i];
-    if (element.value != '' && element.parentElement.querySelector(".label")) {
+    if (element.value != '' && element.parentElement.classList.contains("text-container") && element.parentElement.querySelector(".label")) {
+        element.parentElement.querySelector(".label").classList.add("label-float");
+    }
+}
+
+const textAreas = document.querySelectorAll("textarea");
+for (let i = 0; i < textAreas.length; i++) {
+    const element = textAreas[i];
+    if (element.value != '' && element.parentElement.classList.contains("text-container") && element.parentElement.querySelector(".label")) {
         element.parentElement.querySelector(".label").classList.add("label-float");
     }
 }
@@ -40,7 +48,32 @@ if (document.getElementById("registrationForm1")) {
     document.getElementById("registrationForm1").addEventListener("submit", (event) => {
         event.preventDefault();
         if (validateSection1()) {
-            event.target.submit();
+
+            const submitButton = document.querySelector("#registrationForm1 button[type=submit]");
+            submitButton.style.opacity = '0.7';
+            submitButton.disabled = true;
+            
+
+            fetch("./register/check-email", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: "email=" + encodeURIComponent(document.getElementsByName("email")[0].value)
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status == 'ok') {
+                        event.target.submit();
+                    } else {
+                         showValidationTooltip(document.getElementsByName("email")[0], data.message);
+
+                         submitButton.style.opacity = '1';
+            submitButton.disabled = false;
+
+                    }
+                })
+                .catch(err => console.error(err));
+            
+            
         }
     })
 
@@ -102,7 +135,6 @@ function validateSection1() {
 
     // Validate NIC if displayed (for providers)
     const nicField = document.getElementsByName('nic_no')[0].parentElement;
-    console.log(nicField);
 
     if (nicField && nicField.style.display !== 'none') {
         const nicInput = textInputs[4]; // NIC input (when displayed)
@@ -224,7 +256,6 @@ const profilePhoto = document.getElementById('profilePhoto');
 const profileImage = document.getElementById('profileImage');
 
 if (fileInput) {
-
     fileInput.addEventListener('change', (event) => {
         const file = event.target.files[0];
         if (file) {
@@ -337,6 +368,104 @@ function validateSection2() {
             showProfileValidationTooltip(profileContainer, 'Profile image must be smaller than 8MB');
             isValid = false;
         }
+    }
+
+    return isValid;
+}
+
+
+
+const passwordInput = document.getElementById('password');
+const repasswordInput = document.getElementById('repassword');
+if (passwordInput) {
+    // Password strength and validation
+    if (passwordInput) {
+        passwordInput.addEventListener('input', function () {
+            const password = this.value;
+            updatePasswordStrength(password);
+            hideValidationTooltip(this);
+
+            // Also check confirm password if it has a value
+            if (repasswordInput && repasswordInput.value) {
+                if (password !== repasswordInput.value) {
+                    showValidationTooltip(repasswordInput, 'Passwords do not match');
+                } else {
+                    hideValidationTooltip(repasswordInput);
+                }
+            }
+        });
+    }
+
+    // Confirm password validation
+    if (repasswordInput) {
+        repasswordInput.addEventListener('input', function () {
+            hideValidationTooltip(this);
+
+            const password = passwordInput ? passwordInput.value : '';
+            if (this.value && password !== this.value) {
+                showValidationTooltip(this, 'Passwords do not match');
+            }
+        });
+    }
+}
+
+
+// Password toggle functionality
+function togglePassword(inputId) {
+    const passwordInput = document.getElementById(inputId);
+    const toggleIcon = document.getElementById(inputId + '-icon');
+
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleIcon.classList.remove('fa-eye');
+        toggleIcon.classList.add('fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        toggleIcon.classList.remove('fa-eye-slash');
+        toggleIcon.classList.add('fa-eye');
+    }
+}
+
+
+if (document.getElementById("registrationForm3")) {
+    document.getElementById("registrationForm3").addEventListener("submit", (event) => {
+        event.preventDefault();
+        if (validateSection3()) {
+            event.target.submit();
+        }
+    })
+}
+
+
+// Validate section 3 (Account Security)
+function validateSection3() {
+    const passwordInput = document.getElementById('password');
+    const repasswordInput = document.getElementById('repassword');
+    let isValid = true;
+
+    // Clear any existing tooltips
+    hideValidationTooltip(passwordInput);
+    hideValidationTooltip(repasswordInput);
+
+    const passwordValue = passwordInput.value.trim();
+    const repasswordValue = repasswordInput.value.trim();
+
+    // Validate password
+    if (!passwordValue) {
+        showValidationTooltip(passwordInput, 'Password is required');
+        isValid = false;
+    } else if (!validatePassword(passwordValue)) {
+        showValidationTooltip(passwordInput, 'Password must contain lowercase, uppercase, numbers, symbols, and be more than 12 characters');
+        isValid = false;
+    }
+
+    // Validate confirm password
+    if (!repasswordValue) {
+        showValidationTooltip(repasswordInput, 'Please confirm your password');
+        isValid = false;
+    } else if (passwordValue !== repasswordValue) {
+        showValidationTooltip(repasswordInput, 'Passwords do not match');
+        isValid = false;
     }
 
     return isValid;
