@@ -6,7 +6,7 @@ class ClientModel extends Database {
     // Get client by ID
     public function getClientById($id) {
         $id = $this->conn->real_escape_string($id);
-        $sql = "SELECT * FROM client WHERE Client_ID = $id";
+        $sql = "SELECT * FROM Client WHERE Client_ID = $id";
         $result = $this->conn->query($sql);
 
         if ($result->num_rows > 0) {
@@ -25,7 +25,7 @@ class ClientModel extends Database {
         $website = $this->conn->real_escape_string($website);
         $bio = $this->conn->real_escape_string($bio);
 
-        $sql = "UPDATE client
+        $sql = "UPDATE Client
                 SET First_Name='$firstName', Last_Name='$lastName', Contact_No='$contact', Gender='$gender', Social_Link='$website', Bio='$bio'
                 WHERE Client_ID=$id";
 

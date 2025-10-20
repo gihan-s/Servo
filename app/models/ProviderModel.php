@@ -7,7 +7,7 @@ class ProviderModel extends Database {
     // Get provider by ID
     public function getProviderById($id) {
         $id = $this->conn->real_escape_string($id);
-        $sql = "SELECT * FROM provider WHERE Provider_ID = $id";
+        $sql = "SELECT * FROM Provider WHERE Provider_ID = $id";
         $result = $this->conn->query($sql);
 
         if ($result->num_rows > 0) {
@@ -26,7 +26,7 @@ class ProviderModel extends Database {
         $website = $this->conn->real_escape_string($website);
         $bio = $this->conn->real_escape_string($bio);
 
-        $sql = "UPDATE provider 
+        $sql = "UPDATE Provider 
                 SET first_name='$firstName', last_name='$lastName', contact='$contact', gender='$gender', website='$website', bio='$bio' 
                 WHERE id=$id";
 
