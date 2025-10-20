@@ -3,7 +3,7 @@ name: 🚀 SFTP Deploy to VPS (prod branch)
 on:
   push:
     branches:
-      - prod
+      - prod-new
 
 jobs:
   deploy:
