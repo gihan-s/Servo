@@ -49,7 +49,10 @@ if (document.getElementById("registrationForm1")) {
         event.preventDefault();
         if (validateSection1()) {
 
-            showLoading();
+            const submitButton = document.querySelector("#registrationForm1 button[type=submit]");
+            submitButton.style.opacity = '0.7';
+            submitButton.disabled = true;
+            
 
             fetch("./register/check-email", {
                 method: "POST",
@@ -59,9 +62,13 @@ if (document.getElementById("registrationForm1")) {
                 .then(res => res.json())
                 .then(data => {
                     if (data.status == 'ok') {
-                        // event.target.submit();
+                        event.target.submit();
                     } else {
                          showValidationTooltip(document.getElementsByName("email")[0], data.message);
+
+                         submitButton.style.opacity = '1';
+            submitButton.disabled = false;
+
                     }
                 })
                 .catch(err => console.error(err));
@@ -128,7 +135,6 @@ function validateSection1() {
 
     // Validate NIC if displayed (for providers)
     const nicField = document.getElementsByName('nic_no')[0].parentElement;
-    console.log(nicField);
 
     if (nicField && nicField.style.display !== 'none') {
         const nicInput = textInputs[4]; // NIC input (when displayed)
