@@ -16,7 +16,7 @@ $BaseURL = "..";
         href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="<?= $BaseURL ?>/assets/css/elementStyles.css">
-    <link rel="stylesheet" href="<?= $BaseURL ?>/assets/css/GridTemplates.css">
+    <link rel="stylesheet" href="<?= $BaseURL ?>/assets/css/gridTemplates.css">
     <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
 
     <script src="<?= $BaseURL ?>/assets/js/elementScript.js" defer></script>
