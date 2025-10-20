@@ -37,6 +37,11 @@ switch ($url) {
         $controller->step2submit();
         break;
 
+    case 'profile':
+        $controller = new ProfileController();
+        $controller->view();
+        break;
+
     default:
         $controller = new NotFoundController();
         $controller->index();
