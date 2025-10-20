@@ -52,7 +52,7 @@ if (document.getElementById("registrationForm1")) {
             const submitButton = document.querySelector("#registrationForm1 button[type=submit]");
             submitButton.style.opacity = '0.7';
             submitButton.disabled = true;
-            
+
 
             fetch("./register/check-email", {
                 method: "POST",
@@ -64,16 +64,16 @@ if (document.getElementById("registrationForm1")) {
                     if (data.status == 'ok') {
                         event.target.submit();
                     } else {
-                         showValidationTooltip(document.getElementsByName("email")[0], data.message);
+                        showValidationTooltip(document.getElementsByName("email")[0], data.message);
 
-                         submitButton.style.opacity = '1';
-            submitButton.disabled = false;
+                        submitButton.style.opacity = '1';
+                        submitButton.disabled = false;
 
                     }
                 })
                 .catch(err => console.error(err));
-            
-            
+
+
         }
     })
 
@@ -469,4 +469,169 @@ function validateSection3() {
     }
 
     return isValid;
+}
+
+
+
+function setupImageUpload(inputId, photoContainerId, imageId) {
+    const fileInput = document.getElementById(inputId);
+    const photoContainer = document.getElementById(photoContainerId);
+    const image = document.getElementById(imageId);
+
+    fileInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            // Validate file size for NIC images (5MB = 5 * 1024 * 1024 bytes)
+            const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+            const nicContainer = photoContainer.parentNode;
+
+            if (file.size > maxSize) {
+                showNICValidationTooltip(nicContainer, 'Image must be smaller than 5MB');
+                // Clear the file input
+                fileInput.value = '';
+                return;
+            }
+
+            // Clear any existing validation tooltips
+            hideNICValidationTooltip(nicContainer);
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                image.src = e.target.result; // Set image source to data URL
+                image.style.display = 'block'; // Show the image
+                photoContainer.querySelector('i').style.display = 'none'; // Hide the icon
+            };
+            reader.readAsDataURL(file); // Read file as data URL (client-side)
+        }
+    });
+}
+
+// Set up handlers for NIC inputs
+if (document.getElementById("nicFrontInput")) {
+    setupImageUpload('nicFrontInput', 'nicFrontPhoto', 'nicFrontImage');
+    setupImageUpload('nicBackInput', 'nicBackPhoto', 'nicBackImage');
+}
+
+// Show validation tooltip for NIC containers
+function showNICValidationTooltip(container, message) {
+    // Remove any existing tooltip
+    const existingTooltip = container.querySelector('.validation-tooltip');
+    if (existingTooltip) {
+        existingTooltip.remove();
+    }
+
+    // Create and show tooltip
+    const tooltip = document.createElement('div');
+    tooltip.className = 'validation-tooltip';
+    tooltip.textContent = message;
+    tooltip.style.position = 'absolute';
+    tooltip.style.bottom = '-35px';
+    tooltip.style.left = '50%';
+    tooltip.style.transform = 'translateX(-50%)';
+    tooltip.style.whiteSpace = 'nowrap';
+    container.appendChild(tooltip);
+
+    // Show tooltip with animation
+    setTimeout(() => {
+        tooltip.classList.add('show');
+    }, 10);
+
+    // Auto-hide tooltip after 3 seconds
+    setTimeout(() => {
+        hideNICValidationTooltip(container);
+    }, 3000);
+}
+
+// Hide validation tooltip for NIC containers
+function hideNICValidationTooltip(container) {
+    const tooltip = container.querySelector('.validation-tooltip');
+    if (tooltip) {
+        tooltip.classList.remove('show');
+        setTimeout(() => {
+            tooltip.remove();
+        }, 300);
+    }
+}
+
+
+
+
+if (document.getElementById("registrationForm4")) {
+    document.getElementById("registrationForm4").addEventListener("submit", (event) => {
+        event.preventDefault();
+        if (validateSection4()) {
+            event.target.submit();
+        }
+    })
+}
+
+function validateSection4() {
+
+    let isValid = true;
+
+    // Validate NIC Front
+    const nicFrontInput = document.getElementById('nicFrontInput');
+    const nicFrontImage = document.getElementById('nicFrontImage');
+    const nicFrontContainer = document.querySelector('#nicFrontPhoto').parentNode;
+
+    // Clear existing tooltips
+    hideNICValidationTooltip(nicFrontContainer);
+
+    const hasNicFrontFile = nicFrontInput.files && nicFrontInput.files.length > 0;
+    const hasNicFrontDisplayed = nicFrontImage.style.display === 'block' && nicFrontImage.src && nicFrontImage.src !== '';
+
+    if (!hasNicFrontFile && !hasNicFrontDisplayed) {
+        showNICValidationTooltip(nicFrontContainer, 'NIC front image is required');
+        isValid = false;
+    } else if (hasNicFrontFile) {
+        // Validate file size (5MB = 5 * 1024 * 1024 bytes)
+        const file = nicFrontInput.files[0];
+        const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+
+        if (file.size > maxSize) {
+            showNICValidationTooltip(nicFrontContainer, 'NIC front image must be smaller than 5MB');
+            isValid = false;
+        }
+    }
+
+    // Validate NIC Back
+    const nicBackInput = document.getElementById('nicBackInput');
+    const nicBackImage = document.getElementById('nicBackImage');
+    const nicBackContainer = document.querySelector('#nicBackPhoto').parentNode;
+
+    // Clear existing tooltips
+    hideNICValidationTooltip(nicBackContainer);
+
+    const hasNicBackFile = nicBackInput.files && nicBackInput.files.length > 0;
+    const hasNicBackDisplayed = nicBackImage.style.display === 'block' && nicBackImage.src && nicBackImage.src !== '';
+
+    if (!hasNicBackFile && !hasNicBackDisplayed) {
+        showNICValidationTooltip(nicBackContainer, 'NIC back image is required');
+        isValid = false;
+    } else if (hasNicBackFile) {
+        // Validate file size (5MB = 5 * 1024 * 1024 bytes)
+        const file = nicBackInput.files[0];
+        const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+
+        if (file.size > maxSize) {
+            showNICValidationTooltip(nicBackContainer, 'NIC back image must be smaller than 5MB');
+            isValid = false;
+        }
+    }
+
+    return isValid;
+}
+
+
+
+
+if (document.getElementById("registrationForm5")) {
+    document.getElementById("registrationForm5").addEventListener("submit", (event) => {
+        event.preventDefault();
+        if (document.getElementById("service-card-wrapper").querySelector("div")) {
+            event.target.submit();
+        } else {
+            viewDialogBox("AddMinimumOneDialog");
+        }
+    })
 }
