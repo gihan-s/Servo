@@ -49,6 +49,8 @@ if (document.getElementById("registrationForm1")) {
         event.preventDefault();
         if (validateSection1()) {
 
+            showLoading();
+
             fetch("./register/check-email", {
                 method: "POST",
                 headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -57,7 +59,7 @@ if (document.getElementById("registrationForm1")) {
                 .then(res => res.json())
                 .then(data => {
                     if (data.status == 'ok') {
-                        event.target.submit();
+                        // event.target.submit();
                     } else {
                          showValidationTooltip(document.getElementsByName("email")[0], data.message);
                     }
