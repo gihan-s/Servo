@@ -5,6 +5,7 @@ require_once '../config.php';
 require_once '../app/controllers/HomeController.php';
 require_once '../app/controllers/RegisterController.php';
 require_once '../app/controllers/NotFoundController.php';
+require_once '../app/controllers/ProfileController.php';
 
 // Get the URL path
 $url = $_GET['url'] ?? 'home';
