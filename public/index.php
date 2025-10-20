@@ -1,7 +1,9 @@
 <?php
+session_start();
+
 require_once '../config.php';
 require_once '../app/controllers/HomeController.php';
-require_once '../app/controllers/UsersController.php';
+require_once '../app/controllers/RegisterController.php';
 require_once '../app/controllers/NotFoundController.php';
 require_once '../app/controllers/ProfileController.php';
 
@@ -15,19 +17,24 @@ switch ($url) {
         $controller->index();
         break;
 
-    case 'users':
-        $controller = new UsersController();
-        $controller->index();
+    case 'register':
+        $controller = new RegisterController();
+        $controller->step1();
         break;
 
-    case 'profile':
-        $controller = new ProfileController();
-        $controller->view();
+    case 'register/personalsubmit':
+        $controller = new RegisterController();
+        $controller->step1submit();
         break;
 
-    case (preg_match('/users\/show\/(\d+)/', $url, $matches) ? true : false):
-        $controller = new UsersController();
-        $controller->show($matches[1]); // pass ID from URL
+    case 'register/profile':
+        $controller = new RegisterController();
+        $controller->step2();
+        break;
+
+    case 'register/profilesubmit':
+        $controller = new RegisterController();
+        $controller->step2submit();
         break;
 
     default:
