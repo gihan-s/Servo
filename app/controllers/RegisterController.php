@@ -55,6 +55,26 @@ class RegisterController
     }
 
 
+    public function checkEmail() {
+        header('Content-Type: application/json');
+
+        if (!isset($_POST['email'])) {
+            echo json_encode(['status' => 'error', 'message' => 'No email provided']);
+            return;
+        }
+
+        $email = trim($_POST['email']);
+        $model = new UserModel();
+
+        if ($model->emailExists($email)) {
+            echo json_encode(['status' => 'exists', 'message' => 'Email already exists']);
+        } else {
+            echo json_encode(['status' => 'ok', 'message' => 'Email available']);
+        }
+    }
+
+    
+
     public function password()
     {
         include __DIR__ . '/../views/register/password.php';
