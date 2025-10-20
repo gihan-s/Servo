@@ -16,7 +16,7 @@ class ProfileController
 
     public function view()
     {
-        $_SESSION['user_id'] = 3;
+        $_SESSION['user_id'] = 2;
         $_SESSION['role'] = 'client';
         // Step 1: Check if user is logged in
         if (!isset($_SESSION['user_id']) || !isset($_SESSION['role'])) {
