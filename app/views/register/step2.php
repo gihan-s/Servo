@@ -61,7 +61,8 @@ $BaseURL = "..";
                         <div class="profile-container">
                             <div class="profile-photo" id="profilePhoto">
                                 <i class="fas fa-user"></i>
-                                <img id="profileImage" src="<?= "../../uploads/temp/" . getFromSession('profile_picture') ?>" alt="Profile Picture">
+
+                                <img id="profileImage" src="<?= "/file/temp-images/" . getFromSession('profile_picture') ?>" alt="Profile Picture">
                             </div>
                             <label for="fileInput" class="upload-button"><i class="fa-solid fa-circle-plus"></i></label>
                             <input type="file" id="fileInput" name="profile_picture" accept="image/*">
