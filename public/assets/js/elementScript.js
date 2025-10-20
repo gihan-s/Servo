@@ -441,3 +441,159 @@ function hideValidationTooltip(inputElement) {
 }
 
 
+
+function addChip(elementID, chipValue) {
+
+    if (chipValue == '') {
+        return false;
+    }
+
+    var currentValues = document.getElementById(elementID).querySelector("input").value;
+    currentValues = currentValues == '' ? [] : JSON.parse(currentValues);
+
+    if (currentValues.indexOf(chipValue) > -1) {
+        return false;
+    }
+
+    currentValues.push(chipValue);
+    document.getElementById(elementID).querySelector("input").value = JSON.stringify(currentValues);
+
+
+    const newChip = document.createElement("div");
+    newChip.classList.add("chip");
+    newChip.innerHTML = `
+    <span>${chipValue}</span>
+    <i class="fa-solid fa-xmark"></i>
+    `;
+
+    if (document.getElementById(elementID).querySelector("p")) {
+        document.getElementById(elementID).querySelector("p").remove();
+    }
+
+    document.getElementById(elementID).appendChild(newChip)
+
+    newChip.querySelector("i").addEventListener("click", () => {
+        removeChip(newChip);
+    })
+
+    return newChip;
+}
+
+
+function removeChip(chip) {
+    var currentValues = chip.parentElement.querySelector("input").value;
+    currentValues = currentValues == '' ? [] : JSON.parse(currentValues);
+    currentValues = currentValues.filter(item => item !== chip.querySelector("span").innerHTML);
+    chip.parentElement.querySelector("input").value = JSON.stringify(currentValues);
+    chip.remove();
+}
+
+
+
+function addItemToDropdown(DropdownID, value, isDefault = true) {
+    var element = document.createElement("div");
+    element.innerHTML = value;
+    const OptionsList = document.getElementById(DropdownID).parentElement.parentElement.querySelector(".option-list");
+    OptionsList.appendChild(element);
+
+    if (isDefault) {
+        document.getElementById(DropdownID).value = value;
+        document.getElementById(DropdownID).parentElement.querySelector(".search-dropdown-label").classList.add("label-float");
+    }
+
+    element.addEventListener("click", () => {
+        var searchDD = element.parentElement.parentElement.parentElement;
+        searchDD.querySelector(".text-field-search-dropdown").value = element.innerHTML;
+        searchDD.querySelector(".search-dropdown-label").classList.add("label-float");
+    });
+
+    element.addEventListener("mousedown", () => {
+        element.click();
+    })
+
+    return element;
+}
+
+
+
+function inputReset(formID) {
+    const elementArray = document.getElementById(formID).querySelectorAll("input");
+    for (let i = 0; i < elementArray.length; i++) {
+        const element = elementArray[i];
+
+        if (
+            !element.classList.contains("notreset") &&
+            !element.classList.contains("tel-country-code")
+        ) {
+            element.value = "";
+            try {
+                if (
+                    !element.parentElement
+                        .querySelector(".label")
+                        .classList.contains("tel-dropdown-label") &&
+                    !element.parentElement
+                        .querySelector(".label")
+                        .classList.contains("date-label")
+                ) {
+                    element.parentElement
+                        .querySelector(".label")
+                        .classList.remove("label-float");
+                }
+            } catch (error) { }
+        }
+    }
+
+    const checkBoxArray = document
+        .getElementById(formID)
+        .querySelectorAll("input[type=checkbox]");
+    for (let i = 0; i < checkBoxArray.length; i++) {
+        const element = checkBoxArray[i];
+        element.checked = false;
+    }
+
+    const dateFieldArray = document
+        .getElementById(formID)
+        .querySelectorAll("input[type=date]");
+    for (let i = 0; i < dateFieldArray.length; i++) {
+        const element = dateFieldArray[i];
+        element.valueAsDate = new Date();
+    }
+
+
+    const textareas = document.getElementById(formID).querySelectorAll("textarea");
+    for (let i = 0; i < textareas.length; i++) {
+        const element = textareas[i];
+
+        if (
+            !element.classList.contains("notreset")
+        ) {
+            element.value = "";
+            try {
+                if (
+                    !element.parentElement
+                        .querySelector(".label")
+                        .classList.contains("tel-dropdown-label") &&
+                    !element.parentElement
+                        .querySelector(".label")
+                        .classList.contains("date-label")
+                ) {
+                    element.parentElement
+                        .querySelector(".label")
+                        .classList.remove("label-float");
+                }
+            } catch (error) { }
+        }
+    }
+
+
+    const chipWrappers = document.getElementById(formID).querySelectorAll(".chip-wrapper");
+    for (let i = 0; i < chipWrappers.length; i++) {
+        const element = chipWrappers[i];
+
+        const currentChips = element.querySelectorAll(".chip");
+        for (let j = 0; j < currentChips.length; j++) {
+            removeChip(currentChips[j]);
+        }
+
+    }
+}
