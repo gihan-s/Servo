@@ -73,7 +73,7 @@ class RegisterController
         }
     }
 
-    
+
 
     public function password()
     {
@@ -85,13 +85,22 @@ class RegisterController
         $_SESSION['register']['password'] = $_POST['password'] ?? '';
         $data = $_SESSION['register'] ?? [];
 
+
+        $targetDir = __DIR__ . '/../../uploads/temp/';
+        $finalDir = __DIR__ . '/../../uploads/Users/';
+         if (!is_dir($finalDir)) {
+                mkdir($finalDir, 0777, true);
+            }
+        rename($targetDir . $_SESSION['register']['profile_picture'], $finalDir . $_SESSION['register']['profile_picture']);
+
+
         if ($_SESSION['register']['user_type'] == 'client') {
             $model = new UserModel();
             $userId = $model->insertUser($data);
             if ($userId) {
                 $_SESSION["New_Register"] = true;
-                header('Location: ../login');
-                exit;
+                // header('Location: ../login');
+                // exit;
             }
         }
     }
