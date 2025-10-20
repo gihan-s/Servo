@@ -34,6 +34,10 @@ class RegisterController
 
         if ($_FILES['profile_picture']['name'] != '') {
             $targetDir = __DIR__ . '/../../uploads/temp/';
+            if (!is_dir($targetDir)) {
+                mkdir($targetDir, 0755, true);
+            }
+            
             $filename = uniqid() . '_' . $_FILES['profile_picture']['name'];
             $targetFile = $targetDir . $filename;
 
@@ -69,25 +73,6 @@ class RegisterController
                 header('Location: ../login');
                 exit;
             }
-        }
-    }
-
-
-    public function checkEmail() {
-        header('Content-Type: application/json');
-
-        if (!isset($_POST['email'])) {
-            echo json_encode(['status' => 'error', 'message' => 'No email provided']);
-            return;
-        }
-
-        $email = trim($_POST['email']);
-        $model = new UserModel();
-
-        if ($model->emailExists($email)) {
-            echo json_encode(['status' => 'exists', 'message' => 'Email already exists']);
-        } else {
-            echo json_encode(['status' => 'ok', 'message' => 'Email available']);
         }
     }
 }
