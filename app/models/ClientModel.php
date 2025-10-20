@@ -1,0 +1,58 @@
+<?php
+require_once __DIR__ . '/../core/Database.php';
+
+class UserModel extends Database {
+
+    public function insertUser($data) {
+        // Prepare SQL with placeholders
+        $stmt = $this->conn->prepare(
+            "INSERT INTO Client (`Email`, `Contact_No`, `Password`, `Created_At`, `First_Name`, `Last_Name`, `Gender`, `Profile_Picture`, `Social_Link`, `Bio`, `Status`) 
+             VALUES (?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?)"
+        );
+
+        if (!$stmt) {
+            die("Prepare failed: " . $this->conn->error);
+        }
+
+        $CurrentDate = date("Y-m-d H:i:s");
+        $Status = "Active";
+
+        // Hash password
+        $hashedPassword = password_hash($data['password'], PASSWORD_DEFAULT);
+        $profileImage = $data['profile_picture'] ?? null;
+
+        // Bind parameters: s = string
+        $stmt->bind_param(
+            "sssssssssss",
+            $data['email'],
+            $data['contact_no'],
+            $hashedPassword,
+            $CurrentDate,
+            $data['first_name'],
+            $data['last_name'],
+            $data['gender'],
+            $profileImage,
+            $data['website'],
+            $data['bio'],
+            $Status
+        );
+
+        // Execute
+        if ($stmt->execute()) {
+            $id = $stmt->insert_id;
+            $stmt->close();
+            return $id;
+        } else {
+            die("Insert failed: " . $stmt->error);
+        }
+    }
+
+
+    public function emailExists($email) {
+        $stmt = $this->conn->prepare("SELECT Client_ID FROM Client WHERE Email = ?");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $stmt->store_result(); // store result to get num_rows
+        return $stmt->num_rows > 0; // true if email found
+    }
+}
