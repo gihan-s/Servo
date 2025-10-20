@@ -1,10 +1,8 @@
 <?php
-<<<<<<< HEAD
 
-require_once __DIR__ . '/UserModel.php';
+require_once __DIR__ . '/../core/Database.php';
 
-class ClientModel extends UserModel {
-
+class ClientModel extends Database {
     // Get client by ID
     public function getClientById($id) {
         $id = $this->conn->real_escape_string($id);
@@ -30,15 +28,8 @@ class ClientModel extends UserModel {
 
         return $this->conn->query($sql);
     }
-}
 
-
-=======
-require_once __DIR__ . '/../core/Database.php';
-
-class UserModel extends Database {
-
-    public function insertUser($data) {
+    public function insertClient($data) {
         // Prepare SQL with placeholders
         $stmt = $this->conn->prepare(
             "INSERT INTO Client (`Email`, `Contact_No`, `Password`, `Created_At`, `First_Name`, `Last_Name`, `Gender`, `Profile_Picture`, `Social_Link`, `Bio`, `Status`) 
@@ -91,4 +82,3 @@ class UserModel extends Database {
         return $stmt->num_rows > 0; // true if email found
     }
 }
->>>>>>> c0fcaa1668125a455cbebf23dbeca9689d30f76e

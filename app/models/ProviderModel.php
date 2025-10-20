@@ -1,8 +1,8 @@
 <?php
 
-require_once __DIR__ . '/UserModel.php';
+require_once __DIR__ . '/../core/Database.php';
 
-class ProviderModel extends UserModel {
+class ProviderModel extends Database {
 
     // Get provider by ID
     public function getProviderById($id) {
