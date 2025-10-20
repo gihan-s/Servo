@@ -7,6 +7,7 @@ require_once '../app/controllers/RegisterController.php';
 require_once '../app/controllers/NotFoundController.php';
 require_once '../app/controllers/ProfileController.php';
 require_once '../app/controllers/FileController.php';
+require_once '../app/controllers/DashboardController.php';
 
 // Get the URL path
 $url = $_GET['url'] ?? 'home';
@@ -86,6 +87,26 @@ switch ($url) {
         case 'register/servicesubmit':
         $controller = new RegisterController();
         $controller->servicesubmit();
+        break;
+
+    case 'profile/update':
+        $controller = new ProfileController();
+        $controller->update();
+        break;
+
+    case 'profile/account':
+        $controller = new ProfileController();
+        $controller->account();
+        break;
+
+    case 'profile/send-reset-code':
+        $controller = new ProfileController();
+        $controller->sendResetCode();
+        break;
+
+    case 'dashboard':
+        $controller = new DashboardController();
+        $controller->index();
         break;
 
     default:
