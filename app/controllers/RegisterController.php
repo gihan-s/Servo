@@ -35,9 +35,9 @@ class RegisterController
         if ($_FILES['profile_picture']['name'] != '') {
             $targetDir = __DIR__ . '/../../uploads/temp/';
             if (!is_dir($targetDir)) {
-                mkdir($targetDir, 0755, true);
+                mkdir($targetDir, 0777, true);
             }
-            
+
             $filename = uniqid() . '_' . $_FILES['profile_picture']['name'];
             $targetFile = $targetDir . $filename;
 
