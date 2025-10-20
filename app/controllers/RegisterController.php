@@ -99,8 +99,8 @@ class RegisterController
             $userId = $model->insertUser($data);
             if ($userId) {
                 $_SESSION["New_Register"] = true;
-                // header('Location: ../login');
-                // exit;
+                header('Location: ../login');
+                exit;
             }
         }
     }
