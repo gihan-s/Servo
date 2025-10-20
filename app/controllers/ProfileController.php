@@ -30,10 +30,10 @@ class ProfileController
         // Step 2: Load the correct model based on role
         if ($role === 'client') {
             $user = $this->clientModel->getClientById($userId);
-            $viewFile = "../app/views/client/profile/index.php";
+            $viewFile = "../app/views/client/Profile/index.php";
         } elseif ($role === 'provider') {
             $user = $this->providerModel->getProviderById($userId);
-            $viewFile = "../app/views/provider/profile/index.php";
+            $viewFile = "../app/views/provider/Profile/index.php";
         } else {
             die("Invalid user role!");
         }
