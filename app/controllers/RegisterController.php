@@ -64,7 +64,7 @@ class RegisterController
         }
 
         $email = trim($_POST['email']);
-        $model = new UserModel();
+        $model = new ClientModel();
 
         if ($model->emailExists($email)) {
             echo json_encode(['status' => 'exists', 'message' => 'Email already exists']);
@@ -95,8 +95,8 @@ class RegisterController
 
 
         if ($_SESSION['register']['user_type'] == 'client') {
-            $model = new UserModel();
-            $userId = $model->insertUser($data);
+            $model = new ClientModel();
+            $userId = $model->insertClient($data);
             if ($userId) {
                 $_SESSION["New_Register"] = true;
                 header('Location: ../login');

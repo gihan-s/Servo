@@ -60,6 +60,10 @@ switch ($url) {
         $controller->showUserImage($matches[1]);
         break;
 
+        case 'profile':
+        $controller = new ProfileController();
+        $controller->view();
+        break;
 
     default:
         $controller = new NotFoundController();

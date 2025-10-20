@@ -1,9 +1,35 @@
 <?php
+
 require_once __DIR__ . '/../core/Database.php';
 
-class UserModel extends Database {
+class ClientModel extends Database {
+    // Get client by ID
+    public function getClientById($id) {
+        $id = $this->conn->real_escape_string($id);
+        $sql = "SELECT * FROM clients WHERE id = $id";
+        $result = $this->conn->query($sql);
 
-    public function insertUser($data) {
+        if ($result->num_rows > 0) {
+            return $result->fetch_assoc();
+        }
+        return null;
+    }
+
+    // Update client profile (example)
+    public function updateProfile($id, $name, $email, $company) {
+        $id = $this->conn->real_escape_string($id);
+        $name = $this->conn->real_escape_string($name);
+        $email = $this->conn->real_escape_string($email);
+        $company = $this->conn->real_escape_string($company);
+
+        $sql = "UPDATE clients 
+                SET name='$name', email='$email', company_name='$company' 
+                WHERE id=$id";
+
+        return $this->conn->query($sql);
+    }
+
+    public function insertClient($data) {
         // Prepare SQL with placeholders
         $stmt = $this->conn->prepare(
             "INSERT INTO Client (`Email`, `Contact_No`, `Password`, `Created_At`, `First_Name`, `Last_Name`, `Gender`, `Profile_Picture`, `Social_Link`, `Bio`, `Status`) 
