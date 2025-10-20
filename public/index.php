@@ -2,6 +2,7 @@
 require_once '../config.php';
 require_once '../app/controllers/HomeController.php';
 require_once '../app/controllers/UsersController.php';
+require_once '../app/controllers/NotFoundController.php';
 
 // Get the URL path
 $url = $_GET['url'] ?? 'home';
@@ -24,6 +25,7 @@ switch ($url) {
         break;
 
     default:
-        echo "<h1>Methana Nah. Himathge Ass eke balanna</h1>";
+        $controller = new NotFoundController();
+        $controller->index();
         break;
 }
