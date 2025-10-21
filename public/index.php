@@ -8,6 +8,7 @@ require_once '../app/controllers/NotFoundController.php';
 require_once '../app/controllers/ProfileController.php';
 require_once '../app/controllers/FileController.php';
 require_once '../app/controllers/DashboardController.php';
+require_once '../app/controllers/ProjectController.php';
 
 // Get the URL path
 $url = $_GET['url'] ?? 'home';
@@ -83,6 +84,11 @@ switch ($url) {
 
     case 'dashboard':
         $controller = new DashboardController();
+        $controller->index();
+        break;
+
+    case 'projects':
+        $controller = new ProjectController();
         $controller->index();
         break;
 

@@ -45,7 +45,7 @@ h1 {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.card::before,
+/* .card::before,
 .metric-card::before,
 .activity-card::before,
 .action-card::before {
@@ -56,7 +56,7 @@ h1 {
   right: 0;
   height: 4px;
   background: #008500;
-}
+} */
 
 .card:hover,
 .metric-card:hover,

@@ -1,7 +1,3 @@
-<?php
-require_once __DIR__ . '/../../../../config.php';
-?>
-
 <?php if (!empty($_SESSION['flash'])): ?>
     <script>
         window.__FLASH__ = <?php echo json_encode($_SESSION['flash']); ?>;
