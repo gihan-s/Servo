@@ -101,7 +101,7 @@ class ClientModel extends Database
         $stmt->store_result();
         $status = $stmt->num_rows > 0;
 
-        if ($status) {
+        if (!$status) {
 
             $stmt = $this->conn->prepare("SELECT Provider_ID FROM Provider WHERE Email = ?");
             $stmt->bind_param("s", $email);
