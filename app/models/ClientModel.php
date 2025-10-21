@@ -2,9 +2,11 @@
 
 require_once __DIR__ . '/../core/Database.php';
 
-class ClientModel extends Database {
+class ClientModel extends Database
+{
     // Get client by ID
-    public function getClientById($id) {
+    public function getClientById($id)
+    {
         $id = $this->conn->real_escape_string($id);
         $sql = "SELECT * FROM Client WHERE Client_ID = $id";
         $result = $this->conn->query($sql);
@@ -16,7 +18,8 @@ class ClientModel extends Database {
     }
 
     // Update client profile (example)
-    public function updateProfile($id, $firstName, $lastName, $contact, $gender, $website, $bio) {
+    public function updateProfile($id, $firstName, $lastName, $contact, $gender, $website, $bio)
+    {
         $id = $this->conn->real_escape_string($id);
         $firstName = $this->conn->real_escape_string($firstName);
         $lastName = $this->conn->real_escape_string($lastName);
@@ -40,7 +43,8 @@ class ClientModel extends Database {
         return $stmt->execute();
     }
 
-    public function insertClient($data) {
+    public function insertClient($data)
+    {
         // Prepare SQL with placeholders
         $stmt = $this->conn->prepare(
             "INSERT INTO Client (`Email`, `Contact_No`, `Password`, `Created_At`, `First_Name`, `Last_Name`, `Gender`, `Profile_Picture`, `Social_Link`, `Bio`, `Status`) 
@@ -85,11 +89,23 @@ class ClientModel extends Database {
     }
 
 
-    public function emailExists($email) {
+    public function emailExists($email)
+    {
         $stmt = $this->conn->prepare("SELECT Client_ID FROM Client WHERE Email = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
-        $stmt->store_result(); // store result to get num_rows
-        return $stmt->num_rows > 0; // true if email found
+        $stmt->store_result();
+        $status = $stmt->num_rows > 0;
+
+        if ($status) {
+
+            $stmt = $this->conn->prepare("SELECT Provider_ID FROM Provider WHERE Email = ?");
+            $stmt->bind_param("s", $email);
+            $stmt->execute();
+            $stmt->store_result();
+            $status = $stmt->num_rows > 0;
+        }
+
+        return $status;
     }
 }
