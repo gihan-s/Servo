@@ -73,7 +73,7 @@ $BaseURL = "..";
 						<span class="label">NIC Back</span>
 						<div class="nic-photo" id="nicBackPhoto">
 							<i class="fas fa-id-card"></i>
-							<img id="nicBackImage" src="" alt="NIC Back">
+							<img id="nicBackImage" alt="NIC Back" src="<?= "/file/temp-images/" . getFromSession('nic_back') ?>">
 						</div>
 						<label class="button upload-button" for="nicBackInput"><i class="fa-solid fa-plus"
 								style="padding-right: 10px"></i>Upload</label>
