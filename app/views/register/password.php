@@ -91,7 +91,7 @@ $BaseURL = "..";
 
                     <div class="button-section">
 
-                        <button type="button" onclick="window.location = `../register/profile`" class="button outline">Back
+                        <button type="button" onclick="previousStep();" class="button outline">Back
                             <i class="fa-regular fa-arrow-left" style="padding-left: 5px"></i>
                         </button>
 
@@ -110,3 +110,14 @@ $BaseURL = "..";
 
 </html>
 
+
+<script>
+
+    function previousStep(){
+        if (document.getElementById("user_type").value == 'client') {
+            window.location = `../register/profile`
+        } else {
+            window.location = `../register/services`
+        }
+    }
+</script>
