@@ -77,7 +77,7 @@ if (document.getElementById("registrationForm1")) {
                                 .then(res => res.json())
                                 .then(data => {
                                     if (data.status == 'ok') {
-                                        // event.target.submit();
+                                        event.target.submit();
                                     } else {
                                         showValidationTooltip(document.getElementsByName("nic_no")[0], data.message);
                                         submitButton.style.opacity = '1';
