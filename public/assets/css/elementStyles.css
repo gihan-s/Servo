@@ -1,0 +1,724 @@
+:root {
+  --themeColor: #008500;
+  --textFieldLabelColor: rgba(0, 0, 0, 0.6);
+  --textFieldTextColor: rgba(0, 0, 0, 0.85);
+  --textFieldBorderColor: rgb(224, 224, 224);
+  --textFieldBackgroundColor: white;
+  --dropdownHoverColor: rgba(0, 0, 0, 0.03);
+}
+
+
+
+/* Text Fields */
+.text-container {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.text-container .label {
+  position: absolute;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 19px;
+  color: var(--textFieldLabelColor);
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  background-color: var(--textFieldBackgroundColor);
+  padding: 5px;
+  transition: all 0.2s;
+  pointer-events: none;
+}
+
+.text-container .label-float {
+  top: 0%;
+  left: 2px;
+  transform: translateY(-60%);
+  scale: 0.85;
+}
+
+.text-container input {
+  padding: 15px;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 19px;
+  color: var(--textFieldTextColor);
+  border: 1px solid var(--textFieldBorderColor);
+  border-radius: 5px;
+  background-color: transparent;
+  width: 100%;
+
+  transition: all 0.3s;
+}
+
+.text-container input:active,
+.text-container input:focus {
+  outline: 2px solid var(--themeColor);
+}
+
+
+/* Text Field With Bottom Border */
+
+.text-container.border-bottom .label {
+  left: 0px;
+  padding-left: 2px;
+}
+
+.text-container.border-bottom .label-float {
+  left: -5px;
+}
+
+.text-container.border-bottom input {
+  border: none;
+  border-bottom: 1px solid var(--textFieldBorderColor);
+  border-radius: 0px;
+  padding: 15px 2px 8px 2px;
+}
+
+.text-container.border-bottom input:active,
+.text-container.border-bottom input:focus {
+  outline: none;
+}
+
+.text-container.border-bottom::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background-color: var(--themeColor);
+  bottom: 0px;
+  left: 0px;
+  transition: all 0.2s;
+  transform: scaleX(0);
+}
+
+.text-container.border-bottom:focus-within:after {
+  transform: scaleX(1);
+}
+
+/* DropDowns */
+.select-container {
+  display: inline-block;
+  position: relative;
+}
+
+.select-container input {
+  cursor: pointer;
+  caret-color: transparent;
+}
+
+.select-container::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border: 2px solid var(--textFieldLabelColor);
+  position: absolute;
+  z-index: 5;
+  border-top: none;
+  border-left: none;
+  transform: translateY(-80%) rotate(45deg);
+  top: 50%;
+  right: 15px;
+  transition: 0.2s;
+  pointer-events: none;
+}
+
+.dropdown-view::before {
+  transform: translateY(-20%) rotate(225deg);
+}
+
+.select-container .options {
+  position: absolute;
+  margin-top: 5px;
+  width: 100%;
+  box-shadow: 1px 1px 5px 0px rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+  background-color: var(--textFieldBackgroundColor);
+  display: none;
+  z-index: 50;
+  max-height: 200px;
+  overflow: auto;
+  border: 1px solid var(--textFieldBorderColor);
+}
+
+.dropdown-view .options {
+  display: block;
+}
+
+.select-container .options div {
+  padding: 10px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.select-container .options div:hover {
+  padding: 10px;
+  font-size: 13px;
+  background-color: var(--dropdownHoverColor);
+}
+
+
+/* Dropdown with Search */
+
+.search-select-container {
+  display: inline-block;
+  position: relative;
+}
+
+.search-select-container .text-field-search-dropdown {
+  caret-color: transparent !important;
+}
+
+.search-select-container .text-container input {
+  cursor: pointer;
+}
+
+.search-select-container::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border: 2px solid var(--textFieldLabelColor);
+  position: absolute;
+  z-index: 5;
+
+  border-top: none;
+  border-left: none;
+
+  transform: translateY(-80%) rotate(45deg);
+
+  top: 50%;
+  right: 15px;
+
+  transition: 0.2s;
+
+  pointer-events: none;
+}
+
+.search-select-container .options {
+  position: absolute;
+  margin-top: 5px;
+  width: 100%;
+
+  box-shadow: 1px 1px 5px 0px rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+
+  background-color: var(--textFieldBackgroundColor);
+
+  display: none;
+
+  z-index: 1000;
+
+  border: 1px solid var(--textFieldBorderColor);
+}
+
+.search-select-container .options .option-list {
+  max-height: 160px;
+  overflow: auto;
+  text-align: left;
+}
+
+.search-select-container .options input {
+  margin: 5px;
+  padding: 10px;
+  width: calc(100% - 10px);
+  cursor: text;
+}
+
+.search-select-container .options .option-list div {
+  padding: 10px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.search-select-container .options .option-list div:hover {
+  padding: 10px;
+  font-size: 13px;
+  background-color: var(--dropdownHoverColor);
+}
+
+.dropdown-view::before {
+  transform: translateY(-20%) rotate(225deg);
+}
+
+.dropdown-view .options {
+  display: block;
+}
+
+
+/* Dropdown with Multiple Select */
+.multiple-selector .option-list div {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 0px !important;
+}
+
+.multiple-selector .option-list div input {
+  padding: unset;
+  width: unset;
+  cursor: unset;
+  margin: unset;
+  scale: 1.1;
+  margin-left: 10px;
+}
+
+.multiple-selector .option-list div label {
+  display: block;
+  width: 100%;
+  padding: 10px;
+}
+
+
+
+/* Check Boxes */
+.checkbox-container {
+  display: inline-block;
+  position: relative;
+  padding-left: 35px;
+  cursor: pointer;
+
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.checkbox-container label {
+  height: 29px;
+  line-height: 29px;
+}
+
+.checkbox-container input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 29px;
+  width: 29px;
+  border: 2px solid #bbb;
+
+  border-radius: 5px;
+
+  scale: 0.8;
+}
+
+.checkbox-container input:checked~.checkmark {
+  background-color: var(--themeColor);
+  border: 2px solid var(--themeColor);
+}
+
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+.checkbox-container input:checked~.checkmark:after {
+  display: block;
+}
+
+.checkbox-container .checkmark:after {
+  left: 9px;
+  top: 5px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 3px 3px 0;
+  -webkit-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+
+
+/* Radio Buttons */
+.radio-container {
+  display: inline-block;
+  position: relative;
+  padding-left: 35px;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.radio-container input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.radio-container .checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 29px;
+  width: 29px;
+  background-color: transparent;
+  border-radius: 50%;
+
+  scale: 0.8;
+}
+
+.radio-container input:checked~.checkmark {
+  border: 2px solid var(--themeColor);
+}
+
+.radio-container .checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+.radio-container input:checked~.checkmark:after {
+  display: block;
+}
+
+.radio-container .checkmark:after {
+  top: 5px;
+  left: 5px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--themeColor);
+}
+
+.radio-container label {
+  height: 29px;
+  line-height: 29px;
+}
+
+
+
+/* Switches */
+.switch-wrapper {
+  display: inline-flex;
+  align-items: center;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 70px;
+  height: 25px;
+
+  scale: 0.6;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--textFieldBorderColor);
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+}
+
+.switch .slider:before {
+  position: absolute;
+  content: "";
+  height: 40px;
+  width: 40px;
+
+  left: -7.5px;
+  top: -7.5px;
+
+  background-color: white;
+  box-shadow: 1px 1px 5px 1px #00000037;
+
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+}
+
+.switch input:checked+.slider::before {
+  background-color: var(--themeColor);
+}
+
+.switch input:focus+.slider {
+  box-shadow: 0 0 1px var(--themeColor);
+}
+
+.switch input:checked+.slider:before {
+  -webkit-transform: translateX(40px);
+  -ms-transform: translateX(40px);
+  transform: translateX(40px);
+}
+
+.switch .slider.round {
+  border-radius: 34px;
+}
+
+.switch .slider.round:before {
+  border-radius: 50%;
+}
+
+
+.button {
+  padding: 10px 20px;
+  background-color: var(--themeColor);
+  border: none;
+  border-radius: 5px;
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.button:hover {
+  background-color: #006800;
+}
+
+.button.outline {
+  background-color: transparent;
+  border: 2px solid var(--themeColor);
+  color: var(--themeColor);
+
+  padding: 8px 18px;
+}
+
+.button.outline:hover {
+  background-color: var(--themeColor);
+  color: white;
+}
+
+.button i {
+  color: #fff;
+}
+
+.button:hover i {
+  color: #fff;
+}
+
+.button.outline i {
+  color: var(--themeColor);
+}
+
+.button.outline:hover i {
+  color: white;
+}
+
+
+
+/* Dialog Boxes */
+.dialog-box-2 {
+  background-color: rgba(0, 0, 0, 0.3);
+  position: fixed;
+  z-index: 2000;
+  width: 100%;
+  height: 100%;
+  left: 0px;
+  top: 0px;
+
+  display: none;
+  align-items: center;
+  justify-content: center;
+
+  backdrop-filter: blur(1px);
+}
+
+.dialog-box-2-view {
+  display: flex;
+}
+
+@keyframes modelPopupAnimation {
+  0% {
+    scale: 0.5;
+    opacity: 0.5;
+  }
+
+  100% {
+    scale: 1;
+    opacity: 1;
+  }
+}
+
+.dialog-box-2 .dialog-content {
+  max-width: 90%;
+  max-height: 90%;
+  overflow: auto;
+
+  background-color: var(--containerColor);
+  border-radius: 5px;
+  padding: 10px;
+
+  box-shadow: 1px 1px 5px 0px rgba(0, 0, 0, 0.08);
+  padding: 20px;
+  background-color: white;
+
+  animation: modelPopupAnimation 0.15s linear alternate;
+}
+
+.dialog-box-2 .dialog-content .dialog-title {
+  display: flex;
+  border-bottom: 1px solid var(--textFieldBorderColor);
+  margin-bottom: 30px;
+  display: grid;
+  grid-template-columns: 5fr 1fr;
+}
+
+.dialog-box-2 .dialog-content .dialog-title div:last-child {
+  display: flex;
+  justify-content: end;
+  color: red;
+}
+
+.dialog-box-2 .dialog-content .dialog-title div:last-child i {
+  transition: all 0.2s;
+  cursor: pointer;
+  transform-origin: center center;
+}
+
+.dialog-box-2 .dialog-content .dialog-title div:last-child i:hover {
+  scale: 1.1;
+}
+
+.dialog-box-2 .title {
+  font-size: 1.1em;
+  font-weight: bold;
+  line-height: 20px;
+  color: var(--textFieldTextColor);
+  margin-bottom: 20px;
+}
+
+
+
+.snackbar {
+  padding: 10px 20px;
+  border-radius: 5px;
+  position: fixed;
+  left: 20px;
+  bottom: 20px;
+  background-color: rgb(60, 60, 60);
+  color: white;
+  font-size: 0.85em;
+  max-width: 90%;
+  transform: translateX(-120%);
+  transition: all 0.3s;
+  box-shadow: 1px 1px 2px 0px rgba(0, 0, 0, 0.5);
+  z-index: 100000;
+}
+
+.snackbar i {
+  margin-left: 20px;
+  cursor: pointer;
+}
+
+.snackbar-view {
+  transform: translateX(0%);
+}
+
+.text-container textarea {
+  padding: 15px;
+
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 30px;
+  color: var(--textFieldTextColor);
+
+  border: 1px solid var(--textFieldBorderColor);
+  border-radius: 5px;
+
+  background-color: transparent;
+
+  width: 100%;
+}
+
+.text-container textarea:active,
+.text-container textarea:focus {
+  outline: 2px solid var(--themeColor);
+}
+
+
+/* Full-screen overlay */
+#loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #ffffff;
+  color: rgb(0, 0, 0);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  font-family: sans-serif;
+
+  opacity: 1;
+  transition: all 0.5s;
+}
+
+/* Spinner animation */
+.spinner {
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid #008500;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 10px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+
+.chip-wrapper {
+  border: 1px solid #00000020;
+  border-radius: 5px;
+  padding: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.chip-wrapper p{
+  font-size: 0.8em;
+  opacity: 0.7;
+  margin: 0;
+  font-style: italic;
+}
+
+.chip-wrapper .chip {
+  background-color: #00000010;
+  padding: 5px 15px;
+  font-size: 0.9em;
+  border-radius: 50px;
+  padding-right: 6px;
+}
+
+.chip-wrapper .chip i {
+  margin-left: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 3px;
+  border-radius: 20px;
+  width: 15px;
+  height: 15px;
+  text-align: center;
+  background-color: white;
+}
+
