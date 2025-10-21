@@ -51,11 +51,9 @@ switch ($url) {
         break;
 
     case 'register/check-email':
-        require_once '../app/controllers/RegisterController.php';
         $controller = new RegisterController();
         $controller->checkEmail();
         break;
-
 
     case (preg_match('#^file/temp-images/(.+)$#', $url, $matches) ? true : false):
         $controller = new FileController();
@@ -65,6 +63,31 @@ switch ($url) {
     case 'profile':
         $controller = new ProfileController();
         $controller->view();
+        break;
+
+    case 'register/documents':
+        $controller = new RegisterController();
+        $controller->documents();
+        break;
+
+    case 'register/documentsubmit':
+        $controller = new RegisterController();
+        $controller->documentsubmit();
+        break;
+
+    case 'register/services':
+        $controller = new RegisterController();
+        $controller->services();
+        break;
+
+    case 'register/get-cities':
+        $controller = new RegisterController();
+        $controller->getCities();
+        break;
+
+        case 'register/servicesubmit':
+        $controller = new RegisterController();
+        $controller->servicesubmit();
         break;
 
     case 'profile/update':
