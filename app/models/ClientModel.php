@@ -98,7 +98,18 @@ class ClientModel extends Database
         $stmt = $this->conn->prepare("SELECT Client_ID FROM Client WHERE Email = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
-        $stmt->store_result(); // store result to get num_rows
-        return $stmt->num_rows > 0; // true if email found
+        $stmt->store_result();
+        $status = $stmt->num_rows > 0;
+
+        if ($status) {
+
+            $stmt = $this->conn->prepare("SELECT Provider_ID FROM Provider WHERE Email = ?");
+            $stmt->bind_param("s", $email);
+            $stmt->execute();
+            $stmt->store_result();
+            $status = $stmt->num_rows > 0;
+        }
+
+        return $status;
     }
 }
