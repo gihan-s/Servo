@@ -493,18 +493,11 @@ function deleteAccount() {
         return;
     }
 
-    // const form = document.createElement("form");
-    const f = document.getElementById("accountForm");
-    if (!f) {
-        const tmpForm = document.createElement("form");
-        tmpForm.style.display = "none";
-        tmpForm.id = "accountForm";
-        document.body.appendChild(tmpForm);
-        tmpForm.submit();
-        return;
-    }
-
-    accountForm.method = "POST";
-    accountForm.action = "profile/delete-account";
-    accountForm.submit();
+    const tmp = document.createElement("form");
+    tmp.method = "POST";
+    tmp.action = "profile/delete-account"; 
+    tmp.style.display = "none";
+    document.body.appendChild(tmp);
+    tmp.submit();
+    return;
 }

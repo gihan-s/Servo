@@ -234,13 +234,13 @@ require_once __DIR__ . '/../../../../config.php';
                                         class="fa-regular fa-rotate-left"></i> Reset</button>
                             </div>
                             <div class="divider" style="margin:22px 0;"></div>
-                            <div class="danger-zone">
-                                <h4><i class="fa-regular fa-triangle-exclamation"></i> Danger Zone</h4>
-                                <p>Deleting your account removes all associated data. This cannot be undone.</p>
-                                <button class="danger-btn" onclick="deleteAccount()"><i class="fa-regular fa-trash"></i>
-                                    Delete Account</button>
-                            </div>
                         </form>
+                        <div class="danger-zone">
+                            <h4><i class="fa-regular fa-triangle-exclamation"></i> Danger Zone</h4>
+                            <p>Deleting your account removes all associated data. This cannot be undone.</p>
+                            <button class="danger-btn" onclick="deleteAccount()"><i class="fa-regular fa-trash"></i>
+                                Delete Account</button>
+                        </div>
                     </div>
                 </section>
             </div>
