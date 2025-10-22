@@ -6,7 +6,7 @@
     <title>404 Not Found</title>
     <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css'>
     <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Arvo'>
-    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/notfound.css">
+    <link rel="stylesheet" href="/assets/css/notfound.css">
 
 </head>
 
