@@ -49,11 +49,11 @@ class RegisterController
             }
         }
 
-        if ($_SESSION['register']['user_type'] == "client") {
-            header('Location: password');
+        if ($_SESSION['register']['user_type'] == "provider") {
+            header('Location: documents');
             exit;
         } else {
-            header('Location: documents');
+            header('Location: password');
             exit;
         }
     }

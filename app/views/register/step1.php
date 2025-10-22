@@ -37,19 +37,38 @@
                 <div class="input-field">
 
                     <div class="toggle-section user-change">
-                        <div class="toggle-button <?= getFromSession("user_type") != 'provider' ? "active" : "" ?>"><i class="fa-solid fa-user"
+                        <div class="toggle-button active"><i class="fa-solid fa-user"
                                 style="padding-right: 10px"></i>Client</div>
-                        <div class="toggle-button <?= getFromSession("user_type") == 'provider' ? "active" : "" ?>"><i class="fa-solid fa-user-helmet-safety"
+                        <div class="toggle-button"><i class="fa-solid fa-user-helmet-safety"
                                 style="padding-right: 10px"></i>Provider</div>
                     </div>
 
-                    <input type="hidden" name="user_type" id="user_type" value="<?= getFromSession("user_type") ?>">
+                    <input type="hidden" name="user_type" id="user_type" value="client" />
 
                     <div class="hr-title-container">
                         <span class="hr-title">Personal Information</span>
                         <hr class="hr-line">
                     </div>
 
+                    <script>
+                        document.getElementsByClassName('user-change')[0].addEventListener('click', function(e) {
+                            if (e.target && e.target.classList.contains('toggle-button')) {
+                                var buttons = document.querySelectorAll('.user-change .toggle-button');
+                                buttons.forEach(function(btn) {
+                                    btn.classList.remove('active');
+                                });
+                                e.target.classList.add('active');
+
+                                // Update hidden input value
+                                var userTypeInput;
+                                if (e.target.textContent.includes('Client')) {
+                                    userTypeInput.value = 'client';
+                                } else if (e.target.textContent.includes('Provider')) {
+                                    userTypeInput.value = 'provider';
+                                }
+                            }
+                        });
+                    </script>
                     <?php
 
                     function getFromSession($name)
