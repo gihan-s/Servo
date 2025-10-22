@@ -26,7 +26,7 @@
 			<button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
 			<div class="links" id="mainLinks" role="navigation" aria-label="Primary">
 				<a href="#features">Features</a>
-				<a href="#boosted">Boosted Posts</a>
+				<a href="#boosted">Boosted Services</a>
 				<a href="#categories">Categories</a>
 				<a href="#workflow">How it Works</a>
 				<a href="#feedback">Success Stories</a>
@@ -87,14 +87,14 @@
 	<section id="features" class="section">
 		<div class="lp-container">
 			<div class="section-head reveal">
-				<h2>Why People Choose Servo</h2>
-				<p>From need of talent to getting work done: Servo streamlines the process for clients and providers alike.</p>
+				<h2>Why You Should Choose Our Platform</h2>
+				<p>From finding talent to getting projects done: Servo streamlines the process for clients and providers alike.</p>
 			</div>
 			<div class="features-grid">
 				<div class="feature-card reveal">
 					<div class="feature-icon"><i class="fa-solid fa-shield-check"></i></div>
 					<h3>Verified Talent</h3>
-					<p>Identity + profile checks, skill tagging and history for confident hiring decisions.</p>
+					<p>Identity + profile checks, skill tagging and review system for confident hiring decisions.</p>
 				</div>
 				<div class="feature-card reveal">
 					<div class="feature-icon"><i class="fa-solid fa-lock"></i></div>
