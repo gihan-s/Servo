@@ -559,16 +559,16 @@
   display: none !important;
 }
 
-/* Post Details modal: auto height with a screen-bound max */
+/* Post Details modal: size bound to viewport; inner content scrolls */
 #postDetailsModal {
   max-height: 85vh;
-  overflow: auto;
+  overflow: hidden; /* prevent whole box scrolling; content will scroll */
 }
 
 /* Create/Edit modal: match view modal container sizing */
 .create-post-pop-up .pop-up {
   max-height: 85vh;
-  overflow: auto;
+  overflow: hidden; /* prevent whole box scrolling; content will scroll */
   border: 1px solid #e5e7eb;
   border-radius: 16px;
 }
@@ -586,9 +586,25 @@
   margin: auto;
 }
 
-.create-post-pop-up .pop-up .pop-up-content {
-  max-height: none;
-  overflow: visible;
+/* Make all pop-ups use a flex column layout: sticky header/footer, scrollable content */
+.pop-up-section .pop-up {
+  display: flex;
+  flex-direction: column;
+}
+
+.create-post-pop-up .pop-up .pop-up-content,
+.pop-up-section .pop-up .pop-up-content {
+  flex: 1 1 auto;
+  min-height: 0; /* allow child to shrink and enable scrolling */
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+.pop-up-section .pop-up .pop-up-header {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 2;
 }
 
 .create-post-form .form-group {
@@ -598,45 +614,16 @@
   margin-bottom: 12px;
 }
 
-.create-post-form label {
-  font-weight: 600;
-  color: #374151;
-  font-size: 14px;
-}
-
-.create-post-form input[type="text"],
-.create-post-form input[type="number"],
-.create-post-form input[type="date"],
-.create-post-form select,
-.create-post-form textarea {
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 10px 12px;
-  font-size: 14px;
-  outline-color: #28a745;
-}
-
-.create-post-form textarea {
-  resize: vertical;
-}
-
-.create-post-form .form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-@media (max-width: 520px) {
-  .create-post-form .form-row {
-    grid-template-columns: 1fr;
-  }
-}
-
 .modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
   margin-top: 8px;
+  position: sticky;
+  bottom: 0;
+  background: #fff;
+  padding-top: 8px; /* visual separation when sticky */
+  z-index: 2;
 }
 
 .modal-actions .btn-edit {

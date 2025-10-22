@@ -22,12 +22,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let activeCard = null; // the card currently viewed
 
-    function openPostModal() { postDetailsRoot.classList.remove('deactive'); document.getElementById('postDetailsModal').classList.remove('deactive'); postDetailsRoot.classList.add('active'); document.body.style.overflow = 'hidden'; }
-    function closePostModal() { document.getElementById('postDetailsModal').classList.add('deactive'); postDetailsRoot.classList.remove('active'); postDetailsRoot.classList.add('deactive'); document.body.style.overflow = ''; }
-    function openConfirm() { confirmRoot.classList.remove('deactive'); document.getElementById('confirmDelete').classList.remove('deactive'); confirmRoot.classList.add('active'); document.body.style.overflow = 'hidden'; }
-    function closeConfirm() { document.getElementById('confirmDelete').classList.add('deactive'); confirmRoot.classList.remove('active'); confirmRoot.classList.add('deactive'); document.body.style.overflow = ''; }
-    function openPublishConfirm() { publishRoot.classList.remove('deactive'); document.getElementById('confirmPublish').classList.remove('deactive'); publishRoot.classList.add('active'); document.body.style.overflow = 'hidden'; }
-    function closePublishConfirm() { document.getElementById('confirmPublish').classList.add('deactive'); publishRoot.classList.remove('active'); publishRoot.classList.add('deactive'); document.body.style.overflow = ''; }
+    // Helpers to lock/unlock body scroll without layout shift
+    function lockBody() {
+        const sbw = window.innerWidth - document.documentElement.clientWidth; // scrollbar width
+        if (sbw > 0) {
+            document.body.style.paddingRight = sbw + 'px';
+        }
+        document.body.style.overflow = 'hidden';
+    }
+    function unlockBody() {
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+    }
+
+    function openPostModal() { postDetailsRoot.classList.remove('deactive'); document.getElementById('postDetailsModal').classList.remove('deactive'); postDetailsRoot.classList.add('active'); lockBody(); }
+    function closePostModal() { document.getElementById('postDetailsModal').classList.add('deactive'); postDetailsRoot.classList.remove('active'); postDetailsRoot.classList.add('deactive'); unlockBody(); }
+    function openConfirm() { confirmRoot.classList.remove('deactive'); document.getElementById('confirmDelete').classList.remove('deactive'); confirmRoot.classList.add('active'); lockBody(); }
+    function closeConfirm() { document.getElementById('confirmDelete').classList.add('deactive'); confirmRoot.classList.remove('active'); confirmRoot.classList.add('deactive'); unlockBody(); }
+    function openPublishConfirm() { publishRoot.classList.remove('deactive'); document.getElementById('confirmPublish').classList.remove('deactive'); publishRoot.classList.add('active'); lockBody(); }
+    function closePublishConfirm() { document.getElementById('confirmPublish').classList.add('deactive'); publishRoot.classList.remove('active'); publishRoot.classList.add('deactive'); unlockBody(); }
 
     // Populate modal from a card element
     function populateFromCard(card) {
@@ -96,7 +109,9 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
                     }
                     // open modal
-                    root.classList.remove('deactive'); root.querySelector('.pop-up').classList.remove('deactive'); document.body.style.overflow = 'hidden';
+                    root.classList.remove('deactive');
+                    root.querySelector('.pop-up').classList.remove('deactive');
+                    lockBody();
                 }
             });
         }
@@ -149,9 +164,28 @@ document.addEventListener('DOMContentLoaded', function () {
             cpRoot.classList.add('deactive');
             const pop = cpRoot.querySelector('.pop-up');
             pop && pop.classList.add('deactive');
-            document.body.style.overflow = '';
+            unlockBody();
         });
     }
+
+    // Ensure body lock state stays in sync when the create-post modal is toggled
+    // by generic handlers in other scripts (which don't manage scroll locking).
+    document.addEventListener('click', function (e) {
+        const trigger = e.target.closest('#create-post-pop-up');
+        if (!trigger) return;
+        // Let the other script toggle classes first, then correct the body state.
+        setTimeout(() => {
+            const container = document.getElementsByClassName('create-post-pop-up')[0];
+            if (!container) return;
+            if (container.classList.contains('deactive')) {
+                // Modal just closed
+                unlockBody();
+            } else {
+                // Modal just opened
+                lockBody();
+            }
+        }, 0);
+    });
 
     // Confirm modal actions
     confirmClose && confirmClose.addEventListener('click', closeConfirm);
@@ -209,43 +243,49 @@ document.addEventListener('DOMContentLoaded', function () {
         container.classList.toggle('deactive');
         if (pop) pop.classList.toggle('deactive');
         // lock body scroll when opening, unlock when closing
-        if (goingActive) { document.body.style.overflow = 'hidden'; }
-        else { document.body.style.overflow = ''; }
+        if (goingActive) {
+            const sbw = window.innerWidth - document.documentElement.clientWidth;
+            if (sbw > 0) { document.body.style.paddingRight = sbw + 'px'; }
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+        }
     };
 });
 
 // Tab switching functionality for client-side job management
-    document.addEventListener('DOMContentLoaded', function () {
-        const tabs = document.querySelectorAll('.buttons');
-        const sections = document.querySelectorAll('.requests-section');
+document.addEventListener('DOMContentLoaded', function () {
+    const tabs = document.querySelectorAll('.buttons');
+    const sections = document.querySelectorAll('.requests-section');
 
-        tabs.forEach(tab => {
-            tab.addEventListener('click', function () {
-                // Remove active class from all tabs and sections
-                tabs.forEach(t => t.classList.remove('active'));
-                sections.forEach(s => {
-                    s.classList.remove('active');
-                    s.style.display = 'none';
-                });
-
-                // Add active class to clicked tab
-                this.classList.add('active');
-
-                // Show corresponding section based on tab ID
-                let sectionClass = '';
-                if (this.id === 'active-posts') {
-                    sectionClass = 'active-posts';
-                } else if (this.id === 'draft-posts') {
-                    sectionClass = 'draft-posts';
-                } else if (this.id === 'expired-posts') {
-                    sectionClass = 'expired-posts';
-                }
-
-                const section = document.querySelector('.' + sectionClass);
-                if (section) {
-                    section.classList.add('active');
-                    section.style.display = 'block';
-                }
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function () {
+            // Remove active class from all tabs and sections
+            tabs.forEach(t => t.classList.remove('active'));
+            sections.forEach(s => {
+                s.classList.remove('active');
+                s.style.display = 'none';
             });
+
+            // Add active class to clicked tab
+            this.classList.add('active');
+
+            // Show corresponding section based on tab ID
+            let sectionClass = '';
+            if (this.id === 'active-posts') {
+                sectionClass = 'active-posts';
+            } else if (this.id === 'draft-posts') {
+                sectionClass = 'draft-posts';
+            } else if (this.id === 'expired-posts') {
+                sectionClass = 'expired-posts';
+            }
+
+            const section = document.querySelector('.' + sectionClass);
+            if (section) {
+                section.classList.add('active');
+                section.style.display = 'block';
+            }
         });
     });
+});

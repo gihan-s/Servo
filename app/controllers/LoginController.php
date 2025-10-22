@@ -29,6 +29,8 @@ class LoginController {
         if ($user && password_verify($password, $user['Password'])) {
             $_SESSION['user_id'] = $user['Client_ID'] ?? $user['Provider_ID'];
             $_SESSION['role'] = $type;
+            $_SESSION['user_name'] = $user['First_Name'] . ' ' . $user['Last_Name'];
+            $_SESSION['user_image'] = $user['Profile_Picture'] ?? null;
             header("Location: " . BASE_URL . "/../dashboard");
             exit;
         } else {
@@ -42,7 +44,7 @@ class LoginController {
         session_start();
         session_unset();
         session_destroy();
-        header("Location: " . BASE_URL . "/login");
+        header("Location: " . BASE_URL . "/home");
         exit;
     }
 

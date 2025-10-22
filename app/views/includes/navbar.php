@@ -89,8 +89,8 @@ elseif ($_SESSION['role'] === 'Client') {
             </button>
             <div class="user-profile" onclick="window.location.href='<?= $navRight[2]['href'] ?>'" role="button"
                 tabindex="0" aria-label="Profile">
-                <div class="user-avatar">JC</div>
-                <div class="user-name">John Client</div>
+                <div class="user-avatar" style="overflow: hidden; background-color: transparent; border: 1px solid #33333353;"><img src="<?= BASE_URL . '/../uploads/Users/'. $_SESSION['user_image']?>" alt="" style="height: 100%; width: 100%;"></div>
+                <div class="user-name"><?= $_SESSION['user_name']?></div>
             </div>
             <div class="notif-popover" id="notifPopover" role="dialog" aria-label="Notifications" aria-modal="false">
                 <div class="notif-header">

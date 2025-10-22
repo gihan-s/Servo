@@ -6,8 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/cardList.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/clientPosts.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/elementStyles.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/gridTemplates.css">
     <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
 
+    <script src="<?= BASE_URL ?>/assets/js/elementScript.js" defer></script>
     <script src="<?= BASE_URL ?>/assets/js/cardList.js" defer></script>
     <script src="<?= BASE_URL ?>/assets/js/clientPosts.js" defer></script>
     <title>My Job Posts</title>
@@ -59,482 +62,395 @@
             <!-- ACTIVE POSTS SECTION -->
             <div class="active-posts active requests-section">
                 <div class="item-list">
-                    <!-- Active Post 1 -->
-                    <div class="search-item">
+                    <?php if (empty($data['activePosts'])): ?>
+                        <section class="empty-state" aria-label="No posts">
+                            <!-- ...illustration... -->
+                            <h2>No active posts right now</h2>
+                            <p>Check back soon or refresh to see new posts.</p>
+                            <div class="empty-actions">
+                                <a class="btn primary" href="<?= BASE_URL ?>/feeds"
+                                    onclick="location.reload(); return false;">
+                                    <i class="fa-regular fa-rotate" style="font-size:25px"></i> Refresh
+                                </a>
+                            </div>
+                        </section>
+                    <?php else: ?>
+                        <?php foreach ($data['activePosts'] as $row): ?>
+                            <?php
+                            if (!is_array($row) || !isset($row['post']) || !is_array($row['post'])) {
+                                continue;
+                            }
+                            $p = $row['post'];
+                            $Published_At = $p['Published_At'] ?? null;
+                            $daysPassed = 0;
+                            if ($Published_At) {
+                                try {
+                                    $tz = new DateTimeZone('Asia/Colombo');
+                                    $created = new DateTime($Published_At, $tz);
+                                    $now = new DateTime('now', $tz);
+                                    $daysPassed = $now->diff($created)->days;
+                                } catch (Throwable $e) {
+                                    $daysPassed = 0;
+                                }
+                            }
+                            ?>
+                            <div class="search-item">
+                                <div class="post-header">
+                                    <div class="post-meta">
+                                        <div class="post-date">
+                                            <i class="fas fa-calendar"></i>
+                                            <span>
+                                                <?php if ($daysPassed > 1) {
+                                                    echo "Published " . $daysPassed . " days ago.";
+                                                } else if ($daysPassed == 0) {
+                                                    echo "Published Today";
+                                                } else {
+                                                    echo "Published Yesterday";
+                                                } ?>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="post-actions">
+                                        <button class="action-btn btn-edit"><i class="fas fa-edit"></i> Edit</button>
+                                        <button class="action-btn btn-view"><i class="fas fa-eye"></i> View</button>
+                                        <button class="action-btn btn-delete"><i class="fas fa-trash"></i> Delete</button>
+                                    </div>
+                                </div>
 
-                        <div class="post-header">
-                            <div class="post-meta">
-                                <div class="post-date">
-                                    <i class="fas fa-calendar"></i>
-                                    <span>Posted 2 days ago</span>
+                                <h3 class="post-title"><?= htmlspecialchars($p['Title'] ?? '') ?></h3>
+
+                                <div class="post-description">
+                                    <?php
+                                    $desc = (string) ($p['Description'] ?? '');
+                                    $plain = trim(preg_replace('/\s+/', ' ', strip_tags($desc)));
+                                    $snippet = mb_strimwidth($plain, 0, 160, '…', 'UTF-8'); // limit to ~160 chars
+                                    ?>
+                                    <?= htmlspecialchars($snippet, ENT_QUOTES, 'UTF-8') ?>
+                                </div>
+
+                                <div class="post-skills">
+                                    <span class="skills-label">Required Skills:</span>
+                                    <div class="skills-tags">
+                                        <?php
+                                        if (!empty($row['skills'])) {
+                                            foreach ($row['skills'] as $skill): ?>
+                                                <span class="skill-tag"><?= htmlspecialchars($skill) ?></span>
+                                            <?php endforeach;
+                                        } else { ?>
+                                            <span class="">---No skills specified---</span>
+                                        <?php } ?>
+                                    </div>
+                                </div>
+
+                                <div class="post-footer">
+                                    <div class="post-details">
+                                        <div class="detail-item">
+                                            <span class="detail-label">Budget</span>
+                                            <span class="detail-value budget-amount">LKR
+                                                <?= htmlspecialchars($p['Requesting_Price'] ?? '') ?>/=
+                                                (<?= htmlspecialchars($p['Price_Type'] ?? '') ?>)</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="detail-label">Proposals Received</span>
+                                            <span
+                                                class="detail-value proposals-count"><?= htmlspecialchars($p['Proposal_Count'] ?? '0') ?></span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="detail-label">Level</span>
+                                            <span
+                                                class="detail-value project-level"><?= htmlspecialchars($p['Level'] ?? '') ?></span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="detail-label">Duration</span>
+                                            <span
+                                                class="detail-value project-duration"><?= htmlspecialchars($p['Duration'] ?? '') ?></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="engagement-stats">
+                                    <div class="stat-item"><i class="fas fa-eye"></i><span>156 views</span></div>
+                                    <div class="stat-item"><i class="fas fa-clock"></i><span>5 days left</span></div>
                                 </div>
                             </div>
-                            <div class="post-actions">
-                                <button class="action-btn btn-edit">
-                                    <i class="fas fa-edit"></i>
-                                    Edit
-                                </button>
-                                <button class="action-btn btn-view">
-                                    <i class="fas fa-eye"></i>
-                                    View
-                                </button>
-                                <button class="action-btn btn-delete">
-                                    <i class="fas fa-trash"></i>
-                                    Delete
-                                </button>
-                            </div>
+                        <?php endforeach; ?>
+
+                        <!-- Pagination Active -->
+                        <div class="pagination" aria-label="Pagination Active Posts">
+                            <button class="page-btn prev" disabled><i class="fa-regular fa-chevron-left"></i></button>
+                            <button class="page-btn active">1</button>
+                            <button class="page-btn">2</button>
+                            <button class="page-btn">3</button>
+                            <button class="page-btn next"><i class="fa-regular fa-chevron-right"></i></button>
                         </div>
-
-                        <h3 class="post-title">🚀 Full-Stack E-commerce Platform Development</h3>
-
-                        <div class="post-description">
-                            We need an experienced full-stack developer to build a modern e-commerce platform with React
-                            frontend and Node.js backend. The project includes user authentication, payment integration,
-                            admin dashboard, and inventory management. Looking for someone who can deliver high-quality
-                            code with proper documentation.
-                        </div>
-
-                        <div class="post-skills">
-                            <span class="skills-label">Required Skills:</span>
-                            <div class="skills-tags">
-                                <span class="skill-tag">React.js</span>
-                                <span class="skill-tag">Node.js</span>
-                                <span class="skill-tag">MongoDB</span>
-                                <span class="skill-tag">Express.js</span>
-                                <span class="skill-tag">Payment APIs</span>
-                                <span class="skill-tag">AWS</span>
-                            </div>
-                        </div>
-
-                        <div class="post-footer">
-                            <div class="post-details">
-                                <div class="detail-item">
-                                    <span class="detail-label">Budget</span>
-                                    <span class="detail-value budget-amount">$5,000 - $8,000</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-label">Proposals Received</span>
-                                    <span class="detail-value proposals-count">23</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-label">Level</span>
-                                    <span class="detail-value project-level">Expert</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-label">Duration</span>
-                                    <span class="detail-value project-duration">2-3 months</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="engagement-stats">
-                            <div class="stat-item">
-                                <i class="fas fa-eye"></i>
-                                <span>156 views</span>
-                            </div>
-                            <div class="stat-item">
-                                <i class="fas fa-clock"></i>
-                                <span>5 days left</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Active Post 2 -->
-                    <div class="search-item">
-
-                        <div class="post-header">
-                            <div class="post-meta">
-                                <div class="post-date">
-                                    <i class="fas fa-calendar"></i>
-                                    <span>Posted 1 week ago</span>
-                                </div>
-                            </div>
-                            <div class="post-actions">
-                                <button class="action-btn btn-edit">
-                                    <i class="fas fa-edit"></i>
-                                    Edit
-                                </button>
-                                <button class="action-btn btn-view">
-                                    <i class="fas fa-eye"></i>
-                                    View
-                                </button>
-                                <button class="action-btn btn-delete">
-                                    <i class="fas fa-trash"></i>
-                                    Delete
-                                </button>
-                            </div>
-                        </div>
-
-                        <h3 class="post-title">📱 Mobile App UI/UX Design for iOS & Android</h3>
-
-                        <div class="post-description">
-                            Seeking a talented UI/UX designer to create intuitive and visually appealing designs for our
-                            mobile application. The app focuses on fitness tracking and requires modern, clean
-                            interfaces with excellent user experience. Portfolio with mobile design experience required.
-                        </div>
-
-                        <div class="post-skills">
-                            <span class="skills-label">Required Skills:</span>
-                            <div class="skills-tags">
-                                <span class="skill-tag">UI/UX Design</span>
-                                <span class="skill-tag">Figma</span>
-                                <span class="skill-tag">Adobe XD</span>
-                                <span class="skill-tag">Prototyping</span>
-                                <span class="skill-tag">Mobile Design</span>
-                                <span class="skill-tag">User Research</span>
-                            </div>
-                        </div>
-
-                        <div class="post-footer">
-                            <div class="post-details">
-                                <div class="detail-item">
-                                    <span class="detail-label">Budget</span>
-                                    <span class="detail-value budget-amount">$40 - $60/hr</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-label">Proposals Received</span>
-                                    <span class="detail-value proposals-count">47</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-label">Level</span>
-                                    <span class="detail-value project-level">Intermediate</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-label">Duration</span>
-                                    <span class="detail-value project-duration">1-2 months</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="engagement-stats">
-                            <div class="stat-item">
-                                <i class="fas fa-eye"></i>
-                                <span>287 views</span>
-                            </div>
-                            <div class="stat-item">
-                                <i class="fas fa-clock"></i>
-                                <span>12 days left</span>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Pagination Active -->
-                    <div class="pagination" aria-label="Pagination Active Posts">
-                        <button class="page-btn prev" disabled><i class="fa-regular fa-chevron-left"></i></button>
-                        <button class="page-btn active">1</button>
-                        <button class="page-btn">2</button>
-                        <button class="page-btn">3</button>
-                        <button class="page-btn next"><i class="fa-regular fa-chevron-right"></i></button>
-                    </div>
+                    <?php endif; ?>
                 </div>
             </div>
 
             <!-- DRAFT POSTS SECTION -->
             <div class="draft-posts requests-section draft-section" style="display: none;">
                 <div class="item-list">
-                    <!-- Draft Post 1 -->
-                    <div class="search-item">
-
-                        <div class="post-header">
-                            <div class="post-meta">
-                                <div class="post-date">
-                                    <i class="fas fa-calendar"></i>
-                                    <span>Created 3 days ago</span>
-                                </div>
+                    <?php if (empty($data['draftPosts'])): ?>
+                        <section class="empty-state" aria-label="No draft posts">
+                            <!-- ...illustration... -->
+                            <h2>No draft posts right now</h2>
+                            <p>Create drafts to save your job posts and publish them later.</p>
+                            <div class="empty-actions">
+                                <a class="btn primary" href="<?= BASE_URL ?>/posts/create">
+                                    <i class="fa-regular fa-plus" style="font-size:25px"></i> Create Draft
+                                </a>
                             </div>
-                            <div class="post-actions">
-                                <button class="action-btn btn-edit">
-                                    <i class="fas fa-edit"></i>
-                                    Continue
-                                </button>
-                                <button class="action-btn btn-view">
-                                    <i class="fas fa-rocket"></i>
-                                    Publish
-                                </button>
-                                <button class="action-btn btn-delete">
-                                    <i class="fas fa-trash"></i>
-                                    Delete
-                                </button>
+                        </section>
+                    <?php else: ?>
+                        <?php foreach ($data['draftPosts'] as $row): ?>
+                            <?php
+                            if (!is_array($row) || !isset($row['post']) || !is_array($row['post'])) {
+                                continue;
+                            }
+                            $p = $row['post'];
+                            $Created_At = $p['Created_At'] ?? null;
+                            $daysPassed = 0;
+                            if ($Created_At) {
+                                try {
+                                    $tz = new DateTimeZone('Asia/Colombo');
+                                    $created = new DateTime($Created_At, $tz);
+                                    $now = new DateTime('now', $tz);
+                                    $daysPassed = $now->diff($created)->days;
+                                } catch (Throwable $e) {
+                                    $daysPassed = 0;
+                                }
+                            }
+                            ?>
+
+                            <div class="search-item">
+
+                                <div class="post-header">
+                                    <div class="post-meta">
+                                        <div class="post-date">
+                                            <i class="fas fa-calendar"></i>
+                                            <span>
+                                                <?php if ($daysPassed > 1) {
+                                                    echo "Created " . $daysPassed . " days ago.";
+                                                } else if ($daysPassed == 0) {
+                                                    echo "Created Today";
+                                                } else {
+                                                    echo "Created Yesterday";
+                                                } ?>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="post-actions">
+                                        <button class="action-btn btn-edit">
+                                            <i class="fas fa-edit"></i>
+                                            Continue
+                                        </button>
+                                        <button class="action-btn btn-view">
+                                            <i class="fas fa-rocket"></i>
+                                            Publish
+                                        </button>
+                                        <button class="action-btn btn-delete">
+                                            <i class="fas fa-trash"></i>
+                                            Delete
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <h3 class="post-title"><?= htmlspecialchars($p['Title'] ?? '') ?></h3>
+
+                                <div class="post-description">
+                                    <?php
+                                    $desc = (string) ($p['Description'] ?? '');
+                                    $plain = trim(preg_replace('/\s+/', ' ', strip_tags($desc)));
+                                    $snippet = mb_strimwidth($plain, 0, 160, '…', 'UTF-8'); // limit to ~160 chars
+                                    ?>
+                                    <?= htmlspecialchars($snippet, ENT_QUOTES, 'UTF-8') ?>
+                                </div>
+
+                                <div class="post-skills">
+                                    <span class="skills-label">Required Skills:</span>
+                                    <div class="skills-tags">
+                                        <?php
+                                        if (!empty($row['skills'])) {
+                                            foreach ($row['skills'] as $skill): ?>
+                                                <span class="skill-tag"><?= htmlspecialchars($skill) ?></span>
+                                            <?php endforeach;
+                                        } else { ?>
+                                            <span class="">---No skills specified---</span>
+                                        <?php } ?>
+                                    </div>
+                                </div>
+
+                                <div class="post-footer">
+                                    <div class="post-details">
+                                        <div class="detail-item">
+                                            <span class="detail-label">Budget</span>
+                                            <span class="detail-value budget-amount">LKR
+                                                <?= htmlspecialchars($p['Requesting_Price'] ?? '') ?>/=
+                                                (<?= htmlspecialchars($p['Price_Type'] ?? '') ?>)</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="detail-label">Proposals Received</span>
+                                            <span
+                                                class="detail-value proposals-count"><?= htmlspecialchars($p['Proposal_Count'] ?? '0') ?></span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="detail-label">Level</span>
+                                            <span
+                                                class="detail-value project-level"><?= htmlspecialchars($p['Level'] ?? '') ?></span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="detail-label">Duration</span>
+                                            <span
+                                                class="detail-value project-duration"><?= htmlspecialchars($p['Duration'] ?? '') ?></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+
                             </div>
+                        <?php endforeach; ?>
+
+                        <!-- Pagination Draft -->
+                        <div class="pagination" aria-label="Pagination Draft Posts">
+                            <button class="page-btn prev" disabled><i class="fa-regular fa-chevron-left"></i></button>
+                            <button class="page-btn active">1</button>
+                            <button class="page-btn">2</button>
+                            <button class="page-btn">3</button>
+                            <button class="page-btn next"><i class="fa-regular fa-chevron-right"></i></button>
                         </div>
-
-                        <h3 class="post-title">🎯 Digital Marketing Campaign & SEO Optimization</h3>
-
-                        <div class="post-description">
-                            Looking for a digital marketing expert to boost our online presence through comprehensive
-                            SEO strategies, content marketing, and social media campaigns. Need someone experienced with
-                            Google Analytics, keyword research, and conversion optimization...
-                        </div>
-
-                        <div class="post-skills">
-                            <span class="skills-label">Required Skills:</span>
-                            <div class="skills-tags">
-                                <span class="skill-tag">SEO</span>
-                                <span class="skill-tag">Google Analytics</span>
-                                <span class="skill-tag">Content Marketing</span>
-                                <span class="skill-tag">Social Media</span>
-                            </div>
-                        </div>
-
-                        <div class="post-footer">
-                            <div class="post-details">
-                                <div class="detail-item">
-                                    <span class="detail-label">Budget</span>
-                                    <span class="detail-value budget-amount">$2,500 - $4,000</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-label">Proposals Received</span>
-                                    <span class="detail-value proposals-count">0</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-label">Level</span>
-                                    <span class="detail-value project-level">—</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-label">Duration</span>
-                                    <span class="detail-value project-duration">—</span>
-                                </div>
-                            </div>
-                        </div>
-
-
-                    </div>
-
-                    <!-- Draft Post 2 -->
-                    <div class="search-item">
-
-                        <div class="post-header">
-                            <div class="post-meta">
-                                <div class="post-date">
-                                    <i class="fas fa-calendar"></i>
-                                    <span>Created 1 week ago</span>
-                                </div>
-                            </div>
-                            <div class="post-actions">
-                                <button class="action-btn btn-edit">
-                                    <i class="fas fa-edit"></i>
-                                    Continue
-                                </button>
-                                <button class="action-btn btn-view">
-                                    <i class="fas fa-rocket"></i>
-                                    Publish
-                                </button>
-                                <button class="action-btn btn-delete">
-                                    <i class="fas fa-trash"></i>
-                                    Delete
-                                </button>
-                            </div>
-                        </div>
-
-                        <h3 class="post-title">🏗️ WordPress Website Development & Customization</h3>
-
-                        <div class="post-description">
-                            Need a skilled WordPress developer to create a custom business website with advanced
-                            functionality. The site should include e-commerce capabilities, custom plugins, and
-                            responsive design...
-                        </div>
-
-                        <div class="post-skills">
-                            <span class="skills-label">Required Skills:</span>
-                            <div class="skills-tags">
-                                <span class="skill-tag">WordPress</span>
-                                <span class="skill-tag">PHP</span>
-                                <span class="skill-tag">MySQL</span>
-                                <span class="skill-tag">WooCommerce</span>
-                            </div>
-                        </div>
-
-                        <div class="post-footer">
-                            <div class="post-details">
-                                <div class="detail-item">
-                                    <span class="detail-label">Budget</span>
-                                    <span class="detail-value budget-amount">$3,000 - $5,000</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-label">Proposals Received</span>
-                                    <span class="detail-value proposals-count">0</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-label">Level</span>
-                                    <span class="detail-value project-level">—</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-label">Duration</span>
-                                    <span class="detail-value project-duration">—</span>
-                                </div>
-                            </div>
-                        </div>
-
-
-                    </div>
-                    <!-- Pagination Draft -->
-                    <div class="pagination" aria-label="Pagination Draft Posts">
-                        <button class="page-btn prev" disabled><i class="fa-regular fa-chevron-left"></i></button>
-                        <button class="page-btn active">1</button>
-                        <button class="page-btn">2</button>
-                        <button class="page-btn">3</button>
-                        <button class="page-btn next"><i class="fa-regular fa-chevron-right"></i></button>
-                    </div>
+                    <?php endif; ?>
                 </div>
             </div>
 
             <!-- EXPIRED POSTS SECTION -->
             <div class="expired-posts requests-section expired-section" style="display: none;">
                 <div class="item-list">
-                    <!-- Expired Post 1 -->
-                    <div class="search-item">
+                    <?php if (empty($data['expiredPosts'])): ?>
+                        <section class="empty-state" aria-label="No expired posts">
+                            <!-- ...illustration... -->
+                            <h2>No expired posts right now</h2>
+                            <p>Your expired posts will appear here. You can repost them anytime.</p>
+                        </section>
+                    <?php else: ?>
+                        <?php foreach ($data['expiredPosts'] as $row): ?>
+                            <?php
+                            if (!is_array($row) || !isset($row['post']) || !is_array($row['post'])) {
+                                continue;
+                            }
+                            $p = $row['post'];
+                            $Expired_At = $p['End_At'] ?? null;
+                            $daysPassed = 0;
+                            if ($Expired_At) {
+                                try {
+                                    $tz = new DateTimeZone('Asia/Colombo');
+                                    $expired = new DateTime($Expired_At, $tz);
+                                    $now = new DateTime('now', $tz);
+                                    $daysPassed = $now->diff($expired)->days;
+                                } catch (Throwable $e) {
+                                    $daysPassed = 0;
+                                }
+                            }
+                            ?>
+                            <div class="search-item">
+                                <div class="post-header">
+                                    <div class="post-meta">
+                                        <div class="post-date">
+                                            <i class="fas fa-calendar"></i>
+                                            <span>
+                                                <?php if ($daysPassed > 1) {
+                                                    echo "Expired " . $daysPassed . " days ago.";
+                                                } else if ($daysPassed == 0) {
+                                                    echo "Expired Today";
+                                                } else {
+                                                    echo "Expired Yesterday";
+                                                } ?>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="post-actions">
+                                        <button class="action-btn btn-view">
+                                            <i class="fas fa-eye"></i>
+                                            View
+                                        </button>
+                                        <button class="action-btn btn-edit">
+                                            <i class="fas fa-redo"></i>
+                                            Repost
+                                        </button>
+                                        <button class="action-btn btn-delete">
+                                            <i class="fas fa-trash"></i>
+                                            Delete
+                                        </button>
+                                    </div>
+                                </div>
 
-                        <div class="post-header">
-                            <div class="post-meta">
-                                <div class="post-date">
-                                    <i class="fas fa-calendar"></i>
-                                    <span>Expired 5 days ago</span>
+                                <h3 class="post-title"><?= htmlspecialchars($p['Title'] ?? '') ?></h3>
+
+                                <div class="post-description">
+                                    <?php
+                                    $desc = (string) ($p['Description'] ?? '');
+                                    $plain = trim(preg_replace('/\s+/', ' ', strip_tags($desc)));
+                                    $snippet = mb_strimwidth($plain, 0, 160, '…', 'UTF-8'); // limit to ~160 chars
+                                    ?>
+                                    <?= htmlspecialchars($snippet, ENT_QUOTES, 'UTF-8') ?>
+                                </div>
+
+                                <div class="post-skills">
+                                    <span class="skills-label">Required Skills:</span>
+                                    <div class="skills-tags">
+                                        <?php
+                                        if (!empty($row['skills'])) {
+                                            foreach ($row['skills'] as $skill): ?>
+                                                <span class="skill-tag"><?= htmlspecialchars($skill) ?></span>
+                                            <?php endforeach;
+                                        } else { ?>
+                                            <span class="">---No skills specified---</span>
+                                        <?php } ?>
+                                    </div>
+                                </div>
+
+                                <div class="post-footer">
+                                    <div class="post-details">
+                                        <div class="detail-item">
+                                            <span class="detail-label">Budget</span>
+                                            <span class="detail-value budget-amount">LKR
+                                                <?= htmlspecialchars($p['Requesting_Price'] ?? '') ?>/=
+                                                (<?= htmlspecialchars($p['Price_Type'] ?? '') ?>)</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="detail-label">Final Proposals</span>
+                                            <span
+                                                class="detail-value proposals-count"><?= htmlspecialchars($p['ProposalsCount'] ?? 0) ?></span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="detail-label">Duration</span>
+                                            <span
+                                                class="detail-value project-duration"><?= htmlspecialchars($p['Duration'] ?? '') . ' ' . htmlspecialchars($p['Duration_Type'] ?? '') ?></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="engagement-stats">
+                                    <div class="stat-item">
+                                        <i class="fas fa-eye"></i>
+                                        <span>198 views</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <i class="fas fa-clock"></i>
+                                        <span>Expired</span>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="post-actions">
-                                <button class="action-btn btn-view">
-                                    <i class="fas fa-eye"></i>
-                                    View
-                                </button>
-                                <button class="action-btn btn-edit">
-                                    <i class="fas fa-redo"></i>
-                                    Repost
-                                </button>
-                                <button class="action-btn btn-delete">
-                                    <i class="fas fa-trash"></i>
-                                    Delete
-                                </button>
-                            </div>
+                        <?php endforeach; ?>
+
+                        <!-- Pagination Expired -->
+                        <div class="pagination" aria-label="Pagination Expired Posts">
+                            <button class="page-btn prev" disabled><i class="fa-regular fa-chevron-left"></i></button>
+                            <button class="page-btn active">1</button>
+                            <button class="page-btn">2</button>
+                            <button class="page-btn">3</button>
+                            <button class="page-btn next"><i class="fa-regular fa-chevron-right"></i></button>
                         </div>
-
-                        <h3 class="post-title">📊 Data Analysis & Business Intelligence Dashboard</h3>
-
-                        <div class="post-description">
-                            We needed a data analyst to create comprehensive business intelligence dashboards using
-                            Python and Tableau. The project involved analyzing sales data, customer behavior, and market
-                            trends to provide actionable insights for strategic decision-making.
-                        </div>
-
-                        <div class="post-skills">
-                            <span class="skills-label">Required Skills:</span>
-                            <div class="skills-tags">
-                                <span class="skill-tag">Python</span>
-                                <span class="skill-tag">Tableau</span>
-                                <span class="skill-tag">SQL</span>
-                                <span class="skill-tag">Data Analysis</span>
-                                <span class="skill-tag">Power BI</span>
-                            </div>
-                        </div>
-
-                        <div class="post-footer">
-                            <div class="post-details">
-                                <div class="detail-item">
-                                    <span class="detail-label">Budget</span>
-                                    <span class="detail-value budget-amount">$4,000 - $6,000</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-label">Final Proposals</span>
-                                    <span class="detail-value proposals-count">31</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-label">Duration</span>
-                                    <span class="detail-value project-duration">1-2 months</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="engagement-stats">
-                            <div class="stat-item">
-                                <i class="fas fa-eye"></i>
-                                <span>198 views</span>
-                            </div>
-                            <div class="stat-item">
-                                <i class="fas fa-clock"></i>
-                                <span>Expired</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Expired Post 2 -->
-                    <div class="search-item">
-
-                        <div class="post-header">
-                            <div class="post-meta">
-                                <div class="post-date">
-                                    <i class="fas fa-calendar"></i>
-                                    <span>Expired 2 weeks ago</span>
-                                </div>
-                            </div>
-                            <div class="post-actions">
-                                <button class="action-btn btn-view">
-                                    <i class="fas fa-eye"></i>
-                                    View
-                                </button>
-                                <button class="action-btn btn-edit">
-                                    <i class="fas fa-redo"></i>
-                                    Repost
-                                </button>
-                                <button class="action-btn btn-delete">
-                                    <i class="fas fa-trash"></i>
-                                    Delete
-                                </button>
-                            </div>
-                        </div>
-
-                        <h3 class="post-title">🎨 Logo Design & Brand Identity Package</h3>
-
-                        <div class="post-description">
-                            We were looking for a creative graphic designer to develop a complete brand identity package
-                            including logo design, color palette, typography, and brand guidelines. The project was for
-                            a tech startup in the sustainability sector requiring modern, clean designs.
-                        </div>
-
-                        <div class="post-skills">
-                            <span class="skills-label">Required Skills:</span>
-                            <div class="skills-tags">
-                                <span class="skill-tag">Logo Design</span>
-                                <span class="skill-tag">Brand Identity</span>
-                                <span class="skill-tag">Adobe Illustrator</span>
-                                <span class="skill-tag">Typography</span>
-                                <span class="skill-tag">Color Theory</span>
-                            </div>
-                        </div>
-
-                        <div class="post-footer">
-                            <div class="post-details">
-                                <div class="detail-item">
-                                    <span class="detail-label">Budget</span>
-                                    <span class="detail-value budget-amount">$1,200 - $2,000</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-label">Final Proposals</span>
-                                    <span class="detail-value proposals-count">52</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-label">Duration</span>
-                                    <span class="detail-value project-duration">2-3 weeks</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="engagement-stats">
-                            <div class="stat-item">
-                                <i class="fas fa-eye"></i>
-                                <span>343 views</span>
-                            </div>
-                            <div class="stat-item">
-                                <i class="fas fa-clock"></i>
-                                <span>Expired</span>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Pagination Expired -->
-                    <div class="pagination" aria-label="Pagination Expired Posts">
-                        <button class="page-btn prev" disabled><i class="fa-regular fa-chevron-left"></i></button>
-                        <button class="page-btn active">1</button>
-                        <button class="page-btn">2</button>
-                        <button class="page-btn">3</button>
-                        <button class="page-btn next"><i class="fa-regular fa-chevron-right"></i></button>
-                    </div>
+                        <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -551,62 +467,150 @@
         <hr>
         <div class="pop-up-content">
             <form id="create-post-form" class="create-post-form" onsubmit="return false;">
-                <div class="form-group">
-                    <label for="post-title">Post Title</label>
-                    <input type="text" id="post-title" name="title" placeholder="Enter a clear, concise title" required>
-                </div>
-                <div class="form-group">
-                    <label for="post-description">Post Description</label>
-                    <textarea id="post-description" name="description" rows="4"
-                        placeholder="Describe the work, scope, deliverables, and expectations" required></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="post-skills">Required Skills</label>
-                    <input type="text" id="post-skills" name="skills"
-                        placeholder="e.g., React, Node.js, SEO (comma-separated)">
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="requesting-price">Requesting Price</label>
-                        <input type="number" id="requesting-price" name="price" placeholder="e.g., 5000" min="0"
-                            step="0.01">
-                    </div>
-                    <div class="form-group">
-                        <label for="price-type">Price Type</label>
-                        <select id="price-type" name="price_type">
-                            <option value="hourly">Hourly</option>
-                            <option value="fixed">Entire Work</option>
-                            <option value="daily">Daily</option>
-                        </select>
+                <div class="input-grid-1">
+                    <div class="text-container">
+                        <div class="label text-label">Title</div>
+                        <input type="text" class="text-field" name="title" id="">
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="work-level">Level of Work</label>
-                        <select id="work-level" name="level">
-                            <option value="beginner">Beginner</option>
-                            <option value="intermediate">Intermediate</option>
-                            <option value="expert">Expert</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="duration">Duration</label>
-                        <input type="text" id="duration" name="duration" placeholder="e.g., 2-3 months">
+                <div class="input-grid-1">
+                    <div class="text-container">
+                        <div class="label text-label">Description</div>
+                        <textarea class="text-field" spellcheck="false" name="description"></textarea>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label for="expire-date">Post Expire Date (limits bidding time)</label>
-                    <input type="date" id="expire-date" name="expire_date">
+                <div class="input-grid-1">
+                    <div class="search-select-container" data-idinput="Category_ID">
+                        <div class="text-container">
+                            <div class="label search-dropdown-label">Service Category</div>
+                            <input type="text" class="text-field-search-dropdown" id="Category" autocomplete="off"
+                                onkeydown="return false">
+                        </div>
+                        <div class="options">
+                            <span class="text-container">
+                                <input type="text" class="text-field-search">
+                            </span>
+                            <div class="option-list" onclick="selectCategory(event)">
+                                <?php foreach ($categories as $Category): ?>
+                                    <div data-id="<?= $Category['Category_ID'] ?>">
+                                        <?= htmlspecialchars($Category['Name']) ?>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="Category_ID" name="categoryid">
+                </div>
+                <div class="input-grid-1">
+                    <div style="display: flex; gap: 15px; margin-bottom: 5px;">
+
+                        <div class="search-select-container add-option" style="width: 100%;">
+
+                            <div class="text-container">
+                                <div class="label search-dropdown-label">Skill</div>
+                                <input type="text" class="text-field-search-dropdown" id="SkillAddInput"
+                                    autocomplete="off" onkeydown="return false">
+                            </div>
+
+                            <div class="options">
+
+                                <span class="text-container">
+                                    <input type="text" class="text-field-search" placeholder="Enter new skill to add">
+                                </span>
+
+                                <div class="option-list" id="SkillsOptionList">
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="button" style="white-space: nowrap;" onclick="addSkill();">
+                            <i class="fa-solid fa-plus" style="margin-right: 10px;"></i>Add
+                        </button>
+
+                    </div>
+                </div>
+                <div class="chip-wrapper" id="SkillsChips" style="margin-bottom:20px">
+                    <input type="hidden" id="Skills" name="skills">
+
+                    <p>No skill selected</p>
+                </div>
+                <div class="input-grid-2">
+                    <div class="text-container">
+                        <div class="label text-label">Requesting Price</div>
+                        <input type="text" class="text-field" name="price" id="">
+                    </div>
+                    <div class="search-select-container">
+                        <div class="text-container">
+                            <div class="label search-dropdown-label">Price Type</div>
+                            <input type="text" class="text-field-search-dropdown" autocomplete="off"
+                                onkeydown="return false" name="pricetype" id="">
+                        </div>
+                        <div class="options">
+                            <div class="option-list">
+                                <div>Fixed</div>
+                                <div>Hourly</div>
+                                <div>Daily</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="input-grid-1">
+                    <div class="search-select-container">
+                        <div class="text-container">
+                            <div class="label search-dropdown-label">Level</div>
+                            <input type="text" class="text-field-search-dropdown" autocomplete="off"
+                                onkeydown="return false" name="level" id="">
+                        </div>
+                        <div class="options">
+                            <div class="option-list">
+                                <div>Beginner</div>
+                                <div>Intermediate</div>
+                                <div>Advanced</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="input-grid-2">
+                    <div class="text-container">
+                        <div class="label text-label">Duration</div>
+                        <input type="text" class="text-field" name="duration" id="">
+                    </div>
+                    <div class="search-select-container">
+                        <div class="text-container">
+                            <div class="label search-dropdown-label">Duration Type</div>
+                            <input type="text" class="text-field-search-dropdown" autocomplete="off"
+                                onkeydown="return false" name="durationtype" id="">
+                        </div>
+                        <div class="options">
+                            <div class="option-list">
+                                <div>Days</div>
+                                <div>Weeks</div>
+                                <div>Months</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-grid-1">
+                    <div class="text-container">
+                        <div class="label text-label label-float">Expired Date</div>
+                        <input type="date" class="text-field" name="endat" id="">
+                    </div>
                 </div>
 
                 <div class="modal-actions">
                     <button type="button" class="action-btn btn-view" id="create-post-pop-up"
                         data-role="cancel">Cancel</button>
-                    <button type="button" class="action-btn btn-edit" id="create-post-pop-up" data-role="save-draft">
+                    <button type="button" class="action-btn btn-edit" onclick="window.submitCreatePost('draft')"
+                        id="create-post-pop-up" data-role="save-draft">
                         <i class="fa-regular fa-floppy-disk"></i>
                         Save Draft
                     </button>
-                    <button type="button" class="action-btn btn-view" id="create-post-pop-up" data-role="publish">
+                    <button type="button" class="action-btn btn-view" onclick="window.submitCreatePost('publish')"
+                        id="create-post-pop-up" data-role="publish">
                         <i class="fa-regular fa-rocket"></i>
                         Publish Post
                     </button>
@@ -620,7 +624,7 @@
     </div>
 </div>
 <script>
-    
+
     // (Removed previous capture guard). We'll override togglePopUp safely after external scripts load.
 </script>
 <!-- Post Details Modal -->
@@ -698,6 +702,57 @@
         </div>
     </div>
 </div>
+<script>
+    function selectCategory(e) {
+        // same behavior as registration, but robustly read the clicked option
+        const opt = e?.target?.closest('[data-id]');
+        if (opt) {
+            document.getElementById("Category_ID").value = opt.dataset.id;
+        }
+        const CategoryID = document.getElementById("Category_ID").value;
+        // reset skills dropdown UI
+        document.getElementById("SkillAddInput").value = "";
+        document.getElementById("SkillsOptionList").innerHTML = "";
+        document.getElementById("SkillAddInput").parentElement
+            .querySelector(".label").classList.remove("label-float");
 
+        // absolute URL (like reg page but for posts endpoint)
+        fetch("<?= BASE_URL ?>/posts/get-skills", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: "category_id=" + encodeURIComponent(CategoryID)
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    data.result.forEach(element => {
+                        addItemToDropdown("SkillAddInput", element.Skill, false);
+                    });
+                } else {
+                    console.log(data);
+                }
+            })
+            .catch(err => console.error(err));
+    }
+
+    function addSkill() {
+        if (addChip('SkillsChips', document.getElementById("SkillAddInput").value)) {
+            document.getElementById("SkillAddInput").value = "";
+            document.getElementById("SkillAddInput").parentElement
+                .querySelector(".label").classList.remove("label-float");
+        } else {
+            document.getElementById("SkillAddInput").focus();
+        }
+    }
+    // expose to inline onclick
+    window.submitCreatePost = function (action) {
+        const BASE = "<?= BASE_URL ?>";
+        const form = document.getElementById('create-post-form');
+        if (!form) return;
+        form.action = BASE + '/posts/' + (action === 'draft' ? 'draft' : 'publish');
+        form.method = 'POST';
+        form.submit();
+    };
+</script>
 
 </html>

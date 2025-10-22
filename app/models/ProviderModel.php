@@ -7,7 +7,7 @@ class ProviderModel extends Database
 
     public function getByEmail($email)
     {
-        $stmt = $this->conn->prepare("SELECT * FROM Provider WHERE Email = ?");
+        $stmt = $this->conn->prepare("SELECT * FROM Provider WHERE Email = ? AND Status='active'");
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $result = $stmt->get_result();

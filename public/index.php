@@ -147,6 +147,21 @@ switch ($url) {
         $controller->index();
         break;
 
+    case 'posts/get-skills':
+        $controller = new PostController();
+        $controller->getSkills();
+        break;
+
+    case 'posts/draft':
+        $controller = new PostController();
+        $controller->draftPost();
+        break;
+
+    case 'posts/publish':
+        $controller = new PostController();
+        $controller->publishPost();
+        break;
+
     default:
         $controller = new NotFoundController();
         $controller->index();
