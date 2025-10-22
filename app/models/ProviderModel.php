@@ -5,6 +5,15 @@ require_once __DIR__ . '/../core/Database.php';
 class ProviderModel extends Database
 {
 
+    public function getByEmail($email)
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM Provider WHERE Email = ?");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+        return $result->fetch_assoc();
+    }
 
     public function insertProvider($data)
     {

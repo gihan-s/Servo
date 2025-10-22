@@ -16,8 +16,6 @@ class ProfileController
 
     public function view()
     {
-        $_SESSION['user_id'] = 2;
-        $_SESSION['role'] = 'client';
         // Step 1: Check if user is logged in
         if (!isset($_SESSION['user_id']) || !isset($_SESSION['role'])) {
             header("Location: /login");
@@ -28,10 +26,10 @@ class ProfileController
         $role = $_SESSION['role'];
 
         // Step 2: Load the correct model based on role
-        if ($role === 'client') {
+        if ($role === 'Client') {
             $user = $this->clientModel->getClientById($userId);
             $viewFile = __DIR__ . '/../views/client/Profile/index.php';
-        } elseif ($role === 'provider') {
+        } elseif ($role === 'Provider') {
             $user = $this->providerModel->getProviderById($userId);
             $viewFile = __DIR__ . '/../views/provider/Profile/index.php';
         } else {
@@ -63,9 +61,9 @@ class ProfileController
 
         
         $ok = false;
-        if ($role === 'client') {
+        if ($role === 'Client') {
             $ok = $this->clientModel->updateProfile($userId, $firstName, $lastName, $contact, $gender, $website, $bio);
-        } elseif ($role === 'provider') {
+        } elseif ($role === 'Provider') {
             $ok = $this->providerModel->updateProfile($userId, $firstName, $lastName, $contact, $gender, $website, $bio);
         } else {
             $_SESSION['flash'] = ['type' => 'error', 'message' => 'Invalid user role'];
@@ -176,7 +174,7 @@ class ProfileController
         }
 
         // Fetch current user to compare password
-        $user = $role === 'client'
+        $user = $role === 'Client'
             ? $this->clientModel->getClientById($userId)
             : $this->providerModel->getProviderById($userId);
 
@@ -195,7 +193,7 @@ class ProfileController
 
         // Update password
         $hash = password_hash($newPass, PASSWORD_DEFAULT);
-        $ok = $role === 'client'
+        $ok = $role === 'Client'
             ? $this->clientModel->updatePassword($userId, $hash)
             : $this->providerModel->updatePassword($userId, $hash);
 

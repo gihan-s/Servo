@@ -23,9 +23,9 @@ class PostController
         $role   = $_SESSION['role'];
 
         // Choose view by role
-        if ($role === 'client') {
+        if ($role === 'Client') {
             $viewFile = __DIR__ . '/../views/client/Posts/index.php';
-        } elseif ($role === 'provider') {
+        } elseif ($role === 'Provider') {
             $viewFile = __DIR__ . '/../views/provider/Posts/index.php';
         } else {
             http_response_code(403);

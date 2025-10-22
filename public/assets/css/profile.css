@@ -193,6 +193,23 @@ main {
   }
 }
 
+.profile-logout {
+  margin: 10px 0 0;
+}
+.btn-logout {
+  display: inline-block;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #ef4444;
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+}
+.btn-logout:hover {
+  background: #dc2626;
+  color: #fff;
+}
+
 .card {
   background: #fff;
   border: 1px solid #e5e7eb;
@@ -507,9 +524,15 @@ select:focus {
   pointer-events: auto;
 }
 
-#toast.success { background: #16a34a; }
-#toast.error   { background: #dc2626; }
-#toast.info    { background: #2563eb; }
+#toast.success {
+  background: #16a34a;
+}
+#toast.error {
+  background: #dc2626;
+}
+#toast.info {
+  background: #2563eb;
+}
 
 /* Modal */
 .modal-overlay {
