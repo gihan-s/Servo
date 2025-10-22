@@ -1,7 +1,3 @@
-<?php
-require_once __DIR__ . '/../../../../config.php';
-?>
-
 <?php if (!empty($_SESSION['flash'])): ?>
     <script>
         window.__FLASH__ = <?php echo json_encode($_SESSION['flash']); ?>;
@@ -35,7 +31,7 @@ require_once __DIR__ . '/../../../../config.php';
             <div class="hero-inner">
                 <div class="hero-avatar-wrap">
                     <img class="hero-avatar" id="avatarPublicPreview"
-                        src="<?= BASE_URL . htmlspecialchars($user['Profile_Picture']) ?>" alt="Avatar" />
+                        src="<?= BASE_URL . "/../uploads/Users/" . htmlspecialchars($user['Profile_Picture']) ?? '' ?>" />
                     <button id="avatarSaveBtn" class="avatar-save-btn" style="display:none;" onclick="saveAvatar()"><i
                             class="fa-regular fa-floppy-disk"></i> Save</button>
                 </div>
@@ -62,6 +58,11 @@ require_once __DIR__ . '/../../../../config.php';
                         class="fa-regular fa-user"></i> Personal <span class="count">Info</span></button>
                 <button class="pill" data-target="section-account" aria-current="false"><i
                         class="fa-regular fa-shield-check"></i> Security <span class="count">Settings</span></button>
+                <a href="<?= BASE_URL ?>/logout" class="btn-logout pill">
+                    <i class="fa-regular fa-right-from-bracket"></i> Logout
+                </a>
+
+
             </nav>
             <div class="profile-content">
                 <section id="section-personal" class="profile-section active" aria-label="Personal information">
@@ -211,8 +212,9 @@ require_once __DIR__ . '/../../../../config.php';
             <button class="close-btn" onclick="closeFP()" aria-label="Close"><i
                     class="fa-regular fa-xmark"></i></button>
             <h3 id="fpTitle">Reset Your Password</h3>
-            <form  onsubmit="sendFP(event)">
-                <input type="email" name="fp_email" id="fp_email" placeholder="you@example.com" value="<?= htmlspecialchars($user['Email']) ?>" required readonly/>
+            <form onsubmit="sendFP(event)">
+                <input type="email" name="fp_email" id="fp_email" placeholder="you@example.com"
+                    value="<?= htmlspecialchars($user['Email']) ?>" required readonly />
                 <div class="actions" style="margin-top:4px;">
                     <button type="submit" class="btn btn-primary"><i class="fa-regular fa-paper-plane"></i> Send
                         Code</button>

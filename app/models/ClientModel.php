@@ -4,6 +4,17 @@ require_once __DIR__ . '/../core/Database.php';
 
 class ClientModel extends Database
 {
+
+    public function getByEmail($email)
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM Client WHERE Email = ?");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+        return $result->fetch_assoc();
+    }
+
     // Get client by ID
     public function getClientById($id)
     {
@@ -28,17 +39,21 @@ class ClientModel extends Database
         $website = $this->conn->real_escape_string($website);
         $bio = $this->conn->real_escape_string($bio);
 
-        $sql = "UPDATE Client
-                SET First_Name='$firstName', Last_Name='$lastName', Contact_No='$contact', Gender='$gender', Social_Link='$website', Bio='$bio'
-                WHERE Client_ID=$id";
+        $stmt = $this->conn->prepare("UPDATE Client
+                SET First_Name=?, Last_Name=?, Contact_No=?, Gender=?, Social_Link=?, Bio=?
+                WHERE Client_ID=?");
+        if (!$stmt)
+            return false;
+        $stmt->bind_param("ssssssi", $firstName, $lastName, $contact, $gender, $website, $bio, $id);
+        return $stmt->execute();
 
-        return $this->conn->query($sql);
     }
 
     public function updatePassword($id, $hashed)
     {
         $stmt = $this->conn->prepare("UPDATE client SET Password = ? WHERE Client_ID = ?");
-        if (!$stmt) return false;
+        if (!$stmt)
+            return false;
         $stmt->bind_param("si", $hashed, $id);
         return $stmt->execute();
     }

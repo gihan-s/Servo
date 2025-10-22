@@ -8,6 +8,9 @@ require_once '../app/controllers/NotFoundController.php';
 require_once '../app/controllers/ProfileController.php';
 require_once '../app/controllers/FileController.php';
 require_once '../app/controllers/DashboardController.php';
+require_once '../app/controllers/ProjectController.php';
+require_once '../app/controllers/PostController.php';
+require_once '../app/controllers/LoginController.php';
 
 // Get the URL path
 $url = $_GET['url'] ?? 'home';
@@ -17,6 +20,21 @@ switch ($url) {
     case 'home':
         $controller = new HomeController();
         $controller->index();
+        break;
+
+    case 'login':
+        $controller = new LoginController();
+        $controller->view();
+        break;
+
+    case 'login/authenticate':
+        $controller = new LoginController();
+        $controller->authenticate();
+        break;
+
+    case 'logout':
+        $controller = new LoginController();
+        $controller->logout();
         break;
 
     case 'register':
@@ -116,6 +134,16 @@ switch ($url) {
 
     case 'dashboard':
         $controller = new DashboardController();
+        $controller->index();
+        break;
+
+    case 'projects':
+        $controller = new ProjectController();
+        $controller->index();
+        break;
+
+    case 'posts':
+        $controller = new PostController();
         $controller->index();
         break;
 

@@ -8,6 +8,7 @@
     <title>Client Dashboard</title>
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/cardList.css" />
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/dashboard.css" />
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/footer.css" />
     <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css" />
     
 </head>

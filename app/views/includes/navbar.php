@@ -1,6 +1,51 @@
 <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/styles.css">
 <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/navbar.css">
 <!-- Header -->
+
+<?php
+
+$scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($_SERVER['SERVER_PORT'] ?? '') == 443 ? 'https' : 'http';
+if (!empty($_SERVER['HTTP_X_FORWARDED_PROTO'])) { $scheme = $_SERVER['HTTP_X_FORWARDED_PROTO']; } // if behind proxy
+$currentUrl = $scheme . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+$uriNoBase  = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '/';
+// Now $currentUrl is the full URL, $uriNoBase is just the path (useful for active() checks)
+
+// Provider-specific nav links (left side)
+if ($_SESSION['role'] === 'Provider') {
+    $navLinks = [
+        ['label' => 'Dashboard', 'href' => BASE_URL . '/dashboard'],
+        ['label' => 'Feeds', 'href' => BASE_URL . '/feeds'],
+        ['label' => 'Bids', 'href' => BASE_URL . '/bids'],
+        ['label' => 'Projects', 'href' => BASE_URL . '/projects'],
+        ['label' => 'Earnings', 'href' => BASE_URL . '/earnings'],
+    ];
+
+    // Right-side icons and profile
+    $navRight = [
+        ['type' => 'icon', 'icon' => 'fa-regular fa-envelope', 'href' => BASE_URL . '/messages', 'aria' => 'Messages'],
+        ['type' => 'icon', 'icon' => 'fa-regular fa-bell', 'href' => BASE_URL . '/notifications', 'aria' => 'Notifications'],
+        ['type' => 'profile', 'href' => BASE_URL . '/profile'], // profile/avatar
+    ];
+}
+elseif ($_SESSION['role'] === 'Client') {
+    $navLinks = [
+        ['label' => 'Dashboard', 'href' => BASE_URL . '/dashboard'],
+        ['label' => 'Projects', 'href' => BASE_URL . '/projects'],
+        ['label' => 'Providers', 'href' => BASE_URL . '/providers'],
+        ['label' => 'Posts', 'href' => BASE_URL . '/posts'],
+        ['label' => 'Payments', 'href' => BASE_URL . '/payments'],
+    ];
+
+    // Right-side icons and profile
+    $navRight = [
+        ['type' => 'icon', 'icon' => 'fa-regular fa-envelope', 'href' => BASE_URL . '/messages', 'aria' => 'Messages'],
+        ['type' => 'icon', 'icon' => 'fa-regular fa-bell', 'href' => BASE_URL . '/notifications', 'aria' => 'Notifications'],
+        ['type' => 'profile', 'href' => BASE_URL . '/profile'], // profile/avatar
+    ];
+}
+
+?>
+
 <header>
     <nav class="navbar" role="navigation" aria-label="Main navigation">
         <a href="<?= BASE_URL ?>" class="logo" aria-label="Home">
@@ -12,71 +57,38 @@
                 <span></span><span></span><span></span>
             </button>
             <div class="nav-links" id="navLinks">
-                <?php
-                $uri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
-                // Remove query, normalize slashes
-                $uri = preg_replace('#/{2,}#','/',$uri);
-                // Strip trailing slash (except root)
-                $uri = rtrim($uri, '/');
-                if ($uri === '') { $uri = '/'; }
-                // Compute base path portion from BASE_URL (e.g., http://host/bsk) → '/bsk'
-                $basePath = parse_url(BASE_URL, PHP_URL_PATH) ?? '';
-                if ($basePath && $basePath !== '/' && str_starts_with($uri, $basePath)) {
-                    $uriNoBase = substr($uri, strlen($basePath));
-                    if ($uriNoBase === '') { $uriNoBase = '/'; }
-                } else {
-                    $uriNoBase = $uri;
-                }
-                /**
-                 * Determine active class.
-                 * - Exact path match after removing BASE path.
-                 * - Also treat nested pages (e.g., /client/profile/settings) as active for /client/profile.
-                 */
-                function active(string $path, string $currentRelative): string {
-                    if ($currentRelative === $path) return 'active';
-                    if ($path !== '/' && str_starts_with($currentRelative, $path . '/')) return 'active';
-                    return '';
-                }
-                // Provide helper to build link hrefs consistently
-                function hlink(string $path): string { return BASE_URL . $path; }
-                ?>
-                <a href="<?= hlink('/provider/dashboard') ?>"
-                    class="<?= active('/provider/dashboard', $uriNoBase) ?>">
+                <a href="<?= $navLinks[0]['href'] ?>" class="<?= ('./' . basename( $_SERVER['REQUEST_URI'])) === $navLinks[0]['href'] ? 'active' : '' ?>">
                     <i class="fas fa-th-large"></i>
                     <span>Dashboard</span>
                 </a>
-                <a href="<?= hlink('/provider/jobs') ?>"
-                    class="<?= active('/provider/jobs', $uriNoBase) ?>">
+                <a href="<?= $navLinks[1]['href'] ?>" class="<?= ('./' . basename( $_SERVER['REQUEST_URI'])) === $navLinks[1]['href'] ? 'active' : '' ?>">
                     <i class="fas fa-briefcase"></i>
                     <span>Projects</span>
                 </a>
-                <a href="<?= hlink('/provider/providers') ?>" class="<?= active('/provider/providers', $uriNoBase) ?>">
+                <a href="<?= $navLinks[2]['href'] ?>" class="<?= ('./' . basename( $_SERVER['REQUEST_URI'])) === $navLinks[2]['href'] ? 'active' : '' ?>">
                     <i class="fa-solid fa-users"></i>
                     <span>Providers</span>
                 </a>
-                <a href="<?= hlink('/provider/posts') ?>"
-                    class="<?= active('/provider/posts', $uriNoBase) ?>">
+                <a href="<?= $navLinks[3]['href'] ?>" class="<?= ('./' . basename( $_SERVER['REQUEST_URI'])) === $navLinks[3]['href'] ? 'active' : '' ?>">
                     <i class="fa-solid fa-layer-plus"></i>
                     <span>Posts</span>
                 </a>
-                <a href="<?= hlink('/provider/payments') ?>"
-                    class="<?= active('/provider/payments', $uriNoBase) ?>">
+                <a href="<?= $navLinks[4]['href'] ?>" class="<?= ('./' . basename( $_SERVER['REQUEST_URI'])) === $navLinks[4]['href'] ? 'active' : '' ?>">
                     <i class="fa-solid fa-credit-card"></i><span>Payments</span></a>
             </div>
         </div>
         <div class="user-menu" id="userMenu">
-            <a href="<?= hlink('/provider/messages') ?>"
-                class="<?= active('/provider/messages', $uriNoBase) ?>"
+            <a href="<?= $navRight[0]['href'] ?>" class="<?= ('./' . basename( $_SERVER['REQUEST_URI'])) === $navRight[0]['href'] ? 'active' : '' ?>"
                 aria-label="Messages">
                 <i class="fas fa-comments"></i>
             </a>
-            <button class="notification-icon" id="notifToggle" aria-label="Notifications" aria-haspopup="true"
+            <button class="notification-icon <?= ('./' . basename( $_SERVER['REQUEST_URI'])) === $navRight[1]['href'] ? 'active' : '' ?>" id="notifToggle" aria-label="Notifications" aria-haspopup="true"
                 aria-expanded="false">
                 <i class="fas fa-bell"></i>
                 <span class="notification-badge" id="notifBadge">3</span>
             </button>
-            <div class="user-profile" onclick="window.location.href='<?= hlink('/provider/profile') ?>'" role="button" tabindex="0"
-                aria-label="Profile">
+            <div class="user-profile" onclick="window.location.href='<?= $navRight[2]['href'] ?>'" role="button"
+                tabindex="0" aria-label="Profile">
                 <div class="user-avatar">JC</div>
                 <div class="user-name">John Client</div>
             </div>
@@ -92,7 +104,7 @@
                 <div class="notif-list" id="notifList"></div>
                 <div class="notif-footer">
                     <button class="mark-all" id="markAllBtn">Mark all read</button>
-                    <a href="<?= BASE_URL ?>/client/notifications" class="view-all">View all</a>
+                    <a href="<?= $navRight[1]['href'] ?>" class="view-all">View all</a>
                 </div>
             </div>
         </div>
@@ -104,15 +116,17 @@
             <div class="drawer-section" id="drawerLinks"><!-- cloned links --></div>
             <div class="drawer-section divider"></div>
             <div class="drawer-section">
-                <a href="<?= hlink('/client/messages') ?>"
-                    class="drawer-link <?= active('/client/messages', $uriNoBase) ?>"><i
-                        class="fas fa-comments"></i> Messages</a>
-                <a href="<?= hlink('/client/profile') ?>"
-                    class="drawer-link <?= active('/client/profile', $uriNoBase) ?>"><i
-                        class="fas fa-user-circle"></i> Profile</a>
-        <a href="<?= hlink('/client/notifications') ?>" class="drawer-link <?= active('/client/notifications', $uriNoBase) ?>"><i class="fas fa-bell"></i> Notifications <span
-            class="badge">3</span></a>
-                <a href="<?= hlink('/logout') ?>" class="drawer-link"><i class="fas fa-arrow-right-from-bracket"></i> Logout</a>
+                <a href="<?= $navRight[0]['href'] ?>"
+                    class="drawer-link <?= $currentUrl === $navRight[0]['href'] ? 'active' : '' ?>"><i class="fas fa-comments"></i>
+                    Messages</a>
+                <a href="<?= $navRight[2]['href'] ?>"
+                    class="drawer-link <?= $currentUrl === $navRight[2]['href'] ? 'active' : '' ?>"><i class="fas fa-user-circle"></i>
+                    Profile</a>
+                <a href="<?= $navRight[1]['href'] ?>"
+                    class="drawer-link <?= $currentUrl === $navRight[1]['href'] ? 'active' : '' ?>"><i class="fas fa-bell"></i>
+                    Notifications <span class="badge">3</span></a>
+                <a href="<?= BASE_URL . '/login' ?>" class="drawer-link"><i class="fas fa-arrow-right-from-bracket"></i>
+                    Logout</a>
             </div>
         </div>
         <div class="drawer-overlay" id="drawerOverlay" tabindex="-1" aria-hidden="true"></div>
@@ -120,7 +134,6 @@
 </header>
 <style>
     /* --- Responsive Navbar (Upwork-like) --- */
-    
 </style>
 <script>
     // JS for responsive navbar: overflow management & drawer

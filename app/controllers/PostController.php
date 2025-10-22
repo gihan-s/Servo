@@ -3,7 +3,7 @@
 require_once __DIR__ . '/../models/ClientModel.php';
 require_once __DIR__ . '/../models/ProviderModel.php';
 
-class DashboardController
+class PostController
 {
     private $clientModel;
     private $providerModel;
@@ -24,9 +24,9 @@ class DashboardController
 
         // Choose view by role
         if ($role === 'Client') {
-            $viewFile = __DIR__ . '/../views/client/Dashboard/index.php';
+            $viewFile = __DIR__ . '/../views/client/Posts/index.php';
         } elseif ($role === 'Provider') {
-            $viewFile = __DIR__ . '/../views/provider/Dashboard/index.php';
+            $viewFile = __DIR__ . '/../views/provider/Posts/index.php';
         } else {
             http_response_code(403);
             echo "Invalid role";
@@ -44,6 +44,5 @@ class DashboardController
             exit;
         }
     }
-
 
 }
