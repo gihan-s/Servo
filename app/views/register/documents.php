@@ -83,7 +83,7 @@ $BaseURL = "..";
 				<div class="input-grid-1">
 					<div class="text-container">
 						<div class="label text-label label-float">Resume</div>
-						<input type="file" class="text-field" name="resume" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt">
+						<input type="file" class="text-field" name="resume" accept=".pdf">
 					</div>
 				</div>
 

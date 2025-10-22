@@ -23,7 +23,6 @@ $TopBarHeader = "Dashboard";
     <!-- Javascript -->
     <script src="/assets/js/elementScript.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-doughnutlabel"></script>
 
     <script src="/assets/js/admin-script.js" defer></script>
     <script src="/assets/js/admin-dashboardCharts.js" defer></script>
@@ -107,7 +106,7 @@ $TopBarHeader = "Dashboard";
                 <div class="dougnut-chart-wrapper">
                     <canvas id="VisitsSummery"></canvas>
 
-                    <h3>Projects Summery</h3>
+                    <h3>Projects Summary</h3>
                 </div>
 
                 <table class="visit-table">
@@ -251,7 +250,7 @@ $TopBarHeader = "Dashboard";
             <div class="container">
 
 
-                <h3>Most Spending Clints</h3>
+                <h3>Most Spending Clients</h3>
 
                 <div class="customer-progress-card">
                     <img src="https://randomuser.me/api/portraits/med/men/65.jpg" alt="">

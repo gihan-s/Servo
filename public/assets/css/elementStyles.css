@@ -725,3 +725,127 @@
   background-color: white;
 }
 
+
+
+/* Option Menu */
+
+
+.option-menu{
+  position: relative;
+  display: inline-block;
+}
+
+.option-menu-button {
+  padding: 10px;
+
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+
+  transition: all 0.2s;
+
+  font-size: 1em;
+}
+
+.option-menu-button:hover {
+  background-color: #00000010;
+}
+
+.option-menu-content {
+
+  box-shadow: 0px 0px 5px 0px #00000025;
+  border-radius: 5px;
+
+  flex-direction: column;
+
+  min-width: 100px;
+
+  display: none;
+
+  position: absolute;
+
+  user-select: none;
+
+  top: 100%;
+  right: 0%;
+
+  background-color: white;
+  z-index: 100;
+
+  transform: scale(0);
+
+  transition: all 0.1s;
+
+  display: inline-flex;
+
+  transform-origin: top right;
+}
+
+.option-menu-content.active {
+  
+
+  transform: scale(1);
+}
+
+.option-menu-item {
+  padding: 5px 10px;
+  font-size: 0.9em;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: grid;
+  grid-template-columns: 25px auto;
+  align-items: center;
+}
+
+.option-menu-item i {
+  font-size: 0.8em;
+}
+
+.option-menu-item:hover {
+  background-color: #00000010;
+}
+
+.option-menu-item.red {
+  color: red;
+}
+
+.option-menu-item.red i {
+  color: red;
+}
+
+
+
+
+.chip-blue, .chip-yellow, .chip-green, .chip-purple, .chip-orange, .chip-red{
+  padding: 5px;
+  border-radius: 5px;
+  color: white;
+}
+
+.chip-blue{
+  background-color: #007bff;
+}
+
+.chip-yellow{
+  background-color: #ffc107;
+}
+
+.chip-green{
+  background-color: #28a745;
+}
+
+.chip-purple{
+  background-color: #6610f2;
+}
+
+.chip-orange{
+  background-color: #f76f00;
+}
+
+.chip-red{
+  background-color: red;
+}

@@ -597,3 +597,55 @@ function inputReset(formID) {
 
     }
 }
+
+
+
+
+//Option Menu
+const OptionMenus = document.querySelectorAll(".option-menu");
+for (let i = 0; i < OptionMenus.length; i++) {
+    const element = OptionMenus[i];
+
+    element.querySelector(".option-menu-button").addEventListener("click", (event) => {
+
+        setTimeout(() => {
+            event.target.nextElementSibling.classList.add("active");
+
+            setTimeout(() => {
+                document.body.addEventListener("click", (event2) => {
+                    if (event2.target !== element.querySelector(".option-menu-button")) {
+                        event.target.nextElementSibling.classList.remove("active");
+                    }
+                }, { once: true })
+            }, 50);
+
+        }, 50)
+    })
+}
+
+
+//pagination
+function nextPagination(element){
+    if (!element.parentElement.querySelector(".active").nextElementSibling.classList.contains("next")) {
+        element.parentElement.querySelector(".active").nextElementSibling.click();
+    }
+}
+function previosPagination(element){
+    if (!element.parentElement.querySelector(".active").previousElementSibling.classList.contains("prev")) {
+        element.parentElement.querySelector(".active").previousElementSibling.click();
+    }
+}
+
+function showLoadingOn(elementID){
+    const element = document.getElementById(elementID);
+    
+    const div = document.createElement("div");
+    div.style.display = 'flex';
+    div.style.justifyContent = 'center';
+    const img = document.createElement("img");
+    img.src = '/assets/img/loading.gif';
+    img.style.width = "200px";
+    div.appendChild(img);
+    element.innerHTML = '';
+    element.appendChild(div);
+}

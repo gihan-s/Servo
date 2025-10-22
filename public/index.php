@@ -11,11 +11,14 @@ require_once '../app/controllers/DashboardController.php';
 require_once '../app/controllers/ProjectController.php';
 require_once '../app/controllers/PostController.php';
 require_once '../app/controllers/LoginController.php';
+
 require_once '../app/controllers/admin/AdminLoginController.php';
 require_once '../app/controllers/admin/AdminDashboardController.php';
+require_once '../app/controllers/admin/AdminProviderController.php';
 
 // Get the URL path
 $url = $_GET['url'] ?? 'home';
+$url = strtolower($url);
 
 // Router
 switch ($url) {
@@ -80,6 +83,11 @@ switch ($url) {
         break;
 
     case (preg_match('#^file/temp-images/(.+)$#', $url, $matches) ? true : false):
+        $controller = new FileController();
+        $controller->showTempImage($matches[1]);
+        break;
+
+    case (preg_match('#^file/user-files/(.+)$#', $url, $matches) ? true : false):
         $controller = new FileController();
         $controller->showUserImage($matches[1]);
         break;
@@ -189,6 +197,22 @@ switch ($url) {
         $controller = new AdminDashboardController();
         $controller->index();
         break;
+
+    case 'admin/providers':
+        $controller = new AdminProviderController();
+        $controller->index();
+        break;
+
+    case (preg_match('#^admin/providers/view/(\d+)$#', $url, $matches) ? true : false):
+        $controller = new AdminProviderController();
+        $controller->view($matches[1]);
+        break;
+
+    case 'admin/providers/provider-review':
+        $controller = new AdminProviderController();
+        $controller->review();
+        break;
+
 
     default:
         $controller = new NotFoundController();
