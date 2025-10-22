@@ -1,7 +1,7 @@
 <?php
 
 // Database credentials
-if ($_SERVER['SERVER_NAME'] === 'localhost') {
+if ($_SERVER['SERVER_NAME'] === 'localhost' || $_SERVER['SERVER_NAME'] === 'servo.local') {
     define('DB_HOST', 'localhost');
     define('DB_USER', 'root');
     define('DB_PASS', '');

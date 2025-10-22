@@ -11,6 +11,8 @@ require_once '../app/controllers/DashboardController.php';
 require_once '../app/controllers/ProjectController.php';
 require_once '../app/controllers/PostController.php';
 require_once '../app/controllers/LoginController.php';
+require_once '../app/controllers/admin/AdminLoginController.php';
+require_once '../app/controllers/admin/AdminDashboardController.php';
 
 // Get the URL path
 $url = $_GET['url'] ?? 'home';
@@ -144,6 +146,27 @@ switch ($url) {
 
     case 'posts':
         $controller = new PostController();
+        $controller->index();
+        break;
+
+
+    case 'admin/login':
+        $controller = new AdminLoginController();
+        $controller->index();
+        break;
+
+    case 'admin/login/authenticate':
+        $controller = new AdminLoginController();
+        $controller->authenticate();
+        break;
+
+    case 'admin/logout':
+        $controller = new AdminLoginController();
+        $controller->logout();
+        break;
+
+    case 'admin/dashboard':
+        $controller = new AdminDashboardController();
         $controller->index();
         break;
 

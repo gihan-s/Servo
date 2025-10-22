@@ -1,0 +1,121 @@
+.sidebar-new {
+  background-color: white;
+  position: fixed;
+  left: 20px;
+  top: 20px;
+  bottom: 20px;
+  width: 250px;
+  border-radius: 15px;
+  box-shadow: 0px 0px 5px 0px #00000010;
+  z-index: 1;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 10px;
+}
+
+.topbar-new {
+  background-color: white;
+  height: 70px;
+  border-radius: 15px;
+  box-shadow: 0px 0px 5px 0px #00000010;
+
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  padding-right: 10px;
+
+  margin-bottom: 20px;
+}
+
+.sidebar-new img {
+  width: 70%;
+}
+
+.sidebar-new .option {
+  padding: 8px;
+  display: flex;
+  gap: 20px;
+  font-size: 1.1em;
+  align-items: center;
+  justify-content: start;
+  padding-left: 20px;
+
+  /* background-color: #f5f6f8; */
+  width: 100%;
+  border-radius: 10px;
+
+  cursor: pointer;
+
+  margin-top: 15px;
+
+  color: #00000090;
+
+  transition: all 0.3s;
+}
+
+.sidebar-new .option i {
+  color: #00000090;
+}
+
+.sidebar-new .option:hover {
+  background-color: #ececec;
+  color: black;
+}
+
+.sidebar-new .option:hover i {
+  color: black;
+}
+
+.sidebar-new .option.active {
+  background-color: #ececec;
+  color: black;
+}
+
+.sidebar-new .option.active i {
+  color: black;
+}
+
+.user-wrapper {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  overflow: hidden;
+  width: 50px;
+  transition: all 0.5s;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.user-image img {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+
+  border-radius: 50%;
+}
+
+.user-image {
+  position: relative;
+}
+
+.user-image::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: rgb(0, 206, 0);
+  border: 1px solid white;
+  right: 0;
+  bottom: 0;
+  border-radius: 50%;
+}
+
+
+.topbar-new h3{
+  margin-left: 20px;
+  font-size: 1.3em;
+}
