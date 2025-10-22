@@ -7,7 +7,7 @@ class ProviderModel extends Database
 
     public function getByEmail($email)
     {
-        $stmt = $this->conn->prepare("SELECT * FROM Provider WHERE Email = ?");
+        $stmt = $this->conn->prepare("SELECT * FROM Provider WHERE Email = ? AND Status='active'");
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -233,5 +233,14 @@ class ProviderModel extends Database
         return $stmt->num_rows > 0; // true if email found
     }
 
+    public function deleteProvider($id)
+    {
+        // mark status as 'Deleted' instead of hard-deleting the row
+        $stmt = $this->conn->prepare("UPDATE Provider SET Status = ? WHERE Provider_ID = ?");
+        if (!$stmt) return false;
+        $status = 'Deleted';
+        $stmt->bind_param("si", $status, $id);
+        return $stmt->execute();
+    }
 
 }

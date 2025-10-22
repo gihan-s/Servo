@@ -489,7 +489,15 @@ updateCounts();
 
 // Delete account
 function deleteAccount() {
-    if (confirm("Delete account permanently? This cannot be undone.")) {
-        showToast("Deletion requested");
+    if (!confirm("Delete account permanently? This cannot be undone.")) {
+        return;
     }
+
+    const tmp = document.createElement("form");
+    tmp.method = "POST";
+    tmp.action = "profile/delete-account"; 
+    tmp.style.display = "none";
+    document.body.appendChild(tmp);
+    tmp.submit();
+    return;
 }

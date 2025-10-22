@@ -129,6 +129,11 @@ switch ($url) {
         $controller->account();
         break;
 
+    case 'profile/delete-account':
+        $controller = new ProfileController();
+        $controller->deleteAccount();
+        break;
+
     case 'profile/send-reset-code':
         $controller = new ProfileController();
         $controller->sendResetCode();
@@ -147,6 +152,21 @@ switch ($url) {
     case 'posts':
         $controller = new PostController();
         $controller->index();
+        break;
+
+    case 'posts/get-skills':
+        $controller = new PostController();
+        $controller->getSkills();
+        break;
+
+    case 'posts/draft':
+        $controller = new PostController();
+        $controller->draftPost();
+        break;
+
+    case 'posts/publish':
+        $controller = new PostController();
+        $controller->publishPost();
         break;
 
 
