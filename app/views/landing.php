@@ -62,7 +62,7 @@
 		<div class="hero-inner reveal">
 			<div class="hero-copy">
 				<h1>Build faster with trusted <span style="color:#a7ffd0;">local & remote</span> professionals.</h1>
-				<p>Inspired by leading platforms yet purpose‑built for our region. BSK matches clients with proven providers through transparent posts, structured bids and milestone‑based payments.</p>
+				<p>Inspired by leading platforms yet purpose‑built for our region. Servo matches clients with proven providers through concise posts, transparent bid system and pay on approve payment system.</p>
 			</div>
 			<div class="search-panel" aria-label="Search talent or projects">
 				<div class="search-switch" role="tablist">
@@ -87,8 +87,8 @@
 	<section id="features" class="section">
 		<div class="lp-container">
 			<div class="section-head reveal">
-				<h2>Why Teams Choose BSK</h2>
-				<p>From idea to delivery: vetted profiles, category & skill targeting, milestone tracking, transparent pricing and integrated collaboration tools.</p>
+				<h2>Why People Choose Servo</h2>
+				<p>From need of talent to getting work done: Servo streamlines the process for clients and providers alike.</p>
 			</div>
 			<div class="features-grid">
 				<div class="feature-card reveal">
@@ -99,7 +99,7 @@
 				<div class="feature-card reveal">
 					<div class="feature-icon"><i class="fa-solid fa-lock"></i></div>
 					<h3>Secure Payments</h3>
-					<p>Milestone based releases ensure providers are paid only after approval.</p>
+					<p>Pay On Approve payment ensure providers are paid only after approval.</p>
 				</div>
 				<div class="feature-card reveal">
 					<div class="feature-icon"><i class="fa-solid fa-comments"></i></div>
@@ -109,7 +109,7 @@
 				<div class="feature-card reveal">
 					<div class="feature-icon"><i class="fa-solid fa-bolt"></i></div>
 					<h3>Boosted Visibility</h3>
-					<p>Optional post & profile boosting surfaces urgent work to active talent.</p>
+					<p>Optional services & profile boosting surfaces urgent work to active talent.</p>
 				</div>
 				<div class="feature-card reveal">
 					<div class="feature-icon"><i class="fa-solid fa-diagram-project"></i></div>
@@ -128,7 +128,7 @@
 	<!-- BOOSTED POSTS -->
 	<section id="boosted" class="boosted-section">
 		<div class="lp-container">
-			<h2 class="reveal">Trending & Boosted Posts</h2>
+			<h2 class="reveal">Trending & Boosted Services</h2>
 		</div>
 		<div class="boosted-track" aria-label="Boosted posts carousel">
 			<div class="boost-card reveal"><span class="flag">BOOSTED</span>
@@ -197,7 +197,7 @@
 	<section id="workflow" class="section">
 		<div class="lp-container workflow-shell reveal">
 			<div>
-				<h2 style="margin:0 0 18px;">How BSK Works</h2>
+				<h2 style="margin:0 0 18px;">How Servo's Bidding System Works</h2>
 				<p style="margin:0;max-width:640px;line-height:1.55;font-size:.95rem;color:#475569;">A transparent flow that keeps expectations aligned for both clients and providers – from posting & bidding through collaboration, delivery and payment.</p>
 			</div>
 			<div class="workflow-steps">
@@ -271,7 +271,7 @@
 				<p class="contact-sub">Have a question about projects, provider verification, billing or partnerships? Our small team reads every message.</p>
 				<div class="contact-cards">
 					<div class="c-card"><i class="fa-solid fa-envelope"></i>
-						<div><strong>Email</strong><span>support@bskplatform.com</span></div>
+						<div><strong>Email</strong><span>support@servoplatform.com</span></div>
 					</div>
 					<div class="c-card"><i class="fa-solid fa-headset"></i>
 						<div><strong>Live Support</strong><span>Weekdays 09:00 – 17:00</span></div>
