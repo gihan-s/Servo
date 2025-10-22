@@ -2,35 +2,35 @@
 
 
 :root {
-    --secondaryColor: #f7f9fc;
-    --primaryColor: black;
-    --containerColor: white;
-    --sidebarColor: #233044;
-    --menuButtonColor: #9E9E9E;
-    --searchColor: rgb(242, 242, 242);
-    --topIconColor: rgb(145, 145, 145);
-    --topbarColor: white;
-    --topIconHoverColor: rgb(242, 242, 242);
-    --tableBorderColor: rgb(224, 224, 224);
-    --tableHoverColor: rgb(245, 245, 245);
-    --tableDataColor: rgba(0, 0, 0, 0.85);
+  --secondaryColor: #f7f9fc;
+  --primaryColor: black;
+  --containerColor: white;
+  --sidebarColor: #233044;
+  --menuButtonColor: #9E9E9E;
+  --searchColor: rgb(242, 242, 242);
+  --topIconColor: rgb(145, 145, 145);
+  --topbarColor: white;
+  --topIconHoverColor: rgb(242, 242, 242);
+  --tableBorderColor: rgb(224, 224, 224);
+  --tableHoverColor: rgb(245, 245, 245);
+  --tableDataColor: rgba(0, 0, 0, 0.85);
 
-    --textFieldLabelColor: rgba(0, 0, 0, 0.6);
+  --textFieldLabelColor: rgba(0, 0, 0, 0.6);
 
-    --switchColor: white;
+  --switchColor: white;
 
-    --logoYellow : #008500;
+  --logoYellow: #008500;
 }
 
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: "Anek Malayalam", sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Anek Malayalam", sans-serif;
 
-    transition: background-color 0.2s, color 0.2s;
+  transition: background-color 0.2s, color 0.2s;
 
-    color: var(--primaryColor);
+  color: var(--primaryColor);
 }
 
 
@@ -43,11 +43,11 @@ body {
 
 
 .container {
-    background-color: var(--containerColor);
-    border-radius: 5px;
-    padding: 10px;
+  background-color: var(--containerColor);
+  border-radius: 5px;
+  padding: 10px;
 
-    box-shadow: 1px 1px 5px 0px rgba(0, 0, 0, 0.08);
+  box-shadow: 1px 1px 5px 0px rgba(0, 0, 0, 0.08);
 }
 
 
@@ -101,6 +101,7 @@ body {
   justify-content: space-between;
   z-index: 1;
 }
+
 .top-card div span {
   font-size: 0.85em;
   color: #00000070;
@@ -423,52 +424,111 @@ button i {
 
 /* Table Styles */
 table {
-    margin-bottom: 30px;
-    width: 100%;
-    color: var(--primaryColor);
-    border-collapse: collapse;
+  width: 100%;
+  color: var(--primaryColor);
+  border-collapse: collapse;
 }
 
 table tr {
-    width: 100%;
-    justify-content: space-between;
+  width: 100%;
+  justify-content: space-between;
 
-    border-bottom: 1px solid var(--tableBorderColor);
+  border-bottom: 1px solid var(--tableBorderColor);
 }
 
-table tr:hover {
-    background-color: var(--tableHoverColor);
+table tbody tr:hover {
+  background-color: var(--tableHoverColor);
 }
 
 
 table td {
-    text-align: left;
-    font-weight: 400;
-    font-size: 13px;
-    line-height: 19px;
-    padding: 20px 10px;
+  text-align: left;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 19px;
+  padding: 20px 10px;
 
-    color: var(--tableDataColor);
+  color: var(--tableDataColor);
 }
 
 table th {
-    text-align: left;
-    /* font-weight: 500; */
-    font-size: 13px;
-    line-height: 22px;
-    padding: 20px 10px;
+  text-align: left;
+  /* font-weight: 500; */
+  font-size: 14px;
+  line-height: 22px;
+  padding: 20px 10px;
 
-    color: var(--tableDataColor);
+  color: var(--tableDataColor);
 
-    font-weight: bold;
+  font-weight: bold;
 }
 
 table td i {
-    margin: 0 5px;
-    cursor: pointer;
+  margin: 0 5px;
+  cursor: pointer;
 }
 
 .table-scroll {
-    width: 100%;
-    overflow: auto;
+  width: 100%;
+  overflow: auto;
+}
+
+
+/* Pagination */
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin: 40px auto 10px;
+  flex-wrap: wrap;
+}
+
+.pagination .page-btn {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  color: #374151;
+  min-width: 40px;
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all .25s ease;
+}
+
+.pagination .page-btn i {
+  color: #374151 !important;
+  margin-right: 0px;
+}
+
+.pagination .page-btn:hover {
+  border-color: #008500;
+  color: #008500;
+  transform: translateY(-2px);
+}
+
+.pagination .page-btn.active {
+  background: linear-gradient(135deg, #008500, #006600);
+  color: #ffffff;
+  border: 1px solid #008500;
+  box-shadow: 0 4px 12px rgba(0, 133, 0, 0.25);
+}
+
+.pagination .page-btn.prev,
+.pagination .page-btn.next {
+  padding: 0 18px;
+}
+
+@media (max-width:600px) {
+  .pagination .page-btn {
+    min-width: 36px;
+    height: 36px;
+    font-size: 13px;
+  }
 }

@@ -243,4 +243,29 @@ class ProviderModel extends Database
         return $stmt->execute();
     }
 
+
+     public function getAllProviders($limit, $offset) {
+        $stmt = $this->conn->prepare("SELECT Provider_ID, First_Name, Last_Name, Contact_No, Email, NIC_No, Status FROM Provider WHERE Status <> 'Deleted' ORDER BY Provider_ID DESC LIMIT ? OFFSET ?");
+        $stmt->bind_param("ii", $limit, $offset);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
+    public function getUserCount() {
+        $result = $this->conn->query("SELECT COUNT(Provider_ID) AS Total_Providers FROM Provider WHERE Status <> 'Deleted'");
+        return $result->fetch_assoc()['Total_Providers'];
+    }
+
+
+    public function updateProviderStatus($provider_id, $status)
+    {
+        // mark status as 'Deleted' instead of hard-deleting the row
+        $stmt = $this->conn->prepare("UPDATE Provider SET Status = ? WHERE Provider_ID = ?");
+        if (!$stmt) return false;
+        $stmt->bind_param("si", $status, $provider_id);
+        return $stmt->execute();
+    }
+
+
 }
