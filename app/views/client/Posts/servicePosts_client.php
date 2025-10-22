@@ -1,3 +1,18 @@
+<?php
+// Fallback-safe text snipping helper for servers without mbstring
+if (!function_exists('str_snippet')) {
+    function str_snippet($text, $limit = 160, $suffix = '…') {
+        $text = (string)$text;
+        // Prefer multibyte-aware trim when available
+        if (function_exists('mb_strimwidth')) {
+            return mb_strimwidth($text, 0, (int)$limit, (string)$suffix, 'UTF-8');
+        }
+        // Basic fallback (byte-based)
+        if (strlen($text) <= $limit) return $text;
+        return rtrim(substr($text, 0, $limit)) . $suffix;
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -123,7 +138,7 @@
                                     <?php
                                     $desc = (string) ($p['Description'] ?? '');
                                     $plain = trim(preg_replace('/\s+/', ' ', strip_tags($desc)));
-                                    $snippet = mb_strimwidth($plain, 0, 160, '…', 'UTF-8'); // limit to ~160 chars
+                                    $snippet = str_snippet($plain, 160, '…'); // limit to ~160 chars
                                     ?>
                                     <?= htmlspecialchars($snippet, ENT_QUOTES, 'UTF-8') ?>
                                 </div>
@@ -261,7 +276,7 @@
                                     <?php
                                     $desc = (string) ($p['Description'] ?? '');
                                     $plain = trim(preg_replace('/\s+/', ' ', strip_tags($desc)));
-                                    $snippet = mb_strimwidth($plain, 0, 160, '…', 'UTF-8'); // limit to ~160 chars
+                                    $snippet = str_snippet($plain, 160, '…'); // limit to ~160 chars
                                     ?>
                                     <?= htmlspecialchars($snippet, ENT_QUOTES, 'UTF-8') ?>
                                 </div>
@@ -389,7 +404,7 @@
                                     <?php
                                     $desc = (string) ($p['Description'] ?? '');
                                     $plain = trim(preg_replace('/\s+/', ' ', strip_tags($desc)));
-                                    $snippet = mb_strimwidth($plain, 0, 160, '…', 'UTF-8'); // limit to ~160 chars
+                                    $snippet = str_snippet($plain, 160, '…'); // limit to ~160 chars
                                     ?>
                                     <?= htmlspecialchars($snippet, ENT_QUOTES, 'UTF-8') ?>
                                 </div>
