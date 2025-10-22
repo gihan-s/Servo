@@ -123,4 +123,15 @@ class ClientModel extends Database
 
         return $status;
     }
+
+    public function deleteClient($id)
+    {
+        // mark status as 'Deleted' instead of hard-deleting the row
+        $stmt = $this->conn->prepare("UPDATE Client SET Status = ? WHERE Client_ID = ?");
+        if (!$stmt)
+            return false;
+        $status = 'Deleted';
+        $stmt->bind_param("si", $status, $id);
+        return $stmt->execute();
+    }
 }

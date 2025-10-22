@@ -489,7 +489,22 @@ updateCounts();
 
 // Delete account
 function deleteAccount() {
-    if (confirm("Delete account permanently? This cannot be undone.")) {
-        showToast("Deletion requested");
+    if (!confirm("Delete account permanently? This cannot be undone.")) {
+        return;
     }
+
+    // const form = document.createElement("form");
+    const f = document.getElementById("accountForm");
+    if (!f) {
+        const tmpForm = document.createElement("form");
+        tmpForm.style.display = "none";
+        tmpForm.id = "accountForm";
+        document.body.appendChild(tmpForm);
+        tmpForm.submit();
+        return;
+    }
+
+    accountForm.method = "POST";
+    accountForm.action = "profile/delete-account";
+    accountForm.submit();
 }
