@@ -1,14 +1,30 @@
 // Side navigation logic
 const pills = document.querySelectorAll(".profile-nav .pill");
 const sections = document.querySelectorAll(".profile-section");
-pills.forEach((p) =>
-    p.addEventListener("click", () => {
-        pills.forEach((x) => x.setAttribute("aria-current", "false"));
-        sections.forEach((s) => s.classList.remove("active"));
-        p.setAttribute("aria-current", "true");
-        document.getElementById(p.dataset.target).classList.add("active");
-    })
-);
+pills.forEach((p) => {
+    if (p.classList.contains("btn-logout")) {
+        return;
+    }
+    else {
+        p.addEventListener("click", () => {
+            pills.forEach((x) => x.setAttribute("aria-current", "false"));
+            sections.forEach((s) => s.classList.remove("active"));
+            p.setAttribute("aria-current", "true");
+            document.getElementById(p.dataset.target).classList.add("active");
+        });
+    }
+});
+
+
+document.addEventListener("click", (e) => {
+    const link = e.target.closest(".btn-logout");
+    if (!link) return;
+    e.preventDefault();
+    const BASE = window.BASE_URL || location.origin;
+    if (confirm("Do you want to log out?")) {
+        window.location.href = `./logout`;     // server will redirect to /login
+    }
+});
 
 // Toast helper
 const toast = document.getElementById("toast");
@@ -49,64 +65,64 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Forgot Password modal
 function forgotPassword() {
-  const ov = document.getElementById("fpOverlay");
-  if (ov) ov.style.display = "flex";
+    const ov = document.getElementById("fpOverlay");
+    if (ov) ov.style.display = "flex";
 }
 function closeFP() {
-  const ov = document.getElementById("fpOverlay");
-  if (ov) ov.style.display = "none";
+    const ov = document.getElementById("fpOverlay");
+    if (ov) ov.style.display = "none";
 }
 
 // Send email with reset code
 function sendFP(e) {
-  e.preventDefault();
-  const email = document.getElementById("fp_email")?.value || "";
-  const fd = new FormData();
-  fd.append("email", email);
+    e.preventDefault();
+    const email = document.getElementById("fp_email")?.value || "";
+    const fd = new FormData();
+    fd.append("email", email);
 
-  fetch("profile/send-reset-code", { method: "POST", body: fd, credentials: "same-origin" })
-    .then((r) => r.json())
-    .then((data) => {
-      if (data?.ok) {
-        showToast("Reset code sent to your email", "success");
-        closeFP();
-      } else {
-        showToast(data?.message || "Failed to send reset code", "error");
-      }
-    })
-    .catch(() => showToast("Failed to send reset code", "error"));
+    fetch("profile/send-reset-code", { method: "POST", body: fd, credentials: "same-origin" })
+        .then((r) => r.json())
+        .then((data) => {
+            if (data?.ok) {
+                showToast("Reset code sent to your email", "success");
+                closeFP();
+            } else {
+                showToast(data?.message || "Failed to send reset code", "error");
+            }
+        })
+        .catch(() => showToast("Failed to send reset code", "error"));
 }
 
 // Account form: validate then submit (server will redirect and show toast)
 const accountForm = document.getElementById("accountForm");
 let accountOriginal = new FormData(accountForm);
 function resetAccount() {
-  accountForm.reset();
-  accountOriginal.forEach((v, k) => {
-    if (accountForm.elements[k]) accountForm.elements[k].value = v;
-  });
-  showToast("Account reset");
+    accountForm.reset();
+    accountOriginal.forEach((v, k) => {
+        if (accountForm.elements[k]) accountForm.elements[k].value = v;
+    });
+    showToast("Account reset");
 }
 function saveAccount(e) {
-  e.preventDefault();
-  const fd = new FormData(accountForm);
-  const np = (fd.get("New_Password") || "").trim();
-  const cp = (fd.get("Confirm_Password") || "").trim();
+    e.preventDefault();
+    const fd = new FormData(accountForm);
+    const np = (fd.get("New_Password") || "").trim();
+    const cp = (fd.get("Confirm_Password") || "").trim();
 
-  if (np || cp) {
-    if (np !== cp) {
-      showToast("Passwords do not match", "error");
-      return;
+    if (np || cp) {
+        if (np !== cp) {
+            showToast("Passwords do not match", "error");
+            return;
+        }
+        if (!fd.get("reset_code")) {
+            showToast("Enter the reset code sent to your email", "error");
+            return;
+        }
     }
-    if (!fd.get("reset_code")) {
-      showToast("Enter the reset code sent to your email", "error");
-      return;
-    }
-  }
 
-  accountForm.action = "profile/account";
-  accountForm.method = "POST";
-  accountForm.submit();
+    accountForm.action = "profile/account";
+    accountForm.method = "POST";
+    accountForm.submit();
 }
 
 // Avatar preview (both)

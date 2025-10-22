@@ -4,6 +4,17 @@ require_once __DIR__ . '/../core/Database.php';
 
 class ClientModel extends Database
 {
+
+    public function getByEmail($email)
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM Client WHERE Email = ?");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+        return $result->fetch_assoc();
+    }
+
     // Get client by ID
     public function getClientById($id)
     {

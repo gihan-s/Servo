@@ -11,7 +11,7 @@ $uriNoBase  = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '/';
 // Now $currentUrl is the full URL, $uriNoBase is just the path (useful for active() checks)
 
 // Provider-specific nav links (left side)
-if ($_SESSION['role'] === 'provider') {
+if ($_SESSION['role'] === 'Provider') {
     $navLinks = [
         ['label' => 'Dashboard', 'href' => BASE_URL . '/dashboard'],
         ['label' => 'Feeds', 'href' => BASE_URL . '/feeds'],
@@ -27,7 +27,7 @@ if ($_SESSION['role'] === 'provider') {
         ['type' => 'profile', 'href' => BASE_URL . '/profile'], // profile/avatar
     ];
 }
-elseif ($_SESSION['role'] === 'client') {
+elseif ($_SESSION['role'] === 'Client') {
     $navLinks = [
         ['label' => 'Dashboard', 'href' => BASE_URL . '/dashboard'],
         ['label' => 'Projects', 'href' => BASE_URL . '/projects'],

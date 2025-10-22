@@ -1,3 +1,6 @@
+<link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/footer.css">
+<link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/styles.css">
+	
 	<footer aria-label="Site footer">
 	    <div class="footer-content">
 	        <div class="footer-brand">

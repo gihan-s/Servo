@@ -1,0 +1,661 @@
+.buttons {
+  padding: 12px 24px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+}
+
+.buttons.active {
+  color: white;
+}
+
+.buttons:not(.active):hover {
+  background: #f3f4f6;
+}
+
+.item-list {
+  display: grid;
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* Use global .search-item styles from assets/css/cardList.css */
+/* Keep minimal positioning so absolute children (status badge) align correctly */
+.search-item {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Status Indicators */
+.status-badge {
+  position: absolute;
+  bottom: 16px;
+  /* moved to bottom */
+  right: 16px;
+  top: auto;
+  /* override previous top positioning */
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.status-active {
+  background: #dcfce7;
+  color: #008500;
+  border: 1px solid #bbf7d0;
+}
+
+.status-draft {
+  background: #fef3c7;
+  color: #d97706;
+  border: 1px solid #fed7aa;
+}
+
+.status-expired {
+  background: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+/* Post Header Section */
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.post-meta {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.post-date {
+  color: #6b7280;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.post-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.action-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-transform: none;
+}
+
+.btn-edit {
+  background: white;
+  color: #008500;
+  border: 2px solid #008500;
+}
+
+.btn-edit:hover {
+  background: #008500;
+  color: white;
+  transform: translateY(-1px);
+}
+
+.btn-view {
+  background: #f3f4f6;
+  color: #374151;
+  border: 2px solid #e5e7eb;
+}
+
+.btn-view:hover {
+  background: #e5e7eb;
+  border-color: #d1d5db;
+  transform: translateY(-1px);
+}
+
+.btn-delete {
+  background: white;
+  color: #dc2626;
+  border: 2px solid #dc2626;
+}
+
+.btn-delete:hover {
+  background: #dc2626;
+  color: white;
+  transform: translateY(-1px);
+}
+
+/* Post Content Section */
+.post-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #008500;
+  margin-bottom: 16px;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.post-title:hover {
+  color: #006600;
+  text-decoration: underline;
+}
+
+.post-description {
+  color: #4b5563;
+  line-height: 1.7;
+  margin-bottom: 20px;
+  font-size: 15px;
+}
+
+.post-skills {
+  margin-bottom: 24px;
+}
+
+.skills-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.skills-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.skill-tag {
+  background: #f1f5f9;
+  color: #475569;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+}
+
+.skill-tag:hover {
+  background: #008500;
+  color: white;
+  border-color: #008500;
+  transform: translateY(-1px);
+}
+
+/* Pagination Component */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin: 40px auto 10px;
+  flex-wrap: wrap;
+}
+
+.pagination .page-btn {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  color: #374151;
+  min-width: 40px;
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.pagination .page-btn:hover {
+  border-color: #008500;
+  color: #008500;
+  transform: translateY(-2px);
+}
+
+.pagination .page-btn.active {
+  background: linear-gradient(135deg, #008500, #006600);
+  color: #ffffff;
+  border: 1px solid #008500;
+  box-shadow: 0 4px 12px rgba(0, 133, 0, 0.25);
+}
+
+.pagination .page-btn.prev,
+.pagination .page-btn.next {
+  padding: 0 18px;
+}
+
+@media (max-width: 600px) {
+  .pagination .page-btn {
+    min-width: 36px;
+    height: 36px;
+    font-size: 13px;
+  }
+}
+
+/* Post Footer Section */
+.post-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 20px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.post-details {
+  display: flex;
+  gap: 32px;
+}
+
+.detail-item {
+  text-align: center;
+}
+
+.detail-label {
+  display: block;
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 500;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detail-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.budget-amount {
+  color: #008500;
+  font-size: 18px;
+}
+
+.proposals-count {
+  color: #3b82f6;
+}
+
+.project-level {
+  background: #dcfce7;
+  color: #008500;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.project-duration {
+  background: #fef3c7;
+  color: #92400e;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.engagement-stats {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Section-specific styling */
+.draft-section .search-item::before,
+.expired-section .search-item::before {
+  content: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .post-header {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .post-details {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .search-header {
+    flex-direction: column;
+  }
+
+  .search-button {
+    min-width: auto;
+  }
+}
+
+.post-job-btn {
+  background: #008500;
+  /* solid brand color */
+  color: white;
+  padding: 12px 28px;
+  /* content-based width */
+  white-space: nowrap;
+  /* keep text on one line */
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 13px;
+  /* slightly smaller text */
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 12px rgba(0, 133, 0, 0.3);
+  text-decoration: none;
+  /* remove underline */
+}
+
+.post-job-btn:hover {
+  background: #006600;
+  /* darker solid on hover */
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 133, 0, 0.4);
+  text-decoration: none;
+  /* ensure no underline on hover */
+  color: #ffffff;
+}
+
+.post-job-btn:active {
+  background: #005500;
+  /* slightly darker when active */
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 133, 0, 0.3);
+  text-decoration: none;
+  color: #ffffff;
+}
+
+.post-job-btn:focus,
+.post-job-btn:visited {
+  text-decoration: none;
+  color: #ffffff;
+}
+
+/* Local overrides: align Create Post button to the right of tab menu */
+.service-requests .container-changer {
+  align-items: center;
+  justify-content: space-between;
+}
+
+.service-requests .container-changer .tab-buttons {
+  display: flex;
+  gap: 1rem;
+}
+
+/* Place Create Post button next to Sort selection on the right */
+.search-header .advance-search {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.search-header .advance-search .sort-selection {
+  margin-left: 0;
+}
+
+/* Post Details (View) modal layout */
+.post-view-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.post-view-meta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: -4px;
+}
+
+.post-view .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.post-view-section {
+  margin-top: 10px;
+}
+
+.post-view-section .section-title {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #64748b;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.post-view-section .section-body {
+  color: #475569;
+  line-height: 1.7;
+  font-size: 14px;
+}
+
+.post-view .skills-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.post-view .skills-row .skill-tag {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+.post-view .kv-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+@media (max-width: 520px) {
+  .post-view .kv-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.post-view .kv {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.post-view .kv .kv-label {
+  font-size: 11px;
+  color: #6b7280;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 3px;
+}
+
+.post-view .kv .kv-value {
+  font-size: 15px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.post-view .engagement-row {
+  display: flex;
+  gap: 14px;
+  color: #6b7280;
+  font-size: 13px;
+  align-items: center;
+}
+
+/* Ensure all modals overlay above page content and are hidden when inactive */
+.pop-up-section.request-modal,
+.pop-up-section.confirm-modal,
+.create-post-pop-up {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+/* Apply dim + blur only when overlay is open (not .deactive) */
+.pop-up-section:not(.deactive) {
+  z-index: 7000;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(2px);
+}
+
+.pop-up-section.deactive {
+  pointer-events: none;
+  z-index: -1 !important;
+  background: transparent !important;
+  backdrop-filter: none !important;
+}
+
+.pop-up-section.deactive .pop-up {
+  display: none !important;
+}
+
+/* Post Details modal: auto height with a screen-bound max */
+#postDetailsModal {
+  max-height: 85vh;
+  overflow: auto;
+}
+
+/* Create/Edit modal: match view modal container sizing */
+.create-post-pop-up .pop-up {
+  max-height: 85vh;
+  overflow: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+}
+
+/* Lightweight form styling to match modal */
+/* Modal sizing overrides: wider, close to screen height, no internal scrollbars */
+.create-post-pop-up {
+  align-items: flex-start;
+  overflow-y: auto;
+}
+
+.create-post-pop-up .pop-up {
+  max-width: 720px;
+  width: calc(100% - 32px);
+  margin: auto;
+}
+
+.create-post-pop-up .pop-up .pop-up-content {
+  max-height: none;
+  overflow: visible;
+}
+
+.create-post-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.create-post-form label {
+  font-weight: 600;
+  color: #374151;
+  font-size: 14px;
+}
+
+.create-post-form input[type="text"],
+.create-post-form input[type="number"],
+.create-post-form input[type="date"],
+.create-post-form select,
+.create-post-form textarea {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
+  outline-color: #28a745;
+}
+
+.create-post-form textarea {
+  resize: vertical;
+}
+
+.create-post-form .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 520px) {
+  .create-post-form .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.modal-actions .btn-edit {
+  border-color: #008500;
+  color: #008500;
+  background: #ffffff;
+}
+
+.modal-actions .btn-edit:hover {
+  background: #008500;
+  color: #fff;
+}
+
+.modal-actions .btn-view {
+  background: #f3f4f6;
+  color: #374151;
+  border: 2px solid #e5e7eb;
+}
+
+.modal-actions .btn-view:hover {
+  background: #e5e7eb;
+}
