@@ -49,10 +49,80 @@ $BaseURL = "..";
                         return isset($_SESSION["register"][$name]) ? $_SESSION["register"][$name] : "";
                     }
 
+
                     ?>
 
                     <div id="service-card-wrapper">
-                        <p>No service selected</p>
+                        <?php
+                        if (isset($_SESSION["register"]["category_id"]) && count($_SESSION["register"]["category_id"]) > 0) {
+                            foreach ($_SESSION["register"]["category_id"] as $key => $value) {
+                        ?>
+
+                                <div class="search-item">
+                                    <div class="status-badge status-active"><?= $_SESSION["register"]["category_name"][$key] ?></div>
+
+                                    <div class="post-header">
+                                        <div class="post-meta">
+
+                                        </div>
+                                        <div class="post-actions">
+                                            <button type="button" onclick='deleteService(this)' class="action-btn btn-delete">
+                                                <i class="fas fa-trash"></i>
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <h3 class="post-title"><?= $_SESSION["register"]["title"][$key] ?></h3>
+
+                                    <div class="post-description">
+                                        <?= $_SESSION["register"]["description"][$key] ?>
+                                    </div>
+
+                                    <div class="post-skills">
+                                        <span class="skills-label">Skills:</span>
+                                        <div class="skills-tags">
+                                            <span class="skill-tag">
+                                                <?= join("</span><span class='skill-tag'>", json_decode($_SESSION["register"]["skills"][$key])) ?>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="post-footer">
+                                        <div class="post-details">
+                                            <div class="detail-item">
+                                                <span class="detail-label">
+                                                    <i class="fa-solid fa-circle-dollar"></i>
+                                                    Rs. <?= number_format($_SESSION["register"]["default_price"][$key], 2) ?> / hr
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="engagement-stats">
+                                        <div class="stat-item">
+                                            <i class="fas fa-location-pin"></i>
+                                            <?= join(", ", json_decode($_SESSION["register"]["locations"][$key])) ?>
+                                        </div>
+                                    </div>
+
+                                    <div hidden>
+                                        <input type='hidden' name='category_id[]' value='<?= $_SESSION["register"]["category_id"][$key] ?>'>
+                                        <input type='hidden' name='category_name[]' value='<?= $_SESSION["register"]["category_name"][$key] ?>'>
+                                        <input type='hidden' name='title[]' value='<?= $_SESSION["register"]["title"][$key] ?>'>
+                                        <input type='hidden' name='description[]' value='<?= $_SESSION["register"]["description"][$key] ?>'>
+                                        <input type='hidden' name='default_price[]' value='<?= $_SESSION["register"]["default_price"][$key] ?>'>
+                                        <input type='hidden' name='skills[]' value='<?= $_SESSION["register"]["skills"][$key] ?>'>
+                                        <input type='hidden' name='locations[]' value='<?= $_SESSION["register"]["locations"][$key] ?>'>
+                                    </div>
+                                </div>
+
+                        <?php
+                            }
+                        } else {
+                            echo "<p>No service selected</p>";
+                        }
+                        ?>
                     </div>
 
 
@@ -152,7 +222,7 @@ $BaseURL = "..";
                                 <input type="text" class="text-field-search" placeholder="Enter new skill to add">
                             </span>
 
-                            <div class="option-list">
+                            <div class="option-list" id="SkillsOptionList">
 
                             </div>
                         </div>
@@ -363,6 +433,7 @@ $BaseURL = "..";
 
             <div hidden>
                 <input type='hidden' name='category_id[]' value='${document.getElementById("Category_ID").value}'>
+                <input type='hidden' name='category_name[]' value='${Category}'>
                 <input type='hidden' name='title[]' value='${Title}'>
                 <input type='hidden' name='description[]' value='${Description}'>
                 <input type='hidden' name='default_price[]' value='${Default_Price}'>
@@ -391,6 +462,33 @@ $BaseURL = "..";
         if (document.getElementById("Title").value != '') {
             document.getElementById("SkillArea").style.display = 'block';
         }
+
+
+        CategoryID = document.getElementById("Category_ID").value;
+        document.getElementById("SkillAddInput").value = "";
+        document.getElementById("SkillsOptionList").innerHTML = "";
+        document.getElementById("SkillAddInput").parentElement.querySelector(".label").classList.remove("label-float");
+
+        fetch("./get-skills", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: "category_id=" + encodeURIComponent(CategoryID)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status == 'ok') {
+                    data.result.forEach(element => {
+                        addItemToDropdown("SkillAddInput", element.Skill, false);
+                    });
+                } else {
+                    console.log(data);
+                }
+            })
+            .catch(err => console.error(err));
+
+
     }
 
     function addSkill() {

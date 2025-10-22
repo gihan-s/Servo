@@ -56,6 +56,11 @@ switch ($url) {
         $controller->checkEmail();
         break;
 
+    case 'register/check-nic':
+        $controller = new RegisterController();
+        $controller->checkNIC();
+        break;
+
     case (preg_match('#^file/temp-images/(.+)$#', $url, $matches) ? true : false):
         $controller = new FileController();
         $controller->showUserImage($matches[1]);
@@ -84,6 +89,11 @@ switch ($url) {
     case 'register/get-cities':
         $controller = new RegisterController();
         $controller->getCities();
+        break;
+
+    case 'register/get-skills':
+        $controller = new RegisterController();
+        $controller->getSkills();
         break;
 
     case 'register/servicesubmit':

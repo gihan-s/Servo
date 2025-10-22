@@ -61,8 +61,36 @@ if (document.getElementById("registrationForm1")) {
             })
                 .then(res => res.json())
                 .then(data => {
+
                     if (data.status == 'ok') {
-                        event.target.submit();
+
+                        if (document.getElementById("user_type").value == 'client') {
+                            event.target.submit();
+                        } else {
+
+
+                            fetch("./register/check-nic", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                                body: "nic_no=" + encodeURIComponent(document.getElementsByName("nic_no")[0].value)
+                            })
+                                .then(res => res.json())
+                                .then(data => {
+                                    if (data.status == 'ok') {
+                                        event.target.submit();
+                                        
+                                    } else {
+                                        showValidationTooltip(document.getElementsByName("nic_no")[0], data.message);
+                                        submitButton.style.opacity = '1';
+                                        submitButton.disabled = false;
+                                    }
+                                })
+                                .catch(err => console.error(err));
+
+                        }
+
+
+
                     } else {
                         showValidationTooltip(document.getElementsByName("email")[0], data.message);
 
@@ -76,7 +104,6 @@ if (document.getElementById("registrationForm1")) {
 
         }
     })
-
 }
 
 
