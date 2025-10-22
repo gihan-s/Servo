@@ -9,6 +9,7 @@ require_once '../app/controllers/ProfileController.php';
 require_once '../app/controllers/FileController.php';
 require_once '../app/controllers/DashboardController.php';
 require_once '../app/controllers/ProjectController.php';
+require_once '../app/controllers/PostController.php';
 
 // Get the URL path
 $url = $_GET['url'] ?? 'home';
@@ -85,7 +86,7 @@ switch ($url) {
         $controller->getCities();
         break;
 
-        case 'register/servicesubmit':
+    case 'register/servicesubmit':
         $controller = new RegisterController();
         $controller->servicesubmit();
         break;
@@ -112,6 +113,11 @@ switch ($url) {
 
     case 'projects':
         $controller = new ProjectController();
+        $controller->index();
+        break;
+
+    case 'posts':
+        $controller = new PostController();
         $controller->index();
         break;
 
