@@ -207,4 +207,38 @@ class ProfileController
         header("Location: " . $redirect);
         exit;
     }
+
+    // POST /profile/delete-account
+    public function deleteAccount()
+    {
+        if (!isset($_SESSION['user_id']) || !isset($_SESSION['role'])) {
+            $_SESSION['flash'] = ['type' => 'error', 'message' => 'Please log in first'];
+            header("Location: /login");
+            exit;
+        }
+
+        $userId = $_SESSION['user_id'];
+        $role   = $_SESSION['role'];
+
+        $ok = false;
+        if ($role === 'Client') {
+            $ok = $this->clientModel->deleteClient($userId);
+        } elseif ($role === 'Provider') {
+            $ok = $this->providerModel->deleteProvider($userId);
+        } else {
+            $_SESSION['flash'] = ['type' => 'error', 'message' => 'Invalid user role'];
+            header("Location: /profile");
+            exit;
+        }
+
+        if ($ok) {
+            session_destroy();
+            header("Location: /home");
+            exit;
+        } else {
+            $_SESSION['flash'] = ['type' => 'error', 'message' => 'Error deleting account'];
+            header("Location: /profile");
+            exit;
+        }
+    }
 }
