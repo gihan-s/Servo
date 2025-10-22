@@ -116,7 +116,7 @@ class PostController
     public function draftPost(): void
     {
         $this->ensureAuth();
-        $Published_At = '0000-00-00 00:00:00';
+        $Published_At = null;
         $this->create('draft', $Published_At);
     }
 
