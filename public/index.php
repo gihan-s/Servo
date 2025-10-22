@@ -127,6 +127,11 @@ switch ($url) {
         $controller->account();
         break;
 
+    case 'profile/delete-account':
+        $controller = new ProfileController();
+        $controller->deleteAccount();
+        break;
+
     case 'profile/send-reset-code':
         $controller = new ProfileController();
         $controller->sendResetCode();

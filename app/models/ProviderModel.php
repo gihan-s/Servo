@@ -233,5 +233,14 @@ class ProviderModel extends Database
         return $stmt->num_rows > 0; // true if email found
     }
 
+    public function deleteProvider($id)
+    {
+        // mark status as 'Deleted' instead of hard-deleting the row
+        $stmt = $this->conn->prepare("UPDATE Provider SET Status = ? WHERE Provider_ID = ?");
+        if (!$stmt) return false;
+        $status = 'Deleted';
+        $stmt->bind_param("si", $status, $id);
+        return $stmt->execute();
+    }
 
 }
