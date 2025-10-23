@@ -41,7 +41,7 @@ require_once __DIR__ . '/../../../../config.php';
                             class="fa-regular fa-id-card"></i>
                         <span id="publicSummaryNIC"><?= htmlspecialchars($user['NIC_No']) ?></span> · <span
                             class="status-badge"
-                            id="publicStatus"><?= htmlspecialchars($user['Approvel_Status']) ?></span>
+                            id="publicStatus"><?= htmlspecialchars($user['Status']) ?></span>
                     </div>
                 </div>
                 <div class="hero-actions">

@@ -221,7 +221,7 @@ switch ($url) {
 
     case 'earnings':
         $controller = new EarningsController();
-        $controller->earnings();
+        $controller->index();
         break;
 
     case 'admin/login':
