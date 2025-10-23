@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/cardList.css">
+    <link rel="stylesheet" href="assets/css/cardList.css">
     <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
     <title>Document</title>
 </head>
@@ -159,6 +159,6 @@
 
 </body>
 
-<script src="<?= BASE_URL ?>/assets/js/cardList.js" defer></script>
+<script src="assets/js/cardList.js" defer></script>
 
 </html>

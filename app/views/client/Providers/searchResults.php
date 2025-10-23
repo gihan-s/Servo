@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Link to external CSS files -->
-    <link rel="stylesheet" href="<?= BASE_URL ?>/../app/views/client/Providers/css/searchResultsStyle.css">
+    <link rel="stylesheet" href="assets/css/searchResultsStyle.css">
     <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
 
     <title>Search for services..</title>
@@ -363,6 +363,6 @@
     </div>
 
 </body>
-<script src="<?= BASE_URL ?>/../app/views/client/Providers/js/searchResultsScript.js"></script>
+<script src="assets/js/searchResultsScript.js"></script>
 
 </html>
