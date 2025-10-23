@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Client Dashboard</title>
+    <title>Provider Dashboard</title>
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/cardList.css" />
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/main.css" />
     <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css" />
@@ -393,7 +393,7 @@
 
 <body>
     <?php // Use filesystem path for includes (BASE_URL is for URLs, not filesystem)
-    require_once __DIR__ . '/../navbar.php'; ?>
+    require_once __DIR__ . '/../../includes/navbar.php'; ?>
     <main class="dashboard-wrapper">
         <header class="dashboard">
             <h1>Welcome Back</h1>
@@ -681,7 +681,7 @@
         </section>
     </main>
     <?php // Footer include fixed to use absolute filesystem path relative to this directory
-    require_once __DIR__ . '/../footer.php'; ?>
+    require_once __DIR__ . '/../../includes/footer.php'; ?>
     <script>
     (function(){
         const svg = document.getElementById('revenueChart');

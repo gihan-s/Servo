@@ -828,7 +828,7 @@
 </head>
 <body>
     <?php // Use filesystem path for includes (BASE_URL is for URLs, not filesystem)
-    require_once __DIR__ . '/../navbar.php'; ?>
+    require_once __DIR__ . '/../../includes/navbar.php'; ?>
     <div class="main-content">
     <section class="service-requests">
         <div class="header-requests">
@@ -1289,7 +1289,7 @@
     </div>
     </div> <!-- End of main-content -->
 
-    <?php require_once __DIR__ . '/../footer.php'; ?>
+    <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
 
     <script>
         // Main functionality for provider interface

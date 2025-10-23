@@ -516,7 +516,7 @@
 
 <body>
     <?php // Use filesystem path for includes (BASE_URL is for URLs, not filesystem)
-    require_once __DIR__ . '/../navbar.php'; ?>
+    require_once __DIR__ . '/../../includes/navbar.php'; ?>
     <main class="dashboard-wrapper">
         <header class="dashboard">
             <h1>Earnings</h1>
@@ -821,7 +821,7 @@
         -->
     </main>
 
-    <?php require_once __DIR__ . '/../footer.php'; ?>
+    <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
 
     <script>
         // Period selector functionality

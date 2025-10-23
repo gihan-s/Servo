@@ -15,6 +15,7 @@ require_once '../app/controllers/MessageController.php';
 require_once '../app/controllers/NotificationController.php';
 require_once '../app/controllers/PaymentController.php';
 require_once '../app/controllers/ProviderController.php';
+require_once '../app/controllers/EarningsController.php';
 
 require_once '../app/controllers/admin/AdminLoginController.php';
 require_once '../app/controllers/admin/AdminDashboardController.php';
@@ -216,6 +217,11 @@ switch ($url) {
     case 'providers':
         $controller = new ProviderController();
         $controller->index();
+        break;
+
+    case 'earnings':
+        $controller = new EarningsController();
+        $controller->earnings();
         break;
 
     case 'admin/login':
