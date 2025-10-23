@@ -28,4 +28,24 @@ class PostModel extends Database
         }
     }
 
+    public function getPostById(int $postId): ?array
+    {
+        $sql = "SELECT 
+                    p.Post_ID, p.Client_ID, p.Title, p.Description,
+                    p.Requesting_Price, p.Price_Type,
+                    p.Duration, p.Duration_Type,
+                    p.Category_ID, p.Created_At, p.Published_At,
+                    p.End_At, p.Post_Status, p.Post_Type,
+                    c.Name AS CategoryName
+                FROM Post p
+                LEFT JOIN Category c ON c.Category_ID = p.Category_ID
+                WHERE p.Post_ID = ?
+                LIMIT 1";
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) { error_log('getPostById prepare: '.$this->conn->error); return null; }
+        $stmt->bind_param('i', $postId);
+        if (!$stmt->execute()) { error_log('getPostById exec: '.$stmt->error); return null; }
+        $row = $stmt->get_result()->fetch_assoc();
+        return $row ?: null;
+    }
 }

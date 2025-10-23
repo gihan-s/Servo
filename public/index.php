@@ -11,6 +11,10 @@ require_once '../app/controllers/DashboardController.php';
 require_once '../app/controllers/ProjectController.php';
 require_once '../app/controllers/PostController.php';
 require_once '../app/controllers/LoginController.php';
+require_once '../app/controllers/MessageController.php';
+require_once '../app/controllers/NotificationController.php';
+require_once '../app/controllers/PaymentController.php';
+require_once '../app/controllers/ProviderController.php';
 
 require_once '../app/controllers/admin/AdminLoginController.php';
 require_once '../app/controllers/admin/AdminDashboardController.php';
@@ -177,6 +181,42 @@ switch ($url) {
         $controller->publishPost();
         break;
 
+    case (preg_match('#^posts/view/(\d+)$#', $url, $m) ? true : false):
+        (new PostController())->viewPost((int)$m[1]);
+        break;
+
+    // case (preg_match('#^posts/edit/(\d+)$#', $url, $m) ? true : false):
+    //     (new PostController())->editPost((int)$m[1]);
+    //     break;
+
+    // case (preg_match('#^posts/delete/(\d+)$#', $url, $m) ? true : false):
+    //     (new PostController())->deletePost((int)$m[1]);
+    //     break;
+
+    // case (preg_match('#^posts/publish/(\d+)$#', $url, $m) ? true : false):
+    //     (new PostController())->publishById((int)$m[1]);
+    //     break;
+
+
+    case 'messages':
+        $controller = new MessageController();
+        $controller->index();
+        break;
+
+    case 'notifications':
+        $controller = new NotificationController();
+        $controller->index();
+        break;
+
+    case 'payments':
+        $controller = new PaymentController();
+        $controller->index();
+        break;
+    
+    case 'providers':
+        $controller = new ProviderController();
+        $controller->index();
+        break;
 
     case 'admin/login':
         $controller = new AdminLoginController();

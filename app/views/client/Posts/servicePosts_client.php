@@ -1,14 +1,16 @@
 <?php
 // Fallback-safe text snipping helper for servers without mbstring
 if (!function_exists('str_snippet')) {
-    function str_snippet($text, $limit = 160, $suffix = '…') {
-        $text = (string)$text;
+    function str_snippet($text, $limit = 160, $suffix = '…')
+    {
+        $text = (string) $text;
         // Prefer multibyte-aware trim when available
         if (function_exists('mb_strimwidth')) {
-            return mb_strimwidth($text, 0, (int)$limit, (string)$suffix, 'UTF-8');
+            return mb_strimwidth($text, 0, (int) $limit, (string) $suffix, 'UTF-8');
         }
         // Basic fallback (byte-based)
-        if (strlen($text) <= $limit) return $text;
+        if (strlen($text) <= $limit)
+            return $text;
         return rtrim(substr($text, 0, $limit)) . $suffix;
     }
 }
@@ -110,6 +112,7 @@ if (!function_exists('str_snippet')) {
                             }
                             ?>
                             <div class="search-item">
+                                <input type="hidden" class="post-id" value="<?= htmlspecialchars($p['Post_ID'] ?? '') ?>">
                                 <div class="post-header">
                                     <div class="post-meta">
                                         <div class="post-date">
@@ -126,9 +129,9 @@ if (!function_exists('str_snippet')) {
                                         </div>
                                     </div>
                                     <div class="post-actions">
-                                        <button class="action-btn btn-edit"><i class="fas fa-edit"></i> Edit</button>
-                                        <button class="action-btn btn-view"><i class="fas fa-eye"></i> View</button>
-                                        <button class="action-btn btn-delete"><i class="fas fa-trash"></i> Delete</button>
+                                        <button class="action-btn btn-edit"><i class="fas fa-edit" onclick="window.location='<?= BASE_URL ?>/posts/edit/<?= (int)$p['Post_ID'] ?>'"></i> Edit</button>
+                                        <button class="action-btn btn-view" onclick="window.location='<?= BASE_URL ?>/posts/view/<?= (int)$p['Post_ID'] ?>'"><i class="fas fa-eye"></i> View</button>
+                                        <button class="action-btn btn-delete"><i class="fas fa-trash" onclick="window.location='<?= BASE_URL ?>/posts/delete/<?= (int)$p['Post_ID'] ?>'"></i> Delete</button>
                                     </div>
                                 </div>
 
@@ -185,7 +188,28 @@ if (!function_exists('str_snippet')) {
 
                                 <div class="engagement-stats">
                                     <div class="stat-item"><i class="fas fa-eye"></i><span>156 views</span></div>
-                                    <div class="stat-item"><i class="fas fa-clock"></i><span>5 days left</span></div>
+                                    <div class="stat-item"><i class="fas fa-clock"></i>
+                                        <span>
+                                            <?php
+                                            if (!is_array($row) || !isset($row['post']) || !is_array($row['post'])) {
+                                                continue;
+                                            }
+                                            $p = $row['post'];
+                                            $End_At = $p['End_At'] ?? null;
+                                            $daysLeft = 0;
+                                            if ($End_At) {
+                                                try {
+                                                    $tz = new DateTimeZone('Asia/Colombo');
+                                                    $created = new DateTime($End_At, $tz);
+                                                    $now = new DateTime('now', $tz);
+                                                    $daysLeft = $created->diff($now)->days;
+                                                } catch (Throwable $e) {
+                                                    $daysLeft = 0;
+                                                }
+                                            }
+                                            ?>
+                                            <?= $daysLeft ?> days left</span>
+                                    </div>
                                 </div>
                             </div>
                         <?php endforeach; ?>
@@ -238,7 +262,7 @@ if (!function_exists('str_snippet')) {
                             ?>
 
                             <div class="search-item">
-
+                                <input type="hidden" class="post-id" value="<?= htmlspecialchars($p['Post_ID'] ?? '') ?>">
                                 <div class="post-header">
                                     <div class="post-meta">
                                         <div class="post-date">
@@ -367,6 +391,7 @@ if (!function_exists('str_snippet')) {
                             }
                             ?>
                             <div class="search-item">
+                                <input type="hidden" class="post-id" value="<?= htmlspecialchars($p['Post_ID'] ?? '') ?>">
                                 <div class="post-header">
                                     <div class="post-meta">
                                         <div class="post-date">
@@ -465,7 +490,7 @@ if (!function_exists('str_snippet')) {
                             <button class="page-btn">3</button>
                             <button class="page-btn next"><i class="fa-regular fa-chevron-right"></i></button>
                         </div>
-                        <?php endif; ?>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

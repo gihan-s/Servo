@@ -183,6 +183,42 @@ class PostController
         }
     }
 
+    public function viewPost($postId): void
+    {
+        $this->ensureAuth();
+
+        $userId = $_SESSION['user_id'];
+        $role = $_SESSION['role'];
+
+        if ($role === 'Client') {
+            $actives = $this->postModel->getPosts($userId, 'active');
+            $drafts = $this->postModel->getPosts($userId, 'draft');
+            $expireds = $this->postModel->getPosts($userId, 'expired');
+
+            // Each is an array of dictionaries with keys: post, skills
+            $activePosts = $this->assemblePostsWithSkills($actives);
+            $draftPosts = $this->assemblePostsWithSkills($drafts);
+            $expiredPosts = $this->assemblePostsWithSkills($expireds);
+
+            $data = [
+                'activePosts' => $activePosts,
+                'draftPosts' => $draftPosts,
+                'expiredPosts' => $expiredPosts,
+            ];
+            $categories = $this->categoryModel->getCategories();
+
+            $viewFile = __DIR__ . '/../views/client/Posts/show.php';
+        } elseif ($role === 'Provider') {
+            $viewFile = __DIR__ . '/../views/provider/Posts/show.php';
+        } else {
+            http_response_code(403);
+            echo "Invalid role";
+            return;
+        }
+
+        include $viewFile;
+    }
+
 
     private function ensureAuth(): void
     {
