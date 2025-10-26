@@ -152,8 +152,8 @@
 
 
                                     <div class="options">
-                                        <div>Active</div>
-                                        <div>Inactive</div>
+                                        <div>Available</div>
+                                        <div>Busy</div>
                                     </div>
                                 </div>
                             </div>
@@ -184,8 +184,6 @@
                                 <button class="btn btn-primary" type="submit"><i class="fa-regular fa-floppy-disk"></i>
                                     Save
                                     Account</button>
-                                <button class="btn btn-outline" type="button" onclick="resetAccount()"><i
-                                        class="fa-regular fa-rotate-left"></i> Reset</button>
                             </div>
                             <div class="divider" style="margin:22px 0;"></div>
                         </form>
