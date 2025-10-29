@@ -15,6 +15,16 @@ class ProviderModel extends Database
         return $result->fetch_assoc();
     }
 
+    public function getByEmailAnyStatus($email)
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM Provider WHERE Email = ?");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+        return $result->fetch_assoc();
+    }
+
     public function insertProvider($data)
     {
         // Prepare SQL with placeholders

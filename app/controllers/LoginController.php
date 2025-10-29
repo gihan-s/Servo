@@ -34,7 +34,25 @@ class LoginController {
             header("Location: " . BASE_URL . "/../dashboard");
             exit;
         } else {
-            $_SESSION['login_error'] = 'Invalid email or password.';
+            // Check if user exists but with different status
+            $userAnyStatus = $model->getByEmailAnyStatus($email);
+            if ($userAnyStatus && password_verify($password, $userAnyStatus['Password'])) {
+                // Password is correct but account status is not active
+                $status = $userAnyStatus['Status'];
+                if (strcasecmp($status, 'Inactive') === 0 || strcasecmp($status, 'Deactivated') === 0) {
+                    $_SESSION['login_error'] = 'Account is deactivated for this email.';
+                } elseif (strcasecmp($status, 'Pending') === 0) {
+                    $_SESSION['login_error'] = 'Account is pending approval.';
+                } elseif (strcasecmp($status, 'Rejected') === 0) {
+                    $_SESSION['login_error'] = 'Account has been rejected.';
+                } elseif (strcasecmp($status, 'Deleted') === 0) {
+                    $_SESSION['login_error'] = 'Account has been deleted.';
+                } else {
+                    $_SESSION['login_error'] = 'Account is not active.';
+                }
+            } else {
+                $_SESSION['login_error'] = 'Invalid email or password.';
+            }
             header("Location: " . BASE_URL . "/../login");
             exit;
         }

@@ -15,6 +15,16 @@ class ClientModel extends Database
         return $result->fetch_assoc();
     }
 
+    public function getByEmailAnyStatus($email)
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM Client WHERE Email = ?");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+        return $result->fetch_assoc();
+    }
+
     // Get client by ID
     public function getClientById($id)
     {
