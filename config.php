@@ -3,6 +3,7 @@
 function loadEnv($path)
 {
     if (!file_exists($path)) {
+        die('Error: .env file not found at ' . $path);
         return;
     }
 
@@ -35,10 +36,14 @@ loadEnv(__DIR__ . '/.env');
 //     define('DB_NAME', 'servo');
 // }
 
-define('DB_HOST', $_ENV['DB_HOST'] ?? 'localhost');
-define('DB_USER', $_ENV['DB_USER'] ?? 'root');
-define('DB_PASS', $_ENV['DB_PASS'] ?? '');
-define('DB_NAME', $_ENV['DB_NAME'] ?? 'servo');
+if (!isset($_ENV['DB_HOST'], $_ENV['DB_USER'], $_ENV['DB_PASS'], $_ENV['DB_NAME'])) {
+    die('Error: Missing required environment variables. Please check your .env file.');
+}
+
+define('DB_HOST', $_ENV['DB_HOST']);
+define('DB_USER', $_ENV['DB_USER']);
+define('DB_PASS', $_ENV['DB_PASS']);
+define('DB_NAME', $_ENV['DB_NAME']);
 
 define('BASE_URL', '.');
 
