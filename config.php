@@ -23,19 +23,6 @@ function loadEnv($path)
 
 loadEnv(__DIR__ . '/.env');
 
-// // Database credentials
-// if ($_SERVER['SERVER_NAME'] === 'localhost' || $_SERVER['SERVER_NAME'] === 'servo.local') {
-//     define('DB_HOST', 'localhost');
-//     define('DB_USER', 'root');
-//     define('DB_PASS', '');
-//     define('DB_NAME', 'servo');
-// } else {
-//     define('DB_HOST', 'localhost');
-//     define('DB_USER', 'webuser');
-//     define('DB_PASS', 'Pass@Servo2025');
-//     define('DB_NAME', 'servo');
-// }
-
 if (!isset($_ENV['DB_HOST'], $_ENV['DB_USER'], $_ENV['DB_PASS'], $_ENV['DB_NAME'])) {
     die('Error: Missing required environment variables. Please check your .env file.');
 }
