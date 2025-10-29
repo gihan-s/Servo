@@ -23,7 +23,7 @@ function loadEnv($path)
 
 loadEnv(__DIR__ . '/.env');
 
-if (!isset($_ENV['DB_HOST'], $_ENV['DB_USER'], $_ENV['DB_PASS'], $_ENV['DB_NAME'])) {
+if (!isset($_ENV['DB_HOST'], $_ENV['DB_USER'], $_ENV['DB_PASS'], $_ENV['DB_NAME'], $_ENV['BASE_URL'])) {
     die('Error: Missing required environment variables. Please check your .env file.');
 }
 
@@ -32,7 +32,7 @@ define('DB_USER', $_ENV['DB_USER']);
 define('DB_PASS', $_ENV['DB_PASS']);
 define('DB_NAME', $_ENV['DB_NAME']);
 
-define('BASE_URL', '.');
+define('BASE_URL', $_ENV['BASE_URL']);
 
 date_default_timezone_set("Asia/Colombo");
 
