@@ -36,7 +36,7 @@ class LoginController {
         } else {
             // Check if user exists but with different status
             $userAnyStatus = $model->getByEmailAnyStatus($email);
-            if ($userAnyStatus && password_verify($password, $userAnyStatus['Password'])) {
+            if ($userAnyStatus && !empty($userAnyStatus['Password']) && password_verify($password, $userAnyStatus['Password'])) {
                 // Password is correct but account status is not active
                 $status = $userAnyStatus['Status'];
                 if (strcasecmp($status, 'Inactive') === 0 || strcasecmp($status, 'Deactivated') === 0) {
