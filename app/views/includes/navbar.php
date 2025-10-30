@@ -13,85 +13,74 @@ $uriNoBase  = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '/';
 // Provider-specific nav links (left side)
 if ($_SESSION['role'] === 'Provider') {
     $navLinks = [
-        ['label' => 'Dashboard', 'href' => BASE_URL . '/dashboard'],
-        ['label' => 'Feeds', 'href' => BASE_URL . '/feeds'],
-        ['label' => 'Bids', 'href' => BASE_URL . '/bids'],
-        ['label' => 'Projects', 'href' => BASE_URL . '/projects'],
-        ['label' => 'Earnings', 'href' => BASE_URL . '/earnings'],
-    ];
-
-    // Right-side icons and profile
-    $navRight = [
-        ['type' => 'icon', 'icon' => 'fa-regular fa-envelope', 'href' => BASE_URL . '/messages', 'aria' => 'Messages'],
-        ['type' => 'icon', 'icon' => 'fa-regular fa-bell', 'href' => BASE_URL . '/notifications', 'aria' => 'Notifications'],
-        ['type' => 'profile', 'href' => BASE_URL . '/profile'], // profile/avatar
+        ['label' => 'Dashboard', 'href' => BASE_URL . '/dashboard', 'class' => '"fas fa-gauge"'],
+        ['label' => 'Feeds', 'href' => BASE_URL . '/feeds', 'class' => '"fas fa-briefcase"'],
+        ['label' => 'Bids', 'href' => BASE_URL . '/bids', 'class' => '"fas fa-coins"'],
+        ['label' => 'Projects', 'href' => BASE_URL . '/projects', 'class' => '"fas fa-layer-plus"'],
+        ['label' => 'Earnings', 'href' => BASE_URL . '/earnings', 'class' => '"fas fa-money-bill-wave"'],
     ];
 }
 elseif ($_SESSION['role'] === 'Client') {
     $navLinks = [
-        ['label' => 'Dashboard', 'href' => BASE_URL . '/dashboard'],
-        ['label' => 'Projects', 'href' => BASE_URL . '/projects'],
-        ['label' => 'Providers', 'href' => BASE_URL . '/providers'],
-        ['label' => 'Posts', 'href' => BASE_URL . '/posts'],
-        ['label' => 'Payments', 'href' => BASE_URL . '/payments'],
-    ];
-
-    // Right-side icons and profile
-    $navRight = [
-        ['type' => 'icon', 'icon' => 'fa-regular fa-envelope', 'href' => BASE_URL . '/messages', 'aria' => 'Messages'],
-        ['type' => 'icon', 'icon' => 'fa-regular fa-bell', 'href' => BASE_URL . '/notifications', 'aria' => 'Notifications'],
-        ['type' => 'profile', 'href' => BASE_URL . '/profile'], // profile/avatar
+        ['label' => 'Dashboard', 'href' => BASE_URL . '/dashboard', 'class' => '"fas fa-chart-simple"'],
+        ['label' => 'Projects', 'href' => BASE_URL . '/projects', 'class' => '"fas fa-briefcase"'],
+        ['label' => 'Providers', 'href' => BASE_URL . '/providers', 'class' => '"fas fa-users"'],
+        ['label' => 'Posts', 'href' => BASE_URL . '/posts', 'class' => '"fas fa-layer-plus"'],
+        ['label' => 'Payments', 'href' => BASE_URL . '/payments', 'class' => '"fas fa-credit-card"'],
     ];
 }
+
+$navRight = [
+    ['type' => 'icon', 'icon' => 'fa-regular fa-envelope', 'href' => BASE_URL . '/messages', 'aria' => 'Messages'],
+    ['type' => 'icon', 'icon' => 'fa-regular fa-bell', 'href' => BASE_URL . '/notifications', 'aria' => 'Notifications'],
+    ['type' => 'profile', 'href' => BASE_URL . '/profile'], // profile/avatar
+];
 
 ?>
 
 <header>
     <nav class="navbar" role="navigation" aria-label="Main navigation">
+        <!-- servo logo -->
         <a href="<?= BASE_URL ?>" class="logo" aria-label="Home">
             <span><img src="<?= BASE_URL ?>/assets/img/logo.png" width="150" alt="Logo"></span>
         </a>
         <div class="nav-primary" id="navPrimary">
+            <!-- hamburger menu button for mobile -->
             <button class="nav-hamburger" id="navHamburger" aria-label="Menu" aria-expanded="false"
                 aria-controls="drawerMenu">
                 <span></span><span></span><span></span>
             </button>
+            <!-- navbar links -->
             <div class="nav-links" id="navLinks">
-                <a href="<?= $navLinks[0]['href'] ?>" class="<?= ('./' . basename( $_SERVER['REQUEST_URI'])) === $navLinks[0]['href'] ? 'active' : '' ?>">
-                    <i class="fas fa-th-large"></i>
-                    <span>Dashboard</span>
-                </a>
-                <a href="<?= $navLinks[1]['href'] ?>" class="<?= ('./' . basename( $_SERVER['REQUEST_URI'])) === $navLinks[1]['href'] ? 'active' : '' ?>">
-                    <i class="fas fa-briefcase"></i>
-                    <span>Projects</span>
-                </a>
-                <a href="<?= $navLinks[2]['href'] ?>" class="<?= ('./' . basename( $_SERVER['REQUEST_URI'])) === $navLinks[2]['href'] ? 'active' : '' ?>">
-                    <i class="fa-solid fa-users"></i>
-                    <span>Providers</span>
-                </a>
-                <a href="<?= $navLinks[3]['href'] ?>" class="<?= ('./' . basename( $_SERVER['REQUEST_URI'])) === $navLinks[3]['href'] ? 'active' : '' ?>">
-                    <i class="fa-solid fa-layer-plus"></i>
-                    <span>Posts</span>
-                </a>
-                <a href="<?= $navLinks[4]['href'] ?>" class="<?= ('./' . basename( $_SERVER['REQUEST_URI'])) === $navLinks[4]['href'] ? 'active' : '' ?>">
-                    <i class="fa-solid fa-credit-card"></i><span>Payments</span></a>
+                <!-- use a loop to generate links -->
+                <?php foreach ($navLinks as $link): ?>
+                    <a href="<?= $link['href'] ?>" class="<?= ('./' . basename( $_SERVER['REQUEST_URI'])) === $link['href'] ? 'active' : '' ?>">
+                        <i class=<?= $link['class']; ?>></i>
+                        <span><?= $link['label'] ?></span>
+                    </a>
+                <?php endforeach; ?>
             </div>
         </div>
+
         <div class="user-menu" id="userMenu">
+            <!-- messages section -->
             <a href="<?= $navRight[0]['href'] ?>" class="<?= ('./' . basename( $_SERVER['REQUEST_URI'])) === $navRight[0]['href'] ? 'active' : '' ?>"
                 aria-label="Messages">
                 <i class="fas fa-comments"></i>
             </a>
+            <!-- notifications section -->
             <button class="notification-icon <?= ('./' . basename( $_SERVER['REQUEST_URI'])) === $navRight[1]['href'] ? 'active' : '' ?>" id="notifToggle" aria-label="Notifications" aria-haspopup="true"
                 aria-expanded="false">
                 <i class="fas fa-bell"></i>
                 <span class="notification-badge" id="notifBadge">3</span>
             </button>
+            <!-- user profile section -->
             <div class="user-profile" onclick="window.location.href='<?= $navRight[2]['href'] ?>'" role="button"
                 tabindex="0" aria-label="Profile">
                 <div class="user-avatar" style="overflow: hidden; background-color: transparent; border: 1px solid #33333353;"><img src="<?= BASE_URL . '/../uploads/Users/'. $_SESSION['user_image']?>" alt="" style="height: 100%; width: 100%;"></div>
                 <div class="user-name"><?= $_SESSION['user_name']?></div>
             </div>
+            <!-- notifications pop-up panel -->
             <div class="notif-popover" id="notifPopover" role="dialog" aria-label="Notifications" aria-modal="false">
                 <div class="notif-header">
                     <h3>Notifications</h3>
@@ -108,6 +97,9 @@ elseif ($_SESSION['role'] === 'Client') {
                 </div>
             </div>
         </div>
+
+
+        <!-- drawer menu for mobile -->
         <div class="drawer" id="drawerMenu" aria-hidden="true">
             <div class="drawer-header">
                 <span class="drawer-title">Menu</span>
