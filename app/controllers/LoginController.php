@@ -32,6 +32,7 @@ class LoginController {
             $status = strtolower($status);
 
             switch ($status) {
+                case 'pending':
                 case 'active':
                     $_SESSION['user_id'] = $user['Client_ID'] ?? $user['Provider_ID'];
                     $_SESSION['role'] = $type;
