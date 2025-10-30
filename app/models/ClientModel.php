@@ -7,6 +7,7 @@ class ClientModel extends Database
 
     public function getByEmail($email)
     {
+        $email = strtolower($email);
         $stmt = $this->conn->prepare("SELECT * FROM Client WHERE Email = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
@@ -76,11 +77,14 @@ class ClientModel extends Database
         // Hash password
         $hashedPassword = password_hash($data['password'], PASSWORD_DEFAULT);
         $profileImage = $data['profile_picture'] ?? null;
+        
+        // Convert email to lowercase
+        $email = strtolower($data['email']);
 
         // Bind parameters: s = string
         $stmt->bind_param(
             "sssssssssss",
-            $data['email'],
+            $email,
             $data['contact_no'],
             $hashedPassword,
             $CurrentDate,
@@ -106,6 +110,7 @@ class ClientModel extends Database
 
     public function emailExists($email)
     {
+        $email = strtolower($email);
         $stmt = $this->conn->prepare("SELECT Client_ID FROM Client WHERE Email = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
