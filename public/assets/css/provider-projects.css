@@ -10,7 +10,7 @@
             padding: 10px;
             background-color: #fff;
             top: 0;
-            z-index; 1;
+            z-index: 1;
         }
         .service-requests .item-list {
             max-width: 1400px;
