@@ -26,17 +26,40 @@ class LoginController {
         }
 
         $user = $model->getByEmail($email);
-        if ($user && password_verify($password, $user['Password'])) {
-            $_SESSION['user_id'] = $user['Client_ID'] ?? $user['Provider_ID'];
-            $_SESSION['role'] = $type;
-            $_SESSION['user_name'] = $user['First_Name'] . ' ' . $user['Last_Name'];
-            $_SESSION['user_image'] = $user['Profile_Picture'] ?? null;
-            header("Location: " . BASE_URL . "/../dashboard");
-            exit;
+        if ($user && !empty($user['Password']) && password_verify($password, $user['Password'])) {
+            $status = $user['Status'];
+
+            $status = strtolower($status);
+
+            switch ($status) {
+                case 'active':
+                    $_SESSION['user_id'] = $user['Client_ID'] ?? $user['Provider_ID'];
+                    $_SESSION['role'] = $type;
+                    $_SESSION['user_name'] = $user['First_Name'] . ' ' . $user['Last_Name'];
+                    $_SESSION['user_image'] = $user['Profile_Picture'] ?? null;
+                    header("Location: " . BASE_URL . "/../dashboard");
+                    return;
+
+                case 'rejected':
+                    $_SESSION['login_error'] = 'Account has been rejected.';
+                    header("Location: " . BASE_URL . "/../login");
+                    return;
+
+                case 'deleted':
+                    $_SESSION['login_error'] = 'Account has been deleted.';
+                    header("Location: " . BASE_URL . "/../login");
+                    return;
+
+                default:
+                    $_SESSION['login_error'] = 'There was an issue with your account status: ' . htmlspecialchars($status);
+                    header("Location: " . BASE_URL . "/../login");
+                    return;
+            }
+
         } else {
             $_SESSION['login_error'] = 'Invalid email or password.';
             header("Location: " . BASE_URL . "/../login");
-            exit;
+            return;
         }
     }
 
