@@ -7,7 +7,7 @@ $BaseURL = "..";
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Servo - Get Started</title>
+    <title>Servo | Get Started</title>
 
     <link rel="stylesheet" href="<?= $BaseURL ?>/assets/css/registerStyles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">

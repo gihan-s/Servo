@@ -4,7 +4,9 @@
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width,initial-scale=1" />
-	<title>Servo - Hire Talent & Find Work</title>
+	<title>
+		Servo | Hire Verified Local & Remote Professionals for Your Projects
+	</title>
 
 	<link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/styles.css" />
 	<link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/landing.css" />

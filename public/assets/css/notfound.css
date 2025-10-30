@@ -1,17 +1,28 @@
-body{
+@font-face {
+    font-family: 'Arvo';
+    font-style: normal;
+    font-weight: 400;
+    src: url('../fonts/arvo.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+h1 {
+    font-weight: 400;
+}
+
+body {
     min-height: 100vh;
     display: flex;
     align-items: center;
+    /* */
+    color: #333;
+    overflow: hidden;
 }
 
 .page_404 {
-    padding: 40px 0;
-    background: #fff;
+    /* padding: 40px 0; */
+    /* background: #fff; */
     font-family: 'Arvo', serif;
-    width: 100%;
-}
-
-.page_404 img {
     width: 100%;
 }
 
@@ -21,25 +32,93 @@ body{
     background-position: center;
 }
 
-
 .four_zero_four_bg h1 {
     font-size: 80px;
+    /* margin: 0; */
 }
 
-.four_zero_four_bg h3 {
-    font-size: 80px;
+.contant_box_404 {
+    margin-top: -50px;
+}
+
+.h2 {
+    font-size: 30px;
+    font-weight: 500;
+    margin: 20px 0 10px 0;
 }
 
 .link_404 {
     color: #fff !important;
     padding: 10px 20px;
-    background: #39ac31;
+    background: #008500;
     margin: 20px 0;
     display: inline-block;
-
     text-decoration: none !important;
+    border-radius: 4px;
 }
 
-.contant_box_404 {
-    margin-top: -50px;
+.container {
+    padding-right: 15px;
+    padding-left: 15px;
+    margin-right: auto;
+    margin-left: auto
+}
+
+/* .container:after {
+    clear: both;
+}
+
+.container:before, .container:after {
+    display: table;
+    content: " ";
+} */
+
+@media (min-width:1200px) {
+  .container {
+    width: 1170px
+  }
+}
+
+/* .row {
+    display: flex;
+    justify-content: center;
+    margin-right: -15px;
+    margin-left: -15px
+}
+
+.row:after, .row:before {
+  display: table;
+  content: " "
+}
+
+.row:after {
+  clear: both
+} */
+
+.col-sm-12, .col-sm-10 {
+    width: 100%;
+    padding: 0;
+    box-sizing: border-box;
+
+    position: relative;
+    min-height: 1px;
+    padding-right: 15px;
+    padding-left: 15px
+}
+
+.col-sm-10 {
+    max-width: 83.3333%;
+    /* margin: 0 auto; */
+}
+
+.col-sm-offset-1 {
+    margin-left: 8.3333%;
+}
+
+.text-center {
+    text-align: center;
+}
+
+h1.text-center {
+    margin: 20px 0px 10px;
 }
