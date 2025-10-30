@@ -12,7 +12,7 @@ class LoginController {
     public function authenticate() {
 
         $type = $_POST['type'] ?? '';
-        $email = $_POST['email'] ?? '';
+        $email = strtolower($_POST['email'] ?? '');
         $password = $_POST['password'] ?? '';
 
         if ($type === 'Client') {

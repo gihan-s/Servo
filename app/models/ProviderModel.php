@@ -7,6 +7,7 @@ class ProviderModel extends Database
 
     public function getByEmail($email)
     {
+        $email = strtolower($email);
         $stmt = $this->conn->prepare("SELECT * FROM Provider WHERE Email = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
@@ -36,11 +37,14 @@ class ProviderModel extends Database
         $nicf = $data['nic_front'] ?? null;
         $nicb = $data['nic_back'] ?? null;
         $resume = $data['resume'] ?? null;
+        
+        // Convert email to lowercase
+        $email = strtolower($data['email']);
 
         // Bind parameters: s = string
         $stmt->bind_param(
             "sssssssssssssss",
-            $data['email'],
+            $email,
             $data['contact_no'],
             $data['nic_no'],
             $hashedPassword,

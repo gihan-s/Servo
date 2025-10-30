@@ -18,7 +18,7 @@ class RegisterController
         $_SESSION['register']['first_name'] = $_POST['first_name'] ?? '';
         $_SESSION['register']['last_name'] = $_POST['last_name'] ?? '';
         $_SESSION['register']['gender'] = $_POST['gender'] ?? '';
-        $_SESSION['register']['email'] = $_POST['email'] ?? '';
+        $_SESSION['register']['email'] = strtolower($_POST['email'] ?? '');
         $_SESSION['register']['contact_no'] = $_POST['contact_no'] ?? '';
         $_SESSION['register']['nic_no'] = $_POST['nic_no'] ?? '';
         header('Location: profile');
@@ -68,7 +68,7 @@ class RegisterController
             return;
         }
 
-        $email = trim($_POST['email']);
+        $email = strtolower(trim($_POST['email']));
         $model = new ClientModel();
 
         if ($model->emailExists($email)) {
