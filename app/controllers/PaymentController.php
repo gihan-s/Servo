@@ -25,9 +25,11 @@ class PaymentController
         // Choose view by role
         if ($role === 'Client') {
             $viewFile = __DIR__ . '/../views/client/Payments/index.php';
-        } elseif ($role === 'Provider') {
-            $viewFile = __DIR__ . '/../views/provider/Payments/index.php';
-        } else {
+        }
+        // elseif ($role === 'Provider') {
+        //     $viewFile = __DIR__ . '/../views/provider/Payments/index.php';
+        // }
+        else {
             http_response_code(403);
             echo "Invalid role";
             return;

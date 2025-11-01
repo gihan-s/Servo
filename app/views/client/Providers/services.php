@@ -15,7 +15,7 @@
             <h1>Services / Providers</h1>
             <div class="search-header">
                 <div class="search-button">
-                    <input type="text" placeholder="Search for Requests...">
+                    <input type="text" placeholder="Search for Providers...">
                     <button><i class="fa-light fa-magnifying-glass"></i></button>
                 </div>
                 <button class="filter" id="filter-pop-up"><i

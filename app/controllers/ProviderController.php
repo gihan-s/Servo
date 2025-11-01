@@ -25,9 +25,11 @@ class ProviderController
         // Choose view by role
         if ($role === 'Client') {
             $viewFile = __DIR__ . '/../views/client/Providers/index.php';
-        } elseif ($role === 'Provider') {
-            $viewFile = __DIR__ . '/../views/provider/Providers/index.php';
-        } else {
+        }
+        // elseif ($role === 'Provider') {
+        //     $viewFile = __DIR__ . '/../views/provider/Providers/index.php';
+        // }
+        else {
             http_response_code(403);
             echo "Invalid role";
             return;

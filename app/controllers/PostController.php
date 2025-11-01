@@ -208,9 +208,11 @@ class PostController
             $categories = $this->categoryModel->getCategories();
 
             $viewFile = __DIR__ . '/../views/client/Posts/show.php';
-        } elseif ($role === 'Provider') {
-            $viewFile = __DIR__ . '/../views/provider/Posts/show.php';
-        } else {
+        }
+        // elseif ($role === 'Provider') {
+        //     $viewFile = __DIR__ . '/../views/provider/Posts/show.php';
+        // }
+        else {
             http_response_code(403);
             echo "Invalid role";
             return;
