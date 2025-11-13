@@ -37,6 +37,7 @@
 			<div class="auth">
 					<?php if (isset($_SESSION['user_id']) && isset($_SESSION['role'])): ?>
 							<a href="<?= BASE_URL ?>/dashboard" class="cta">Dashboard</a>
+							<!-- <a href="<?= BASE_URL ?>/logout" class="cta">Log Out</a> -->
 					<?php else: ?>
 							<a href="<?= BASE_URL ?>/login" class="login">Log In</a>
 							<a href="<?= BASE_URL ?>/register" class="cta">Get Started</a>
