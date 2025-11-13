@@ -15,7 +15,7 @@
 </head>
 
 <body>
-    <button class="button home-btn" onclick="window.location.href='<?= BASE_URL ?>/'">Home</button>
+    <?php include 'header.php' ?>
     <div class="main-section">
         <img src="<?= BASE_URL ?>/assets/img/logo.png" alt="Servo">
         <?php

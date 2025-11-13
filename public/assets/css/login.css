@@ -1,10 +1,15 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+/* @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap'); */
+
+@font-face {
+    font-family: 'DM Sans';
+    src: url('../fonts/dm_sans.ttf') format('truetype');
+}
 
 *{
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: "Roboto", sans-serif;
+    font-family: "DM Sans", sans-serif;
 }
 
 body {
@@ -13,6 +18,7 @@ body {
     align-items: center;
     justify-content: center;
     background: #f8f9fa;
+    padding-top: 70px;
 }
 
 body::before {
@@ -23,6 +29,37 @@ body::before {
   background-size: cover;
   opacity: 0.1; /* 👈 change this for transparency */
   z-index: -1;
+}
+
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 70px;
+    background-color: var(--background-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    z-index: 1000;
+}
+
+.header .logo {
+    height: 30px;
+    width: auto;
+}
+
+/* Responsive header adjustments */
+@media (max-width: 768px) {
+    .header {
+        padding: 0 20px;
+    }
+
+    .header .logo {
+        height: 40px;
+    }
 }
 
 .main-section {
@@ -38,6 +75,7 @@ body::before {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    z-index: 1;
 }
 
 .main-section img {

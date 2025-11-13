@@ -1,23 +1,24 @@
-* {
-    color: #333;
-}
-
 :root {
-    --theme-color: #008500;
+    --primary-color: #008500;
     --border-color: #333;
     --background-color: #ffffffff;
 }
 
-body {
+@font-face {
+    font-family: 'DM Sans';
+    src: url('../fonts/dm_sans.ttf') format('truetype');
+}
+
+*{
     font-family: "DM Sans", sans-serif;
+}
+
+body {
     background-color: var(--background-color);
     margin: 0;
     padding: 0;
     padding-top: 70px;
-    /* Add padding to account for fixed header */
-
     position: relative;
-    
 }
 
 body::before {
@@ -62,14 +63,13 @@ body::before {
 }
 
 .main-section {
-    padding: 40px;
-    margin: auto;
-
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    max-width: 400px;
     width: 100%;
+    max-width: 500px;
+    margin: auto;
+    padding: 40px;
     background-color: var(--background-color);
-    border-radius: 10px;
+    border-radius: 15px;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07);
     z-index: 1;
     margin-top: 35px;
     
@@ -82,6 +82,23 @@ body::before {
     margin: 0 auto;
     display: block;
     margin-bottom: 40px;
+}
+
+.register-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-bottom: 5%;
+}
+
+.register-header h2 {
+    flex: 1;
+    text-align: center;
+    margin: 0;
+    font-size: 1.64rem;
+    color: #333;
+    font-weight: 600;
 }
 
 input:-webkit-autofill,
@@ -180,7 +197,7 @@ input:-webkit-autofill:active {
 }
 
 .toggle-button.active {
-    background-color: var(--theme-color);
+    background-color: var(--primary-color);
     color: var(--background-color);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
@@ -239,12 +256,12 @@ input:-webkit-autofill:active {
     left: 50%;
     transform: translateX(-50%);
     overflow: hidden;
-    border: 1px solid var(--theme-color);
+    border: 1px solid var(--primary-color);
 }
 
 .profile-photo i {
     font-size: 80px;
-    color: var(--theme-color);
+    color: var(--primary-color);
 }
 
 .profile-photo img {
@@ -263,7 +280,7 @@ input:-webkit-autofill:active {
     bottom: 10px;
     right: 10px;
     font-size: 25px;
-    color: var(--theme-color);
+    color: var(--primary-color);
     background-color: var(--background-color);
     cursor: pointer;
     transition: background-color 0.3s ease;
@@ -295,14 +312,14 @@ input:-webkit-autofill:active {
     align-items: center;
     justify-content: center;
     margin-bottom: 10px;
-    border: 2px solid var(--theme-color);
+    border: 2px solid var(--primary-color);
     border-radius: 10px;
 
 }
 
 .nic-photo i {
     font-size: 50px;
-    color: var(--theme-color);
+    color: var(--primary-color);
     padding: 20px;
 }
 
@@ -348,7 +365,7 @@ input:-webkit-autofill:active {
 }
 
 .accordion-item .accordion-title:hover {
-    border-color: var(--theme-color);
+    border-color: var(--primary-color);
     box-shadow: 0 3px 8px rgba(0, 133, 0, 0.15);
 }
 
@@ -427,7 +444,7 @@ input:-webkit-autofill:active {
 }
 
 .password-toggle:hover {
-    color: var(--theme-color);
+    color: var(--primary-color);
 }
 
 .text-container {

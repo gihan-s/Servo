@@ -27,10 +27,15 @@
 
     <?php include 'header.php' ?>
 
-
     <form id="registrationForm1" class="form" action="./register/personalsubmit" method="post" enctype="multipart/form-data" novalidate>
 
         <div class="main-section">
+
+            <img src="<?= BASE_URL ?>/assets/img/logo.png" alt="Servo">
+
+            <div class="register-header">
+                <h2>Sign Up to Servo</h2>
+            </div>
 
             <div class="section active">
 
