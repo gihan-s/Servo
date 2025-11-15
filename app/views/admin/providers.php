@@ -19,6 +19,7 @@ $TopBarHeader = "Providers";
 
     <link rel="stylesheet" href="/assets/css/admin-main.css">
     <link rel="stylesheet" href="/assets/css/admin-sidebar.css">
+    <link rel="stylesheet" href="/assets/css/admin-provider-view.css">
 
     <!-- Javascript -->
     <script src="/assets/js/elementScript.js" defer></script>

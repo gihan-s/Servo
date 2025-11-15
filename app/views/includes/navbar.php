@@ -124,9 +124,6 @@ $navRight = [
         <div class="drawer-overlay" id="drawerOverlay" tabindex="-1" aria-hidden="true"></div>
     </nav>
 </header>
-<style>
-    /* --- Responsive Navbar (Upwork-like) --- */
-</style>
 <script>
     // JS for responsive navbar: overflow management & drawer
     (function () {

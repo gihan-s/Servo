@@ -17,6 +17,7 @@ $baseURL = "../../../";
     <link rel="stylesheet" href="<?= BASE_URL ?>/../assets/css/elementStyles.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/../assets/css/gridTemplates.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/../assets/css/login.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>/../assets/css/admin-login.css">
     <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
 </head>
 
@@ -59,11 +60,3 @@ $baseURL = "../../../";
 </body>
 
 </html>
-
-
-<style>
-    .login-header h2{
-        font-size: 1.2em;
-        color: #686868ff;
-    }
-</style>

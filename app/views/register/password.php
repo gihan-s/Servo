@@ -10,6 +10,7 @@ $BaseURL = "..";
     <title>Servo | Get Started</title>
 
     <link rel="stylesheet" href="<?= $BaseURL ?>/assets/css/registerStyles.css">
+    <link rel="stylesheet" href="<?= $BaseURL ?>/assets/css/register-footer.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
