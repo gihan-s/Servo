@@ -17,6 +17,7 @@ $baseURL = "../../../";
     <link rel="stylesheet" href="<?= BASE_URL ?>/../assets/css/elementStyles.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/../assets/css/gridTemplates.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/../assets/css/login.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>/../assets/css/login-inline.css">
     <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
 </head>
 
@@ -29,12 +30,11 @@ $baseURL = "../../../";
         ?>
 
         <?php if ($loginError): ?>
-            <div
-                style="background:#ffe8e8; color:#7a0b0b; border:1px solid #f5b5b5; padding:10px 14px; border-radius:6px; width:100%; max-width:420px; margin:0 auto 18px auto; font-size:14px; line-height:1.4; box-shadow:0 1px 2px rgba(0,0,0,.06);">
+            <div class="login-error-message">
                 <?= htmlspecialchars($loginError) ?>
             </div>
         <?php endif; ?>
-        <div class="login-header">
+        <div class="login-header admin-login-header">
             <h2>Admin Panel</h2>
         </div>
 
@@ -59,11 +59,3 @@ $baseURL = "../../../";
 </body>
 
 </html>
-
-
-<style>
-    .login-header h2{
-        font-size: 1.2em;
-        color: #686868ff;
-    }
-</style>

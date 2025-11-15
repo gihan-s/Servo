@@ -15,6 +15,7 @@
         rel="stylesheet">
     <link rel="stylesheet" href="<?= $BaseURL ?>/assets/css/elementStyles.css">
     <link rel="stylesheet" href="<?= $BaseURL ?>/assets/css/gridTemplates.css">
+    <link rel="stylesheet" href="<?= $BaseURL ?>/assets/css/register-inline.css">
     <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
 
     <script src="<?= $BaseURL ?>/assets/js/elementScript.js" defer></script>
@@ -42,10 +43,8 @@
                 <div class="input-field">
 
                     <div class="toggle-section user-change">
-                        <div class="toggle-button active"><i class="fa-solid fa-user"
-                                style="padding-right: 10px"></i>Client</div>
-                        <div class="toggle-button"><i class="fa-solid fa-user-helmet-safety"
-                                style="padding-right: 10px"></i>Provider</div>
+                        <div class="toggle-button active"><i class="fa-solid fa-user"></i>Client</div>
+                        <div class="toggle-button"><i class="fa-solid fa-user-helmet-safety"></i>Provider</div>
                     </div>
 
                     <input type="hidden" name="user_type" id="user_type" value="client" />
@@ -118,7 +117,7 @@
                             <input type="text" class="text-field" name="contact_no" value="<?= getFromSession("contact_no") ?>" id="" required>
                         </div>
 
-                        <div class="text-container" style="display: none;">
+                        <div class="text-container nic-field-hidden">
                             <div class="label text-label">NIC *</div>
                             <input type="text" class="text-field" name="nic_no" value="<?= getFromSession("nic_no") ?>" id="">
                         </div>
@@ -128,7 +127,7 @@
 
                     <div class="button-section">
                         <button type="submit" class="button" id="nextBtn">Next
-                            <i class="fa-regular fa-arrow-right" style="padding-left: 5px"></i>
+                            <i class="fa-regular fa-arrow-right"></i>
                         </button>
                     </div>
                 </div>
