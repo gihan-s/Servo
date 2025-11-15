@@ -1,0 +1,12 @@
+/* Common CSS Variables and Base Styles */
+:root {
+    --green: #008500;
+    --radius: 16px;
+}
+
+body {
+    margin: 0;
+    font-family: 'Inter', Arial, sans-serif;
+    background: #f8fafc;
+    color: #111827;
+}

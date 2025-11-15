@@ -1,6 +1,4 @@
 @import url('https://fonts.googleapis.com/css2?family=Anek+Malayalam:wght@100..800&display=swap');
-
-
 :root {
   --secondaryColor: #f7f9fc;
   --primaryColor: black;
@@ -33,15 +31,11 @@
   color: var(--primaryColor);
 }
 
-
-
 body {
   padding: 25px;
   padding-left: 290px;
   background-color: #f5f6f8;
 }
-
-
 .container {
   background-color: var(--containerColor);
   border-radius: 5px;
@@ -49,8 +43,6 @@ body {
 
   box-shadow: 1px 1px 5px 0px rgba(0, 0, 0, 0.08);
 }
-
-
 
 .container {
   border-radius: 15px;
@@ -415,13 +407,9 @@ button i {
 
   font-size: 0.9em;
 }
-
-
 .image-preview a:hover {
   background-color: #00000025;
 }
-
-
 /* Table Styles */
 table {
   width: 100%;
@@ -439,8 +427,6 @@ table tr {
 table tbody tr:hover {
   background-color: var(--tableHoverColor);
 }
-
-
 table td {
   text-align: left;
   font-weight: 400;
@@ -472,8 +458,6 @@ table td i {
   width: 100%;
   overflow: auto;
 }
-
-
 /* Pagination */
 
 .pagination {
