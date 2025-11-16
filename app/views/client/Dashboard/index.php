@@ -8,6 +8,7 @@
     <title>Servo | Dashboard</title>
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/cardList.css" />
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/dashboard.css" />
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/client-dashboard.css" />
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/footer.css" />
     <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css" />
     
@@ -95,7 +96,7 @@
                         </div>
                     </li>
                 </ul>
-                <div style="margin-top:18px; text-align:right;">
+                <div class="activity-card-actions">
                     <button class="link-btn"><i class="fa-regular fa-arrow-right"></i> View All Payments</button>
                 </div>
             </div>
@@ -136,14 +137,14 @@
                         </div>
                     </li>
                 </ul>
-                <div style="margin-top:18px; text-align:right;">
+                <div class="activity-card-actions">
                     <button class="link-btn"><i class="fa-regular fa-arrow-right"></i> Manage Posts</button>
                 </div>
             </div>
         </section>
 
         <!-- Projects Snapshot -->
-        <section aria-label="Projects snapshot" style="margin-bottom:56px;">
+        <section aria-label="Projects snapshot" class="section-mb-56">
             <div class="section-header">
                 <h2>Active Projects</h2>
                 <div class="section-actions">
@@ -151,68 +152,58 @@
                     <button class="link-btn"><i class="fa-regular fa-plus"></i> New Project</button>
                 </div>
             </div>
-            <div class="card" style="padding:0; overflow:hidden;">
-                <table style="width:100%; border-collapse:separate; border-spacing:0; font-size:14px;">
-                    <thead
-                        style="background:#f1f5f9; text-align:left; font-size:12px; letter-spacing:.5px; text-transform:uppercase; color:#475569;">
+            <div class="card project-table-card">
+                <table class="project-table">
+                    <thead>
                         <tr>
-                            <th style="padding:14px 20px;">Project</th>
-                            <th style="padding:14px 20px;">Stage</th>
-                            <th style="padding:14px 20px;">Provider</th>
-                            <th style="padding:14px 20px;">Budget</th>
-                            <th style="padding:14px 20px;">Progress</th>
-                            <th style="padding:14px 20px; text-align:right;">Action</th>
+                            <th>Project</th>
+                            <th>Stage</th>
+                            <th>Provider</th>
+                            <th>Budget</th>
+                            <th>Progress</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr style="border-top:1px solid #e5e7eb;">
-                            <td style="padding:16px 20px; font-weight:600; color:#111827;">E‑commerce Platform</td>
-                            <td style="padding:16px 20px;">Sprint 3</td>
-                            <td style="padding:16px 20px;">DevStudio Labs</td>
-                            <td style="padding:16px 20px; color:#008500; font-weight:600;">$6,500</td>
-                            <td style="padding:16px 20px;">
-                                <div
-                                    style="background:#e2e8f0; height:8px; border-radius:6px; position:relative; overflow:hidden;">
-                                    <div
-                                        style="background:#008500; width:60%; position:absolute; inset:0; border-radius:6px;">
-                                    </div>
+                        <tr>
+                            <td class="project-name">E‑commerce Platform</td>
+                            <td>Sprint 3</td>
+                            <td>DevStudio Labs</td>
+                            <td class="project-budget">$6,500</td>
+                            <td>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar-fill progress-60"></div>
                                 </div>
                             </td>
-                            <td style="padding:16px 20px; text-align:right;">
+                            <td>
                                 <button class="ghost-btn"><i class="fa-regular fa-eye"></i> Details</button>
                             </td>
                         </tr>
-                        <tr style="border-top:1px solid #e5e7eb;">
-                            <td style="padding:16px 20px; font-weight:600; color:#111827;">Analytics Dashboard</td>
-                            <td style="padding:16px 20px;">QA</td>
-                            <td style="padding:16px 20px;">DataCraft</td>
-                            <td style="padding:16px 20px; color:#008500; font-weight:600;">$4,800</td>
-                            <td style="padding:16px 20px;">
-                                <div
-                                    style="background:#e2e8f0; height:8px; border-radius:6px; position:relative; overflow:hidden;">
-                                    <div
-                                        style="background:#008500; width:82%; position:absolute; inset:0; border-radius:6px;">
-                                    </div>
+                        <tr>
+                            <td class="project-name">Analytics Dashboard</td>
+                            <td>QA</td>
+                            <td>DataCraft</td>
+                            <td class="project-budget">$4,800</td>
+                            <td>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar-fill progress-82"></div>
                                 </div>
                             </td>
-                            <td style="padding:16px 20px; text-align:right;">
+                            <td>
                                 <button class="ghost-btn"><i class="fa-regular fa-eye"></i> Details</button>
                             </td>
                         </tr>
-                        <tr style="border-top:1px solid #e5e7eb;">
-                            <td style="padding:16px 20px; font-weight:600; color:#111827;">Mobile Fitness App</td>
-                            <td style="padding:16px 20px;">Design</td>
-                            <td style="padding:16px 20px;">UXPro Studio</td>
-                            <td style="padding:16px 20px; color:#008500; font-weight:600;">$3,200</td>
-                            <td style="padding:16px 20px;">
-                                <div
-                                    style="background:#e2e8f0; height:8px; border-radius:6px; position:relative; overflow:hidden;">
-                                    <div
-                                        style="background:#008500; width:35%; position:absolute; inset:0; border-radius:6px;">
-                                    </div>
+                        <tr>
+                            <td class="project-name">Mobile Fitness App</td>
+                            <td>Design</td>
+                            <td>UXPro Studio</td>
+                            <td class="project-budget">$3,200</td>
+                            <td>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar-fill progress-35"></div>
                                 </div>
                             </td>
-                            <td style="padding:16px 20px; text-align:right;">
+                            <td>
                                 <button class="ghost-btn"><i class="fa-regular fa-eye"></i> Details</button>
                             </td>
                         </tr>
@@ -222,7 +213,7 @@
         </section>
 
         <!-- Quick Actions -->
-        <section aria-label="Quick actions" style="margin-bottom:40px;">
+        <section aria-label="Quick actions" class="section-mb-40">
             <div class="section-header">
                 <h2>Quick Actions</h2>
             </div>
@@ -241,7 +232,7 @@
         </section>
 
         <!-- Support / Help -->
-        <section aria-label="Help and support" style="margin-bottom:64px;">
+        <section aria-label="Help and support" class="section-mb-64">
             <div class="section-header">
                 <h2>Need Help?</h2>
             </div>

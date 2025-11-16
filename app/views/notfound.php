@@ -5,8 +5,6 @@
     <meta charset="UTF-8">
     <title>404 Not Found</title>
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/notfound.css">
-    <style>
-    </style>
 </head>
 
 <body>
