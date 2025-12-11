@@ -25,7 +25,7 @@ elseif ($_SESSION['role'] === 'Client') {
         ['label' => 'Dashboard', 'href' => BASE_URL . '/dashboard', 'class' => '"fas fa-chart-simple"'],
         ['label' => 'Projects', 'href' => BASE_URL . '/projects', 'class' => '"fas fa-briefcase"'],
         ['label' => 'Providers', 'href' => BASE_URL . '/providers', 'class' => '"fas fa-users"'],
-        ['label' => 'Posts', 'href' => BASE_URL . '/posts', 'class' => '"fas fa-layer-plus"'],
+        ['label' => 'Requests', 'href' => BASE_URL . '/requests', 'class' => '"fas fa-layer-plus"'],
         ['label' => 'Payments', 'href' => BASE_URL . '/payments', 'class' => '"fas fa-credit-card"'],
     ];
 }
