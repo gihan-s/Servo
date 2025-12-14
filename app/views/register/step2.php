@@ -14,7 +14,8 @@ $BaseURL = "..";
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap"
-        rel="stylesheet">
+        rel="stylesheet"
+    >
     <link rel="stylesheet" href="<?= $BaseURL ?>/assets/css/elementStyles.css">
     <link rel="stylesheet" href="<?= $BaseURL ?>/assets/css/gridTemplates.css">
     <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
@@ -44,8 +45,7 @@ $BaseURL = "..";
 
                     <?php
 
-                    function getFromSession($name)
-                    {
+                    function getFromSession($name) {
                         return isset($_SESSION["register"][$name]) ? $_SESSION["register"][$name] : "";
                     }
 

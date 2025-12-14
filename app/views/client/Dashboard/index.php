@@ -11,12 +11,15 @@
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/client-dashboard.css" />
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/footer.css" />
     <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css" />
+    <script src="<?= BASE_URL ?>/assets/js/dashboard.js"></script>
     
 </head>
 
 <body>
     <?php // Use filesystem path for includes (BASE_URL is for URLs, not filesystem)
-    require_once __DIR__ . '/../../includes/navbar.php'; ?>
+    require_once __DIR__ . '/../../includes/navbar.php';
+    ?>
+
     <main class="dashboard-wrapper">
         <header class="dashboard">
             <h1>Welcome Back</h1>
@@ -26,33 +29,41 @@
         <!-- Metrics -->
         <section class="metrics-grid" aria-label="Key metrics">
             <!-- Active Posts -->
-            <div class="metric-card">
+            <div class="metric-card" id="activeRequestsCard">
                 <div class="metric-icon" style="background:#ecfdf5; color:#008500;"><i class="fas fa-clipboard-list"></i>
                 </div>
-                <div class="metric-title">Active Posts</div>
-                <div class="metric-value">3</div>
+                <div class="metric-title">Active Requests</div>
+                <div class="metric-value">
+                    <?= $activeRequestCount ?>
+                </div>
                 <div class="metric-delta delta-up"><i class="fa-solid fa-arrow-up"></i> +1 this week</div>
             </div>
             <!-- Pending Payments -->
-            <div class="metric-card">
+            <div class="metric-card" id="pendingPaymentsCard">
                 <div class="metric-icon" style="background:#fefce8; color:#b45309;"><i class="fas fa-file-invoice-dollar"></i></div>
                 <div class="metric-title">Pending Payments</div>
-                <div class="metric-value">2</div>
+                <div class="metric-value">
+                    <?= $pendingPaymentCount ?>
+                </div>
                 <div class="metric-delta" style="color:#b45309;"><i class="fa-solid fa-hourglass"></i> Due soon</div>
             </div>
             <!-- Total Projects -->
-            <div class="metric-card">
+            <div class="metric-card" id="totalProjectsCard">
                 <div class="metric-icon" style="background:#eff6ff; color:#008500;"><i class="fas fa-briefcase"></i></div>
                 <div class="metric-title">Total Projects</div>
-                <div class="metric-value">5</div>
+                <div class="metric-value">
+                    <?= $totalProjectCount ?>
+                </div>
                 <div class="metric-delta delta-up"><i class="fa-solid fa-arrow-up"></i> +2</div>
             </div>
             <!-- Total Spent -->
-            <div class="metric-card">
+            <div class="metric-card" id="totalSpentCard">
                 <div class="metric-icon" style="background:#ecfdf5; color:#008500;"><i class="fas fa-sack-dollar"></i>
                 </div>
                 <div class="metric-title">Total Spent</div>
-                <div class="metric-value">$3,450</div>
+                <div class="metric-value">
+                    $<?= number_format($totalSpent, 2) ?>
+                </div>
                 <div class="metric-delta delta-up"><i class="fa-solid fa-arrow-up"></i> +5% vs last month</div>
             </div>
         </section>
@@ -62,83 +73,48 @@
             <div class="activity-card">
                 <h3><i class="fas fa-file-invoice"></i> Recent Payments</h3>
                 <ul class="list">
+                    <?php foreach ($recentPayments as $payment): ?>
                     <li class="list-item">
                         <div class="item-top">
-                            <div class="item-title">Invoice #INV-10452 • Sprint 3 Development</div>
-                            <span class="status-badge status-pending">Pending</span>
-                        </div>
+                            <div class="item-title">Invoice #<?= $payment['invoice'] ?> • <?= $payment['description'] ?></div>
+                            <span class="status-badge status-<?= strtolower($payment['status']) ?>"><?= $payment['status'] ?></span>
+                        </div> 
                         <div class="item-meta">
-                            <span><i class="fa-regular fa-calendar"></i> Sep 02, 2025</span>
-                            <span><i class="fa-regular fa-coins"></i> $1,200.00</span>
-                            <span><i class="fa-regular fa-credit-card"></i> Visa</span>
+                            <span><i class="fa-regular fa-calendar"></i> <?= $payment['date'] ?></span>
+                            <span><i class="fa-regular fa-coins"></i> $<?= number_format($payment['amount'], 2) ?></span>
+                            <span><i class="fa-regular fa-credit-card"></i> <?= $payment['method'] ?></span>
                         </div>
                     </li>
-                    <li class="list-item">
-                        <div class="item-top">
-                            <div class="item-title">Invoice #INV-10398 • Brand Pack Delivery</div>
-                            <span class="status-badge status-paid">Paid</span>
-                        </div>
-                        <div class="item-meta">
-                            <span><i class="fa-regular fa-calendar"></i> Aug 28, 2025</span>
-                            <span><i class="fa-regular fa-coins"></i> $950.00</span>
-                            <span><i class="fa-regular fa-credit-card"></i> Stripe</span>
-                        </div>
-                    </li>
-                    <li class="list-item">
-                        <div class="item-top">
-                            <div class="item-title">Invoice #INV-10321 • QA Cycle Refund</div>
-                            <span class="status-badge status-refunded">Refunded</span>
-                        </div>
-                        <div class="item-meta">
-                            <span><i class="fa-regular fa-calendar"></i> Aug 30, 2025</span>
-                            <span><i class="fa-regular fa-coins"></i> $420.00</span>
-                            <span><i class="fa-regular fa-credit-card"></i> Stripe</span>
-                        </div>
-                    </li>
+                    <?php endforeach; ?>
                 </ul>
                 <div class="activity-card-actions">
-                    <button class="link-btn"><i class="fa-regular fa-arrow-right"></i> View All Payments</button>
+                    <button class="link-btn" id="viewPayments"><i class="fa-regular fa-arrow-right"></i>View All Payments</button>
                 </div>
             </div>
+
             <div class="activity-card">
-                <h3><i class="fas fa-clipboard-list"></i> Recent Posts</h3>
+                <h3><i class="fas fa-clipboard-list"></i> Recent Requests</h3>
                 <ul class="list">
+                    <?php foreach ($recentRequests as $request): ?>
+
                     <li class="list-item">
                         <div class="item-top">
-                            <div class="item-title">Full-Stack E‑commerce Platform</div>
-                            <span class="status-badge status-open">Open</span>
+                            <div class="item-title"><?= $request['title'] ?></div>
+                            <span class="status-badge status-<?= strtolower($request['status']) ?>"><?= $request['status'] ?></span>
                         </div>
                         <div class="item-meta">
-                            <span><i class="fa-regular fa-calendar"></i> 2d ago</span>
-                            <span><i class="fa-regular fa-users"></i> 23 proposals</span>
-                            <span><i class="fa-regular fa-hourglass"></i> 5 days left</span>
-                        </div>
+                            <span><i class="fa-regular fa-calendar"></i> <?= $request['time_ago'] ?></span>
+                            <?php if ($request['proposals'] !== null): ?>
+                            <span><i class="fa-regular fa-users"></i> <?= $request['proposals'] ?> proposals</span>
+                            <span><i class="fa-regular fa-hourglass"></i> <?= $request['time_left'] ?></span>
+                            <?php else: ?>
+                            <span><i class="fa-regular fa-layer-group"></i> <?= $request['time_left'] ?></span>
+                            <?php endif; ?>
                     </li>
-                    <li class="list-item">
-                        <div class="item-top">
-                            <div class="item-title">Mobile App UI/UX Design</div>
-                            <span class="status-badge status-open">Open</span>
-                        </div>
-                        <div class="item-meta">
-                            <span><i class="fa-regular fa-calendar"></i> 1w ago</span>
-                            <span><i class="fa-regular fa-users"></i> 47 proposals</span>
-                            <span><i class="fa-regular fa-hourglass"></i> 12 days left</span>
-                        </div>
-                    </li>
-                    <li class="list-item">
-                        <div class="item-top">
-                            <div class="item-title">Digital Marketing Campaign Plan</div>
-                            <span class="status-badge status-draft">Draft</span>
-                        </div>
-                        <div class="item-meta">
-                            <span><i class="fa-regular fa-calendar"></i> 3d ago</span>
-                            
-                            <span><i class="fa-regular fa-layer-group"></i> Draft</span>
-                        </div>
-                    </li>
+                    <?php endforeach; ?>
                 </ul>
                 <div class="activity-card-actions">
-                    <button class="link-btn"><i class="fa-regular fa-arrow-right"></i> Manage Posts</button>
+                    <button class="link-btn" id="viewRequests"><i class="fa-regular fa-arrow-right"></i>Manage Requests</button>
                 </div>
             </div>
         </section>
@@ -165,48 +141,22 @@
                         </tr>
                     </thead>
                     <tbody>
+                        <?php foreach ($activeProjects as $project): ?>
                         <tr>
-                            <td class="project-name">E‑commerce Platform</td>
-                            <td>Sprint 3</td>
-                            <td>DevStudio Labs</td>
-                            <td class="project-budget">$6,500</td>
+                            <td class="project-name"><?= htmlspecialchars($project['name']) ?></td>
+                            <td><?= htmlspecialchars($project['stage']) ?></td>
+                            <td><?= htmlspecialchars($project['provider']) ?></td>
+                            <td class="project-budget">$<?= number_format($project['budget'], 2) ?></td>
                             <td>
                                 <div class="progress-bar-container">
-                                    <div class="progress-bar-fill progress-60"></div>
+                                    <div class="progress-bar-fill progress-<?= intval($project['progress']) ?>"></div>
                                 </div>
                             </td>
                             <td>
                                 <button class="ghost-btn"><i class="fa-regular fa-eye"></i> Details</button>
                             </td>
                         </tr>
-                        <tr>
-                            <td class="project-name">Analytics Dashboard</td>
-                            <td>QA</td>
-                            <td>DataCraft</td>
-                            <td class="project-budget">$4,800</td>
-                            <td>
-                                <div class="progress-bar-container">
-                                    <div class="progress-bar-fill progress-82"></div>
-                                </div>
-                            </td>
-                            <td>
-                                <button class="ghost-btn"><i class="fa-regular fa-eye"></i> Details</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="project-name">Mobile Fitness App</td>
-                            <td>Design</td>
-                            <td>UXPro Studio</td>
-                            <td class="project-budget">$3,200</td>
-                            <td>
-                                <div class="progress-bar-container">
-                                    <div class="progress-bar-fill progress-35"></div>
-                                </div>
-                            </td>
-                            <td>
-                                <button class="ghost-btn"><i class="fa-regular fa-eye"></i> Details</button>
-                            </td>
-                        </tr>
+                        <?php endforeach; ?>
                     </tbody>
                 </table>
             </div>

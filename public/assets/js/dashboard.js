@@ -1,0 +1,32 @@
+document.addEventListener('DOMContentLoaded', function() {
+    const buttonLinks = {
+      viewPayments: '/payments',
+      viewRequests: '/requests'
+    };
+
+    Object.entries(buttonLinks).forEach(([id, url]) => {
+      const btn = document.getElementById(id);
+      if (btn) {
+        btn.addEventListener('click', () => {
+          window.location.href = url;
+        });
+      }
+    });
+
+    const cardLinks = {
+      activeRequestsCard: '/requests',
+      pendingPaymentsCard: '/payments',
+      totalProjectsCard: '/projects',
+      totalSpentCard: '/payments'
+    };
+
+    Object.entries(cardLinks).forEach(([id, url]) => {
+      const card = document.getElementById(id);
+      if (card) {
+        card.style.cursor = 'pointer';
+        card.addEventListener('click', () => {
+          window.location.href = url;
+        });
+      }
+    });
+});

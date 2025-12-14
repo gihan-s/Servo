@@ -48,4 +48,52 @@ class PostModel extends Database
         $row = $stmt->get_result()->fetch_assoc();
         return $row ?: null;
     }
+
+    public function countActiveRequests($clientId)
+    {
+        $count = 3; // Replace with actual data fetching logic
+        // $stmt = $this->conn->prepare("SELECT COUNT(*) as count FROM Post WHERE Client_ID = ? AND Post_Status = 'Published'");
+        // $stmt->bind_param("i", $clientId);
+        // $stmt->execute();
+        // $result = $stmt->get_result();
+        // $count = $result->fetch_assoc()['count'];
+        // $stmt->close();
+        return $count;
+    }
+
+    public function getRecentRequests($clientId, $limit = 3)
+    {
+        // $stmt = $this->conn->prepare("SELECT * FROM Post WHERE Client_ID = ? ORDER BY Created_At DESC LIMIT ?");
+        // $stmt->bind_param("ii", $clientId, $limit);
+        // $stmt->execute();
+        // $result = $stmt->get_result();
+        // $stmt->close();
+        // return $result->fetch_all(MYSQLI_ASSOC);
+        return [
+            [
+                'title' => 'Full-Stack E‑commerce Platform',
+                'status' => 'Open',
+                'posted_date' => '2025-12-12',
+                'proposals' => 23,
+                'time_left' => '5 days left',
+                'expiry_date' => '2025-12-31'
+            ],
+            [
+                'title' => 'Mobile App UI/UX Design',
+                'status' => 'Open',
+                'posted_date' => '2025-11-30',
+                'proposals' => 47,
+                'time_left' => '12 days left',
+                'expiry_date' => '2025-12-30'
+            ],
+            [
+                'title' => 'Digital Marketing Campaign Plan',
+                'status' => 'Draft',
+                'posted_date' => '2025-11-28',
+                'proposals' => null,
+                'time_left' => null,
+                'expiry_date' => null
+            ]
+        ]; // fetch actual data from model
+    }
 }
