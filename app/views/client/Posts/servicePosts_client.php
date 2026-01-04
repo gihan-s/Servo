@@ -738,7 +738,8 @@ if (!function_exists('str_snippet')) {
         <div class="modal-actions">
             <button class="action-btn btn-view" id="confirmPublishKeep">Cancel</button>
             <button class="action-btn btn-edit" id="confirmPublishBtn"><i class="fa-regular fa-rocket"></i>
-                Publish</button>
+                Publish
+            </button>
         </div>
     </div>
 </div>

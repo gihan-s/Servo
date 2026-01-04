@@ -1,11 +1,22 @@
 <?php
+// PAYMENT Table Format:
+// +------------+-------------+------+-----+---------+-------+
+// | Field      | Type        | Null | Key | Default | Extra |
+// +------------+-------------+------+-----+---------+-------+
+// | Payment_ID | int         | NO   | PRI | NULL    |       |
+// | Amount     | double      | YES  |     | NULL    |       |
+// | Status     | varchar(45) | YES  |     | NULL    |       |
+// | Hold_Time  | datetime    | YES  |     | NULL    |       |
+// | Paid_Time  | datetime    | YES  |     | NULL    |       |
+// | Commission | double      | YES  |     | NULL    |       |
+// | Project_ID | int         | NO   | MUL | NULL    |       |
+// +------------+-------------+------+-----+---------+-------+
+// needed columns: Method, Description, Due_Date
 
 require_once __DIR__ . '/../core/Database.php';
 
-class PaymentModel extends Database
-{
-    public function getPaymentsByClientId($clientId)
-    {
+class PaymentModel extends Database {
+    public function getPaymentsByClientId($clientId) {
         // $stmt = $this->conn->prepare("SELECT * FROM Payment WHERE Client_ID = ?");
         // $stmt->bind_param("i", $clientId);
         // $stmt->execute();
@@ -15,8 +26,7 @@ class PaymentModel extends Database
         return null; // Placeholder
     }
 
-    public function getPaymentsCountByClientId($clientId, $status = null)
-    {
+    public function getPaymentsCountByClientId($clientId, $status = null) {
         // $query = "SELECT COUNT(*) as count FROM Payment WHERE Client_ID = ?";
         // if ($status) {
         //     $query .= " AND Status = ?";
@@ -35,8 +45,7 @@ class PaymentModel extends Database
         return 4; // Placeholder
     } 
 
-    public function getTotalSpentByClientId($clientId)
-    {
+    public function getTotalSpentByClientId($clientId) {
         // $stmt = $this->conn->prepare("SELECT SUM(Amount) as total FROM Payment WHERE Client_ID = ? AND Status = 'Paid'");
         // $stmt->bind_param("i", $clientId);
         // $stmt->execute();
@@ -47,8 +56,7 @@ class PaymentModel extends Database
         return 3450; // Placeholder
     }
 
-    public function getRecentPaymentsByClientId($clientId, $limit = 3)
-    {
+    public function getRecentPaymentsByClientId($clientId, $limit = 3) {
         // $stmt = $this->conn->prepare("SELECT * FROM Payment WHERE Client_ID = ? ORDER BY Date DESC LIMIT ?");
         // $stmt->bind_param("ii", $clientId, $limit);
         // $stmt->execute();
@@ -57,28 +65,28 @@ class PaymentModel extends Database
         // return $result->fetch_all(MYSQLI_ASSOC);
         return [
           [
-              'invoice' => 'INV-10452',
-              'description' => 'Sprint 3 Development',
-              'status' => 'Pending',
-              'date' => 'Sep 02, 2025',
-              'amount' => 1200.00,
-              'method' => 'Visa'
+              'Payment_ID' => 'INV-10452',
+              'Description' => 'Sprint 3 Development',
+              'Status' => 'Pending',
+              'Due_Date' => 'Sep 02, 2025',
+              'Amount' => 1200.00,
+              'Method' => 'Visa'
           ],
           [
-              'invoice' => 'INV-10398',
-              'description' => 'Brand Pack Delivery',
-              'status' => 'Paid',
-              'date' => 'Aug 28, 2025',
-              'amount' => 950.00,
-              'method' => 'Stripe'
+              'Payment_ID' => 'INV-10398',
+              'Description' => 'Brand Pack Delivery',
+              'Status' => 'Paid',
+              'Due_Date' => 'Aug 28, 2025',
+              'Amount' => 950.00,
+              'Method' => 'Stripe'
           ],
           [
-              'invoice' => 'INV-10321',
-              'description' => 'QA Cycle Refund',
-              'status' => 'Refunded',
-              'date' => 'Aug 30, 2025',
-              'amount' => 420.00,
-              'method' => 'Stripe'
+              'Payment_ID' => 'INV-10321',
+              'Description' => 'QA Cycle Refund',
+              'Status' => 'Refunded',
+              'Due_Date' => 'Aug 30, 2025',
+              'Amount' => 420.00,
+              'Method' => 'Stripe'
           ]
         ]; // Placeholder
     }

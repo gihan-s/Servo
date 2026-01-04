@@ -76,19 +76,19 @@
                     <?php foreach ($recentPayments as $payment): ?>
                     <li class="list-item">
                         <div class="item-top">
-                            <div class="item-title">Invoice #<?= $payment['invoice'] ?> • <?= $payment['description'] ?></div>
-                            <span class="status-badge status-<?= strtolower($payment['status']) ?>"><?= $payment['status'] ?></span>
+                            <div class="item-title">Invoice #<?= $payment['Payment_ID'] ?> • <?= $payment['Description'] ?></div>
+                            <span class="status-badge status-<?= strtolower($payment['Status']) ?>"><?= $payment['Status'] ?></span>
                         </div> 
                         <div class="item-meta">
-                            <span><i class="fa-regular fa-calendar"></i> <?= $payment['date'] ?></span>
-                            <span><i class="fa-regular fa-coins"></i> $<?= number_format($payment['amount'], 2) ?></span>
-                            <span><i class="fa-regular fa-credit-card"></i> <?= $payment['method'] ?></span>
+                            <span><i class="fa-regular fa-calendar"></i> <?= $payment['Due_Date'] ?></span>
+                            <span><i class="fa-regular fa-coins"></i> $<?= number_format($payment['Amount'], 2) ?></span>
+                            <span><i class="fa-regular fa-credit-card"></i> <?= $payment['Method'] ?></span>
                         </div>
                     </li>
                     <?php endforeach; ?>
                 </ul>
                 <div class="activity-card-actions">
-                    <button class="link-btn" id="viewPayments"><i class="fa-regular fa-arrow-right"></i>View All Payments</button>
+                    <button class="link-btn" id="viewPaymentsButton"><i class="fa-regular fa-arrow-right"></i>View All Payments</button>
                 </div>
             </div>
 
@@ -99,22 +99,26 @@
 
                     <li class="list-item">
                         <div class="item-top">
-                            <div class="item-title"><?= $request['title'] ?></div>
-                            <span class="status-badge status-<?= strtolower($request['status']) ?>"><?= $request['status'] ?></span>
+                            <div class="item-title"><?= $request['Title'] ?></div>
+                            <span class="status-badge status-<?= strtolower($request['Post_Status']) ?>"><?= $request['Post_Status'] ?></span>
                         </div>
                         <div class="item-meta">
-                            <span><i class="fa-regular fa-calendar"></i> <?= $request['time_ago'] ?></span>
-                            <?php if ($request['proposals'] !== null): ?>
-                            <span><i class="fa-regular fa-users"></i> <?= $request['proposals'] ?> proposals</span>
-                            <span><i class="fa-regular fa-hourglass"></i> <?= $request['time_left'] ?></span>
+                            <span><i class="fa-regular fa-calendar"></i> <?= $request['Time_Ago'] ?></span>
+
+                            <?php if ($request['Proposals'] !== null): ?>
+                            <span><i class="fa-regular fa-users"></i> <?= $request['Proposals'] ?> proposals</span>
                             <?php else: ?>
-                            <span><i class="fa-regular fa-layer-group"></i> <?= $request['time_left'] ?></span>
+                            <span><i class="fa-regular fa-users"></i> 0 proposals</span>
+                            <?php endif; ?>
+
+                            <?php if ($request['Time_Left'] !== null): ?>
+                            <span><i class="fa-regular fa-hourglass"></i> <?= $request['Time_Left'] ?></span>
                             <?php endif; ?>
                     </li>
                     <?php endforeach; ?>
                 </ul>
                 <div class="activity-card-actions">
-                    <button class="link-btn" id="viewRequests"><i class="fa-regular fa-arrow-right"></i>Manage Requests</button>
+                    <button class="link-btn" id="viewRequestsButton"><i class="fa-regular fa-arrow-right"></i>Manage Requests</button>
                 </div>
             </div>
         </section>
@@ -124,7 +128,7 @@
             <div class="section-header">
                 <h2>Active Projects</h2>
                 <div class="section-actions">
-                    <button class="link-btn"><i class="fa-regular fa-eye"></i> View All</button>
+                    <button class="link-btn" id="viewProjectsButton"><i class="fa-regular fa-eye"></i> View All</button>
                     <button class="link-btn"><i class="fa-regular fa-plus"></i> New Project</button>
                 </div>
             </div>
@@ -143,13 +147,13 @@
                     <tbody>
                         <?php foreach ($activeProjects as $project): ?>
                         <tr>
-                            <td class="project-name"><?= htmlspecialchars($project['name']) ?></td>
-                            <td><?= htmlspecialchars($project['stage']) ?></td>
-                            <td><?= htmlspecialchars($project['provider']) ?></td>
-                            <td class="project-budget">$<?= number_format($project['budget'], 2) ?></td>
+                            <td class="project-name"><?= htmlspecialchars($project['Title']) ?></td>
+                            <td><?= htmlspecialchars($project['Stage']) ?></td>
+                            <td><?= htmlspecialchars($project['Provider']) ?></td>
+                            <td class="project-budget">$<?= number_format($project['Budget'], 2) ?></td>
                             <td>
                                 <div class="progress-bar-container">
-                                    <div class="progress-bar-fill progress-<?= intval($project['progress']) ?>"></div>
+                                    <div class="progress-bar-fill progress-<?= intval($project['Progress']) ?>"></div>
                                 </div>
                             </td>
                             <td>
@@ -169,9 +173,9 @@
             </div>
             <div class="actions-grid">
                 <div class="action-card">
-                    <h3>Create a New Post</h3>
+                    <h3>Create a New Request</h3>
                     <p>Describe the work you need and start receiving proposals from verified providers.</p>
-                    <button class="primary-btn"><i class="fa-regular fa-plus"></i> New Post</button>
+                    <button class="primary-btn"><i class="fa-regular fa-plus"></i> New Request</button>
                 </div>
                 <div class="action-card">
                     <h3>Find Providers</h3>

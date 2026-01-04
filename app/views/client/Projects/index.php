@@ -14,14 +14,19 @@
 
 <body>
 
-  <?php require_once __DIR__ . '/../../includes/navbar.php'; ?>
+  <?php
+  require_once __DIR__ . '/../../includes/navbar.php';
+  ?>
+
   <!-- Main Content -->
   <div class="main-content">
   <?php include __DIR__ . '/serviceProjects.php'; ?>
   </div>
 
   <!-- Footer -->
-  <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
+  <?php
+  require_once __DIR__ . '/../../includes/footer.php';
+  ?>
 
   
 </body>

@@ -43,10 +43,8 @@ class DashboardController
             $activeProjects = $this->projectModel->getProjectsByClientId($userId, 3, 'Active');
 
             foreach ($recentRequests as &$request) {
-                if ($request['posted_date'])
-                    $request['time_ago'] = timeAgo($request['posted_date']);
-                if ($request['expiry_date'])
-                    $request['time_left'] = timeLeft($request['expiry_date']);
+                $request['Time_Ago'] = timeAgo($request['Created_At']);
+                $request['Time_Left'] = timeLeft($request['End_At']);
             }
             unset($request);
 

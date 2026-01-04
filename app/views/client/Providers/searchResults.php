@@ -106,72 +106,44 @@
                 <!-- Search Results -->
 
                 <div class="item-list">
-                    <div class="search-item">
-                        <div class="item-head">
-                            <div class="item-img"><img src="sampleImg.jpg" alt=""></div>
-                            <div class="item-main-dets">
-                                <div class="item-name">Chethiya Bandara</div>
-                                <div class="item-title">Full Stack Web Developer - Expert in PHP, Laravel, and WordPress
+                    <?php
+                    // Sample data for demonstration
+                    $len = 2; // Replace with the actual number of providers
+                    for ($i = 0; $i < $len; $i++) { ?>
+                        <div class="search-item">
+                            <div class="item-head">
+                                <div class="item-img"><img src="sampleImg.jpg" alt=""></div>
+                                <div class="item-main-dets">
+                                    <div class="item-name">Chethiya Bandara</div>
+                                    <div class="item-title">Full Stack Web Developer - Expert in PHP, Laravel, and WordPress
+                                    </div>
+                                    <div class="item-district">Gampaha</div>
                                 </div>
-                                <div class="item-district">Gampaha</div>
-                            </div>
-                            <div class="button">
-                                <button class="message-btn" title="Message Provider"><i class="fa-regular fa-messages"></i></button>
-                                <button class="view-profile"><i class="fa-regular fa-user"></i> View Profile</button>
-                                <button class="hire-btn"><i class="fa-regular fa-briefcase"></i> Hire</button>
-                            </div>
-                        </div>
-                        <div class="item-middle">
-                            <div class="rate">$40/hr</div>
-                            <div class="success"><i class="fa-solid fa-shield-check"></i>90% Project Success</div>
-                            <div class="total-earn">$10K+ earned</div>
-                        </div>
-                        <div class="item-tags">
-                            <span>Conten SEO</span>
-                            <span>Adobe XD</span>
-                            <span>Web Design</span>
-                            <span>Shopify</span>
-                        </div>
-                        <div class="item-description">Turn Your Web App Idea into a Fast, Scalable, and Beautiful
-                            Reality —
-                            Delivered On Time, Every Time! Hi, I’m Junaid — a results-driven Full-Stack Web Application
-                            Developer specializing in React, Next.js, MERN stack, and API integrations. Whether you need
-                        </div>
-                        <div class="bottom-button"><button>View profile</button></div>
-                    </div>
-                    <div class="search-item">
-                        <div class="item-head">
-                            <div class="item-img"><img src="sampleImg.jpg" alt=""></div>
-                            <div class="item-main-dets">
-                                <div class="item-name">Chethiya Bandara</div>
-                                <div class="item-title">Full Stack Web Developer - Expert in PHP, Laravel, and WordPress
+                                <div class="button">
+                                    <button class="message-btn" title="Message Provider"><i class="fa-regular fa-messages"></i></button>
+                                    <button class="view-profile"><i class="fa-regular fa-user"></i> View Profile</button>
+                                    <button class="hire-btn"><i class="fa-regular fa-briefcase"></i> Hire</button>
                                 </div>
-                                <div class="item-district">Gampaha</div>
                             </div>
-                            <div class="button">
-                                <button class="message-btn" title="Message Provider"><i class="fa-regular fa-messages"></i></button>
-                                <button class="view-profile"><i class="fa-regular fa-user"></i> View Profile</button>
-                                <button class="hire-btn"><i class="fa-regular fa-briefcase"></i> Hire</button>
+                            <div class="item-middle">
+                                <div class="rate">$40/hr</div>
+                                <div class="success"><i class="fa-solid fa-shield-check"></i>90% Project Success</div>
+                                <div class="total-earn">$10K+ earned</div>
                             </div>
+                            <div class="item-tags">
+                                <span>Conten SEO</span>
+                                <span>Adobe XD</span>
+                                <span>Web Design</span>
+                                <span>Shopify</span>
+                            </div>
+                            <div class="item-description">Turn Your Web App Idea into a Fast, Scalable, and Beautiful
+                                Reality —
+                                Delivered On Time, Every Time! Hi, I’m Junaid — a results-driven Full-Stack Web Application
+                                Developer specializing in React, Next.js, MERN stack, and API integrations. Whether you need
+                            </div>
+                            <div class="bottom-button"><button>View profile</button></div>
                         </div>
-                        <div class="item-middle">
-                            <div class="rate">$40/hr</div>
-                            <div class="success"><i class="fa-solid fa-shield-check"></i>90% Project Success</div>
-                            <div class="total-earn">$10K+ earned</div>
-                        </div>
-                        <div class="item-tags">
-                            <span>Conten SEO</span>
-                            <span>Adobe XD</span>
-                            <span>Web Design</span>
-                            <span>Shopify</span>
-                        </div>
-                        <div class="item-description">Turn Your Web App Idea into a Fast, Scalable, and Beautiful
-                            Reality —
-                            Delivered On Time, Every Time! Hi, I’m Junaid — a results-driven Full-Stack Web Application
-                            Developer specializing in React, Next.js, MERN stack, and API integrations. Whether you need
-                        </div>
-                        <div class="bottom-button"><button>View profile</button></div>
-                    </div>
+                    <?php } ?>
                     <div class="pagination" aria-label="Provider Pagination">
                         <button class="page-btn prev" disabled><i class="fa-regular fa-chevron-left"></i></button>
                         <button class="page-btn active">1</button>

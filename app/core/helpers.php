@@ -1,5 +1,6 @@
 <?php
 function timeAgo($date) {
+    if ($date == NULL) return NULL;
     $timestamp = strtotime($date);
     $diff = time() - $timestamp;
     if ($diff < 60) return $diff . ' seconds ago';
@@ -11,6 +12,7 @@ function timeAgo($date) {
 }
 
 function timeLeft($date) {
+    if ($date == NULL) return NULL;
     $timestamp = strtotime($date);
     $diff = $timestamp - time();
     if ($diff <= 0) return 'Expired';
