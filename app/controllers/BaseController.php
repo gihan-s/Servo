@@ -22,7 +22,7 @@ class BaseController
         $this->loadNotificationsAndMessages();
     }
 
-    public function getNotificationsAndMessages($userId, $role)
+    public function loadNotificationsAndMessages($userId, $role)
     {
         if ($role === 'Client') {
            $notifications =$this->notificationModel->getLatestNotificationsByClientId($userId);
