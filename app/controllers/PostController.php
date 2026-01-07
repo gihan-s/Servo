@@ -150,7 +150,7 @@ class PostController
 
         if ($categoryId <= 0) {
             $_SESSION['form_error'] = 'Please select a category.';
-            header('Location: ' . BASE_URL . '/posts'); // or back to the modal anchor
+            header('Location: ' . '/requests');
             exit;
         }
 
@@ -177,11 +177,11 @@ class PostController
         if ($postId > 0) {
             // $skills is array of IDs (preferred) or names
             $this->skillsModel->insertPostSkill($postId, $skills);
-            header('Location: ' . BASE_URL . '/../posts');
+            header('Location: ' . '/requests');
         } else {
             error_log('createPost failed, got PostID=0');
             $_SESSION['form_error'] = 'Could not create post. Please try again.';
-            header('Location: ' . BASE_URL . '/../posts');
+            header('Location: ' . '/requests');
             exit;
         }
     }

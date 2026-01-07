@@ -162,39 +162,39 @@ switch ($url) {
         $controller->index();
         break;
 
-    case 'posts':
+    case 'requests':
         $controller = new PostController();
         $controller->index();
         break;
 
-    case 'posts/get-skills':
+    case 'requests/get-skills':
         $controller = new PostController();
         $controller->getSkills();
         break;
 
-    case 'posts/draft':
+    case 'requests/draft':
         $controller = new PostController();
         $controller->draftPost();
         break;
 
-    case 'posts/publish':
+    case 'requests/publish':
         $controller = new PostController();
         $controller->publishPost();
         break;
 
-    case (preg_match('#^posts/view/(\d+)$#', $url, $m) ? true : false):
+    case (preg_match('#^requests/view/(\d+)$#', $url, $m) ? true : false):
         (new PostController())->viewPost((int)$m[1]);
         break;
 
-    // case (preg_match('#^posts/edit/(\d+)$#', $url, $m) ? true : false):
+    // case (preg_match('#^requests/edit/(\d+)$#', $url, $m) ? true : false):
     //     (new PostController())->editPost((int)$m[1]);
     //     break;
 
-    // case (preg_match('#^posts/delete/(\d+)$#', $url, $m) ? true : false):
+    // case (preg_match('#^requests/delete/(\d+)$#', $url, $m) ? true : false):
     //     (new PostController())->deletePost((int)$m[1]);
     //     break;
 
-    // case (preg_match('#^posts/publish/(\d+)$#', $url, $m) ? true : false):
+    // case (preg_match('#^requests/publish/(\d+)$#', $url, $m) ? true : false):
     //     (new PostController())->publishById((int)$m[1]);
     //     break;
 

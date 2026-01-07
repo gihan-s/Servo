@@ -5,20 +5,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Servo | My Posts</title>
- 
+  <title>Servo | My Service Requests</title>
+  <!-- <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/elementStyles.css"> -->
+  <!-- <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/clientPosts.css"> -->
 </head>
 
 <body>
-
-  <!-- Breadcrumb -->
-  <!--<div class="breadcrumb">
-        <div class="breadcrumb-content">
-            <a href="client-dashboard.html">Dashboard</a>
-            <span>›</span>
-            <span>My Jobs</span>
-        </div>
-    </div>-->
 
   <?php require_once __DIR__ . '/../../includes/navbar.php'; ?>
   <!-- Main Content -->
@@ -28,7 +20,6 @@
 
   <!-- Footer -->
   <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
-
   
 </body>
 

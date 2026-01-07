@@ -30,19 +30,19 @@ if (!function_exists('str_snippet')) {
     <script src="<?= BASE_URL ?>/assets/js/elementScript.js" defer></script>
     <script src="<?= BASE_URL ?>/assets/js/cardList.js" defer></script>
     <script src="<?= BASE_URL ?>/assets/js/clientPosts.js" defer></script>
-    <title>My Job Posts</title>
+    <title>My Service Requests</title>
 </head>
 
 <body>
     <section class="service-requests">
         <div class="header-requests">
             <div class="header-top" style="display:flex; justify-content: space-between; align-items: center;">
-                <h1>My Job Posts</h1>
+                <h1>My Service Requests</h1>
 
             </div>
             <div class="search-header">
                 <div class="search-button">
-                    <input type="text" placeholder="Search my job posts...">
+                    <input type="text" placeholder="Search my service requests...">
                     <button><i class="fa-light fa-magnifying-glass"></i></button>
                 </div>
                 <button class="filter" id="filter-pop-up"><i
@@ -60,7 +60,7 @@ if (!function_exists('str_snippet')) {
                         </div>
                     </div>
                     <button type="button" class="post-job-btn" id="create-post-pop-up"><i
-                            class="fa-regular fa-plus"></i> Create Post</button>
+                            class="fa-regular fa-plus"></i> Create Request</button>
                 </div>
 
             </div>
@@ -68,22 +68,22 @@ if (!function_exists('str_snippet')) {
 
             <div class="container-changer">
                 <div class="tab-buttons">
-                    <div id="active-posts" class="buttons active">Active Posts</div>
-                    <div id="draft-posts" class="buttons">Draft Posts</div>
-                    <div id="expired-posts" class="buttons">Expired Posts</div>
+                    <div id="active-posts" class="buttons active">Active Requests</div>
+                    <div id="draft-posts" class="buttons">Draft Requests</div>
+                    <div id="expired-posts" class="buttons">Expired Requests</div>
                 </div>
             </div>
         </div>
 
         <div class="request-content">
-            <!-- ACTIVE POSTS SECTION -->
+            <!-- ACTIVE REQUESTS SECTION -->
             <div class="active-posts active requests-section">
                 <div class="item-list">
                     <?php if (empty($data['activePosts'])): ?>
                         <section class="empty-state" aria-label="No posts">
                             <!-- ...illustration... -->
-                            <h2>No active posts right now</h2>
-                            <p>Check back soon or refresh to see new posts.</p>
+                            <h2>No active requests right now</h2>
+                            <p>Check back soon or refresh to see new requests.</p>
                             <div class="empty-actions">
                                 <a class="btn primary" href="<?= BASE_URL ?>/feeds"
                                     onclick="location.reload(); return false;">
@@ -144,7 +144,7 @@ if (!function_exists('str_snippet')) {
                                         <button class="action-btn btn-view" onclick="viewPost(<?= (int) $p['Post_ID'] ?>)"><i
                                                 class="fas fa-eye"></i> View</button>
                                         <button class="action-btn btn-delete"><i class="fas fa-trash"
-                                                onclick="window.location='<?= BASE_URL ?>/posts/delete/<?= (int) $p['Post_ID'] ?>'"></i>
+                                                onclick="window.location='<?= BASE_URL ?>/requests/delete/<?= (int) $p['Post_ID'] ?>'"></i>
                                             Delete</button>
                                     </div>
                                 </div>
@@ -229,7 +229,7 @@ if (!function_exists('str_snippet')) {
                         <?php endforeach; ?>
 
                         <!-- Pagination Active -->
-                        <div class="pagination" aria-label="Pagination Active Posts">
+                        <div class="pagination" aria-label="Pagination Active Requests">
                             <button class="page-btn prev" disabled><i class="fa-regular fa-chevron-left"></i></button>
                             <button class="page-btn active">1</button>
                             <button class="page-btn">2</button>
@@ -240,16 +240,16 @@ if (!function_exists('str_snippet')) {
                 </div>
             </div>
 
-            <!-- DRAFT POSTS SECTION -->
+            <!-- DRAFT REQUESTS SECTION -->
             <div class="draft-posts requests-section draft-section" style="display: none;">
                 <div class="item-list">
                     <?php if (empty($data['draftPosts'])): ?>
-                        <section class="empty-state" aria-label="No draft posts">
+                        <section class="empty-state" aria-label="No draft requests">
                             <!-- ...illustration... -->
-                            <h2>No draft posts right now</h2>
-                            <p>Create drafts to save your job posts and publish them later.</p>
+                            <h2>No draft requests right now</h2>
+                            <p>Create drafts to save your job requests and publish them later.</p>
                             <div class="empty-actions">
-                                <a class="btn primary" href="<?= BASE_URL ?>/posts/create">
+                                <a class="btn primary" href="<?= BASE_URL ?>/requests/create">
                                     <i class="fa-regular fa-plus" style="font-size:25px"></i> Create Draft
                                 </a>
                             </div>
@@ -364,7 +364,7 @@ if (!function_exists('str_snippet')) {
                         <?php endforeach; ?>
 
                         <!-- Pagination Draft -->
-                        <div class="pagination" aria-label="Pagination Draft Posts">
+                        <div class="pagination" aria-label="Pagination Draft Requests">
                             <button class="page-btn prev" disabled><i class="fa-regular fa-chevron-left"></i></button>
                             <button class="page-btn active">1</button>
                             <button class="page-btn">2</button>
@@ -375,14 +375,14 @@ if (!function_exists('str_snippet')) {
                 </div>
             </div>
 
-            <!-- EXPIRED POSTS SECTION -->
+            <!-- EXPIRED REQUESTS SECTION -->
             <div class="expired-posts requests-section expired-section" style="display: none;">
                 <div class="item-list">
                     <?php if (empty($data['expiredPosts'])): ?>
-                        <section class="empty-state" aria-label="No expired posts">
+                        <section class="empty-state" aria-label="No expired requests">
                             <!-- ...illustration... -->
-                            <h2>No expired posts right now</h2>
-                            <p>Your expired posts will appear here. You can repost them anytime.</p>
+                            <h2>No expired requests right now</h2>
+                            <p>Your expired requests will appear here. You can repost them anytime.</p>
                         </section>
                     <?php else: ?>
                         <?php foreach ($data['expiredPosts'] as $row): ?>
@@ -497,7 +497,7 @@ if (!function_exists('str_snippet')) {
                         <?php endforeach; ?>
 
                         <!-- Pagination Expired -->
-                        <div class="pagination" aria-label="Pagination Expired Posts">
+                        <div class="pagination" aria-label="Pagination Expired Requests">
                             <button class="page-btn prev" disabled><i class="fa-regular fa-chevron-left"></i></button>
                             <button class="page-btn active">1</button>
                             <button class="page-btn">2</button>
@@ -515,7 +515,7 @@ if (!function_exists('str_snippet')) {
 <div class="pop-up-section create-post-pop-up deactive">
     <div class="pop-up deactive">
         <div class="pop-up-header">
-            <div class="pop-up-title">Create a New Post</div>
+            <div class="pop-up-title">Create A New Service Request</div>
             <i class="fa-light fa-xmark" id="create-post-pop-up"></i>
         </div>
         <hr>
@@ -664,11 +664,11 @@ if (!function_exists('str_snippet')) {
                     <button type="button" class="action-btn btn-view" onclick="window.submitCreatePost('publish')"
                         id="create-post-pop-up" data-role="publish">
                         <i class="fa-regular fa-rocket"></i>
-                        Publish Post
+                        Publish Request
                     </button>
                     <button type="button" class="action-btn btn-edit" data-role="save-post" style="display:none;">
                         <i class="fa-regular fa-floppy-disk"></i>
-                        Save Post
+                        Save Request
                     </button>
                 </div>
             </form>
@@ -721,7 +721,7 @@ if (!function_exists('str_snippet')) {
 <div class="pop-up-section confirm-modal deactive" id="confirmPublishRoot">
     <div class="pop-up deactive" id="confirmPublish">
         <div class="pop-up-header" style="display:flex; align-items:center; justify-content:space-between;">
-            <div class="pop-up-title">Publish Post</div>
+            <div class="pop-up-title">Publish Request</div>
             <i class="fa-light fa-xmark" id="confirmPublishClose" style="cursor:pointer;"></i>
         </div>
         <hr>
@@ -749,8 +749,8 @@ if (!function_exists('str_snippet')) {
         document.getElementById("SkillAddInput").parentElement
             .querySelector(".label").classList.remove("label-float");
 
-        // absolute URL (like reg page but for posts endpoint)
-        fetch("<?= BASE_URL ?>/posts/get-skills", {
+        // absolute URL (like reg page but for requests endpoint)
+        fetch("<?= BASE_URL ?>/requests/get-skills", {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body: "category_id=" + encodeURIComponent(CategoryID)
@@ -782,7 +782,7 @@ if (!function_exists('str_snippet')) {
         const BASE = "<?= BASE_URL ?>";
         const form = document.getElementById('create-post-form');
         if (!form) return;
-        form.action = BASE + '/posts/' + (action === 'draft' ? 'draft' : 'publish');
+        form.action = BASE + '/requests/' + (action === 'draft' ? 'draft' : 'publish');
         form.method = 'POST';
         form.submit();
     };
