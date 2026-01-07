@@ -3,6 +3,7 @@
 require_once __DIR__ . '/../models/ClientModel.php';
 require_once __DIR__ . '/../models/ProviderModel.php';
 require_once __DIR__ . '/../models/PostModel.php';
+require_once __DIR__ . '/../models/PostSkillsModel.php';
 require_once __DIR__ . '/../models/SkillsModel.php';
 require_once __DIR__ . '/../models/CategoryModel.php';
 
@@ -11,6 +12,7 @@ class PostController
     private ClientModel $clientModel;
     private ProviderModel $providerModel;
     private PostModel $postModel;
+    private PostSkillsModel $postSkillsModel;
     private SkillsModel $skillsModel;
     private CategoryModel $categoryModel;
 
@@ -19,6 +21,7 @@ class PostController
         $this->clientModel = new ClientModel();
         $this->providerModel = new ProviderModel();
         $this->postModel = new PostModel();
+        $this->postSkillsModel = new PostSkillsModel();
         $this->skillsModel = new SkillsModel();
         $this->categoryModel = new CategoryModel();
     }
@@ -183,43 +186,48 @@ class PostController
         }
     }
 
-    public function viewPost($postId): void
-    {
-        $this->ensureAuth();
+public function viewPost($id): void
+{
+    header('Content-Type: application/json');
 
-        $userId = $_SESSION['user_id'];
-        $role = $_SESSION['role'];
-
-        if ($role === 'Client') {
-            $actives = $this->postModel->getPosts($userId, 'active');
-            $drafts = $this->postModel->getPosts($userId, 'draft');
-            $expireds = $this->postModel->getPosts($userId, 'expired');
-
-            // Each is an array of dictionaries with keys: post, skills
-            $activePosts = $this->assemblePostsWithSkills($actives);
-            $draftPosts = $this->assemblePostsWithSkills($drafts);
-            $expiredPosts = $this->assemblePostsWithSkills($expireds);
-
-            $data = [
-                'activePosts' => $activePosts,
-                'draftPosts' => $draftPosts,
-                'expiredPosts' => $expiredPosts,
-            ];
-            $categories = $this->categoryModel->getCategories();
-
-            $viewFile = __DIR__ . '/../views/client/Posts/show.php';
-        }
-        // elseif ($role === 'Provider') {
-        //     $viewFile = __DIR__ . '/../views/provider/Posts/show.php';
-        // }
-        else {
-            http_response_code(403);
-            echo "Invalid role";
-            return;
-        }
-
-        include $viewFile;
+    $id = (int) $id;
+    if ($id <= 0) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Invalid post id']);
+        return;
     }
+
+    // Implement this in PostModel to return ONE row (or rename to your actual method)
+    $post = $this->postModel->getPostById($id);
+
+    if (!$post) {
+        http_response_code(404);
+        echo json_encode(['error' => 'Post not found']);
+        return;
+    }
+
+    // Reuse existing helper to get skills for this post
+    $skills = $this->postSkillsModel->getPostSkills($id);
+
+    $response = [
+        'Post_ID'          => $post['Post_ID'] ?? null,
+        'Title'            => $post['Title'] ?? '',
+        'Description'      => $post['Description'] ?? '',
+        'Requesting_Price' => $post['Requesting_Price'] ?? '',
+        'Price_Type'       => $post['Price_Type'] ?? '',
+        'Level'            => $post['Level'] ?? '',
+        'Duration'         => $post['Duration'] ?? '',
+        'Duration_Type'    => $post['Duration_Type'] ?? '',
+        'Proposal_Count'   => $post['Proposal_Count'] ?? ($post['ProposalsCount'] ?? 0),
+        'Published_At'     => $post['Published_At'] ?? ($post['Created_At'] ?? null),
+        'Views'            => $post['Views'] ?? ($post['View_Count'] ?? null),
+        'Category_Name'    => $post['CategoryName'] ?? '',
+        'Category_ID'      => $post['Category_ID'] ?? null,
+        'skills'           => array_column($skills, 'Skill'),
+    ];
+
+    echo json_encode($response);
+}
 
 
     private function ensureAuth(): void
