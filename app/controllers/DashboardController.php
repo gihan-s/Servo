@@ -1,24 +1,22 @@
 <?php
 
+require_once __DIR__ . '/../core/helpers.php';
+
 require_once __DIR__ . '/../models/ClientModel.php';
 require_once __DIR__ . '/../models/ProviderModel.php';
 require_once __DIR__ . '/../models/PostModel.php';
 require_once __DIR__ . '/../models/PaymentModel.php';
 require_once __DIR__ . '/../models/ProjectModel.php';
-require_once __DIR__ . '/../core/helpers.php';
 
-class DashboardController
+class DashboardController extends BaseController
 {
-    private $clientModel;
-    private $providerModel;
     private $postModel;
     private $paymentModel;
     private $projectModel;
 
     public function __construct()
     {
-        $this->clientModel = new ClientModel();
-        $this->providerModel = new ProviderModel();
+        parent::__construct(); // inherit BaseController instead of overriding
         $this->postModel = new PostModel();
         $this->paymentModel = new PaymentModel();
         $this->projectModel = new ProjectModel();
@@ -59,15 +57,5 @@ class DashboardController
 
         include $viewFile;
     }
-
-    private function ensureAuth(): void
-    {
-        if (empty($_SESSION['user_id']) || empty($_SESSION['role'])) {
-            $_SESSION['flash'] = ['type' => 'error', 'message' => 'Please log in first'];
-            header("Location: /login");
-            exit;
-        }
-    }
-
 
 }

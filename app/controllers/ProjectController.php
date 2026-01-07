@@ -4,16 +4,13 @@ require_once __DIR__ . '/../models/ClientModel.php';
 require_once __DIR__ . '/../models/ProviderModel.php';
 require_once __DIR__ . '/../models/ProjectModel.php';
 
-class ProjectController
+class ProjectController extends BaseController
 {
-    private $clientModel;
-    private $providerModel;
     private $projectModel;
 
     public function __construct()
     {
-        $this->clientModel = new ClientModel();
-        $this->providerModel = new ProviderModel();
+        parent::__construct();
         $this->projectModel = new ProjectModel();
     }
 
@@ -44,15 +41,6 @@ class ProjectController
         }
 
         include $viewFile;
-    }
-
-    private function ensureAuth(): void
-    {
-        if (empty($_SESSION['user_id']) || empty($_SESSION['role'])) {
-            $_SESSION['flash'] = ['type' => 'error', 'message' => 'Please log in first'];
-            header("Location: /login");
-            exit;
-        }
     }
 
 }

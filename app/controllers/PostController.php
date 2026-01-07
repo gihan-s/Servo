@@ -1,23 +1,18 @@
 <?php
 
-require_once __DIR__ . '/../models/ClientModel.php';
-require_once __DIR__ . '/../models/ProviderModel.php';
 require_once __DIR__ . '/../models/PostModel.php';
 require_once __DIR__ . '/../models/SkillsModel.php';
 require_once __DIR__ . '/../models/CategoryModel.php';
 
-class PostController
+class PostController extends BaseController
 {
-    private ClientModel $clientModel;
-    private ProviderModel $providerModel;
     private PostModel $postModel;
     private SkillsModel $skillsModel;
     private CategoryModel $categoryModel;
 
     public function __construct()
     {
-        $this->clientModel = new ClientModel();
-        $this->providerModel = new ProviderModel();
+        parent::__construct();
         $this->postModel = new PostModel();
         $this->skillsModel = new SkillsModel();
         $this->categoryModel = new CategoryModel();
@@ -219,16 +214,6 @@ class PostController
         }
 
         include $viewFile;
-    }
-
-
-    private function ensureAuth(): void
-    {
-        if (empty($_SESSION['user_id']) || empty($_SESSION['role'])) {
-            $_SESSION['flash'] = ['type' => 'error', 'message' => 'Please log in first'];
-            header("Location: /login");
-            exit;
-        }
     }
 
 }

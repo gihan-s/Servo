@@ -28,24 +28,44 @@ class NotificationModel extends Database {
         return 5; // Placeholder
     } 
 
-    public function getLatestNotificationsByClientId($clientId, $limit = 5) {
-        // $stmt = $this->conn->prepare("SELECT * FROM Notification WHERE Client_ID = ? ORDER BY Created_At DESC LIMIT ?");
-        // $stmt->bind_param("ii", $clientId, $limit);
+    public function getNotificationsByClientId($clientId, $limit = 5, $offset = 0) {
+        // $stmt = $this->conn->prepare("SELECT * FROM Notification WHERE Client_ID = ? ORDER BY Created_At DESC LIMIT ? OFFSET ?");
+        // $stmt->bind_param("iii", $clientId, $limit, $offset);
         // $stmt->execute();
         // $result = $stmt->get_result();
         // $stmt->close();
         // return $result->fetch_all(MYSQLI_ASSOC);
-        return null; // Placeholder
+        return []; // Placeholder
     }
 
-    public function getLatestNotificationsByProviderId($providerId, $limit = 5) {
-        // $stmt = $this->conn->prepare("SELECT * FROM Notification WHERE Provider_ID = ? ORDER BY Created_At DESC LIMIT ?");
-        // $stmt->bind_param("ii", $providerId, $limit);
+    public function getNotificationsByProviderId($providerId, $limit = 5, $offset = 0) {
+        // $stmt = $this->conn->prepare("SELECT * FROM Notification WHERE Provider_ID = ? ORDER BY Created_At DESC LIMIT ? OFFSET ?");
+        // $stmt->bind_param("iii", $providerId, $limit, $offset);
         // $stmt->execute();
         // $result = $stmt->get_result();
         // $stmt->close();
         // return $result->fetch_all(MYSQLI_ASSOC);
-        return null; // Placeholder
+        return []; // Placeholder
+    }
+
+    public function getLatestNotificationsByClientId($clientId, $sinceTimestamp, $limit = 5) {
+        // $stmt = $this->conn->prepare("SELECT * FROM Notification WHERE Client_ID = ? AND Created_At > ? ORDER BY Created_At DESC LIMIT ?");
+        // $stmt->bind_param("isi", $clientId, $sinceTimestamp, $limit);
+        // $stmt->execute();
+        // $result = $stmt->get_result();
+        // $stmt->close();
+        // return $result->fetch_all(MYSQLI_ASSOC);
+        return []; // Placeholder
+    }
+
+    public function getLatestNotificationsByProviderId($providerId, $sinceTimestamp, $limit = 5) {
+        // $stmt = $this->conn->prepare("SELECT * FROM Notification WHERE Provider_ID = ? AND Created_At > ? ORDER BY Created_At DESC LIMIT ?");
+        // $stmt->bind_param("isi", $providerId, $sinceTimestamp, $limit);
+        // $stmt->execute();
+        // $result = $stmt->get_result();
+        // $stmt->close();
+        // return $result->fetch_all(MYSQLI_ASSOC);
+        return []; // Placeholder
     }
 
     public function markNotificationAsRead($notificationId) {
