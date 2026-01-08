@@ -1,8 +1,5 @@
 <?php
 
-require_once __DIR__ . '/../models/ClientModel.php';
-require_once __DIR__ . '/../models/ProviderModel.php';
-
 class ProviderController extends BaseController
 {
 

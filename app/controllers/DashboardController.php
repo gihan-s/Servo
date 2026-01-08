@@ -1,9 +1,5 @@
 <?php
 
-require_once __DIR__ . '/../core/helpers.php';
-
-require_once __DIR__ . '/../models/ClientModel.php';
-require_once __DIR__ . '/../models/ProviderModel.php';
 require_once __DIR__ . '/../models/PostModel.php';
 require_once __DIR__ . '/../models/PaymentModel.php';
 require_once __DIR__ . '/../models/ProjectModel.php';
