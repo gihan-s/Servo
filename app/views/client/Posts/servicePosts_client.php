@@ -683,7 +683,7 @@ if (!function_exists('str_snippet')) {
 
 </div>
 
-<div class="dialog-box-2" id="edit-post-popup">
+<div class="dialog-box-2" id="view-post-popup">
     <div class="dialog-content" style="width: 500px;">
         <div class="dialog-title">
             <div class="title">Create A New Service Request</div>
@@ -927,7 +927,7 @@ if (!function_exists('str_snippet')) {
     }
 
     function viewPost(id) {
-        viewDialogBox('edit-post-popup');
+        viewDialogBox('view-post-popup');
 
         fetch("<?= BASE_URL ?>/requests/view/" + id)
             .then(response => response.json())
@@ -951,10 +951,10 @@ if (!function_exists('str_snippet')) {
                     : '<span>No skills specified</span>';
 
                 // Update title
-                document.querySelector("#edit-post-popup .dialog-title .title").innerText = "Post Details";
+                document.querySelector("#view-post-popup .dialog-title .title").innerText = "Post Details";
 
                 // Replace form content with a div wrapper for proper styling
-                const formContainer = document.querySelector("#edit-post-popup .dialog-body");
+                const formContainer = document.querySelector("#view-post-popup .dialog-body");
                 formContainer.innerHTML = `
                 <div class="post-view">
                     <div class="post-view-title">${post.Title || 'Untitled'}</div>
