@@ -1,3 +1,18 @@
+.main-container {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.filter-container {
+  min-width: 250px;
+} 
+
+.item-container {
+  width: 100%;
+}
+
+
 .buttons {
   padding: 12px 24px;
   border-radius: 12px;
@@ -19,7 +34,6 @@
 .item-list {
   display: grid;
   gap: 24px;
-  max-width: 1200px;
   margin: 0 auto;
   position: relative;
 }
@@ -365,7 +379,7 @@
   white-space: nowrap;
   /* keep text on one line */
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   font-weight: 700;
   font-size: 13px;
   /* slightly smaller text */
@@ -383,8 +397,6 @@
 
 .post-job-btn:hover {
   background: #006600;
-  /* darker solid on hover */
-  transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(0, 133, 0, 0.4);
   text-decoration: none;
   /* ensure no underline on hover */
@@ -410,6 +422,7 @@
 .service-requests .container-changer {
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 20px;
 }
 
 .service-requests .container-changer .tab-buttons {
@@ -440,7 +453,7 @@
   display: flex;
   gap: 8px;
   align-items: center;
-  margin-top: -4px;
+  margin-top: 6px;
 }
 
 .post-view .chip {
@@ -457,7 +470,7 @@
 }
 
 .post-view-section {
-  margin-top: 10px;
+  margin-top: 15px;
 }
 
 .post-view-section .section-title {
@@ -531,6 +544,7 @@
   color: #6b7280;
   font-size: 13px;
   align-items: center;
+  margin-bottom: 20px;
 }
 
 /* Ensure all modals overlay above page content and are hidden when inactive */
@@ -626,27 +640,8 @@
   position: sticky;
   bottom: 0;
   background: #fff;
-  padding-top: 16px; /* visual separation when sticky */
-  z-index: 9999;
+  padding: 20px 0; /* visual separation when sticky */
+  z-index: 99;
 }
 
-.modal-actions .btn-edit {
-  border-color: #008500;
-  color: #008500;
-  background: #ffffff;
-}
 
-.modal-actions .btn-edit:hover {
-  background: #008500;
-  color: #fff;
-}
-
-.modal-actions .btn-view {
-  background: #f3f4f6;
-  color: #374151;
-  border: 2px solid #e5e7eb;
-}
-
-.modal-actions .btn-view:hover {
-  background: #e5e7eb;
-}

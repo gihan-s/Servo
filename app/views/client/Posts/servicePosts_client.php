@@ -39,43 +39,47 @@ if (!function_exists('str_snippet')) {
             <div class="header-top" style="display:flex; justify-content: space-between; align-items: center;">
                 <h1>My Service Requests</h1>
 
+                <button type="button" class="post-job-btn" onclick="viewDialogBox('create-post-popup')"><i
+                        class="fa-regular fa-plus"></i>
+                    Create Request</button>
             </div>
+
+        </div>
+        <div class="container-changer">
+            <div class="tab-buttons">
+                <div id="active-posts" class="buttons active">Active Requests</div>
+                <div id="draft-posts" class="buttons">Draft Requests</div>
+                <div id="expired-posts" class="buttons">Expired Requests</div>
+            </div>
+        </div>
+        <div class="request-content">
             <div class="search-header">
+
                 <div class="search-button">
                     <input type="text" placeholder="Search my service requests...">
                     <button><i class="fa-light fa-magnifying-glass"></i></button>
                 </div>
                 <button class="filter" id="filter-pop-up"><i
-                        class="fa-light fa-filter-list"></i><span>Filter</span></button>
+                        class="fa-light fa-filter-list"></i><span>filter</span></button>
+
                 <div class="advance-search">
-                    <div class="sort-selection">
-                        <div class="selection-input-field">
-                            <input type="selection-input" id="selection-input" name="sort" value="Sort By Relevence"
-                                disabled><i class="fa-light fa-chevron-down"></i>
+                    <span>Sort By: </span>
+                    <div class="select-container" style="width: 100px;">
+
+                        <div class="text-container">
+                            <div class="label dropdown-label" style="visibility: hidden;"></div>
+                            <input type="text" id="date" class="text-field-dropdown"
+                                style="padding: 10px; background-color: var(--containerColor);" value="Date" readonly>
                         </div>
-                        <div class="selection-options" id="selection-options">
-                            <div class="opt">Sort By Relevence</div>
-                            <div class="opt">Sort By Price</div>
-                            <div class="opt">Sort By Rating</div>
+
+                        <div class="options">
+                            <div>Date</div>
+                            <div>Price</div>
+                            <div>Views</div>
                         </div>
                     </div>
-                    <button type="button" class="post-job-btn" id="create-post-pop-up"><i
-                            class="fa-regular fa-plus"></i> Create Request</button>
-                </div>
-
-            </div>
-
-
-            <div class="container-changer">
-                <div class="tab-buttons">
-                    <div id="active-posts" class="buttons active">Active Requests</div>
-                    <div id="draft-posts" class="buttons">Draft Requests</div>
-                    <div id="expired-posts" class="buttons">Expired Requests</div>
                 </div>
             </div>
-        </div>
-
-        <div class="request-content">
             <!-- ACTIVE REQUESTS SECTION -->
             <div class="active-posts active requests-section">
                 <div class="item-list">
@@ -142,7 +146,8 @@ if (!function_exists('str_snippet')) {
                                                 class="fas fa-edit"></i>
                                             Edit</button>
                                         <button class="action-btn btn-view" onclick="viewPost(<?= (int) $p['Post_ID'] ?>)"><i
-                                                class="fas fa-eye"></i> View</button>
+                                                class="fas fa-eye"></i>
+                                            View</button>
                                         <button class="action-btn btn-delete"><i class="fas fa-trash"
                                                 onclick="window.location='<?= BASE_URL ?>/requests/delete/<?= (int) $p['Post_ID'] ?>'"></i>
                                             Delete</button>
@@ -511,7 +516,187 @@ if (!function_exists('str_snippet')) {
     </section>
 
 </body>
-<!-- Create Post Modal (matches project pop-up pattern) -->
+
+
+<div class="dialog-box-2" id="create-post-popup">
+    <div class="dialog-content" style="width: 500px;">
+        <div class="dialog-title">
+            <div class="title">Create A New Service Request</div>
+
+            <div>
+                <i class="fa-solid fa-xmark dialog-close-button-2" onclick="closeDialogBox('create-post-popup')"></i>
+            </div>
+        </div>
+        <form id="create-post-form" class="create-post-form" onsubmit="return false;">
+            <div class="input-grid-1">
+                <div class="text-container">
+                    <div class="label text-label">Title</div>
+                    <input type="text" class="text-field" name="title" id="">
+                </div>
+            </div>
+            <div class="input-grid-1">
+                <div class="text-container">
+                    <div class="label text-label">Description</div>
+                    <textarea class="text-field" spellcheck="false" name="description"></textarea>
+                </div>
+            </div>
+            <div class="input-grid-1">
+                <div class="search-select-container" data-idinput="Category_ID">
+                    <div class="text-container">
+                        <div class="label search-dropdown-label">Service Category</div>
+                        <input type="text" class="text-field-search-dropdown" name="category" id="Category"
+                            autocomplete="off" onkeydown="return false">
+                    </div>
+                    <div class="options">
+                        <span class="text-container">
+                            <input type="text" class="text-field-search">
+                        </span>
+                        <div class="option-list" onclick="selectCategory(event)">
+                            <?php foreach ($categories as $Category): ?>
+                                <div data-id="<?= $Category['Category_ID'] ?>">
+                                    <?= htmlspecialchars($Category['Name']) ?>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                </div>
+
+                <input type="hidden" id="Category_ID" name="categoryid">
+            </div>
+            <div class="input-grid-1">
+                <div style="display: flex; gap: 15px; margin-bottom: 5px;">
+
+                    <div class="search-select-container add-option" style="width: 100%;">
+
+                        <div class="text-container">
+                            <div class="label search-dropdown-label" id="field-skill-label">Skill</div>
+                            <input type="text" class="text-field-search-dropdown" id="SkillAddInput" autocomplete="off"
+                                onkeydown="return false">
+                        </div>
+
+                        <div class="options">
+
+                            <span class="text-container">
+                                <input type="text" class="text-field-search" placeholder="Enter new skill to add">
+                            </span>
+
+                            <div class="option-list" id="SkillsOptionList">
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="button" style="white-space: nowrap;" onclick="addSkill();">
+                        <i class="fa-solid fa-plus" style="margin-right: 10px;"></i>Add
+                    </button>
+
+                </div>
+            </div>
+            <div class="chip-wrapper" id="SkillsChips" style="margin-bottom:20px">
+                <input type="hidden" id="Skills" name="skills">
+
+                <p>No skill selected</p>
+            </div>
+            <div class="input-grid-2">
+                <div class="text-container">
+                    <div class="label text-label">Requesting Price</div>
+                    <input type="text" class="text-field" name="price" id="">
+                </div>
+                <div class="search-select-container">
+                    <div class="text-container">
+                        <div class="label search-dropdown-label">Price Type</div>
+                        <input type="text" class="text-field-search-dropdown" autocomplete="off"
+                            onkeydown="return false" name="pricetype" id="">
+                    </div>
+                    <div class="options">
+                        <div class="option-list">
+                            <div>Fixed</div>
+                            <div>Hourly</div>
+                            <div>Daily</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="input-grid-2">
+                <div class="text-container">
+                    <div class="label text-label">Duration</div>
+                    <input type="text" class="text-field" name="duration" id="">
+                </div>
+                <div class="search-select-container">
+                    <div class="text-container">
+                        <div class="label search-dropdown-label">Duration Type</div>
+                        <input type="text" class="text-field-search-dropdown" autocomplete="off"
+                            onkeydown="return false" name="durationtype" id="">
+                    </div>
+                    <div class="options">
+                        <div class="option-list">
+                            <div>Days</div>
+                            <div>Weeks</div>
+                            <div>Months</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-grid-2">
+                <div class="search-select-container">
+                    <div class="text-container">
+                        <div class="label search-dropdown-label">Level</div>
+                        <input type="text" class="text-field-search-dropdown" autocomplete="off"
+                            onkeydown="return false" name="level" id="">
+                    </div>
+                    <div class="options">
+                        <div class="option-list">
+                            <div>Beginner</div>
+                            <div>Intermediate</div>
+                            <div>Advanced</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-container">
+                    <div class="label text-label label-float">Expired Date</div>
+                    <input type="date" class="text-field" name="endat" id="">
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button type="reset" class="action-btn btn-delete" id="create-post-pop-up"
+                    data-role="cancel">Reset</button>
+                <button type="button" class="action-btn btn-view" onclick="window.submitCreatePost('draft')"
+                    id="create-post-pop-up" data-role="save-draft">
+                    <i class="fa-regular fa-floppy-disk"></i>
+                    Save Draft
+                </button>
+                <button type="button" class="action-btn btn-edit" onclick="submitPost('publish')"
+                    id="create-post-pop-up" data-role="publish">
+                    <i class="fa-regular fa-rocket"></i>
+                    Publish Request
+                </button>
+                <button type="button" class="action-btn btn-edit" data-role="save-post" style="display:none;">
+                    <i class="fa-regular fa-floppy-disk"></i>
+                    Save Request
+                </button>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+<div class="dialog-box-2" id="edit-post-popup">
+    <div class="dialog-content" style="width: 500px;">
+        <div class="dialog-title">
+            <div class="title">Create A New Service Request</div>
+
+            <div>
+                <i class="fa-solid fa-xmark dialog-close-button-2" onclick="closeDialogBox('edit-post-popup')"></i>
+            </div>
+        </div>
+        <div class="dialog-body"></div>
+    </div>
+</div>
+
+<!-- Create Post Modal (matches project pop-up pattern) 
 <div class="pop-up-section create-post-pop-up deactive">
     <div class="pop-up deactive">
         <div class="pop-up-header">
@@ -520,161 +705,10 @@ if (!function_exists('str_snippet')) {
         </div>
         <hr>
         <div class="pop-up-content">
-            <form id="create-post-form" class="create-post-form" onsubmit="return false;">
-                <div class="input-grid-1">
-                    <div class="text-container">
-                        <div class="label text-label">Title</div>
-                        <input type="text" class="text-field" name="title" id="">
-                    </div>
-                </div>
-                <div class="input-grid-1">
-                    <div class="text-container">
-                        <div class="label text-label">Description</div>
-                        <textarea class="text-field" spellcheck="false" name="description"></textarea>
-                    </div>
-                </div>
-                <div class="input-grid-1">
-                    <div class="search-select-container" data-idinput="Category_ID">
-                        <div class="text-container">
-                            <div class="label search-dropdown-label">Service Category</div>
-                            <input type="text" class="text-field-search-dropdown" name="category" id="Category"
-                                autocomplete="off" onkeydown="return false">
-                        </div>
-                        <div class="options">
-                            <span class="text-container">
-                                <input type="text" class="text-field-search">
-                            </span>
-                            <div class="option-list" onclick="selectCategory(event)">
-                                <?php foreach ($categories as $Category): ?>
-                                    <div data-id="<?= $Category['Category_ID'] ?>">
-                                        <?= htmlspecialchars($Category['Name']) ?>
-                                    </div>
-                                <?php endforeach; ?>
-                            </div>
-                        </div>
-                    </div>
-
-                    <input type="hidden" id="Category_ID" name="categoryid">
-                </div>
-                <div class="input-grid-1">
-                    <div style="display: flex; gap: 15px; margin-bottom: 5px;">
-
-                        <div class="search-select-container add-option" style="width: 100%;">
-
-                            <div class="text-container">
-                                <div class="label search-dropdown-label" id="field-skill-label">Skill</div>
-                                <input type="text" class="text-field-search-dropdown" id="SkillAddInput"
-                                    autocomplete="off" onkeydown="return false">
-                            </div>
-
-                            <div class="options">
-
-                                <span class="text-container">
-                                    <input type="text" class="text-field-search" placeholder="Enter new skill to add">
-                                </span>
-
-                                <div class="option-list" id="SkillsOptionList">
-
-                                </div>
-                            </div>
-                        </div>
-
-                        <button class="button" style="white-space: nowrap;" onclick="addSkill();">
-                            <i class="fa-solid fa-plus" style="margin-right: 10px;"></i>Add
-                        </button>
-
-                    </div>
-                </div>
-                <div class="chip-wrapper" id="SkillsChips" style="margin-bottom:20px">
-                    <input type="hidden" id="Skills" name="skills">
-
-                    <p>No skill selected</p>
-                </div>
-                <div class="input-grid-2">
-                    <div class="text-container">
-                        <div class="label text-label">Requesting Price</div>
-                        <input type="text" class="text-field" name="price" id="">
-                    </div>
-                    <div class="search-select-container">
-                        <div class="text-container">
-                            <div class="label search-dropdown-label">Price Type</div>
-                            <input type="text" class="text-field-search-dropdown" autocomplete="off"
-                                onkeydown="return false" name="pricetype" id="">
-                        </div>
-                        <div class="options">
-                            <div class="option-list">
-                                <div>Fixed</div>
-                                <div>Hourly</div>
-                                <div>Daily</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="input-grid-2">
-                    <div class="text-container">
-                        <div class="label text-label">Duration</div>
-                        <input type="text" class="text-field" name="duration" id="">
-                    </div>
-                    <div class="search-select-container">
-                        <div class="text-container">
-                            <div class="label search-dropdown-label">Duration Type</div>
-                            <input type="text" class="text-field-search-dropdown" autocomplete="off"
-                                onkeydown="return false" name="durationtype" id="">
-                        </div>
-                        <div class="options">
-                            <div class="option-list">
-                                <div>Days</div>
-                                <div>Weeks</div>
-                                <div>Months</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="input-grid-2">
-                    <div class="search-select-container">
-                        <div class="text-container">
-                            <div class="label search-dropdown-label">Level</div>
-                            <input type="text" class="text-field-search-dropdown" autocomplete="off"
-                                onkeydown="return false" name="level" id="">
-                        </div>
-                        <div class="options">
-                            <div class="option-list">
-                                <div>Beginner</div>
-                                <div>Intermediate</div>
-                                <div>Advanced</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="text-container">
-                        <div class="label text-label label-float">Expired Date</div>
-                        <input type="date" class="text-field" name="endat" id="">
-                    </div>
-                </div>
-
-                <div class="modal-actions">
-                    <button type="button" class="action-btn btn-view" id="create-post-pop-up"
-                        data-role="cancel">Cancel</button>
-                    <button type="button" class="action-btn btn-edit" onclick="window.submitCreatePost('draft')"
-                        id="create-post-pop-up" data-role="save-draft">
-                        <i class="fa-regular fa-floppy-disk"></i>
-                        Save Draft
-                    </button>
-                    <button type="button" class="action-btn btn-view" onclick="window.submitCreatePost('publish')"
-                        id="create-post-pop-up" data-role="publish">
-                        <i class="fa-regular fa-rocket"></i>
-                        Publish Request
-                    </button>
-                    <button type="button" class="action-btn btn-edit" data-role="save-post" style="display:none;">
-                        <i class="fa-regular fa-floppy-disk"></i>
-                        Save Request
-                    </button>
-                </div>
-            </form>
+            
         </div>
     </div>
-</div>
+</div>-->
 <script>
 
     // (Removed previous capture guard). We'll override togglePopUp safely after external scripts load.
@@ -759,7 +793,7 @@ if (!function_exists('str_snippet')) {
             .then(data => {
                 if (data.status === 'ok') {
                     data.result.forEach(element => {
-                        addItemToDropdown("SkillAddInput", element.Skill, false);
+                        addItemToDropdown("SkillAddInput", element.Skill, false, element.Skill_ID);
                     });
                 } else {
                     console.log(data);
@@ -769,7 +803,7 @@ if (!function_exists('str_snippet')) {
     }
 
     function addSkill() {
-        if (addChip('SkillsChips', document.getElementById("SkillAddInput").value)) {
+        if (addChip('SkillsChips', document.getElementById("SkillAddInput").value, document.getElementById("SkillAddInput").dataset.id)) {
             document.getElementById("SkillAddInput").value = "";
             document.getElementById("SkillAddInput").parentElement
                 .querySelector(".label").classList.remove("label-float");
@@ -778,14 +812,7 @@ if (!function_exists('str_snippet')) {
         }
     }
     // expose to inline onclick
-    window.submitCreatePost = function (action) {
-        const BASE = "<?= BASE_URL ?>";
-        const form = document.getElementById('create-post-form');
-        if (!form) return;
-        form.action = BASE + '/requests/' + (action === 'draft' ? 'draft' : 'publish');
-        form.method = 'POST';
-        form.submit();
-    };
+
 
     function daysConvert(days) {
 
@@ -806,22 +833,103 @@ if (!function_exists('str_snippet')) {
     }
 
 
+    function submitPost(action) {
+
+        // Validate required fields
+        const title = document.querySelector("input[name='title']").value.trim();
+        const description = document.querySelector("textarea[name='description']").value.trim();
+        const categoryId = document.getElementById("Category_ID").value;
+        const skillsString = document.getElementById("Skills").value;
+        const skillIds = skillsString.match(/\d+/g)?.map(id => parseInt(id, 10)) || [];
+        const skillIdsString = skillIds.join(','); // "1,5,8,12"
+        console.log("Skills IDs String:", skillIdsString);
+
+
+        // if (!title) {
+        //     alert('Please enter a title');
+        //     document.querySelector("input[name='title']").focus();
+        //     return;
+        // }
+
+        // if (!description) {
+        //     alert('Please enter a description');
+        //     document.querySelector("textarea[name='description']").focus();
+        //     return;
+        // }
+
+        // if (!categoryId) {
+        //     alert('Please select a category');
+        //     return;
+        // }
+
+        // Collect all form data manually
+        const postData = {
+            title: title,
+            description: description,
+            category_id: categoryId,
+            skills: skillIdsString,
+            price: document.querySelector("input[name='price']").value.trim() || '',
+            price_type: document.querySelector("input[name='pricetype']").value.trim() || '',
+            duration: document.querySelector("input[name='duration']").value.trim() || '',
+            duration_type: document.querySelector("input[name='durationtype']").value.trim() || '',
+            level: document.querySelector("input[name='level']").value.trim() || '',
+            end_at: document.querySelector("input[name='endat']").value || '',
+            status: action // 'draft' or 'publish'
+        };
+
+        // Convert to URL-encoded format
+        const urlEncodedData = Object.keys(postData)
+            .map(key => encodeURIComponent(key) + '=' + encodeURIComponent(postData[key]))
+            .join('&');
+
+        const url = "<?= BASE_URL ?>/requests/create";
+        console.log("Calling URL:", url);
+        console.log("POST data:", postData);
+        // Send AJAX request
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: urlEncodedData
+        })
+            .then(response => {
+                console.log("Response status:", response.status);
+                console.log("Response headers:", response.headers.get('content-type'));
+
+                // Get the raw text first to see what's being returned
+                return response.text().then(text => {
+                    console.log("Raw response:", text);
+
+                    // Try to parse as JSON
+                    try {
+                        return JSON.parse(text);
+                    } catch (e) {
+                        console.error("Failed to parse JSON:", e);
+                        throw new Error("Server returned invalid JSON: " + text.substring(0, 200));
+                    }
+                });
+            })
+            .then(data => {
+                console.log("Parsed data:", data);
+                if (data.success) {
+                    alert(action === 'draft' ? 'Draft saved successfully!' : 'Post published successfully!');
+                    closeDialogBox('create-post-popup');
+                    location.reload();
+                } else {
+                    alert('Error: ' + (data.message || 'Failed to create post'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred: ' + error.message);
+            });
+    }
 
     function viewPost(id) {
-        // Wait for clientPosts.js to load, then call its function
-        if (typeof openPostModal === 'function') {
-            openPostModal();
-        } else {
-            // Fallback: manually toggle modal classes
-            const root = document.getElementById('postDetailsRoot');
-            const modal = document.getElementById('postDetailsModal');
-            if (root && modal) {
-                root.classList.remove('deactive');
-                modal.classList.remove('deactive');
-            }
-        }
+        viewDialogBox('edit-post-popup');
 
-        fetch("<?= BASE_URL ?>/posts/view/" + id)
+        fetch("<?= BASE_URL ?>/requests/view/" + id)
             .then(response => response.json())
             .then(post => {
                 if (post.error) {
@@ -842,35 +950,42 @@ if (!function_exists('str_snippet')) {
                     ? post.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')
                     : '<span>No skills specified</span>';
 
-                document.querySelector("#postDetailsRoot #postContent").innerHTML = `
-                    <div class="post-view-title" id="modalPostTitle">${post.Title || 'Untitled'}</div>
+                // Update title
+                document.querySelector("#edit-post-popup .dialog-title .title").innerText = "Post Details";
+
+                // Replace form content with a div wrapper for proper styling
+                const formContainer = document.querySelector("#edit-post-popup .dialog-body");
+                formContainer.innerHTML = `
+                <div class="post-view">
+                    <div class="post-view-title">${post.Title || 'Untitled'}</div>
                     <div class="post-view-meta">
-                        <span class="chip"><i class="fa-regular fa-calendar"></i><span id="modalPostDate">${publishDate}</span></span>
+                        <span class="chip"><i class="fa-regular fa-calendar"></i><span>${publishDate}</span></span>
                     </div>
                     <div class="post-view-section">
                         <div class="section-title">Description</div>
-                        <div id="modalPostDescription" class="section-body">${post.Description || 'No description provided'}</div>
+                        <div class="section-body">${post.Description || 'No description provided'}</div>
                     </div>
                     <div class="post-view-section">
                         <div class="section-title">Required Skills</div>
-                        <div id="modalPostSkills" class="skills-row">${skillsHTML}</div>
+                        <div class="skills-row">${skillsHTML}</div>
                     </div>
                     <div class="post-view-section">
                         <div class="section-title">Details</div>
-                        <div id="modalPostKV" class="kv-grid">
-                            <div class="kv-item"><span class="kv-label">Budget: </span><span class="kv-value"></t>LKR ${post.Requesting_Price || '0'}/= (${post.Price_Type || 'N/A'})</span></div>
-                            <div class="kv-item"><span class="kv-label">Level:  </span><span class="kv-value">${post.Level || 'N/A'}</span></div>
-                            <div class="kv-item"><span class="kv-label">Duration:   </span><span class="kv-value">${post.Duration || 'N/A'} ${post.Duration_Type || 'N/A'}</span></div>
-                            <div class="kv-item"><span class="kv-label">Proposals:  </span><span class="kv-value">${post.Proposal_Count || '0'}</span></div>
+                        <div class="kv-grid">
+                            <div class="kv-item"><span class="kv-label">Budget:</span><span class="kv-value">LKR ${post.Requesting_Price || '0'}/= (${post.Price_Type || 'N/A'})</span></div>
+                            <div class="kv-item"><span class="kv-label">Level:</span><span class="kv-value">${post.Level || 'N/A'}</span></div>
+                            <div class="kv-item"><span class="kv-label">Duration:</span><span class="kv-value">${post.Duration || 'N/A'} ${post.Duration_Type || 'N/A'}</span></div>
+                            <div class="kv-item"><span class="kv-label">Proposals:</span><span class="kv-value">${post.Proposal_Count || '0'}</span></div>
                         </div>
                     </div>
-                    <div class="post-view-section" id="modalEngagementSection">
+                    <div class="post-view-section">
                         <div class="section-title">Engagement</div>
-                        <div id="modalPostEngagement" class="engagement-row">
+                        <div class="engagement-row">
                             <span class="chip"><i class="fa-regular fa-eye"></i> ${post.Views || '0'} views</span>
                         </div>
                     </div>
-                `;
+                </div>
+            `;
             })
             .catch(error => {
                 console.error('Error fetching post:', error);
@@ -886,7 +1001,7 @@ if (!function_exists('str_snippet')) {
             modal.classList.remove('deactive');
         }
 
-        fetch("<?= BASE_URL ?>/posts/view/" + id)
+        fetch("<?= BASE_URL ?>/requests/view/" + id)
             .then(response => response.json())
             .then(post => {
                 if (post.error) {
@@ -981,12 +1096,12 @@ if (!function_exists('str_snippet')) {
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        // Get all elements with id 'create-post-pop-up' (buttons to open modal)
-        const createPostBtns = document.querySelectorAll('[id="create-post-pop-up"]');
+        // Get all elements with id 'create-post-popup' (buttons to open modal)
+        const createPostBtns = document.querySelectorAll('[id="create-post-popup"]');
 
         createPostBtns.forEach(btn => {
             btn.addEventListener('click', function (e) {
-                const root = document.querySelector('.create-post-pop-up');
+                const root = document.querySelector('#create-post-popup');
 
                 // Check if we're opening the modal (has deactive class)
                 if (root && root.classList.contains('deactive')) {

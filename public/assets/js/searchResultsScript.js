@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Toggle the radio button state when the label is clicked
 
-    document.querySelectorAll('.search-bottom .search-filters .filter-item .radios li').forEach(option => {
+    document.querySelectorAll('.search-filters .filter-item .radios li').forEach(option => {
         option.addEventListener('click', function() {
             if (!this.querySelector('input').checked){
                 this.querySelector('input').checked = true;
@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Toggle the checkbox state when the label is clicked
 
-    document.querySelectorAll('.search-bottom .search-filters .filter-item .checkboxes li').forEach(option => {
+    document.querySelectorAll('.search-filters .filter-item .checkboxes li').forEach(option => {
         option.addEventListener('click', function() {
             if (!this.querySelector('input').checked){
                 this.querySelector('input').checked = true;
@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Toggle the checkbox state when the input is clicked
 
-    document.querySelectorAll('.search-bottom .search-filters .filter-item .checkboxes li input').forEach(option => {
+    document.querySelectorAll('.search-filters .filter-item .checkboxes li input').forEach(option => {
         option.addEventListener('click', function() {
             if (!this.checked){
                 this.checked = true;

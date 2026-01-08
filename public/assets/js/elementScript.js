@@ -62,6 +62,7 @@ for (let i = 0; i < DropDownArray.length; i++) {
             "click",
             () => {
                 DropDowntextfieldArray[i].value = element.innerHTML;
+                DropDowntextfieldArray[i].dataset.id = element.dataset.id;
                 dropdownFocus(i);
                 DropdownLabelArray[i].style.color = "var(--textFieldLabelColor)";
             },
@@ -213,8 +214,8 @@ for (let i = 0; i < SearchDropDownArray.length; i++) {
                     multipleDropdownFiller(SearchDropDownArray[i]);
                 } else {
                     SearchDropDowntextfieldArray[i].value = element.innerText;
-                    if (parentSelect.dataset.idinput != undefined) {
-                        document.getElementById(parentSelect.dataset.idinput).value = element.dataset.id;
+                    if (element.dataset.id) {
+                        SearchDropDowntextfieldArray[i].dataset.id = element.dataset.id;
                     }
                 }
                 searchDropdownFocus(i);
@@ -336,10 +337,14 @@ for (let i = 0; i < searchDropdowns.length; i++) {
 
                 const newElement = document.createElement("div");
                 newElement.innerHTML = AddOptionDiv.dataset.value;
+                newElement.dataset.id = AddOptionDiv.dataset.value;
 
                 newElement.addEventListener("click", () => {
                     var searchDD = element;
                     searchDD.querySelector(".text-field-search-dropdown").value = AddOptionDiv.dataset.value;
+                    if (newElement.dataset.id) {
+                        searchDD.querySelector(".text-field-search-dropdown").dataset.id = newElement.dataset.id;
+                    }
                     searchDD.querySelector(".search-dropdown-label").classList.add("label-float");
                 });
 
@@ -442,7 +447,7 @@ function hideValidationTooltip(inputElement) {
 
 
 
-function addChip(elementID, chipValue) {
+function addChip(elementID, chipValue, chipID) {
 
     if (chipValue == '') {
         return false;
@@ -451,11 +456,11 @@ function addChip(elementID, chipValue) {
     var currentValues = document.getElementById(elementID).querySelector("input").value;
     currentValues = currentValues == '' ? [] : JSON.parse(currentValues);
 
-    if (currentValues.indexOf(chipValue) > -1) {
+    if (currentValues.some(item => item.value === chipValue)) {
         return false;
     }
 
-    currentValues.push(chipValue);
+    currentValues.push({ value: chipValue, id: chipID });
     document.getElementById(elementID).querySelector("input").value = JSON.stringify(currentValues);
 
 
@@ -483,18 +488,21 @@ function addChip(elementID, chipValue) {
 function removeChip(chip) {
     var currentValues = chip.parentElement.querySelector("input").value;
     currentValues = currentValues == '' ? [] : JSON.parse(currentValues);
-    currentValues = currentValues.filter(item => item !== chip.querySelector("span").innerHTML);
+    currentValues = currentValues.filter(item => item.value !== chip.querySelector("span").innerHTML);
     chip.parentElement.querySelector("input").value = JSON.stringify(currentValues);
     chip.remove();
 }
 
 
 
-function addItemToDropdown(DropdownID, value, isDefault = true) {
+function addItemToDropdown(DropdownID, value, isDefault = true, valueID) {
     var element = document.createElement("div");
     element.innerHTML = value;
+    element.dataset.id = valueID;
     const OptionsList = document.getElementById(DropdownID).parentElement.parentElement.querySelector(".option-list");
     OptionsList.appendChild(element);
+
+
 
     if (isDefault) {
         document.getElementById(DropdownID).value = value;
@@ -503,7 +511,9 @@ function addItemToDropdown(DropdownID, value, isDefault = true) {
 
     element.addEventListener("click", () => {
         var searchDD = element.parentElement.parentElement.parentElement;
-        searchDD.querySelector(".text-field-search-dropdown").value = element.innerHTML;
+        searchDD.querySelector(".text-field-search-dropdown").value = element.innerHTML;if (element.dataset.id) {
+            searchDD.querySelector(".text-field-search-dropdown").dataset.id = element.dataset.id;
+        }
         searchDD.querySelector(".search-dropdown-label").classList.add("label-float");
     });
 

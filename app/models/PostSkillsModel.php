@@ -19,4 +19,17 @@ class PostSkillsModel extends Database
             return $result->fetch_all(MYSQLI_ASSOC);
     }
 
+    public function addPostSkill($postId, $skillId)
+{
+    try {
+        $query = "INSERT INTO post_need_skills (Post_ID, Skill_ID) VALUES (?, ?)";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('ii', $postId, $skillId);
+        return $stmt->execute();
+    } catch (Exception $e) {
+        error_log('Error in addPostSkill: ' . $e->getMessage());
+        return false;
+    }
+}
+
 }
