@@ -1,5 +1,15 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
 
+/* color themes */
+:root {
+  --primary: #008500;
+  --primary-dark: #218838;
+  --primary-light: #28a74619;
+  --text: #333;
+  --bg: #fff;
+  --border: #e5e7eb;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -36,7 +46,7 @@ body {
   width: 100%;
   height: 50px;
   border-radius: 5rem 5rem 0 5rem;
-  border: solid 1px #28a745;
+  border: solid 1px var(--primary);
   box-shadow: 0 0 5px 2px rgba(0, 0, 0, 0.1);
 }
 
@@ -51,7 +61,7 @@ body {
 }
 
 .search-button button {
-  background-color: #28a745;
+  background-color: var(--primary);
   color: #fff;
   height: 50px;
   border: none;
@@ -64,7 +74,7 @@ body {
 }
 
 .search-button button:hover {
-  background-color: #218838;
+  background-color: var(--primary);
   box-shadow: 0 0 5px rgba(40, 167, 69, 0.2);
 }
 
@@ -84,7 +94,7 @@ body {
   border: none;
   cursor: pointer;
   font-size: 25px;
-  color: #28a745;
+  color: var(--primary);
   height: 100%;
   padding: 0.5rem 1rem;
   border-radius: 50%;
@@ -92,7 +102,7 @@ body {
 }
 
 .search-header button.filter:hover {
-  color: #218838;
+  color: var(--primary);
   background-color: #28a74619;
   box-shadow: 0 0 5px rgba(40, 167, 69, 0.2);
 }
@@ -104,13 +114,13 @@ body {
 .search-bottom .search-filters .main-title {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #28a745;
+  color: var(--primary);
 }
 
 .search-bottom .search-filters .main-title hr {
   width: 100%;
   height: 3px;
-  background-color: #28a745;
+  background-color: var(--primary);
   margin: 0.5rem 0;
 }
 
@@ -171,13 +181,13 @@ body {
 
 .filter-item .filter-options li input {
   margin-right: 0.5rem;
-  outline-color: #28a745;
+  outline-color: var(--primary);
   scale: 1.5;
   cursor: pointer;
 }
 
 .search-filters .button-apply button {
-  background-color: #28a745;
+  background-color: var(--primary);
   outline: none;
   border: none;
   padding: 0.5rem;
@@ -189,7 +199,7 @@ body {
 }
 
 .search-filters .button-apply button:hover {
-  background-color: #186829;
+  background-color: var(--primary);
   box-shadow: 0 0 5px rgba(40, 167, 69, 0.2);
 }
 
@@ -209,14 +219,14 @@ body {
 .search-bottom .search-content .advance-search .search-selection {
   display: flex;
   align-items: center;
-  border: 1px solid #28a745;
+  border: 1px solid var(--primary);
   width: 100%;
   height: 40px;
   border-radius: 5rem;
 }
 
 .search-bottom .search-content .advance-search .search-selection hr {
-  background-color: #28a745;
+  background-color: var(--primary);
   width: 1px;
   height: 100%;
 }
@@ -248,7 +258,7 @@ body {
   display: flex;
   width: 200px;
   height: 40px;
-  border: 1px solid #28a745;
+  border: 1px solid var(--primary);
   border-radius: 5rem;
   cursor: pointer;
   background-color: transparent;
@@ -260,7 +270,7 @@ body {
   right: 10px;
   top: 50%;
   transform: translateY(-50%);
-  color: #28a745;
+  color: var(--primary);
   font-size: 20px;
   transition: transform 0.3s ease;
 }
@@ -281,7 +291,7 @@ body {
   outline: none;
   background-color: transparent;
   font-size: 1rem;
-  color: #28a745;
+  color: var(--primary);
   cursor: pointer;
   z-index: -1;
 }
@@ -312,7 +322,7 @@ body {
 
 .search-content .advance-search .sort-selection .selection-options.active {
   height: 300%;
-  outline: 1px solid #28a745;
+  outline: 1px solid var(--primary);
 }
 
 .search-content .item-list hr {
@@ -363,7 +373,7 @@ body {
 .search-item .item-head .item-name {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #28a745;
+  color: var(--primary);
   line-height: 1.8rem;
 }
 
@@ -427,7 +437,7 @@ body {
 .search-item .item-middle .success i {
   font-size: 1.5rem;
   padding-right: 5px;
-  color: #28a745;
+  color: var(--primary);
 }
 
 .search-item .item-tags {
@@ -499,7 +509,7 @@ body {
 
 
 .search-item .bottom-button button:hover {
-  background-color: #28a745;
+  background-color: var(--primary);
   color: #fff;
 }
 
@@ -607,19 +617,19 @@ body {
 .pop-up-section .pop-up .pop-up-header .pop-up-title {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #28a745;
+  color: var(--primary);
 }
 
 .pop-up-section .pop-up .pop-up-header i {
   font-size: 1.5rem;
-  color: #28a745;
+  color: var(--primary);
   cursor: pointer;
 }
 
 .pop-up-section .pop-up hr {
   width: 100%;
   height: 2px;
-  background-color: #28a745;
+  background-color: var(--primary);
   margin-bottom: 0.5rem;
 }
 
@@ -655,7 +665,7 @@ body {
 }
 
 .pop-up-section .pop-up .pop-up-content .pop-up-item:hover .pop-up-item-name {
-  color: #218838;
+  color: var(--primary);
 }
 
 .pop-up-section.deactive {

@@ -1,26 +1,17 @@
 <?php
 
-require_once __DIR__ . '/../models/ClientModel.php';
-require_once __DIR__ . '/../models/ProviderModel.php';
-
-class ProfileController
+class ProfileController extends BaseController
 {
-    private $clientModel;
-    private $providerModel;
 
     public function __construct()
     {
-        $this->clientModel = new ClientModel();
-        $this->providerModel = new ProviderModel();
+        parent::__construct();
     }
 
     public function view()
     {
         // Step 1: Check if user is logged in
-        if (!isset($_SESSION['user_id']) || !isset($_SESSION['role'])) {
-            header("Location: /login");
-            exit;
-        }
+        $this->ensureAuth();
 
         $userId = $_SESSION['user_id'];
         $role = $_SESSION['role'];
@@ -123,11 +114,7 @@ class ProfileController
     // POST /profile/account
     public function account()
     {
-        if (!isset($_SESSION['user_id']) || !isset($_SESSION['role'])) {
-            $_SESSION['flash'] = ['type' => 'error', 'message' => 'Please log in first'];
-            header("Location: /login");
-            exit;
-        }
+        $this->ensureAuth();
 
         $userId = $_SESSION['user_id'];
         $role   = $_SESSION['role'];
@@ -211,11 +198,7 @@ class ProfileController
     // POST /profile/delete-account
     public function deleteAccount()
     {
-        if (!isset($_SESSION['user_id']) || !isset($_SESSION['role'])) {
-            $_SESSION['flash'] = ['type' => 'error', 'message' => 'Please log in first'];
-            header("Location: /login");
-            exit;
-        }
+        $this->ensureAuth();
 
         $userId = $_SESSION['user_id'];
         $role   = $_SESSION['role'];

@@ -81,7 +81,18 @@ body::before {
     max-width: 200px;
     margin: 0 auto;
     display: block;
-    margin-bottom: 40px;
+    margin-bottom: 25px;
+}
+
+.h2 {
+    display: block;
+    font-size: 1.5em;
+    margin-block-start: 0.83em;
+    margin-block-end: 0.83em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    font-weight: bold;
+    unicode-bidi: isolate;
 }
 
 .register-header {
@@ -89,7 +100,7 @@ body::before {
     align-items: center;
     justify-content: center;
     position: relative;
-    margin-bottom: 5%;
+    margin-bottom: 2%;
 }
 
 .register-header h2 {
@@ -98,7 +109,7 @@ body::before {
     margin: 0;
     font-size: 1.64rem;
     color: #333;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 input:-webkit-autofill,
@@ -174,7 +185,7 @@ input:-webkit-autofill:active {
     display: flex;
     justify-content: center;
     margin: 10px auto;
-    margin-bottom: 40px;
+    margin-bottom: 10px;
     border: 1px solid #33300080;
     border-radius: 10px;
     padding: 5px;
@@ -559,4 +570,13 @@ input:-webkit-autofill:active {
 
 .password-strength-text.very-strong {
     color: #00aa00;
+}
+
+.user-description {
+    text-align: center;
+    font-size: 14px;
+    margin-top: 0px;
+    margin-bottom: 20px;
+    font-weight: 400;
+    color: #00000090;
 }

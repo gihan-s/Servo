@@ -1,13 +1,52 @@
 <?php
+// POST Table Format:
+// +------------------+---------------+------+-----+---------+----------------+
+// | Field            | Type          | Null | Key | Default | Extra          |
+// +------------------+---------------+------+-----+---------+----------------+
+// | Post_ID          | int           | NO   | PRI | NULL    | auto_increment |
+// | Created_At       | datetime      | YES  |     | NULL    |                |
+// | Category_ID      | int           | NO   | MUL | NULL    |                |
+// | Post_Type        | varchar(45)   | YES  |     | NULL    |                |
+// | Post_Status      | varchar(45)   | YES  |     | NULL    |                |
+// | Client_ID        | int           | NO   | MUL | NULL    |                |
+// | Provider_ID      | int           | YES  | MUL | NULL    |                |
+// | Title            | varchar(100)  | YES  |     | NULL    |                |
+// | Description      | varchar(2048) | YES  |     | NULL    |                |
+// | Requesting_Price | double        | YES  |     | NULL    |                |
+// | Price_Type       | varchar(25)   | NO   |     | NULL    |                |
+// | Duration         | varchar(50)   | NO   |     | NULL    |                |
+// | Level            | varchar(30)   | NO   |     | NULL    |                |
+// | End_At           | date          | NO   |     | NULL    |                |
+// | Published_At     | datetime      | YES  |     | NULL    |                |
+// | Duration_Type    | varchar(25)   | NO   |     | NULL    |                |
+// +------------------+---------------+------+-----+---------+----------------+
 
 require_once __DIR__ . '/../core/Database.php';
 
 class PostModel extends Database
 {
-    public function getPosts($clientId, $status)
+    public function getPosts($clientId, $status = null, $limit = null)
     {
-        $stmt = $this->conn->prepare("SELECT * FROM Post WHERE Client_ID = ? AND Post_Status = ?  AND Post_Type = 'post'");
-        $stmt->bind_param("is", $clientId, $status);
+        $query = "SELECT * FROM Post WHERE Client_ID = ? AND Post_Type = 'post'";
+        $types = "i";
+        $params = [$clientId];
+
+        if ($status !== null) {
+            $query .= " AND Post_Status = ?";
+            $types .= "s";
+            $params[] = $status;
+        }
+
+        $query .= " ORDER BY Created_At DESC";
+
+        if ($limit !== null) {
+            $query .= " LIMIT ?";
+            $types .= "i";
+            $params[] = $limit;
+        }
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param($types, ...$params);
         $stmt->execute();
         $result = $stmt->get_result();
         $stmt->close();
@@ -103,5 +142,50 @@ class PostModel extends Database
         $stmt->close();
 
         return $row ?: null;
+    }
+
+    public function countActiveRequests($clientId)
+    {
+        $count = 3; // Replace with actual data fetching logic
+        // $stmt = $this->conn->prepare("SELECT COUNT(*) as count FROM Post WHERE Client_ID = ? AND Post_Status = 'Published'");
+        // $stmt->bind_param("i", $clientId);
+        // $stmt->execute();
+        // $result = $stmt->get_result();
+        // $count = $result->fetch_assoc()['count'];
+        // $stmt->close();
+        return $count;
+    }
+
+    public function getRecentRequests($clientId, $limit = 3)
+    {
+        // $stmt = $this->conn->prepare("SELECT * FROM Post WHERE Client_ID = ? ORDER BY Created_At DESC LIMIT ?");
+        // $stmt->bind_param("ii", $clientId, $limit);
+        // $stmt->execute();
+        // $result = $stmt->get_result();
+        // $stmt->close();
+        // return $result->fetch_all(MYSQLI_ASSOC);
+        return [
+            [
+                'Title' => 'Full-Stack E‑commerce Platform',
+                'Post_Status' => 'Open',
+                'Created_At' => '2025-12-12',
+                'Proposals' => 23,
+                'End_At' => '2025-12-31'
+            ],
+            [
+                'Title' => 'Mobile App UI/UX Design',
+                'Post_Status' => 'Open',
+                'Created_At' => '2025-11-30',
+                'Proposals' => 47,
+                'End_At' => '2025-12-30'
+            ],
+            [
+                'Title' => 'Digital Marketing Campaign Plan',
+                'Post_Status' => 'Draft',
+                'Created_At' => '2025-11-28',
+                'Proposals' => NULL,
+                'End_At' => NULL
+            ]
+        ]; // fetch actual data from model
     }
 }

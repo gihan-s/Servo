@@ -1,17 +1,14 @@
 <?php
+require_once __DIR__ . '/../models/PaymentModel.php';
 
-require_once __DIR__ . '/../models/ClientModel.php';
-require_once __DIR__ . '/../models/ProviderModel.php';
-
-class PaymentController
+class PaymentController extends BaseController
 {
-    private $clientModel;
-    private $providerModel;
+    private PaymentModel $paymentModel;
 
     public function __construct()
     {
-        $this->clientModel = new ClientModel();
-        $this->providerModel = new ProviderModel();
+        parent::__construct();
+        $this->paymentModel = new PaymentModel();
     }
 
     // GET /dashboard
@@ -37,14 +34,4 @@ class PaymentController
 
         include $viewFile;
     }
-
-    private function ensureAuth(): void
-    {
-        if (empty($_SESSION['user_id']) || empty($_SESSION['role'])) {
-            $_SESSION['flash'] = ['type' => 'error', 'message' => 'Please log in first'];
-            header("Location: /login");
-            exit;
-        }
-    }
-
 }
