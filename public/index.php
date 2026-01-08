@@ -173,14 +173,9 @@ switch ($url) {
         $controller->getSkills();
         break;
 
-    case 'requests/draft':
+    case 'requests/create':
         $controller = new PostController();
-        $controller->draftPost();
-        break;
-
-    case 'requests/publish':
-        $controller = new PostController();
-        $controller->publishPost();
+        $controller->create();
         break;
 
     case (preg_match('#^requests/view/(\d+)$#', $url, $m) ? true : false):
