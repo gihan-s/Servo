@@ -1,16 +1,12 @@
 <?php
 
-require_once __DIR__ . '/../models/ClientModel.php';
-require_once __DIR__ . '/../models/ProviderModel.php';
 require_once __DIR__ . '/../models/PostModel.php';
 require_once __DIR__ . '/../models/PostSkillsModel.php';
 require_once __DIR__ . '/../models/SkillsModel.php';
 require_once __DIR__ . '/../models/CategoryModel.php';
 
-class PostController
+class PostController extends BaseController
 {
-    private ClientModel $clientModel;
-    private ProviderModel $providerModel;
     private PostModel $postModel;
     private PostSkillsModel $postSkillsModel;
     private SkillsModel $skillsModel;
@@ -18,8 +14,7 @@ class PostController
 
     public function __construct()
     {
-        $this->clientModel = new ClientModel();
-        $this->providerModel = new ProviderModel();
+        parent::__construct();
         $this->postModel = new PostModel();
         $this->postSkillsModel = new PostSkillsModel();
         $this->skillsModel = new SkillsModel();
@@ -271,16 +266,6 @@ class PostController
         ];
 
         echo json_encode($response);
-    }
-
-
-    private function ensureAuth(): void
-    {
-        if (empty($_SESSION['user_id']) || empty($_SESSION['role'])) {
-            $_SESSION['flash'] = ['type' => 'error', 'message' => 'Please log in first'];
-            header("Location: /login");
-            exit;
-        }
     }
 
 }

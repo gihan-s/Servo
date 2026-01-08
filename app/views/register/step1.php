@@ -8,11 +8,6 @@
     <title>Servo | Get Started</title>
 
     <link rel="stylesheet" href="<?= $BaseURL ?>/assets/css/registerStyles.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap"
-        rel="stylesheet">
     <link rel="stylesheet" href="<?= $BaseURL ?>/assets/css/elementStyles.css">
     <link rel="stylesheet" href="<?= $BaseURL ?>/assets/css/gridTemplates.css">
     <link rel="stylesheet" href="<?= $BaseURL ?>/assets/css/register-inline.css">
@@ -20,8 +15,6 @@
 
     <script src="<?= $BaseURL ?>/assets/js/elementScript.js" defer></script>
     <script src="<?= $BaseURL ?>/assets/js/registerScript.js" defer></script>
-
-
 </head>
 
 <body>
@@ -34,18 +27,22 @@
 
             <img src="<?= BASE_URL ?>/assets/img/logo.png" alt="Servo">
 
-            <div class="register-header">
-                <h2>Sign Up to Servo</h2>
+            <div id="register-header" class="register-header">
+                <h2>Sign Up as a Client</h2>
+            </div>
+
+            <div id="user-description" class="user-description">
+                Looking to hire services.
+            </div>
+
+            <div class="toggle-section user-change">
+                <div class="toggle-button active"><i class="fa-solid fa-user"></i>Client</div>
+                <div class="toggle-button"><i class="fa-solid fa-user-helmet-safety"></i>Provider</div>
             </div>
 
             <div class="section active">
 
                 <div class="input-field">
-
-                    <div class="toggle-section user-change">
-                        <div class="toggle-button active"><i class="fa-solid fa-user"></i>Client</div>
-                        <div class="toggle-button"><i class="fa-solid fa-user-helmet-safety"></i>Provider</div>
-                    </div>
 
                     <input type="hidden" name="user_type" id="user_type" value="client" />
 
@@ -54,32 +51,11 @@
                         <hr class="hr-line">
                     </div>
 
-                    <script>
-                        document.getElementsByClassName('user-change')[0].addEventListener('click', function(e) {
-                            if (e.target && e.target.classList.contains('toggle-button')) {
-                                var buttons = document.querySelectorAll('.user-change .toggle-button');
-                                buttons.forEach(function(btn) {
-                                    btn.classList.remove('active');
-                                });
-                                e.target.classList.add('active');
-
-                                // Update hidden input value
-                                var userTypeInput;
-                                if (e.target.textContent.includes('Client')) {
-                                    userTypeInput.value = 'client';
-                                } else if (e.target.textContent.includes('Provider')) {
-                                    userTypeInput.value = 'provider';
-                                }
-                            }
-                        });
-                    </script>
                     <?php
-
-                    function getFromSession($name)
-                    {
-                        return isset($_SESSION["register"][$name]) ? $_SESSION["register"][$name] : "";
-                    }
-
+                        function getFromSession($name)
+                        {
+                            return isset($_SESSION["register"][$name]) ? $_SESSION["register"][$name] : "";
+                        }
                     ?>
 
                     <!-- Input fields -->
@@ -138,11 +114,4 @@
     </form>
 
 </body>
-
 </html>
-
-<script>
-    window.addEventListener("load", ()=> {
-    changeUIByUserType();
-})
-</script>
