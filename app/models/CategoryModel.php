@@ -1,4 +1,14 @@
 <?php
+// CATEGORY TABLE STRUCTURE
+// +-------------+--------------+------+-----+---------+-------+
+// | Field       | Type         | Null | Key | Default | Extra |
+// +-------------+--------------+------+-----+---------+-------+
+// | Category_ID | int          | NO   | PRI | NULL    |       |
+// | Name        | varchar(100) | YES  |     | NULL    |       |
+// | Description | varchar(100) | YES  |     | NULL    |       |
+// | Icon        | varchar(100) | YES  |     | NULL    |       |
+// +-------------+--------------+------+-----+---------+-------+
+
 
 require_once __DIR__ . '/../core/Database.php';
 

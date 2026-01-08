@@ -15,6 +15,8 @@ class BaseController
 
     protected $notifications = [];
     protected $messages = [];
+    protected $unreadMessageCount = 3;
+    protected $unreadNotificationCount = 2;
 
     public function __construct()
     {

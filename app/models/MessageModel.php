@@ -14,9 +14,26 @@
 // | Provider_ID           | int                       | NO   | MUL | NULL    |       |
 // | Client_ID             | int                       | NO   | MUL | NULL    |       |
 // | Is_Read               | boolean                   | YES  |     | NULL    |       |
+// | Conversation_ID       | int                       | YES  | MUL | NULL    |       |
 // +-----------------------+---------------------------+------+-----+---------+-------+
+
+// CONVERSATION Table Format:
+// +-----------------------+---------------------------+------+-----+---------+-------+
+// | Field                 | Type                      | Null | Key | Default | Extra |
+// +-----------------------+---------------------------+------+-----+---------+-------+
+// | Conversation_ID       | int                       | NO   | PRI | NULL    |       |
+// | Project_ID            | int                       | YES  | MUL | NULL    |       |
+// | Title                 | varchar(100)              | YES  |     | NULL    |       |
+// | Last_Message_At       | datetime                  | YES  |     | NULL    |       |
+// | Unread_Count_Client   | int                       | YES  |     | NULL    |       |
+// | Unread_Count_Provider | int                       | YES  |     | NULL    |       |
+// | Starred_By_Client     | boolean                   | YES  |     | NULL    |       |
+// | Starred_By_Provider   | boolean                   | YES  |     | NULL    |       |
+// +-----------------------+---------------------------+------+-----+---------+-------+
+
 // Note: Is_Client_To_Provider = 1 means message sent from Client to Provider
-// Todo: add Is_Read, Sender_Type, Receiver_Type fields to the table and remove Is_Client_To_Provider field. change date types to timestamp.
+// Todo: add Is_Read, Sender_Type, Receiver_Type, Conversation_ID fields to the table and remove Is_Client_To_Provider field. change date types to timestamp.
+// Todo: add a Conversation table to group messages between a client and provider. Title set by Project title if applicable.
 
 require_once __DIR__ . '/../core/Database.php';
 
