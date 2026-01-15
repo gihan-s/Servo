@@ -11,6 +11,11 @@ require_once '../app/controllers/DashboardController.php';
 require_once '../app/controllers/ProjectController.php';
 require_once '../app/controllers/PostController.php';
 require_once '../app/controllers/LoginController.php';
+require_once '../app/controllers/MessageController.php';
+require_once '../app/controllers/NotificationController.php';
+require_once '../app/controllers/PaymentController.php';
+require_once '../app/controllers/ProviderController.php';
+require_once '../app/controllers/EarningsController.php';
 
 require_once '../app/controllers/admin/AdminLoginController.php';
 require_once '../app/controllers/admin/AdminDashboardController.php';
@@ -157,26 +162,67 @@ switch ($url) {
         $controller->index();
         break;
 
-    case 'posts':
+    case 'requests':
         $controller = new PostController();
         $controller->index();
         break;
 
-    case 'posts/get-skills':
+    case 'requests/get-skills':
         $controller = new PostController();
         $controller->getSkills();
         break;
 
-    case 'posts/draft':
+    case 'requests/draft':
         $controller = new PostController();
         $controller->draftPost();
         break;
 
-    case 'posts/publish':
+    case 'requests/publish':
         $controller = new PostController();
         $controller->publishPost();
         break;
 
+    case (preg_match('#^requests/view/(\d+)$#', $url, $m) ? true : false):
+        (new PostController())->viewPost((int)$m[1]);
+        break;
+
+    // case (preg_match('#^requests/edit/(\d+)$#', $url, $m) ? true : false):
+    //     (new PostController())->editPost((int)$m[1]);
+    //     break;
+
+    // case (preg_match('#^requests/delete/(\d+)$#', $url, $m) ? true : false):
+    //     (new PostController())->deletePost((int)$m[1]);
+    //     break;
+
+    // case (preg_match('#^requests/publish/(\d+)$#', $url, $m) ? true : false):
+    //     (new PostController())->publishById((int)$m[1]);
+    //     break;
+
+
+    case 'messages':
+        $controller = new MessageController();
+        $controller->index();
+        break;
+
+    case 'notifications':
+        $controller = new NotificationController();
+        $controller->index();
+        break;
+
+    case 'payments':
+        $controller = new PaymentController();
+        $controller->index();
+        break;
+    
+    case 'providers':
+        $controller = new ProviderController();
+        $controller->index();
+        break;
+
+    case 'earnings':
+        $controller = new EarningsController();
+        $controller->index();
+        break;
 
     case 'admin/login':
         $controller = new AdminLoginController();
@@ -212,7 +258,6 @@ switch ($url) {
         $controller = new AdminProviderController();
         $controller->review();
         break;
-
 
     default:
         $controller = new NotFoundController();

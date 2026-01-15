@@ -142,7 +142,7 @@ document.addEventListener('DOMContentLoaded', function () {
         createBtn.addEventListener('click', function () {
             const root = document.getElementsByClassName('create-post-pop-up')[0];
             if (root) {
-                const titleEl = root.querySelector('.pop-up-title'); if (titleEl) titleEl.textContent = 'Create a New Post';
+                // const titleEl = root.querySelector('.pop-up-title'); if (titleEl) titleEl.textContent = 'Create a new service request';
                 const btnSaveDraft = root.querySelector('[data-role="save-draft"]');
                 const btnPublish = root.querySelector('[data-role="publish"]');
                 const btnSavePost = root.querySelector('[data-role="save-post"]');

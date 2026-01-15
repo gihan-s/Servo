@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Profile</title>
+    <title>Servo | Profile</title>
 
     <!--stylesheets-->
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/profile.css">
@@ -152,8 +152,8 @@
 
 
                                     <div class="options">
-                                        <div>Active</div>
-                                        <div>Inactive</div>
+                                        <div>Available</div>
+                                        <div>Busy</div>
                                     </div>
                                 </div>
                             </div>
@@ -184,8 +184,6 @@
                                 <button class="btn btn-primary" type="submit"><i class="fa-regular fa-floppy-disk"></i>
                                     Save
                                     Account</button>
-                                <button class="btn btn-outline" type="button" onclick="resetAccount()"><i
-                                        class="fa-regular fa-rotate-left"></i> Reset</button>
                             </div>
                             <div class="divider" style="margin:22px 0;"></div>
                         </form>

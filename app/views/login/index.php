@@ -7,15 +7,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Servo | Login</title>
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/elementStyles.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/gridTemplates.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/login.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/login-inline.css">
     <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
 </head>
 
 <body>
-    <button class="button home-btn" onclick="window.location.href='<?= BASE_URL ?>/'">Home</button>
+    <?php include 'header.php' ?>
     <div class="main-section">
         <img src="<?= BASE_URL ?>/assets/img/logo.png" alt="Servo">
         <?php
@@ -25,14 +26,12 @@
         $loginError = $_SESSION['login_error'] ?? null;
         unset($_SESSION['login_error']);
         if (!empty($_SESSION['reg_pending_notice'])): ?>
-            <div
-                style="background:#fff8e1; color:#754c00; border:1px solid #f0d48a; padding:10px 14px; border-radius:6px; width:100%; max-width:420px; margin:0 auto 12px auto; font-size:14px; line-height:1.4; box-shadow:0 1px 2px rgba(0,0,0,.06);">
+            <div class="reg-pending-notice">
                 <strong>Registration received.</strong><br />You will get an email after approved by an admin.
             </div>
             <?php unset($_SESSION['reg_pending_notice']); endif; ?>
         <?php if ($loginError): ?>
-            <div
-                style="background:#ffe8e8; color:#7a0b0b; border:1px solid #f5b5b5; padding:10px 14px; border-radius:6px; width:100%; max-width:420px; margin:0 auto 18px auto; font-size:14px; line-height:1.4; box-shadow:0 1px 2px rgba(0,0,0,.06);">
+            <div class="login-error-message">
                 <?= htmlspecialchars($loginError) ?>
             </div>
         <?php endif; ?>
@@ -57,9 +56,8 @@
                     minlength="8" required>
                 <i class="fa-solid fa-eye toggle-password" id="togglePassword" tabindex="0" onclick="togglePasswordView(event)"></i>
             </div>
-            <div style="text-align:center; margin: 18px 0 8px 0; font-size:1rem; color:#444;">
-                Don't have an account? <a href="<?= BASE_URL ?>/register"
-                    style="color:#14a800; font-weight:bold; text-decoration:none;">Register</a>
+            <div class="register-link-section">
+                Don't have an account? <a href="<?= BASE_URL ?>/register" class="register-link">Register</a>
             </div>
             <button type="submit" class="button" id="submitBtn">Continue as Client</button>
         </form>

@@ -475,7 +475,7 @@
   padding: 10px 20px;
   background-color: var(--themeColor);
   border: none;
-  border-radius: 5px;
+  border-radius: 7px;
   color: white;
   font-weight: 500;
   cursor: pointer;
@@ -633,9 +633,10 @@
 
   font-size: 13px;
   font-weight: 400;
-  line-height: 30px;
+  line-height: 1.5;
   color: var(--textFieldTextColor);
 
+  height: 6.5lh;
   border: 1px solid var(--textFieldBorderColor);
   border-radius: 5px;
 

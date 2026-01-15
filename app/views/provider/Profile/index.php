@@ -41,7 +41,7 @@ require_once __DIR__ . '/../../../../config.php';
                             class="fa-regular fa-id-card"></i>
                         <span id="publicSummaryNIC"><?= htmlspecialchars($user['NIC_No']) ?></span> · <span
                             class="status-badge"
-                            id="publicStatus"><?= htmlspecialchars($user['Approvel_Status']) ?></span>
+                            id="publicStatus"><?= htmlspecialchars($user['Status']) ?></span>
                     </div>
                 </div>
                 <div class="hero-actions">
@@ -54,13 +54,18 @@ require_once __DIR__ . '/../../../../config.php';
 
         <div class="profile-shell">
             <nav class="profile-nav" aria-label="Profile sections">
-                <button class="pill" data-target="section-personal" aria-current="true"><i
-                        class="fa-regular fa-user"></i> Personal <span class="count">Info</span></button>
-                <button class="pill" data-target="section-work" aria-current="false"><i
-                        class="fa-regular fa-briefcase"></i> Work <span class="count"
-                        id="countCategories">0</span></button>
+                <button class="pill" data-target="section-personal" aria-current="true">
+                    <i class="fa-regular fa-user"></i> Personal <span class="count">Info</span>
+                </button>
+                <button class="pill" data-target="section-work" aria-current="false">
+                    <i class="fa-regular fa-briefcase"></i> Work <span class="count" id="countCategories">0</span>
+                </button>
                 <button class="pill" data-target="section-account" aria-current="false"><i
-                        class="fa-regular fa-shield-check"></i> Security <span class="count">Settings</span></button>
+                        class="fa-regular fa-shield-check"></i> Security <span class="count">Settings</span>
+                </button>
+                <a href="<?= BASE_URL ?>/logout" class="btn-logout pill">
+                    <i class="fa-regular fa-right-from-bracket"></i> Logout
+                </a>
             </nav>
             <div class="profile-content">
                 <section id="section-personal" class="profile-section active" aria-label="Personal information">

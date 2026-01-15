@@ -7,7 +7,7 @@ $BaseURL = "..";
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Servo - Get Started</title>
+    <title>Servo | Get Started</title>
 
     <link rel="stylesheet" href="<?= $BaseURL ?>/assets/css/registerStyles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,6 +18,7 @@ $BaseURL = "..";
     <link rel="stylesheet" href="<?= $BaseURL ?>/assets/css/elementStyles.css">
     <link rel="stylesheet" href="<?= $BaseURL ?>/assets/css/gridTemplates.css">
     <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
+    <link rel="stylesheet" href="<?= $BaseURL ?>/assets/css/registerServices.css">
 
     <script src="<?= $BaseURL ?>/assets/js/elementScript.js" defer></script>
     <script src="<?= $BaseURL ?>/assets/js/registerScript.js" defer></script>
@@ -585,226 +586,7 @@ $BaseURL = "..";
     }
 </script>
 
-<style>
-    .main-section {
-        max-width: 800px;
-    }
 
-    .button-section button {
-        flex: unset;
-        width: 150px;
-    }
-
-    .top-button-wrapper {
-        margin-bottom: 25px;
-    }
-
-    #AddServiceDialog h5 {
-        text-align: center;
-        font-size: 0.9em;
-        margin-top: 35px;
-    }
-
-    .search-item {
-        background: white;
-        border-radius: 16px;
-        padding: 28px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        border: 1px solid #e5e7eb;
-        position: relative;
-        overflow: hidden;
-
-        text-align: left;
-
-        margin-bottom: 25px;
-    }
-
-    .search-item::before {
-        content: none;
-    }
-
-    .search-item:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        border-color: #008500;
-    }
-
-    /* Status Indicators */
-    .status-badge {
-        position: absolute;
-        bottom: 16px;
-        /* moved to bottom */
-        right: 16px;
-        top: auto;
-        /* override previous top positioning */
-        padding: 6px 12px;
-        border-radius: 20px;
-        font-size: 11px;
-        font-weight: 700;
-        text-transform: uppercase;
-    }
-
-    .status-active {
-        background: #dcfce7;
-        color: #008500;
-        border: 1px solid #bbf7d0;
-    }
-
-    /* Post Header Section */
-    .post-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 20px;
-    }
-
-
-    .post-actions {
-        display: flex;
-        gap: 8px;
-    }
-
-    .action-btn {
-        padding: 8px 16px;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 12px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        border: none;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        text-transform: none;
-    }
-
-    .btn-delete {
-        background: white;
-        color: #dc2626;
-        border: 2px solid #dc2626;
-    }
-
-    .btn-delete i {
-        color: #dc2626;
-    }
-
-
-    .btn-delete:hover {
-        background: #dc2626;
-        color: white;
-        transform: translateY(-1px);
-    }
-
-    .btn-delete:hover i {
-        color: white;
-    }
-
-    /* Post Content Section */
-    .post-title {
-        font-size: 22px;
-        font-weight: 700;
-        color: #008500;
-        margin-bottom: 16px;
-        line-height: 1.4;
-        cursor: pointer;
-        transition: color 0.2s ease;
-    }
-
-    .post-description {
-        color: #4b5563;
-        line-height: 1.7;
-        margin-bottom: 20px;
-        font-size: 15px;
-    }
-
-    .post-skills {
-        margin-bottom: 24px;
-    }
-
-    .skills-label {
-        font-size: 14px;
-        font-weight: 600;
-        color: #374151;
-        margin-bottom: 10px;
-        display: block;
-    }
-
-    .skills-tags {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-
-    .skill-tag {
-        background: #f1f5f9;
-        color: #475569;
-        padding: 6px 14px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 600;
-        border: 1px solid #e2e8f0;
-        transition: all 0.2s ease;
-    }
-
-    .skill-tag:hover {
-        background: #008500;
-        color: white;
-        border-color: #008500;
-        transform: translateY(-1px);
-    }
-
-
-    /* Post Footer Section */
-    .post-footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding-top: 20px;
-        border-top: 1px solid #f3f4f6;
-    }
-
-    .post-details {
-        display: flex;
-        gap: 32px;
-    }
-
-    .detail-item {
-        text-align: center;
-    }
-
-    .detail-label {
-        display: block;
-        font-size: 12px;
-        color: #6b7280;
-        font-weight: 500;
-        margin-bottom: 4px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .detail-value {
-        font-size: 16px;
-        font-weight: 700;
-        color: #111827;
-    }
-
-
-    .engagement-stats {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        margin-top: 8px;
-        font-size: 12px;
-        color: #6b7280;
-    }
-
-    .stat-item {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-    }
-</style>
 
 
 
@@ -825,3 +607,5 @@ $BaseURL = "..";
     </div>
 
 </div>
+
+

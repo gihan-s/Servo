@@ -1,14 +1,16 @@
 <?php
 // Fallback-safe text snipping helper for servers without mbstring
 if (!function_exists('str_snippet')) {
-    function str_snippet($text, $limit = 160, $suffix = '…') {
-        $text = (string)$text;
+    function str_snippet($text, $limit = 160, $suffix = '…')
+    {
+        $text = (string) $text;
         // Prefer multibyte-aware trim when available
         if (function_exists('mb_strimwidth')) {
-            return mb_strimwidth($text, 0, (int)$limit, (string)$suffix, 'UTF-8');
+            return mb_strimwidth($text, 0, (int) $limit, (string) $suffix, 'UTF-8');
         }
         // Basic fallback (byte-based)
-        if (strlen($text) <= $limit) return $text;
+        if (strlen($text) <= $limit)
+            return $text;
         return rtrim(substr($text, 0, $limit)) . $suffix;
     }
 }
@@ -28,19 +30,19 @@ if (!function_exists('str_snippet')) {
     <script src="<?= BASE_URL ?>/assets/js/elementScript.js" defer></script>
     <script src="<?= BASE_URL ?>/assets/js/cardList.js" defer></script>
     <script src="<?= BASE_URL ?>/assets/js/clientPosts.js" defer></script>
-    <title>My Job Posts</title>
+    <title>My Service Requests</title>
 </head>
 
 <body>
     <section class="service-requests">
         <div class="header-requests">
             <div class="header-top" style="display:flex; justify-content: space-between; align-items: center;">
-                <h1>My Job Posts</h1>
+                <h1>My Service Requests</h1>
 
             </div>
             <div class="search-header">
                 <div class="search-button">
-                    <input type="text" placeholder="Search my job posts...">
+                    <input type="text" placeholder="Search my service requests...">
                     <button><i class="fa-light fa-magnifying-glass"></i></button>
                 </div>
                 <button class="filter" id="filter-pop-up"><i
@@ -58,7 +60,7 @@ if (!function_exists('str_snippet')) {
                         </div>
                     </div>
                     <button type="button" class="post-job-btn" id="create-post-pop-up"><i
-                            class="fa-regular fa-plus"></i> Create Post</button>
+                            class="fa-regular fa-plus"></i> Create Request</button>
                 </div>
 
             </div>
@@ -66,22 +68,22 @@ if (!function_exists('str_snippet')) {
 
             <div class="container-changer">
                 <div class="tab-buttons">
-                    <div id="active-posts" class="buttons active">Active Posts</div>
-                    <div id="draft-posts" class="buttons">Draft Posts</div>
-                    <div id="expired-posts" class="buttons">Expired Posts</div>
+                    <div id="active-posts" class="buttons active">Active Requests</div>
+                    <div id="draft-posts" class="buttons">Draft Requests</div>
+                    <div id="expired-posts" class="buttons">Expired Requests</div>
                 </div>
             </div>
         </div>
 
         <div class="request-content">
-            <!-- ACTIVE POSTS SECTION -->
+            <!-- ACTIVE REQUESTS SECTION -->
             <div class="active-posts active requests-section">
                 <div class="item-list">
                     <?php if (empty($data['activePosts'])): ?>
                         <section class="empty-state" aria-label="No posts">
                             <!-- ...illustration... -->
-                            <h2>No active posts right now</h2>
-                            <p>Check back soon or refresh to see new posts.</p>
+                            <h2>No active requests right now</h2>
+                            <p>Check back soon or refresh to see new requests.</p>
                             <div class="empty-actions">
                                 <a class="btn primary" href="<?= BASE_URL ?>/feeds"
                                     onclick="location.reload(); return false;">
@@ -110,12 +112,22 @@ if (!function_exists('str_snippet')) {
                             }
                             ?>
                             <div class="search-item">
+                                <input type="hidden" class="post-id" value="<?= htmlspecialchars($p['Post_ID'] ?? '') ?>">
                                 <div class="post-header">
                                     <div class="post-meta">
                                         <div class="post-date">
                                             <i class="fas fa-calendar"></i>
                                             <span>
-                                                <?php if ($daysPassed > 1) {
+                                                <?php if ($daysPassed >= 365) {
+                                                    $years = floor($daysPassed / 365);
+                                                    echo "Published " . $years . ($years === 1 ? " year" : " years") . " ago.";
+                                                } else if ($daysPassed >= 30) {
+                                                    $months = floor($daysPassed / 30);
+                                                    echo "Published " . $months . ($months === 1 ? " month" : " months") . " ago.";
+                                                } else if ($daysPassed >= 7) {
+                                                    $weeks = floor($daysPassed / 7);
+                                                    echo "Published " . $weeks . ($weeks === 1 ? " week" : " weeks") . " ago.";
+                                                } else if ($daysPassed > 1) {
                                                     echo "Published " . $daysPassed . " days ago.";
                                                 } else if ($daysPassed == 0) {
                                                     echo "Published Today";
@@ -126,9 +138,14 @@ if (!function_exists('str_snippet')) {
                                         </div>
                                     </div>
                                     <div class="post-actions">
-                                        <button class="action-btn btn-edit"><i class="fas fa-edit"></i> Edit</button>
-                                        <button class="action-btn btn-view"><i class="fas fa-eye"></i> View</button>
-                                        <button class="action-btn btn-delete"><i class="fas fa-trash"></i> Delete</button>
+                                        <button class="action-btn btn-edit" onclick="editPost(<?= (int) $p['Post_ID'] ?>)"><i
+                                                class="fas fa-edit"></i>
+                                            Edit</button>
+                                        <button class="action-btn btn-view" onclick="viewPost(<?= (int) $p['Post_ID'] ?>)"><i
+                                                class="fas fa-eye"></i> View</button>
+                                        <button class="action-btn btn-delete"><i class="fas fa-trash"
+                                                onclick="window.location='<?= BASE_URL ?>/requests/delete/<?= (int) $p['Post_ID'] ?>'"></i>
+                                            Delete</button>
                                     </div>
                                 </div>
 
@@ -138,7 +155,7 @@ if (!function_exists('str_snippet')) {
                                     <?php
                                     $desc = (string) ($p['Description'] ?? '');
                                     $plain = trim(preg_replace('/\s+/', ' ', strip_tags($desc)));
-                                    $snippet = str_snippet($plain, 160, '…'); // limit to ~160 chars
+                                    $snippet = str_snippet($plain, 300, '…'); // limit to ~160 chars
                                     ?>
                                     <?= htmlspecialchars($snippet, ENT_QUOTES, 'UTF-8') ?>
                                 </div>
@@ -185,13 +202,34 @@ if (!function_exists('str_snippet')) {
 
                                 <div class="engagement-stats">
                                     <div class="stat-item"><i class="fas fa-eye"></i><span>156 views</span></div>
-                                    <div class="stat-item"><i class="fas fa-clock"></i><span>5 days left</span></div>
+                                    <div class="stat-item"><i class="fas fa-clock"></i>
+                                        <span>
+                                            <?php
+                                            if (!is_array($row) || !isset($row['post']) || !is_array($row['post'])) {
+                                                continue;
+                                            }
+                                            $p = $row['post'];
+                                            $End_At = $p['End_At'] ?? null;
+                                            $daysLeft = 0;
+                                            if ($End_At) {
+                                                try {
+                                                    $tz = new DateTimeZone('Asia/Colombo');
+                                                    $created = new DateTime($End_At, $tz);
+                                                    $now = new DateTime('now', $tz);
+                                                    $daysLeft = $created->diff($now)->days;
+                                                } catch (Throwable $e) {
+                                                    $daysLeft = 0;
+                                                }
+                                            }
+                                            ?>
+                                            <?= $daysLeft ?> days left</span>
+                                    </div>
                                 </div>
                             </div>
                         <?php endforeach; ?>
 
                         <!-- Pagination Active -->
-                        <div class="pagination" aria-label="Pagination Active Posts">
+                        <div class="pagination" aria-label="Pagination Active Requests">
                             <button class="page-btn prev" disabled><i class="fa-regular fa-chevron-left"></i></button>
                             <button class="page-btn active">1</button>
                             <button class="page-btn">2</button>
@@ -202,16 +240,16 @@ if (!function_exists('str_snippet')) {
                 </div>
             </div>
 
-            <!-- DRAFT POSTS SECTION -->
+            <!-- DRAFT REQUESTS SECTION -->
             <div class="draft-posts requests-section draft-section" style="display: none;">
                 <div class="item-list">
                     <?php if (empty($data['draftPosts'])): ?>
-                        <section class="empty-state" aria-label="No draft posts">
+                        <section class="empty-state" aria-label="No draft requests">
                             <!-- ...illustration... -->
-                            <h2>No draft posts right now</h2>
-                            <p>Create drafts to save your job posts and publish them later.</p>
+                            <h2>No draft requests right now</h2>
+                            <p>Create drafts to save your job requests and publish them later.</p>
                             <div class="empty-actions">
-                                <a class="btn primary" href="<?= BASE_URL ?>/posts/create">
+                                <a class="btn primary" href="<?= BASE_URL ?>/requests/create">
                                     <i class="fa-regular fa-plus" style="font-size:25px"></i> Create Draft
                                 </a>
                             </div>
@@ -238,7 +276,7 @@ if (!function_exists('str_snippet')) {
                             ?>
 
                             <div class="search-item">
-
+                                <input type="hidden" class="post-id" value="<?= htmlspecialchars($p['Post_ID'] ?? '') ?>">
                                 <div class="post-header">
                                     <div class="post-meta">
                                         <div class="post-date">
@@ -326,7 +364,7 @@ if (!function_exists('str_snippet')) {
                         <?php endforeach; ?>
 
                         <!-- Pagination Draft -->
-                        <div class="pagination" aria-label="Pagination Draft Posts">
+                        <div class="pagination" aria-label="Pagination Draft Requests">
                             <button class="page-btn prev" disabled><i class="fa-regular fa-chevron-left"></i></button>
                             <button class="page-btn active">1</button>
                             <button class="page-btn">2</button>
@@ -337,14 +375,14 @@ if (!function_exists('str_snippet')) {
                 </div>
             </div>
 
-            <!-- EXPIRED POSTS SECTION -->
+            <!-- EXPIRED REQUESTS SECTION -->
             <div class="expired-posts requests-section expired-section" style="display: none;">
                 <div class="item-list">
                     <?php if (empty($data['expiredPosts'])): ?>
-                        <section class="empty-state" aria-label="No expired posts">
+                        <section class="empty-state" aria-label="No expired requests">
                             <!-- ...illustration... -->
-                            <h2>No expired posts right now</h2>
-                            <p>Your expired posts will appear here. You can repost them anytime.</p>
+                            <h2>No expired requests right now</h2>
+                            <p>Your expired requests will appear here. You can repost them anytime.</p>
                         </section>
                     <?php else: ?>
                         <?php foreach ($data['expiredPosts'] as $row): ?>
@@ -367,6 +405,7 @@ if (!function_exists('str_snippet')) {
                             }
                             ?>
                             <div class="search-item">
+                                <input type="hidden" class="post-id" value="<?= htmlspecialchars($p['Post_ID'] ?? '') ?>">
                                 <div class="post-header">
                                     <div class="post-meta">
                                         <div class="post-date">
@@ -458,14 +497,14 @@ if (!function_exists('str_snippet')) {
                         <?php endforeach; ?>
 
                         <!-- Pagination Expired -->
-                        <div class="pagination" aria-label="Pagination Expired Posts">
+                        <div class="pagination" aria-label="Pagination Expired Requests">
                             <button class="page-btn prev" disabled><i class="fa-regular fa-chevron-left"></i></button>
                             <button class="page-btn active">1</button>
                             <button class="page-btn">2</button>
                             <button class="page-btn">3</button>
                             <button class="page-btn next"><i class="fa-regular fa-chevron-right"></i></button>
                         </div>
-                        <?php endif; ?>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -476,7 +515,7 @@ if (!function_exists('str_snippet')) {
 <div class="pop-up-section create-post-pop-up deactive">
     <div class="pop-up deactive">
         <div class="pop-up-header">
-            <div class="pop-up-title">Create a New Post</div>
+            <div class="pop-up-title">Create A New Service Request</div>
             <i class="fa-light fa-xmark" id="create-post-pop-up"></i>
         </div>
         <hr>
@@ -498,8 +537,8 @@ if (!function_exists('str_snippet')) {
                     <div class="search-select-container" data-idinput="Category_ID">
                         <div class="text-container">
                             <div class="label search-dropdown-label">Service Category</div>
-                            <input type="text" class="text-field-search-dropdown" id="Category" autocomplete="off"
-                                onkeydown="return false">
+                            <input type="text" class="text-field-search-dropdown" name="category" id="Category"
+                                autocomplete="off" onkeydown="return false">
                         </div>
                         <div class="options">
                             <span class="text-container">
@@ -523,7 +562,7 @@ if (!function_exists('str_snippet')) {
                         <div class="search-select-container add-option" style="width: 100%;">
 
                             <div class="text-container">
-                                <div class="label search-dropdown-label">Skill</div>
+                                <div class="label search-dropdown-label" id="field-skill-label">Skill</div>
                                 <input type="text" class="text-field-search-dropdown" id="SkillAddInput"
                                     autocomplete="off" onkeydown="return false">
                             </div>
@@ -571,23 +610,6 @@ if (!function_exists('str_snippet')) {
                         </div>
                     </div>
                 </div>
-                <div class="input-grid-1">
-                    <div class="search-select-container">
-                        <div class="text-container">
-                            <div class="label search-dropdown-label">Level</div>
-                            <input type="text" class="text-field-search-dropdown" autocomplete="off"
-                                onkeydown="return false" name="level" id="">
-                        </div>
-                        <div class="options">
-                            <div class="option-list">
-                                <div>Beginner</div>
-                                <div>Intermediate</div>
-                                <div>Advanced</div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
                 <div class="input-grid-2">
                     <div class="text-container">
                         <div class="label text-label">Duration</div>
@@ -609,7 +631,22 @@ if (!function_exists('str_snippet')) {
                     </div>
                 </div>
 
-                <div class="input-grid-1">
+                <div class="input-grid-2">
+                    <div class="search-select-container">
+                        <div class="text-container">
+                            <div class="label search-dropdown-label">Level</div>
+                            <input type="text" class="text-field-search-dropdown" autocomplete="off"
+                                onkeydown="return false" name="level" id="">
+                        </div>
+                        <div class="options">
+                            <div class="option-list">
+                                <div>Beginner</div>
+                                <div>Intermediate</div>
+                                <div>Advanced</div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="text-container">
                         <div class="label text-label label-float">Expired Date</div>
                         <input type="date" class="text-field" name="endat" id="">
@@ -627,11 +664,11 @@ if (!function_exists('str_snippet')) {
                     <button type="button" class="action-btn btn-view" onclick="window.submitCreatePost('publish')"
                         id="create-post-pop-up" data-role="publish">
                         <i class="fa-regular fa-rocket"></i>
-                        Publish Post
+                        Publish Request
                     </button>
                     <button type="button" class="action-btn btn-edit" data-role="save-post" style="display:none;">
                         <i class="fa-regular fa-floppy-disk"></i>
-                        Save Post
+                        Save Request
                     </button>
                 </div>
             </form>
@@ -650,27 +687,8 @@ if (!function_exists('str_snippet')) {
             <i class="fa-light fa-xmark" id="postDetailsClose" style="cursor:pointer;"></i>
         </div>
         <hr>
-        <div class="pop-up-content post-view" style="display:flex; flex-direction:column; gap:12px;">
-            <div class="post-view-title" id="modalPostTitle">Post Title</div>
-            <div class="post-view-meta">
-                <span class="chip"><i class="fa-regular fa-calendar"></i><span id="modalPostDate">—</span></span>
-            </div>
-            <div class="post-view-section">
-                <div class="section-title">Description</div>
-                <div id="modalPostDescription" class="section-body">Description</div>
-            </div>
-            <div class="post-view-section">
-                <div class="section-title">Required Skills</div>
-                <div id="modalPostSkills" class="skills-row"></div>
-            </div>
-            <div class="post-view-section">
-                <div class="section-title">Details</div>
-                <div id="modalPostKV" class="kv-grid"></div>
-            </div>
-            <div class="post-view-section" id="modalEngagementSection" style="display:none;">
-                <div class="section-title">Engagement</div>
-                <div id="modalPostEngagement" class="engagement-row"></div>
-            </div>
+        <div class="pop-up-content post-view" id="postContent" style="display:flex; flex-direction:column; gap:12px;">
+
         </div>
         <div class="modal-actions" style="justify-content:flex-end;">
             <button class="action-btn btn-delete" id="modalDeleteBtn"><i class="fa-regular fa-circle-xmark"></i>
@@ -703,7 +721,7 @@ if (!function_exists('str_snippet')) {
 <div class="pop-up-section confirm-modal deactive" id="confirmPublishRoot">
     <div class="pop-up deactive" id="confirmPublish">
         <div class="pop-up-header" style="display:flex; align-items:center; justify-content:space-between;">
-            <div class="pop-up-title">Publish Post</div>
+            <div class="pop-up-title">Publish Request</div>
             <i class="fa-light fa-xmark" id="confirmPublishClose" style="cursor:pointer;"></i>
         </div>
         <hr>
@@ -731,8 +749,8 @@ if (!function_exists('str_snippet')) {
         document.getElementById("SkillAddInput").parentElement
             .querySelector(".label").classList.remove("label-float");
 
-        // absolute URL (like reg page but for posts endpoint)
-        fetch("<?= BASE_URL ?>/posts/get-skills", {
+        // absolute URL (like reg page but for requests endpoint)
+        fetch("<?= BASE_URL ?>/requests/get-skills", {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body: "category_id=" + encodeURIComponent(CategoryID)
@@ -764,10 +782,268 @@ if (!function_exists('str_snippet')) {
         const BASE = "<?= BASE_URL ?>";
         const form = document.getElementById('create-post-form');
         if (!form) return;
-        form.action = BASE + '/posts/' + (action === 'draft' ? 'draft' : 'publish');
+        form.action = BASE + '/requests/' + (action === 'draft' ? 'draft' : 'publish');
         form.method = 'POST';
         form.submit();
     };
+
+    function daysConvert(days) {
+
+        if (days >= 365) {
+            const years = Math.floor(days / 365);
+            return years + (years === 1 ? " year" : " years");
+        }
+        else if (days >= 30) {
+            const months = Math.floor(days / 30);
+            return months + (months === 1 ? " month" : " months");
+        }
+        else if (days >= 7) {
+            const weeks = Math.floor(days / 7);
+            return weeks + (weeks === 1 ? " week" : " weeks");
+        } else {
+            return days + (days === 1 ? " day" : " days");
+        }
+    }
+
+
+
+    function viewPost(id) {
+        // Wait for clientPosts.js to load, then call its function
+        if (typeof openPostModal === 'function') {
+            openPostModal();
+        } else {
+            // Fallback: manually toggle modal classes
+            const root = document.getElementById('postDetailsRoot');
+            const modal = document.getElementById('postDetailsModal');
+            if (root && modal) {
+                root.classList.remove('deactive');
+                modal.classList.remove('deactive');
+            }
+        }
+
+        fetch("<?= BASE_URL ?>/posts/view/" + id)
+            .then(response => response.json())
+            .then(post => {
+                if (post.error) {
+                    console.error('Error fetching post:', post.error);
+                    return;
+                }
+
+                // Format date
+                const publishDate = post.Published_At ?
+                    new Date(post.Published_At).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    }) : 'N/A';
+
+                // Build skills HTML
+                const skillsHTML = post.skills && post.skills.length > 0
+                    ? post.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')
+                    : '<span>No skills specified</span>';
+
+                document.querySelector("#postDetailsRoot #postContent").innerHTML = `
+                    <div class="post-view-title" id="modalPostTitle">${post.Title || 'Untitled'}</div>
+                    <div class="post-view-meta">
+                        <span class="chip"><i class="fa-regular fa-calendar"></i><span id="modalPostDate">${publishDate}</span></span>
+                    </div>
+                    <div class="post-view-section">
+                        <div class="section-title">Description</div>
+                        <div id="modalPostDescription" class="section-body">${post.Description || 'No description provided'}</div>
+                    </div>
+                    <div class="post-view-section">
+                        <div class="section-title">Required Skills</div>
+                        <div id="modalPostSkills" class="skills-row">${skillsHTML}</div>
+                    </div>
+                    <div class="post-view-section">
+                        <div class="section-title">Details</div>
+                        <div id="modalPostKV" class="kv-grid">
+                            <div class="kv-item"><span class="kv-label">Budget: </span><span class="kv-value"></t>LKR ${post.Requesting_Price || '0'}/= (${post.Price_Type || 'N/A'})</span></div>
+                            <div class="kv-item"><span class="kv-label">Level:  </span><span class="kv-value">${post.Level || 'N/A'}</span></div>
+                            <div class="kv-item"><span class="kv-label">Duration:   </span><span class="kv-value">${post.Duration || 'N/A'} ${post.Duration_Type || 'N/A'}</span></div>
+                            <div class="kv-item"><span class="kv-label">Proposals:  </span><span class="kv-value">${post.Proposal_Count || '0'}</span></div>
+                        </div>
+                    </div>
+                    <div class="post-view-section" id="modalEngagementSection">
+                        <div class="section-title">Engagement</div>
+                        <div id="modalPostEngagement" class="engagement-row">
+                            <span class="chip"><i class="fa-regular fa-eye"></i> ${post.Views || '0'} views</span>
+                        </div>
+                    </div>
+                `;
+            })
+            .catch(error => {
+                console.error('Error fetching post:', error);
+                alert('Failed to load post details. Please try again.');
+            });
+    }
+
+    function editPost(id) {
+        const root = document.querySelector('.create-post-pop-up');
+        const modal = root.querySelector('.pop-up');
+        if (root && modal) {
+            root.classList.remove('deactive');
+            modal.classList.remove('deactive');
+        }
+
+        fetch("<?= BASE_URL ?>/posts/view/" + id)
+            .then(response => response.json())
+            .then(post => {
+                if (post.error) {
+                    console.error('Error fetching post:', post.error);
+                    return;
+                }
+
+                // Format date
+                const publishDate = post.Published_At ?
+                    new Date(post.Published_At).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    }) : 'N/A';
+
+                root.querySelector(".pop-up-title").innerText = "Edit Post";
+                root.querySelectorAll(".label").forEach(label => {
+                    label.classList.add("label-float");
+                });
+                root.querySelector("#field-skill-label").classList.remove("label-float");
+                root.querySelector("input[name='title']").value = post.Title || '';
+                root.querySelector("textarea[name='description']").value = post.Description || '';
+
+                root.querySelector("input[name='category']").value = post.Category_Name || '';
+                document.getElementById("Category_ID").value = post.Category_ID || '';
+
+                // Clear existing skills first
+                const skillsChips = root.querySelector("#SkillsChips");
+                skillsChips.innerHTML = '<input type="hidden" id="Skills" name="skills"><p>No skill selected</p>';
+
+                // Add each skill using the existing addChip function
+                if (post.skills && post.skills.length > 0) {
+                    post.skills.forEach(skill => {
+                        addChip('SkillsChips', skill);
+                    });
+                }
+
+                root.querySelector("input[name='price']").value = post.Requesting_Price || '';
+                root.querySelector("input[name='pricetype']").value = post.Price_Type || '';
+                root.querySelector("input[name='duration']").value = post.Duration || '';
+                root.querySelector("input[name='durationtype']").value = post.Duration_Type || '';
+                root.querySelector("input[name='level']").value = post.Level || '';
+
+
+                const endAtInput = root.querySelector("input[name='endat']");
+                if (post.End_At) {
+                    // Extract date part from datetime string (format: YYYY-MM-DD HH:MM:SS)
+                    const datePart = post.End_At.split(' ')[0];
+                    endAtInput.value = datePart;
+                } else {
+                    endAtInput.value = '';
+                }
+
+                // Change buttons: hide draft/publish, show save button
+                const saveDraftBtn = root.querySelector('[data-role="save-draft"]');
+                const publishBtn = root.querySelector('[data-role="publish"]');
+                const savePostBtn = root.querySelector('[data-role="save-post"]');
+
+                if (saveDraftBtn) saveDraftBtn.style.display = 'none';
+                if (publishBtn) publishBtn.style.display = 'none';
+                if (savePostBtn) {
+                    savePostBtn.style.display = '';
+                    // Set the post ID for update
+                    savePostBtn.setAttribute('data-post-id', post.Post_ID);
+                }
+
+                // Load skills for the selected category
+                if (post.Category_ID) {
+                    fetch("<?= BASE_URL ?>/posts/get-skills", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                        body: "category_id=" + encodeURIComponent(post.Category_ID)
+                    })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.status === 'ok') {
+                                const skillsOptionList = document.getElementById("SkillsOptionList");
+                                skillsOptionList.innerHTML = '';
+                                data.result.forEach(element => {
+                                    addItemToDropdown("SkillAddInput", element.Skill, false);
+                                });
+                            }
+                        })
+                        .catch(err => console.error('Error loading skills:', err));
+                }
+
+            })
+            .catch(error => {
+                console.error('Error fetching post:', error);
+                alert('Failed to load post details. Please try again.');
+            });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Get all elements with id 'create-post-pop-up' (buttons to open modal)
+        const createPostBtns = document.querySelectorAll('[id="create-post-pop-up"]');
+
+        createPostBtns.forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                const root = document.querySelector('.create-post-pop-up');
+
+                // Check if we're opening the modal (has deactive class)
+                if (root && root.classList.contains('deactive')) {
+                    // Reset the entire form
+                    const form = document.getElementById('create-post-form');
+                    if (form) {
+                        form.reset();
+                    }
+
+                    // Clear skills chips
+                    const skillsChips = document.querySelector("#SkillsChips");
+                    if (skillsChips) {
+                        skillsChips.innerHTML = '<input type="hidden" id="Skills" name="skills"><p>No skill selected</p>';
+                    }
+
+                    // Clear category ID
+                    const categoryId = document.getElementById("Category_ID");
+                    if (categoryId) {
+                        categoryId.value = "";
+                    }
+
+                    // Remove label-float from all labels
+                    root.querySelectorAll(".label").forEach(label => {
+                        label.classList.remove("label-float");
+                    });
+
+                    // Clear skills dropdown
+                    const skillAddInput = document.getElementById("SkillAddInput");
+                    if (skillAddInput) {
+                        skillAddInput.value = "";
+                    }
+                    const skillsOptionList = document.getElementById("SkillsOptionList");
+                    if (skillsOptionList) {
+                        skillsOptionList.innerHTML = "";
+                    }
+
+                    // Set title to "Create a New Post"
+                    const title = root.querySelector(".pop-up-title");
+                    if (title) {
+                        title.innerText = "Create a New Post";
+                    }
+
+                    // Show the draft/publish buttons, hide save button
+                    const saveDraftBtn = root.querySelector('[data-role="save-draft"]');
+                    const publishBtn = root.querySelector('[data-role="publish"]');
+                    const savePostBtn = root.querySelector('[data-role="save-post"]');
+
+                    if (saveDraftBtn) saveDraftBtn.style.display = '';
+                    if (publishBtn) publishBtn.style.display = '';
+                    if (savePostBtn) savePostBtn.style.display = 'none';
+                }
+            });
+        });
+    });
+
+
+
 </script>
 
 </html>

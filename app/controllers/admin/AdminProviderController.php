@@ -24,7 +24,6 @@ class AdminProviderController
         $totalUsers = $model->getUserCount();
         $totalPages = ceil($totalUsers / $limit);
 
-
         include __DIR__ . '/../../views/admin/providers.php';
     }
 

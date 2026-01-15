@@ -1257,3 +1257,26 @@ body.landing-body {
     opacity: 1;
     transform: translateY(0);
 }
+
+/* Additional inline styles moved to CSS */
+.mobile-drawer-divider {
+    border: none;
+    border-top: 1px solid #e2e8f0;
+    margin: 14px 0;
+}
+
+.hero-highlight {
+    color: #a7ffd0;
+}
+
+.workflow-title {
+    margin: 0 0 18px;
+}
+
+.workflow-subtitle {
+    margin: 0;
+    max-width: 640px;
+    line-height: 1.55;
+    font-size: .95rem;
+    color: #475569;
+}

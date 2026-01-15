@@ -4,7 +4,9 @@
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width,initial-scale=1" />
-	<title>Servo - Hire Talent & Find Work</title>
+	<title>
+		Servo | Hire Verified Local & Remote Professionals for Your Projects
+	</title>
 
 	<link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/styles.css" />
 	<link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/landing.css" />
@@ -33,8 +35,13 @@
 				<a href="#contact">Contact Us</a>
 			</div>
 			<div class="auth">
-				<a href="<?= BASE_URL ?>/login" class="login">Log In</a>
-				<a href="<?= BASE_URL ?>/register" class="cta">Get Started</a>
+					<?php if (isset($_SESSION['user_id']) && isset($_SESSION['role'])): ?>
+							<a href="<?= BASE_URL ?>/logout" class="login">Log Out</a>
+							<a href="<?= BASE_URL ?>/dashboard" class="cta">Dashboard</a>
+					<?php else: ?>
+							<a href="<?= BASE_URL ?>/login" class="login">Log In</a>
+							<a href="<?= BASE_URL ?>/register" class="cta">Get Started</a>
+					<?php endif; ?>
 			</div>
 		</div>
 	</nav>
@@ -50,7 +57,7 @@
 			<a href="#workflow">How it Works</a>
 			<a href="#feedback">Success Stories</a>
 			<a href="#contact">Contact Us</a>
-			<hr style="border:none;border-top:1px solid #e2e8f0;margin:14px 0;" />
+			<hr class="mobile-drawer-divider" />
 			<a href="<?= BASE_URL ?>/login"><i class="fa-solid fa-arrow-right-to-bracket"></i> Log In</a>
 			<a href="<?= BASE_URL ?>/register"><i class="fa-solid fa-user-plus"></i> Create Account</a>
 		</div>
@@ -61,7 +68,7 @@
 	<section class="hero" id="top">
 		<div class="hero-inner reveal">
 			<div class="hero-copy">
-				<h1>Build faster with trusted <span style="color:#a7ffd0;">local & remote</span> professionals.</h1>
+				<h1>Build faster with trusted <span class="hero-highlight">local & remote</span> professionals.</h1>
 				<p>Inspired by leading platforms yet purpose‑built for our region. Servo matches clients with proven providers through concise posts, transparent bid system and pay on approve payment system.</p>
 			</div>
 			<div class="search-panel" aria-label="Search talent or projects">
@@ -197,8 +204,8 @@
 	<section id="workflow" class="section">
 		<div class="lp-container workflow-shell reveal">
 			<div>
-				<h2 style="margin:0 0 18px;">How Servo's Bidding System Works</h2>
-				<p style="margin:0;max-width:640px;line-height:1.55;font-size:.95rem;color:#475569;">A transparent flow that keeps expectations aligned for both clients and providers – from posting & bidding through collaboration, delivery and payment.</p>
+				<h2 class="workflow-title">How Servo's Bidding System Works</h2>
+				<p class="workflow-subtitle">A transparent flow that keeps expectations aligned for both clients and providers – from posting & bidding through collaboration, delivery and payment.</p>
 			</div>
 			<div class="workflow-steps">
 				<div class="step reveal">

@@ -1,0 +1,17 @@
+/* Register Page Inline Styles */
+
+/* Icon padding for toggle buttons */
+.toggle-button .fa-user,
+.toggle-button .fa-user-helmet-safety {
+    padding-right: 10px;
+}
+
+/* Next button icon padding */
+.button .fa-arrow-right {
+    padding-left: 5px;
+}
+
+/* NIC field hidden by default */
+.nic-field-hidden {
+    display: none;
+}
