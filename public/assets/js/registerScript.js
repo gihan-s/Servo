@@ -1,4 +1,8 @@
+document.addEventListener('DOMContentLoaded', function() {
 const userTypeToggles = document.querySelectorAll(".toggle-section.user-change .toggle-button");
+const registerHeader = document.getElementById("register-header");
+const userDescription = document.getElementById("user-description");
+
 for (let i = 0; i < userTypeToggles.length; i++) {
     const element = userTypeToggles[i];
 
@@ -6,9 +10,21 @@ for (let i = 0; i < userTypeToggles.length; i++) {
         userTypeToggles[0].classList.remove("active");
         userTypeToggles[1].classList.remove("active");
         element.classList.add("active");
-        document.getElementById("user_type").value = element.innerText.toLowerCase();
+
+        // const buttonText = element.innerText.toLowerCase();
+        const isClient = element.textContent.toLowerCase().includes("client");
+        document.getElementById("user_type").value = isClient ? "client" : "provider";
+
+        // Update header and description based on user type
+        // if (buttonText.includes("client")) {
+        //     registerHeader.querySelector("h2").innerText = "Sign Up as a Client";
+        //     userDescription.innerText = "Looking to hire services.";
+        // } else if (buttonText.includes("provider")) {
+        //     registerHeader.querySelector("h2").innerText = "Sign Up as a Provider";
+        //     userDescription.innerText = "Looking to offer your services.";
+        // }
         changeUIByUserType();
-    })
+    });
 
 }
 
@@ -33,13 +49,19 @@ for (let i = 0; i < textAreas.length; i++) {
 function changeUIByUserType() {
 
     var userType = document.getElementById("user_type").value;
+    const nicInput = document.getElementsByName("nic_no")[0];
+    const nicContainer = nicInput ? nicInput.parentElement : null;
 
     if (userType == "provider") {
-        document.getElementsByName("nic_no")[0].parentElement.style.display = "block";
-        document.getElementsByName("nic_no")[0].required = true;
+        if (nicContainer) nicContainer.style.display = "block";
+        if (nicInput) nicInput.required = true;
+        registerHeader.querySelector("h2").innerText = "Sign Up as a Provider";
+        userDescription.innerText = "Looking to offer your services.";
     } else {
-        document.getElementsByName("nic_no")[0].parentElement.style.display = "none";
-        document.getElementsByName("nic_no")[0].required = false;
+        if (nicContainer) nicContainer.style.display = "none";
+        if (nicInput) nicInput.required = false;
+        registerHeader.querySelector("h2").innerText = "Sign Up as a Client";
+        userDescription.innerText = "Looking to hire services.";
     }
 
 }
@@ -662,3 +684,4 @@ if (document.getElementById("registrationForm5")) {
         }
     })
 }
+});

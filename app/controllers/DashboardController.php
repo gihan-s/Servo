@@ -1,17 +1,21 @@
 <?php
 
-require_once __DIR__ . '/../models/ClientModel.php';
-require_once __DIR__ . '/../models/ProviderModel.php';
+require_once __DIR__ . '/../models/PostModel.php';
+require_once __DIR__ . '/../models/PaymentModel.php';
+require_once __DIR__ . '/../models/ProjectModel.php';
 
-class DashboardController
+class DashboardController extends BaseController
 {
-    private $clientModel;
-    private $providerModel;
+    private $postModel;
+    private $paymentModel;
+    private $projectModel;
 
     public function __construct()
     {
-        $this->clientModel = new ClientModel();
-        $this->providerModel = new ProviderModel();
+        parent::__construct(); // inherit BaseController instead of overriding
+        $this->postModel = new PostModel();
+        $this->paymentModel = new PaymentModel();
+        $this->projectModel = new ProjectModel();
     }
 
     // GET /dashboard
@@ -24,6 +28,20 @@ class DashboardController
 
         // Choose view by role
         if ($role === 'Client') {
+            $activeRequestCount = $this->postModel->countActiveRequests($userId);
+            $recentRequests = $this->postModel->getRecentRequests($userId);
+            $pendingPaymentCount = $this->paymentModel->getPaymentsCountByClientId($userId, 'Pending');
+            $recentPayments = $this->paymentModel->getRecentPaymentsByClientId($userId, 3);
+            $totalSpent = $this->paymentModel->getTotalSpentByClientId($userId);
+            $totalProjectCount = $this->projectModel->countProjectsByClientId($userId);
+            $activeProjects = $this->projectModel->getProjectsByClientId($userId, 3, 'Active');
+
+            foreach ($recentRequests as &$request) {
+                $request['Time_Ago'] = timeAgo($request['Created_At']);
+                $request['Time_Left'] = timeLeft($request['End_At']);
+            }
+            unset($request);
+
             $viewFile = __DIR__ . '/../views/client/Dashboard/index.php';
         } elseif ($role === 'Provider') {
             $viewFile = __DIR__ . '/../views/provider/Dashboard/index.php';
@@ -35,15 +53,5 @@ class DashboardController
 
         include $viewFile;
     }
-
-    private function ensureAuth(): void
-    {
-        if (empty($_SESSION['user_id']) || empty($_SESSION['role'])) {
-            $_SESSION['flash'] = ['type' => 'error', 'message' => 'Please log in first'];
-            header("Location: /login");
-            exit;
-        }
-    }
-
 
 }
