@@ -86,4 +86,28 @@ class SkillsModel extends Database
         $stmt->close();
         return $inserted;
     }
+
+
+    public function getByProviderCategoryIds(array $categoryIds): array
+    {
+        if (empty($categoryIds)) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($categoryIds), '?'));
+        $types = str_repeat('i', count($categoryIds));
+
+        $stmt = $this->conn->prepare(
+            "SELECT Provider_Categories_ID, Skill FROM Skills WHERE Provider_Categories_ID IN ($placeholders)"
+        );
+        $stmt->bind_param($types, ...$categoryIds);
+        $stmt->execute();
+
+        $skills = [];
+        foreach ($stmt->get_result()->fetch_all(MYSQLI_ASSOC) as $row) {
+            $skills[$row['Provider_Categories_ID']][] = $row["Skill"];
+        }
+
+        return $skills;
+    }
 }

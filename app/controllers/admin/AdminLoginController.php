@@ -23,12 +23,12 @@ class AdminLoginController {
             $_SESSION['access_level'] = $user['Access_Level'];
             $_SESSION['name'] = $user['Name'];
 
-            header("Location: " . BASE_URL . "/../../admin/dashboard");
+            header("Location: " . BASE_URL . "/admin/dashboard");
             exit;
 
         } else {
             $_SESSION['login_error'] = 'Invalid Username or Password.';
-            header("Location: " . BASE_URL . "/../../admin/login");
+            header("Location: " . BASE_URL . "/admin/login");
             exit;
         }
     }
@@ -37,7 +37,7 @@ class AdminLoginController {
         session_start();
         session_unset();
         session_destroy();
-        header("Location: /admin/login");
+        header("Location: " . BASE_URL . "/admin/login");
         exit;
     }
 

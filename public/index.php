@@ -87,6 +87,16 @@ switch ($url) {
         $controller->checkNIC();
         break;
 
+    case 'register/send-email-otp':
+        $controller = new RegisterController();
+        $controller->sendEmailOTP();
+        break;
+
+    case 'register/verify-email-otp':
+        $controller = new RegisterController();
+        $controller->verifyEmailOTP();
+        break;
+
     case (preg_match('#^file/temp-images/(.+)$#', $url, $matches) ? true : false):
         $controller = new FileController();
         $controller->showTempImage($matches[1]);
@@ -213,7 +223,7 @@ switch ($url) {
         $controller = new PaymentController();
         $controller->index();
         break;
-    
+
     case 'providers':
         $controller = new ProviderController();
         $controller->index();

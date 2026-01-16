@@ -1,4 +1,7 @@
+<?php include_once '../helpers/locations.php'; ?>
+
 <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/providerView.css">
+
 
 <div class="provider-wrapper">
 
@@ -51,7 +54,7 @@
 
         <h4 class="provider-subtitle">Profile Picture</h4>
 
-        <img class="profile-picture" src="/file/user-files/<?= urlencode($user["Profile_Picture"]) ?>" alt="">
+        <img class="profile-picture" src="<?= BASE_URL ?>/file/user-files/<?= urlencode($user["Profile_Picture"]) ?>" alt="">
 
     </div>
 
@@ -59,7 +62,7 @@
 
         <h4 class="provider-subtitle">NIC Front</h4>
 
-        <img class="profile-picture" src="/file/user-files/<?= urlencode($user["NIC_Front"]) ?>" alt="">
+        <img class="profile-picture" src="<?= BASE_URL ?>/file/user-files/<?= urlencode($user["NIC_Front"]) ?>" alt="">
 
     </div>
 
@@ -67,7 +70,7 @@
 
         <h4 class="provider-subtitle">NIC Back</h4>
 
-        <img class="profile-picture" src="/file/user-files/<?= urlencode($user["NIC_Back"]) ?>" alt="">
+        <img class="profile-picture" src="<?= BASE_URL ?>/file/user-files/<?= urlencode($user["NIC_Back"]) ?>" alt="">
 
     </div>
 
@@ -80,7 +83,7 @@ if ($user["Resume"] != '') {
     <div class="container" style="margin-bottom: 25px;">
         <h4 class="provider-subtitle">Resume</h4>
 
-        <iframe src="/file/user-files/<?= urlencode($user["Resume"]) ?>"
+        <iframe src="<?= BASE_URL ?>/file/user-files/<?= rawurlencode($user["Resume"]) ?>"
             width="100%"
             height="600px"
             style="border:none;">
@@ -95,10 +98,12 @@ if ($user["Resume"] != '') {
 
 <h3 class="provider-title">Service Areas</h3>
 
+<?php foreach ($user['Categories'] as $Category): ?>
+
 <div id="service-card-wrapper">
 
     <div class="search-item">
-        <div class="status-badge status-active">Graphic Design</div>
+        <div class="status-badge status-active"><?= htmlspecialchars($Category['Category_Type']) ?></div>
 
         <div class="post-header">
             <div class="post-meta">
@@ -109,18 +114,18 @@ if ($user["Resume"] != '') {
             </div>
         </div>
 
-        <h3 class="post-title">Graphic Design</h3>
+        <h3 class="post-title"><?= htmlspecialchars($Category['Title']) ?></h3>
 
         <div class="post-description">
-            Skilled in creating visually engaging designs for digital and print media using tools like Adobe Photoshop, Illustrator, and Canva. Experienced in developing creative visuals and layouts that enhance brand identity and user engagement.
+            <?= htmlspecialchars($Category['Description']) ?>
         </div>
 
         <div class="post-skills">
             <span class="skills-label">Skills:</span>
             <div class="skills-tags">
-                <span class="skill-tag">Photoshop</span>
-                <span class="skill-tag">Ilustrator</span>
-                <span class="skill-tag">Canva</span>
+                <?php foreach ($Category['Skills'] as $Skill): ?>
+                <span class="skill-tag"><?= $Skill ?></span>
+                <?php endforeach; ?>
             </div>
         </div>
 
@@ -129,7 +134,7 @@ if ($user["Resume"] != '') {
                 <div class="detail-item">
                     <span class="detail-label">
                         <i class="fa-solid fa-circle-dollar"></i>
-                        Rs. 1200.00 / hr
+                        Rs. <?= number_format($Category['Default_Price'], 2) ?> / hr
                     </span>
                 </div>
             </div>
@@ -138,17 +143,16 @@ if ($user["Resume"] != '') {
         <div class="engagement-stats">
             <div class="stat-item">
                 <i class="fas fa-location-pin"></i>
-                All Districts
-                <?php
-                // join(", ", json_decode($_SESSION["register"]["locations"][$key])) 
-                ?>
+                <?= formatLocations($Category['Locations']) ?>
             </div>
         </div>
 
     </div>
 
-
 </div>
+
+<?php endforeach; ?>
+
 
 <form action="./Providers/provider-review" method="post">
 
