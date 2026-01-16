@@ -8,10 +8,7 @@
     <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/serviceProjects.css">
     
-    
     <script src="<?= BASE_URL ?>/assets/js/cardList.js" defer></script>
-    
-    <title>Service Requests & Projects</title>
 </head>
 
 <body>
@@ -49,17 +46,20 @@
             </div>
         </div>
         <div class="request-content">
+            <!-- Pending Requests Section -->
             <div class="pending-requests active requests-section" id="section-pending">
                 <p class="section-note">Requests you sent to providers after reviewing proposals. Awaiting provider
                     acceptance or action.</p>
                 <div class="item-list">
+
+                    <?php foreach ($pendingRequestProjects as $request): ?>
                     <div class="search-item" data-status="awaiting">
                         <div class="item-head">
                             <div class="item-main-dets">
-                                <div class="item-name">Chethiya Bandara</div>
-                                <div class="item-title">Social Media Post Series (8 graphics)</div>
+                                <div class="item-name"><?= htmlspecialchars($request['provider']); ?></div>
+                                <div class="item-title"><?= htmlspecialchars($request['title']); ?></div>
                                 <div class="item-district">
-                                    <span>Sent 15 Jul 2025 | 17:55</span>
+                                    <span>Sent <?= htmlspecialchars($request['sentDate']); ?></span>
                                 </div>
                             </div>
                             <div class="button">
@@ -72,12 +72,12 @@
                             </div>
                         </div>
                         <div class="item-middle">
-                            <div><i class="fa-regular fa-tag"></i> Proposed: $40/hr</div>
+                            <div><i class="fa-regular fa-tag"></i> Proposed: <?= htmlspecialchars($request['proposedRate']); ?></div>
                         </div>
-                        <div class="item-description">Awaiting provider confirmation for design of 8 event/class
-                            promotional posts using provided branding.</div>
-                        <div class="status-bottom"><span class="status-chip status-awaiting">Direct Request</span></div>
+                        <div class="item-description"><?= htmlspecialchars($request['description']); ?></div>
+                        <div class="status-bottom"><span class="status-chip status-awaiting"><?= htmlspecialchars($request['status']); ?></span></div>
                     </div>
+                    <?php endforeach; ?>
 
                 </div>
                 <div class="pagination" aria-label="Pending Requests Pagination">
@@ -88,18 +88,21 @@
                     <button class="page-btn next"><i class="fa-regular fa-chevron-right"></i></button>
                 </div>
             </div>
+            <!-- Completed Projects Section -->
             <div class="completed-jobs requests-section" id="section-completed">
                 <p class="section-note">Fully completed and confirmed projects. You can review and reference past work
                     here.</p>
                 <div class="item-list">
+
+                    <?php foreach ($completedProjects as $project): ?>
                     <div class="search-item" data-status="complete">
                         <div class="item-head">
                             <div class="item-main-dets">
-                                <div class="item-title">Landing Page Copy Refresh</div>
+                                <div class="item-title"><?= htmlspecialchars($project['title']); ?></div>
                                 <div class="item-district">
-                                    <span>Completed 01 Aug 2025</span>
-                                    <span>Total Paid: $750</span>
-                                    <span>Duration: 9d</span>
+                                    <span><?= htmlspecialchars($project['completedDate']); ?></span>
+                                    <span>Total Paid: <?= htmlspecialchars($project['totalPaid']); ?></span>
+                                    <span>Duration: <?= htmlspecialchars($project['duration']); ?></span>
                                 </div>
                             </div>
                             <div class="button">
@@ -107,11 +110,11 @@
                                 <button class="btn-primary"><i class="fa-regular fa-stars"></i> Review</button>
                             </div>
                         </div>
-                        <div class="item-description">Delivered updated hero, feature blurbs and pricing copy focused on
-                            conversion uplift.</div>
+                        <div class="item-description"><?= htmlspecialchars($project['description']); ?></div>
                         <div class="status-bottom"><span class="status-chip status-complete"><i
                                     class="fa-regular fa-circle-check"></i> Completed</span></div>
                     </div>
+                    <?php endforeach; ?>
 
                 </div>
                 <div class="pagination" aria-label="Completed Jobs Pagination">
@@ -127,13 +130,18 @@
                 <p class="section-note">Providers marked these as finished. Review deliverables and release payment or
                     request changes.</p>
                 <div class="item-list">
+
+                    <?php
+                    ?>
+
+                    <?php foreach ($pendingReviewProjects as $project): ?>
                     <div class="search-item" data-status="review">
                         <div class="item-head">
                             <div class="item-main-dets">
-                                <div class="item-title">API Integration Phase 1</div>
+                                <div class="item-title"><?php echo htmlspecialchars($project['title']); ?></div>
                                 <div class="item-district">
-                                    <span>Submitted 03 Aug 2025</span>
-                                    <span>Milestone: $1,200</span>
+                                    <span>Submitted <?php echo htmlspecialchars($project['submittedDate']); ?></span>
+                                    <span>Milestone: <?php echo htmlspecialchars($project['milestoneAmount']); ?></span>
                                 </div>
                             </div>
                             <div class="button">
@@ -143,11 +151,11 @@
                                 <button class="btn-outline"><i class="fa-regular fa-messages"></i> Message</button>
                             </div>
                         </div>
-                        <div class="item-description">OAuth, invoice and billing endpoints integrated. Validate callback
-                            handling before release.</div>
+                        <div class="item-description"><?php echo htmlspecialchars($project['description']); ?></div>
                         <div class="status-bottom"><span class="status-chip status-review"><i
                                     class="fa-regular fa-clipboard-check"></i> Pending Review</span></div>
                     </div>
+                    <?php endforeach; ?>
 
                 </div>
                 <div class="pagination" aria-label="Pending Review Pagination">
@@ -158,18 +166,20 @@
                     <button class="page-btn next"><i class="fa-regular fa-chevron-right"></i></button>
                 </div>
             </div>
+            <!-- Approved Requests Section -->
             <div class="in-progress-requests requests-section" id="section-progress">
                 <p class="section-note">Approved requests with providers. Fund milestones, communicate, or mark work
-                    ready for
-                    review.</p>
+                    ready for review.</p>
                 <div class="item-list">
+
+                    <?php foreach ($approvedRequestProjects as $project): ?>
                     <div class="search-item" data-status="progress">
                         <div class="item-head">
                             <div class="item-main-dets">
-                                <div class="item-title">3D Asset Pack Creation</div>
+                                <div class="item-title"><?= htmlspecialchars($project['title']); ?></div>
                                 <div class="item-district">
-                                    <span>Started 15 Aug 2025</span>
-                                    <span>Hourly: $90</span>
+                                    <span>Started <?= htmlspecialchars($project['startedDate']); ?></span>
+                                    <span>Hourly: <?= htmlspecialchars($project['hourlyRate']); ?></span>
                                 </div>
                             </div>
                             <div class="button">
@@ -179,12 +189,13 @@
                             </div>
                         </div>
                         <div class="item-middle">
-                            <div><i class="fa-regular fa-hourglass"></i> Estimated Time 6d</div>
+                            <div><i class="fa-regular fa-hourglass"></i> Estimated Time <?= htmlspecialchars($project['estimatedTime']); ?></div>
                         </div>
-                        <div class="item-description">Creating 15 optimized low‑poly environment props for prototype.
+                        <div class="item-description"><?= htmlspecialchars($project['description']); ?>
                         </div>
-                        <div class="status-bottom"><span class="status-chip status-progress">bid request</span></div>
+                        <div class="status-bottom"><span class="status-chip status-progress"><?= htmlspecialchars($project['status']); ?></span></div>
                     </div>
+                    <?php endforeach; ?>
 
                 </div>
                 <div class="pagination" aria-label="Approved Requests Pagination">
@@ -196,18 +207,20 @@
                 </div>
             </div>
 
+            <!-- Ongoing Projects Section -->
             <div class="ongoing-projects requests-section" id="section-progress">
                 <p class="section-note">Approved requests with providers. Fund milestones, communicate, or mark work
-                    ready for
-                    review.</p>
+                    ready for review.</p>
                 <div class="item-list">
+
+                    <?php foreach ($ongoingProjects as $project): ?>
                     <div class="search-item" data-status="progress">
                         <div class="item-head">
                             <div class="item-main-dets">
-                                <div class="item-title">3D Asset Pack Creation</div>
+                                <div class="item-title"><?= htmlspecialchars($project['title']); ?></div>
                                 <div class="item-district">
-                                    <span>Started 15 Aug 2025</span>
-                                    <span>Hourly: $90</span>
+                                    <span>Started <?= htmlspecialchars($project['startedDate']); ?></span>
+                                    <span>Hourly: <?= htmlspecialchars($project['hourlyRate']); ?></span>
                                 </div>
                             </div>
                             <div class="button">
@@ -217,16 +230,17 @@
                             </div>
                         </div>
                         <div class="item-middle">
-                            <div><i class="fa-regular fa-hourglass"></i> ETA 6d</div>
+                            <div><i class="fa-regular fa-hourglass"></i> ETA <?= htmlspecialchars($project['estimatedTime']); ?></div>
                         </div>
                         <div class="progress-container" aria-label="Project progress">
-                            <div class="progress-label">Progress: <span class="progress-percent">0%</span> <span class="progress-detail" style="color:#64748b;">(0h of 0h)</span></div>
+                            <div class="progress-label">Progress: <span class="progress-percent"><?= htmlspecialchars($project['progress']); ?>%</span> <span class="progress-detail" style="color:#64748b;">(0h of 0h)</span></div>
                             <div class="progress-track"><div class="progress-fill"></div></div>
                         </div>
-                        <div class="item-description">Creating 15 optimized low‑poly environment props for prototype.
+                        <div class="item-description"><?= htmlspecialchars($project['description']); ?>
                         </div>
-                        <div class="status-bottom"><span class="status-chip status-progress">Direct Request</span></div>
+                        <div class="status-bottom"><span class="status-chip status-progress"><?= htmlspecialchars($project['status']); ?></span></div>
                     </div>
+                    <?php endforeach; ?>
 
                 </div>
                 <div class="pagination" aria-label="Approved Requests Pagination">
@@ -267,25 +281,25 @@
                         </div>
                         <ul class="filter-options radios">
                             <li><input type="radio" name="success" id="success" checked>Any success rate</li>
-                            <li><input type="radio" name="success" id="success">90% & up</li>
-                            <li><input type="radio" name="success" id="success">80% & up</li>
-                            <li><input type="radio" name="success" id="success">70% & up</li>
-                            <li><input type="radio" name="success" id="success">Less than 70%</li>
+                            <li><input type="radio" name="success" id="success">85% & up</li>
+                            <li><input type="radio" name="success" id="success">75% & up</li>
+                            <li><input type="radio" name="success" id="success">65% & up</li>
+                            <li><input type="radio" name="success" id="success">50% & up</li>
                         </ul>
                     </div>
-                    <div class="filter-item">
+                    <!-- <div class="filter-item">
                         <div class="filter-title"><span>Total Earnings</span><i class="fa-light fa-chevron-down"></i>
                         </div>
                         <ul class="filter-options radios">
                             <li><input type="radio" name="earnings" id="earnings" checked>Any amount earned</li>
-                            <li><input type="radio" name="earnings" id="earnings">$1+ earned</li>
+                            <li><input type="radio" name="earnings" id="earnings">$25+ earned</li>
                             <li><input type="radio" name="earnings" id="earnings">$100+ earned</li>
-                            <li><input type="radio" name="earnings" id="earnings">$1K+ earned</li>
-                            <li><input type="radio" name="earnings" id="earnings">$10K+ earned</li>
+                            <li><input type="radio" name="earnings" id="earnings">$250+ earned</li>
+                            <li><input type="radio" name="earnings" id="earnings">$1000+ earned</li>
                             <li><input type="radio" name="earnings" id="earnings">No earnings yet</li>
                         </ul>
-                    </div>
-                    <div class="filter-item">
+                    </div> -->
+                    <!-- <div class="filter-item">
                         <div class="filter-title"><span>Language</span><i class="fa-light fa-chevron-down"></i></div>
                         <ul class="filter-options checkboxes">
                             <li><input type="checkbox" name="language" id="language" checked>English</li>
@@ -293,7 +307,7 @@
                             <li><input type="checkbox" name="language" id="language">Tamil</li>
                             <li><input type="checkbox" name="language" id="language">Other</li>
                         </ul>
-                    </div>
+                    </div> -->
                 </div>
 
             </div>
@@ -352,7 +366,9 @@
     <div class="pop-up-section confirm-modal deactive" id="confirmCancelRoot">
         <div class="pop-up" id="confirmCancel">
             <div class="pop-up-header" style="display:flex; align-items:center; justify-content:space-between;">
-                <div class="pop-up-title">Confirm Cancel</div>
+                <div class="pop-up-title">
+                    Confirm Cancel
+                </div>
                 <i class="fa-light fa-xmark" id="confirmCancelClose" style="cursor:pointer;"></i>
             </div>
             <hr>
@@ -407,28 +423,46 @@
         const reqDescription = document.getElementById('reqDescription');
         const reqPrice = document.getElementById('reqPrice');
         const reqDate = document.getElementById('reqDate');
-    const modalProgressSection = document.getElementById('modalProgressSection');
-    const modalProgressFill = document.getElementById('modalProgressFill');
-    const modalProgressPercent = document.getElementById('modalProgressPercent');
-    const modalProgressDetail = document.getElementById('modalProgressDetail');
-    const modalRemarksSection = document.getElementById('modalRemarksSection');
-    const reqRemarks = document.getElementById('reqRemarks');
+        const modalProgressSection = document.getElementById('modalProgressSection');
+        const modalProgressFill = document.getElementById('modalProgressFill');
+        const modalProgressPercent = document.getElementById('modalProgressPercent');
+        const modalProgressDetail = document.getElementById('modalProgressDetail');
+        const modalRemarksSection = document.getElementById('modalRemarksSection');
+        const reqRemarks = document.getElementById('reqRemarks');
 
-        function openModal() { root.classList.remove('deactive'); root.classList.add('active'); document.body.style.overflow = 'hidden'; }
-        function closeModal() { root.classList.remove('active'); root.classList.add('deactive'); document.body.style.overflow = ''; }
+    function openModal() {
+        root.classList.remove('deactive');
+        root.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
 
-        function extractText(el, selector) {
-            const node = el.querySelector(selector);
-            return node ? node.textContent.trim() : '';
-        }
+    function closeModal() {
+        root.classList.remove('active');
+        root.classList.add('deactive');
+        document.body.style.overflow = '';
+    }
+
+    function extractText(el, selector) {
+        const node = el.querySelector(selector);
+        return node ? node.textContent.trim() : '';
+    }
 
     const confirmRoot = document.getElementById('confirmCancelRoot');
-        const confirmClose = document.getElementById('confirmCancelClose');
-        const btnKeep = document.getElementById('btnKeep');
-        const btnConfirmCancel = document.getElementById('btnConfirmCancel');
+    const confirmClose = document.getElementById('confirmCancelClose');
+    const btnKeep = document.getElementById('btnKeep');
+    const btnConfirmCancel = document.getElementById('btnConfirmCancel');
 
-    function openConfirm() { confirmRoot.classList.remove('deactive'); confirmRoot.classList.add('active'); document.body.style.overflow = 'hidden'; }
-    function closeConfirm() { confirmRoot.classList.remove('active'); confirmRoot.classList.add('deactive'); document.body.style.overflow = ''; }
+    function openConfirm() {
+        confirmRoot.classList.remove('deactive');
+        confirmRoot.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeConfirm() {
+        confirmRoot.classList.remove('active');
+        confirmRoot.classList.add('deactive');
+        document.body.style.overflow = '';
+    }
 
     // Request Changes modal helpers
     const reqChangesRoot = document.getElementById('requestChangesRoot');

@@ -43,7 +43,6 @@
                 
             </div>
 
-
             <div class="container-changer">
                 <div id="pending-payments" class="buttons active">Pending Payments</div>
                 <div id="completed-payments" class="buttons">Completed Payments</div>

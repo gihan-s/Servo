@@ -39,479 +39,301 @@ if (!function_exists('str_snippet')) {
             <div class="header-top" style="display:flex; justify-content: space-between; align-items: center;">
                 <h1>My Service Requests</h1>
 
-            </div>
-            <div class="search-header">
-                <div class="search-button">
-                    <input type="text" placeholder="Search my service requests...">
-                    <button><i class="fa-light fa-magnifying-glass"></i></button>
-                </div>
-                <button class="filter" id="filter-pop-up"><i
-                        class="fa-light fa-filter-list"></i><span>Filter</span></button>
-                <div class="advance-search">
-                    <div class="sort-selection">
-                        <div class="selection-input-field">
-                            <input type="selection-input" id="selection-input" name="sort" value="Sort By Relevence"
-                                disabled><i class="fa-light fa-chevron-down"></i>
-                        </div>
-                        <div class="selection-options" id="selection-options">
-                            <div class="opt">Sort By Relevence</div>
-                            <div class="opt">Sort By Price</div>
-                            <div class="opt">Sort By Rating</div>
-                        </div>
-                    </div>
-                    <button type="button" class="post-job-btn" id="create-post-pop-up"><i
-                            class="fa-regular fa-plus"></i> Create Request</button>
-                </div>
-
+                <button type="button" class="post-job-btn" onclick="openCreateForm('create-post-popup')"><i
+                        class="fa-regular fa-plus"></i>
+                    Create Request</button>
             </div>
 
-
-            <div class="container-changer">
-                <div class="tab-buttons">
-                    <div id="active-posts" class="buttons active">Active Requests</div>
-                    <div id="draft-posts" class="buttons">Draft Requests</div>
-                    <div id="expired-posts" class="buttons">Expired Requests</div>
-                </div>
+        </div>
+        <div class="container-changer">
+            <div class="tab-buttons">
+                <div id="active-posts" class="buttons active">Active Requests</div>
+                <div id="draft-posts" class="buttons">Draft Requests</div>
+                <div id="expired-posts" class="buttons">Expired Requests</div>
             </div>
         </div>
-
         <div class="request-content">
+            <div class="search-header">
+
+                <div class="search-button">
+                    <input type="text" id="searchInput" placeholder="Search my service requests...">
+                    <button><i class="fa-light fa-magnifying-glass"></i></button>
+                </div>
+                <button class="filter" id="filter-pop-up"><i class="fa-light fa-filter-list"
+                        onclick="window.showSuccessToast('Test','Test Message')"></i><span>filter</span></button>
+
+                <div class="advance-search">
+                    <span>Sort By: </span>
+                    <div class="select-container" style="width: 150px;">
+
+                        <div class="text-container">
+                            <div class="label dropdown-label" style="visibility: hidden;"></div>
+                            <input type="text" id="sortDropdown" class="text-field-dropdown"
+                                style="padding: 10px; background-color: var(--containerColor);" value="Date (Newest)" readonly>
+                        </div>
+
+                        <div class="options" id="sortOptions" style='max-height:none;'>
+                            <div data-sort="date_desc">Date (Newest)</div>
+                            <div data-sort="date_asc">Date (Oldest)</div>
+                            <div data-sort="price_desc">Price (High)</div>
+                            <div data-sort="price_asc">Price (Low)</div>
+                            <div data-sort="views_desc">Views (Most)</div>
+                            <div data-sort="views_asc">Views (Least)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <!-- ACTIVE REQUESTS SECTION -->
             <div class="active-posts active requests-section">
                 <div class="item-list">
-                    <?php if (empty($data['activePosts'])): ?>
-                        <section class="empty-state" aria-label="No posts">
-                            <!-- ...illustration... -->
-                            <h2>No active requests right now</h2>
-                            <p>Check back soon or refresh to see new requests.</p>
-                            <div class="empty-actions">
-                                <a class="btn primary" href="<?= BASE_URL ?>/feeds"
-                                    onclick="location.reload(); return false;">
-                                    <i class="fa-regular fa-rotate" style="font-size:25px"></i> Refresh
-                                </a>
-                            </div>
-                        </section>
-                    <?php else: ?>
-                        <?php foreach ($data['activePosts'] as $row): ?>
-                            <?php
-                            if (!is_array($row) || !isset($row['post']) || !is_array($row['post'])) {
-                                continue;
-                            }
-                            $p = $row['post'];
-                            $Published_At = $p['Published_At'] ?? null;
-                            $daysPassed = 0;
-                            if ($Published_At) {
-                                try {
-                                    $tz = new DateTimeZone('Asia/Colombo');
-                                    $created = new DateTime($Published_At, $tz);
-                                    $now = new DateTime('now', $tz);
-                                    $daysPassed = $now->diff($created)->days;
-                                } catch (Throwable $e) {
-                                    $daysPassed = 0;
-                                }
-                            }
-                            ?>
-                            <div class="search-item">
-                                <input type="hidden" class="post-id" value="<?= htmlspecialchars($p['Post_ID'] ?? '') ?>">
-                                <div class="post-header">
-                                    <div class="post-meta">
-                                        <div class="post-date">
-                                            <i class="fas fa-calendar"></i>
-                                            <span>
-                                                <?php if ($daysPassed >= 365) {
-                                                    $years = floor($daysPassed / 365);
-                                                    echo "Published " . $years . ($years === 1 ? " year" : " years") . " ago.";
-                                                } else if ($daysPassed >= 30) {
-                                                    $months = floor($daysPassed / 30);
-                                                    echo "Published " . $months . ($months === 1 ? " month" : " months") . " ago.";
-                                                } else if ($daysPassed >= 7) {
-                                                    $weeks = floor($daysPassed / 7);
-                                                    echo "Published " . $weeks . ($weeks === 1 ? " week" : " weeks") . " ago.";
-                                                } else if ($daysPassed > 1) {
-                                                    echo "Published " . $daysPassed . " days ago.";
-                                                } else if ($daysPassed == 0) {
-                                                    echo "Published Today";
-                                                } else {
-                                                    echo "Published Yesterday";
-                                                } ?>
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="post-actions">
-                                        <button class="action-btn btn-edit" onclick="editPost(<?= (int) $p['Post_ID'] ?>)"><i
-                                                class="fas fa-edit"></i>
-                                            Edit</button>
-                                        <button class="action-btn btn-view" onclick="viewPost(<?= (int) $p['Post_ID'] ?>)"><i
-                                                class="fas fa-eye"></i> View</button>
-                                        <button class="action-btn btn-delete"><i class="fas fa-trash"
-                                                onclick="window.location='<?= BASE_URL ?>/requests/delete/<?= (int) $p['Post_ID'] ?>'"></i>
-                                            Delete</button>
-                                    </div>
-                                </div>
-
-                                <h3 class="post-title"><?= htmlspecialchars($p['Title'] ?? '') ?></h3>
-
-                                <div class="post-description">
-                                    <?php
-                                    $desc = (string) ($p['Description'] ?? '');
-                                    $plain = trim(preg_replace('/\s+/', ' ', strip_tags($desc)));
-                                    $snippet = str_snippet($plain, 300, '…'); // limit to ~160 chars
-                                    ?>
-                                    <?= htmlspecialchars($snippet, ENT_QUOTES, 'UTF-8') ?>
-                                </div>
-
-                                <div class="post-skills">
-                                    <span class="skills-label">Required Skills:</span>
-                                    <div class="skills-tags">
-                                        <?php
-                                        if (!empty($row['skills'])) {
-                                            foreach ($row['skills'] as $skill): ?>
-                                                <span class="skill-tag"><?= htmlspecialchars($skill) ?></span>
-                                            <?php endforeach;
-                                        } else { ?>
-                                            <span class="">---No skills specified---</span>
-                                        <?php } ?>
-                                    </div>
-                                </div>
-
-                                <div class="post-footer">
-                                    <div class="post-details">
-                                        <div class="detail-item">
-                                            <span class="detail-label">Budget</span>
-                                            <span class="detail-value budget-amount">LKR
-                                                <?= htmlspecialchars($p['Requesting_Price'] ?? '') ?>/=
-                                                (<?= htmlspecialchars($p['Price_Type'] ?? '') ?>)</span>
-                                        </div>
-                                        <div class="detail-item">
-                                            <span class="detail-label">Proposals Received</span>
-                                            <span
-                                                class="detail-value proposals-count"><?= htmlspecialchars($p['Proposal_Count'] ?? '0') ?></span>
-                                        </div>
-                                        <div class="detail-item">
-                                            <span class="detail-label">Level</span>
-                                            <span
-                                                class="detail-value project-level"><?= htmlspecialchars($p['Level'] ?? '') ?></span>
-                                        </div>
-                                        <div class="detail-item">
-                                            <span class="detail-label">Duration</span>
-                                            <span
-                                                class="detail-value project-duration"><?= htmlspecialchars($p['Duration'] ?? '') ?></span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="engagement-stats">
-                                    <div class="stat-item"><i class="fas fa-eye"></i><span>156 views</span></div>
-                                    <div class="stat-item"><i class="fas fa-clock"></i>
-                                        <span>
-                                            <?php
-                                            if (!is_array($row) || !isset($row['post']) || !is_array($row['post'])) {
-                                                continue;
-                                            }
-                                            $p = $row['post'];
-                                            $End_At = $p['End_At'] ?? null;
-                                            $daysLeft = 0;
-                                            if ($End_At) {
-                                                try {
-                                                    $tz = new DateTimeZone('Asia/Colombo');
-                                                    $created = new DateTime($End_At, $tz);
-                                                    $now = new DateTime('now', $tz);
-                                                    $daysLeft = $created->diff($now)->days;
-                                                } catch (Throwable $e) {
-                                                    $daysLeft = 0;
-                                                }
-                                            }
-                                            ?>
-                                            <?= $daysLeft ?> days left</span>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-
-                        <!-- Pagination Active -->
-                        <div class="pagination" aria-label="Pagination Active Requests">
-                            <button class="page-btn prev" disabled><i class="fa-regular fa-chevron-left"></i></button>
-                            <button class="page-btn active">1</button>
-                            <button class="page-btn">2</button>
-                            <button class="page-btn">3</button>
-                            <button class="page-btn next"><i class="fa-regular fa-chevron-right"></i></button>
-                        </div>
-                    <?php endif; ?>
                 </div>
             </div>
 
             <!-- DRAFT REQUESTS SECTION -->
             <div class="draft-posts requests-section draft-section" style="display: none;">
                 <div class="item-list">
-                    <?php if (empty($data['draftPosts'])): ?>
-                        <section class="empty-state" aria-label="No draft requests">
-                            <!-- ...illustration... -->
-                            <h2>No draft requests right now</h2>
-                            <p>Create drafts to save your job requests and publish them later.</p>
-                            <div class="empty-actions">
-                                <a class="btn primary" href="<?= BASE_URL ?>/requests/create">
-                                    <i class="fa-regular fa-plus" style="font-size:25px"></i> Create Draft
-                                </a>
-                            </div>
-                        </section>
-                    <?php else: ?>
-                        <?php foreach ($data['draftPosts'] as $row): ?>
-                            <?php
-                            if (!is_array($row) || !isset($row['post']) || !is_array($row['post'])) {
-                                continue;
-                            }
-                            $p = $row['post'];
-                            $Created_At = $p['Created_At'] ?? null;
-                            $daysPassed = 0;
-                            if ($Created_At) {
-                                try {
-                                    $tz = new DateTimeZone('Asia/Colombo');
-                                    $created = new DateTime($Created_At, $tz);
-                                    $now = new DateTime('now', $tz);
-                                    $daysPassed = $now->diff($created)->days;
-                                } catch (Throwable $e) {
-                                    $daysPassed = 0;
-                                }
-                            }
-                            ?>
-
-                            <div class="search-item">
-                                <input type="hidden" class="post-id" value="<?= htmlspecialchars($p['Post_ID'] ?? '') ?>">
-                                <div class="post-header">
-                                    <div class="post-meta">
-                                        <div class="post-date">
-                                            <i class="fas fa-calendar"></i>
-                                            <span>
-                                                <?php if ($daysPassed > 1) {
-                                                    echo "Created " . $daysPassed . " days ago.";
-                                                } else if ($daysPassed == 0) {
-                                                    echo "Created Today";
-                                                } else {
-                                                    echo "Created Yesterday";
-                                                } ?>
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="post-actions">
-                                        <button class="action-btn btn-edit">
-                                            <i class="fas fa-edit"></i>
-                                            Continue
-                                        </button>
-                                        <button class="action-btn btn-view">
-                                            <i class="fas fa-rocket"></i>
-                                            Publish
-                                        </button>
-                                        <button class="action-btn btn-delete">
-                                            <i class="fas fa-trash"></i>
-                                            Delete
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <h3 class="post-title"><?= htmlspecialchars($p['Title'] ?? '') ?></h3>
-
-                                <div class="post-description">
-                                    <?php
-                                    $desc = (string) ($p['Description'] ?? '');
-                                    $plain = trim(preg_replace('/\s+/', ' ', strip_tags($desc)));
-                                    $snippet = str_snippet($plain, 160, '…'); // limit to ~160 chars
-                                    ?>
-                                    <?= htmlspecialchars($snippet, ENT_QUOTES, 'UTF-8') ?>
-                                </div>
-
-                                <div class="post-skills">
-                                    <span class="skills-label">Required Skills:</span>
-                                    <div class="skills-tags">
-                                        <?php
-                                        if (!empty($row['skills'])) {
-                                            foreach ($row['skills'] as $skill): ?>
-                                                <span class="skill-tag"><?= htmlspecialchars($skill) ?></span>
-                                            <?php endforeach;
-                                        } else { ?>
-                                            <span class="">---No skills specified---</span>
-                                        <?php } ?>
-                                    </div>
-                                </div>
-
-                                <div class="post-footer">
-                                    <div class="post-details">
-                                        <div class="detail-item">
-                                            <span class="detail-label">Budget</span>
-                                            <span class="detail-value budget-amount">LKR
-                                                <?= htmlspecialchars($p['Requesting_Price'] ?? '') ?>/=
-                                                (<?= htmlspecialchars($p['Price_Type'] ?? '') ?>)</span>
-                                        </div>
-                                        <div class="detail-item">
-                                            <span class="detail-label">Proposals Received</span>
-                                            <span
-                                                class="detail-value proposals-count"><?= htmlspecialchars($p['Proposal_Count'] ?? '0') ?></span>
-                                        </div>
-                                        <div class="detail-item">
-                                            <span class="detail-label">Level</span>
-                                            <span
-                                                class="detail-value project-level"><?= htmlspecialchars($p['Level'] ?? '') ?></span>
-                                        </div>
-                                        <div class="detail-item">
-                                            <span class="detail-label">Duration</span>
-                                            <span
-                                                class="detail-value project-duration"><?= htmlspecialchars($p['Duration'] ?? '') ?></span>
-                                        </div>
-                                    </div>
-                                </div>
-
-
-                            </div>
-                        <?php endforeach; ?>
-
-                        <!-- Pagination Draft -->
-                        <div class="pagination" aria-label="Pagination Draft Requests">
-                            <button class="page-btn prev" disabled><i class="fa-regular fa-chevron-left"></i></button>
-                            <button class="page-btn active">1</button>
-                            <button class="page-btn">2</button>
-                            <button class="page-btn">3</button>
-                            <button class="page-btn next"><i class="fa-regular fa-chevron-right"></i></button>
-                        </div>
-                    <?php endif; ?>
                 </div>
             </div>
 
             <!-- EXPIRED REQUESTS SECTION -->
             <div class="expired-posts requests-section expired-section" style="display: none;">
                 <div class="item-list">
-                    <?php if (empty($data['expiredPosts'])): ?>
-                        <section class="empty-state" aria-label="No expired requests">
-                            <!-- ...illustration... -->
-                            <h2>No expired requests right now</h2>
-                            <p>Your expired requests will appear here. You can repost them anytime.</p>
-                        </section>
-                    <?php else: ?>
-                        <?php foreach ($data['expiredPosts'] as $row): ?>
-                            <?php
-                            if (!is_array($row) || !isset($row['post']) || !is_array($row['post'])) {
-                                continue;
-                            }
-                            $p = $row['post'];
-                            $Expired_At = $p['End_At'] ?? null;
-                            $daysPassed = 0;
-                            if ($Expired_At) {
-                                try {
-                                    $tz = new DateTimeZone('Asia/Colombo');
-                                    $expired = new DateTime($Expired_At, $tz);
-                                    $now = new DateTime('now', $tz);
-                                    $daysPassed = $now->diff($expired)->days;
-                                } catch (Throwable $e) {
-                                    $daysPassed = 0;
-                                }
-                            }
-                            ?>
-                            <div class="search-item">
-                                <input type="hidden" class="post-id" value="<?= htmlspecialchars($p['Post_ID'] ?? '') ?>">
-                                <div class="post-header">
-                                    <div class="post-meta">
-                                        <div class="post-date">
-                                            <i class="fas fa-calendar"></i>
-                                            <span>
-                                                <?php if ($daysPassed > 1) {
-                                                    echo "Expired " . $daysPassed . " days ago.";
-                                                } else if ($daysPassed == 0) {
-                                                    echo "Expired Today";
-                                                } else {
-                                                    echo "Expired Yesterday";
-                                                } ?>
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="post-actions">
-                                        <button class="action-btn btn-view">
-                                            <i class="fas fa-eye"></i>
-                                            View
-                                        </button>
-                                        <button class="action-btn btn-edit">
-                                            <i class="fas fa-redo"></i>
-                                            Repost
-                                        </button>
-                                        <button class="action-btn btn-delete">
-                                            <i class="fas fa-trash"></i>
-                                            Delete
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <h3 class="post-title"><?= htmlspecialchars($p['Title'] ?? '') ?></h3>
-
-                                <div class="post-description">
-                                    <?php
-                                    $desc = (string) ($p['Description'] ?? '');
-                                    $plain = trim(preg_replace('/\s+/', ' ', strip_tags($desc)));
-                                    $snippet = str_snippet($plain, 160, '…'); // limit to ~160 chars
-                                    ?>
-                                    <?= htmlspecialchars($snippet, ENT_QUOTES, 'UTF-8') ?>
-                                </div>
-
-                                <div class="post-skills">
-                                    <span class="skills-label">Required Skills:</span>
-                                    <div class="skills-tags">
-                                        <?php
-                                        if (!empty($row['skills'])) {
-                                            foreach ($row['skills'] as $skill): ?>
-                                                <span class="skill-tag"><?= htmlspecialchars($skill) ?></span>
-                                            <?php endforeach;
-                                        } else { ?>
-                                            <span class="">---No skills specified---</span>
-                                        <?php } ?>
-                                    </div>
-                                </div>
-
-                                <div class="post-footer">
-                                    <div class="post-details">
-                                        <div class="detail-item">
-                                            <span class="detail-label">Budget</span>
-                                            <span class="detail-value budget-amount">LKR
-                                                <?= htmlspecialchars($p['Requesting_Price'] ?? '') ?>/=
-                                                (<?= htmlspecialchars($p['Price_Type'] ?? '') ?>)</span>
-                                        </div>
-                                        <div class="detail-item">
-                                            <span class="detail-label">Final Proposals</span>
-                                            <span
-                                                class="detail-value proposals-count"><?= htmlspecialchars($p['ProposalsCount'] ?? 0) ?></span>
-                                        </div>
-                                        <div class="detail-item">
-                                            <span class="detail-label">Duration</span>
-                                            <span
-                                                class="detail-value project-duration"><?= htmlspecialchars($p['Duration'] ?? '') . ' ' . htmlspecialchars($p['Duration_Type'] ?? '') ?></span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="engagement-stats">
-                                    <div class="stat-item">
-                                        <i class="fas fa-eye"></i>
-                                        <span>198 views</span>
-                                    </div>
-                                    <div class="stat-item">
-                                        <i class="fas fa-clock"></i>
-                                        <span>Expired</span>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-
-                        <!-- Pagination Expired -->
-                        <div class="pagination" aria-label="Pagination Expired Requests">
-                            <button class="page-btn prev" disabled><i class="fa-regular fa-chevron-left"></i></button>
-                            <button class="page-btn active">1</button>
-                            <button class="page-btn">2</button>
-                            <button class="page-btn">3</button>
-                            <button class="page-btn next"><i class="fa-regular fa-chevron-right"></i></button>
-                        </div>
-                    <?php endif; ?>
                 </div>
             </div>
         </div>
     </section>
 
 </body>
-<!-- Create Post Modal (matches project pop-up pattern) -->
+
+
+<div class="dialog-box-2" id="create-post-popup">
+    <div class="dialog-content">
+        <div class="dialog-title">
+            <div class="title">Create A New Service Request</div>
+
+            <div>
+                <i class="fa-solid fa-xmark dialog-close-button-2" onclick="closeDialogBox('create-post-popup')"></i>
+            </div>
+        </div>
+        <form id="create-post-form" class="create-post-form" onsubmit="return false;">
+            <div class="input-grid-1">
+                <div class="text-container">
+                    <div class="label text-label">Title</div>
+                    <input type="text" class="text-field" name="title" id="">
+                </div>
+            </div>
+            <div class="input-grid-1">
+                <div class="text-container">
+                    <div class="label text-label">Description</div>
+                    <textarea class="text-field" spellcheck="false" name="description"></textarea>
+                </div>
+            </div>
+            <div class="input-grid-1">
+                <div class="search-select-container" data-idinput="Category_ID">
+                    <div class="text-container">
+                        <div class="label search-dropdown-label">Service Category</div>
+                        <input type="text" class="text-field-search-dropdown" name="category" id="Category"
+                            autocomplete="off" onkeydown="return false">
+                    </div>
+                    <div class="options">
+                        <span class="text-container">
+                            <input type="text" class="text-field-search">
+                        </span>
+                        <div class="option-list" onclick="selectCategory(event)">
+                            <?php foreach ($categories as $Category): ?>
+                                <div data-id="<?= $Category['Category_ID'] ?>">
+                                    <?= htmlspecialchars($Category['Name']) ?>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                </div>
+
+                <input type="hidden" id="Category_ID" name="categoryid">
+            </div>
+            <div class="input-grid-1">
+                <div style="display: flex; gap: 15px; margin-bottom: 5px;">
+
+                    <div class="search-select-container add-option" style="width: 100%;">
+
+                        <div class="text-container">
+                            <div class="label search-dropdown-label" id="field-skill-label">Skill</div>
+                            <input type="text" class="text-field-search-dropdown" id="SkillAddInput" autocomplete="off"
+                                onkeydown="return false">
+                        </div>
+
+                        <div class="options">
+
+                            <span class="text-container">
+                                <input type="text" class="text-field-search" placeholder="Enter new skill to add">
+                            </span>
+
+                            <div class="option-list" id="SkillsOptionList">
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="button" style="white-space: nowrap;" onclick="addSkill();">
+                        <i class="fa-solid fa-plus" style="margin-right: 10px;"></i>Add
+                    </button>
+
+                </div>
+            </div>
+            <div class="chip-wrapper" id="SkillsChips" style="margin-bottom:20px">
+                <input type="hidden" id="Skills" name="skills">
+
+                <p>No skill selected</p>
+            </div>
+            <div class="input-grid-2">
+                <div class="text-container">
+                    <div class="label text-label">Requesting Price</div>
+                    <input type="text" class="text-field" name="price" id="">
+                </div>
+                <div class="search-select-container">
+                    <div class="text-container">
+                        <div class="label search-dropdown-label">Price Type</div>
+                        <input type="text" class="text-field-search-dropdown" autocomplete="off"
+                            onkeydown="return false" name="pricetype" id="">
+                    </div>
+                    <div class="options">
+                        <div class="option-list">
+                            <div>Fixed</div>
+                            <div>Hourly</div>
+                            <div>Daily</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="input-grid-2">
+                <div class="text-container">
+                    <div class="label text-label">Duration</div>
+                    <input type="text" class="text-field" name="duration" id="">
+                </div>
+                <div class="search-select-container">
+                    <div class="text-container">
+                        <div class="label search-dropdown-label">Duration Type</div>
+                        <input type="text" class="text-field-search-dropdown" autocomplete="off"
+                            onkeydown="return false" name="durationtype" id="">
+                    </div>
+                    <div class="options">
+                        <div class="option-list">
+                            <div>Days</div>
+                            <div>Weeks</div>
+                            <div>Months</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-grid-2">
+                <div class="search-select-container">
+                    <div class="text-container">
+                        <div class="label search-dropdown-label">Level</div>
+                        <input type="text" class="text-field-search-dropdown" autocomplete="off"
+                            onkeydown="return false" name="level" id="">
+                    </div>
+                    <div class="options">
+                        <div class="option-list">
+                            <div>Beginner</div>
+                            <div>Intermediate</div>
+                            <div>Advanced</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-container">
+                    <div class="label text-label label-float">Expired Date</div>
+                    <input type="date" class="text-field" name="endat" id="">
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button type="reset" class="action-btn btn-delete" id="create-post-pop-up" data-role="cancel"
+                    onclick="inputReset('create-post-form')">Reset</button>
+                <button type="button" class="action-btn btn-view" onclick="submitPost('draft')" id="create-post-pop-up"
+                    data-role="save-draft">
+                    <i class="fa-regular fa-floppy-disk"></i>
+                    Save Draft
+                </button>
+                <button type="button" class="action-btn btn-edit" onclick="viewDialogBox('confirm-publish')"
+                    id="create-post-pop-up" data-role="publish">
+                    <i class="fa-regular fa-rocket"></i>
+                    Publish Request
+                </button>
+                <button type="button" class="action-btn btn-edit" onclick="saveEditedPost()" data-role="save-post"
+                    style="display:none;">
+                    <i class="fa-regular fa-floppy-disk"></i>
+                    Save Request
+                </button>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+<div class="dialog-box-2" id="confirm-publish">
+    <div class="dialog-content" style="width: 400px;">
+        <div class="dialog-title">
+            <div class="title">Confirm Publish</div>
+
+            <div>
+                <i class="fa-solid fa-xmark dialog-close-button-2" onclick="closeDialogBox('confirm-publish')"></i>
+            </div>
+        </div>
+        <div class="pop-up-content">
+            Are you sure you want to publish this request? It will become visible for providers to bid.
+        </div>
+        <div class="modal-actions">
+            <button class="action-btn btn-delete" id="confirmPublishKeep"
+                onclick="closeDialogBox('confirm-publish')">Cancel</button>
+            <button class="action-btn btn-edit" id="confirmPublishBtn" onclick="submitPost('publish')"><i
+                    class="fa-regular fa-rocket"></i>
+                Publish
+            </button>
+        </div>
+
+    </div>
+
+</div>
+
+<div class="dialog-box-2" id="confirm-delete">
+    <div class="dialog-content" style="width: 400px;">
+        <div class="dialog-title">
+            <div class="title">Confirm Delete</div>
+
+            <div>
+                <i class="fa-solid fa-xmark dialog-close-button-2" onclick="closeDialogBox('confirm-delete')"></i>
+            </div>
+        </div>
+        <div class="pop-up-content">
+            Are you sure you want to delete this post? This action cannot be undone.
+        </div>
+        <div class="modal-actions">
+            <button class="action-btn btn-view" id="confirmKeep"
+                onclick="closeDialogBox('confirm-delete')">Keep</button>
+            <button class="action-btn btn-delete" id="confirmDeleteBtn"><i class="fa-regular fa-circle-xmark"></i> Yes,
+                Delete</button>
+        </div>
+
+    </div>
+
+</div>
+
+<div class="dialog-box-2" id="view-post-popup">
+    <div class="dialog-content">
+        <div class="dialog-title">
+            <div class="title">Post Details</div>
+
+            <div>
+                <i class="fa-solid fa-xmark dialog-close-button-2" onclick="closeDialogBox('view-post-popup')"></i>
+            </div>
+        </div>
+        <div class="dialog-body"></div>
+    </div>
+</div>
+
+<!-- Create Post Modal (matches project pop-up pattern) 
 <div class="pop-up-section create-post-pop-up deactive">
     <div class="pop-up deactive">
         <div class="pop-up-header">
@@ -520,167 +342,12 @@ if (!function_exists('str_snippet')) {
         </div>
         <hr>
         <div class="pop-up-content">
-            <form id="create-post-form" class="create-post-form" onsubmit="return false;">
-                <div class="input-grid-1">
-                    <div class="text-container">
-                        <div class="label text-label">Title</div>
-                        <input type="text" class="text-field" name="title" id="">
-                    </div>
-                </div>
-                <div class="input-grid-1">
-                    <div class="text-container">
-                        <div class="label text-label">Description</div>
-                        <textarea class="text-field" spellcheck="false" name="description"></textarea>
-                    </div>
-                </div>
-                <div class="input-grid-1">
-                    <div class="search-select-container" data-idinput="Category_ID">
-                        <div class="text-container">
-                            <div class="label search-dropdown-label">Service Category</div>
-                            <input type="text" class="text-field-search-dropdown" name="category" id="Category"
-                                autocomplete="off" onkeydown="return false">
-                        </div>
-                        <div class="options">
-                            <span class="text-container">
-                                <input type="text" class="text-field-search">
-                            </span>
-                            <div class="option-list" onclick="selectCategory(event)">
-                                <?php foreach ($categories as $Category): ?>
-                                    <div data-id="<?= $Category['Category_ID'] ?>">
-                                        <?= htmlspecialchars($Category['Name']) ?>
-                                    </div>
-                                <?php endforeach; ?>
-                            </div>
-                        </div>
-                    </div>
-
-                    <input type="hidden" id="Category_ID" name="categoryid">
-                </div>
-                <div class="input-grid-1">
-                    <div style="display: flex; gap: 15px; margin-bottom: 5px;">
-
-                        <div class="search-select-container add-option" style="width: 100%;">
-
-                            <div class="text-container">
-                                <div class="label search-dropdown-label" id="field-skill-label">Skill</div>
-                                <input type="text" class="text-field-search-dropdown" id="SkillAddInput"
-                                    autocomplete="off" onkeydown="return false">
-                            </div>
-
-                            <div class="options">
-
-                                <span class="text-container">
-                                    <input type="text" class="text-field-search" placeholder="Enter new skill to add">
-                                </span>
-
-                                <div class="option-list" id="SkillsOptionList">
-
-                                </div>
-                            </div>
-                        </div>
-
-                        <button class="button" style="white-space: nowrap;" onclick="addSkill();">
-                            <i class="fa-solid fa-plus" style="margin-right: 10px;"></i>Add
-                        </button>
-
-                    </div>
-                </div>
-                <div class="chip-wrapper" id="SkillsChips" style="margin-bottom:20px">
-                    <input type="hidden" id="Skills" name="skills">
-
-                    <p>No skill selected</p>
-                </div>
-                <div class="input-grid-2">
-                    <div class="text-container">
-                        <div class="label text-label">Requesting Price</div>
-                        <input type="text" class="text-field" name="price" id="">
-                    </div>
-                    <div class="search-select-container">
-                        <div class="text-container">
-                            <div class="label search-dropdown-label">Price Type</div>
-                            <input type="text" class="text-field-search-dropdown" autocomplete="off"
-                                onkeydown="return false" name="pricetype" id="">
-                        </div>
-                        <div class="options">
-                            <div class="option-list">
-                                <div>Fixed</div>
-                                <div>Hourly</div>
-                                <div>Daily</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="input-grid-2">
-                    <div class="text-container">
-                        <div class="label text-label">Duration</div>
-                        <input type="text" class="text-field" name="duration" id="">
-                    </div>
-                    <div class="search-select-container">
-                        <div class="text-container">
-                            <div class="label search-dropdown-label">Duration Type</div>
-                            <input type="text" class="text-field-search-dropdown" autocomplete="off"
-                                onkeydown="return false" name="durationtype" id="">
-                        </div>
-                        <div class="options">
-                            <div class="option-list">
-                                <div>Days</div>
-                                <div>Weeks</div>
-                                <div>Months</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="input-grid-2">
-                    <div class="search-select-container">
-                        <div class="text-container">
-                            <div class="label search-dropdown-label">Level</div>
-                            <input type="text" class="text-field-search-dropdown" autocomplete="off"
-                                onkeydown="return false" name="level" id="">
-                        </div>
-                        <div class="options">
-                            <div class="option-list">
-                                <div>Beginner</div>
-                                <div>Intermediate</div>
-                                <div>Advanced</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="text-container">
-                        <div class="label text-label label-float">Expired Date</div>
-                        <input type="date" class="text-field" name="endat" id="">
-                    </div>
-                </div>
-
-                <div class="modal-actions">
-                    <button type="button" class="action-btn btn-view" id="create-post-pop-up"
-                        data-role="cancel">Cancel</button>
-                    <button type="button" class="action-btn btn-edit" onclick="window.submitCreatePost('draft')"
-                        id="create-post-pop-up" data-role="save-draft">
-                        <i class="fa-regular fa-floppy-disk"></i>
-                        Save Draft
-                    </button>
-                    <button type="button" class="action-btn btn-view" onclick="window.submitCreatePost('publish')"
-                        id="create-post-pop-up" data-role="publish">
-                        <i class="fa-regular fa-rocket"></i>
-                        Publish Request
-                    </button>
-                    <button type="button" class="action-btn btn-edit" data-role="save-post" style="display:none;">
-                        <i class="fa-regular fa-floppy-disk"></i>
-                        Save Request
-                    </button>
-                </div>
-            </form>
+            
         </div>
     </div>
-</div>
-<script>
-
-    // (Removed previous capture guard). We'll override togglePopUp safely after external scripts load.
-</script>
+</div>-->
 <!-- Post Details Modal -->
-<div class="pop-up-section request-modal deactive" id="postDetailsRoot">
+<!-- <div class="pop-up-section request-modal deactive" id="postDetailsRoot">
     <div class="pop-up deactive" id="postDetailsModal" style="max-width:720px; border-radius:16px;">
         <div class="pop-up-header" style="display:flex; align-items:center; justify-content:space-between;">
             <div class="pop-up-title">Post Details</div>
@@ -695,10 +362,10 @@ if (!function_exists('str_snippet')) {
                 Delete</button>
         </div>
     </div>
-</div>
+</div> -->
 
 
-<!-- Confirm Delete Modal -->
+<!-- Confirm Delete Modal
 <div class="pop-up-section confirm-modal deactive" id="confirmDeleteRoot">
     <div class="pop-up deactive" id="confirmDelete">
         <div class="pop-up-header" style="display:flex; align-items:center; justify-content:space-between;">
@@ -715,10 +382,10 @@ if (!function_exists('str_snippet')) {
                 Delete</button>
         </div>
     </div>
-</div>
+</div> -->
 
 <!-- Confirm Publish Modal -->
-<div class="pop-up-section confirm-modal deactive" id="confirmPublishRoot">
+<!-- <div class="pop-up-section confirm-modal deactive" id="confirmPublishRoot">
     <div class="pop-up deactive" id="confirmPublish">
         <div class="pop-up-header" style="display:flex; align-items:center; justify-content:space-between;">
             <div class="pop-up-title">Publish Request</div>
@@ -731,12 +398,343 @@ if (!function_exists('str_snippet')) {
         <div class="modal-actions">
             <button class="action-btn btn-view" id="confirmPublishKeep">Cancel</button>
             <button class="action-btn btn-edit" id="confirmPublishBtn"><i class="fa-regular fa-rocket"></i>
-                Publish</button>
+                Publish
+            </button>
         </div>
     </div>
-</div>
+</div> -->
 <script>
-    function selectCategory(e) {
+    // Global variable to track current sort
+    let currentSort = 'date_desc';
+    let currentSearch = '';
+    let searchTimeout = null;
+
+    /**
+     * Load posts via AJAX
+     */
+    function loadPosts(status = 'active') {
+        const container = document.querySelector(`.${status}-posts .item-list`);
+
+        container.innerHTML = `
+        <div class="loading-state">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Loading posts...</p>
+        </div>
+    `;
+
+        console.log('Loading posts for status:', status, 'with sort:', currentSort, 'search:', currentSearch);
+
+        // CHANGE THIS LINE - add /list to the URL
+        fetch(`<?= BASE_URL ?>/requests/list?status=${status}&sort=${currentSort}&search=${encodeURIComponent(currentSearch)}`)
+            .then(response => {
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers.get('content-type'));
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Parsed data:', data);
+
+                // Add delay to make loading animation visible
+                return new Promise(resolve => setTimeout(() => resolve(data), 300));
+            })
+            .then(data => {
+                if (data.success && data.posts && data.posts.length > 0) {
+                    container.innerHTML = '';
+                    data.posts.forEach(item => {
+                        const postHTML = createPostCard(item.post, item.skills, status);
+                        container.insertAdjacentHTML('beforeend', postHTML);
+                    });
+                } else {
+                    showEmptyState(status, container);
+                }
+            })
+            .catch(error => {
+                console.error('Error loading posts:', error);
+                container.innerHTML = `
+                <div class="error-state">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <p>Failed to load posts. Please try again.</p>
+                    <p style="font-size: 12px; color: #999;">${error.message}</p>
+                    <button onclick="loadPosts('${status}')" class="retry-btn">Retry</button>
+                </div>
+            `;
+            });
+    }
+
+    /**
+     * Create post card HTML
+     */
+    function createPostCard(post, skills, status = 'active') {
+        const skillsHTML = skills && skills.length > 0
+            ? skills.map(skill => `<span class="skill-tag">${escapeHtml(skill)}</span>`).join('')
+            : '<span class="no-skills">---No skills specified---</span>';
+
+        const description = post.Description || '';
+        const snippet = description.length > 300
+            ? escapeHtml(description.substring(0, 300)) + '...'
+            : escapeHtml(description);
+
+        const publishedDate = formatDate(post.Published_At || post.Created_At);
+        const daysLeft = calculateDaysLeft(post.End_At);
+        if (daysLeft == 'Expired'){
+            updateAsExpired(post.Post_ID);
+        }
+
+        // Different buttons based on status
+        let actionsHTML = '';
+        if (status === 'active') {
+            actionsHTML = `
+                <button class="action-btn btn-edit" onclick="editPost(${post.Post_ID})">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+                <button class="action-btn btn-view" onclick="viewPost(${post.Post_ID})">
+                    <i class="fas fa-eye"></i> View
+                </button>
+                <button class="action-btn btn-delete" onclick="deletePost(${post.Post_ID})">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            `;
+        } else if (status === 'draft') {
+            actionsHTML = `
+                <button class="action-btn btn-edit" onclick="editPost(${post.Post_ID})">
+                    <i class="fas fa-edit"></i> Continue
+                </button>
+                <button class="action-btn btn-view" onclick="publishDraft(${post.Post_ID})">
+                    <i class="fas fa-rocket"></i> Publish
+                </button>
+                <button class="action-btn btn-delete" onclick="deletePost(${post.Post_ID})">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            `;
+        } else if (status === 'expired') {
+            actionsHTML = `
+                <button class="action-btn btn-view" onclick="viewPost(${post.Post_ID})">
+                    <i class="fas fa-eye"></i> View
+                </button>
+                <button class="action-btn btn-edit" onclick="repostExpired(${post.Post_ID})">
+                    <i class="fas fa-redo"></i> Repost
+                </button>
+                <button class="action-btn btn-delete" onclick="deletePost(${post.Post_ID})">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            `;
+        }
+
+        // Different date label based on status
+        let dateLabel = '';
+        if (status === 'draft') {
+            dateLabel = `Created ${publishedDate}`;
+        } else if (status === 'expired') {
+            dateLabel = `Expired ${publishedDate}`;
+        } else {
+            dateLabel = `Published ${publishedDate}`;
+        }
+
+        // Different footer based on status
+        let footerHTML = '';
+        if (status === 'expired') {
+            footerHTML = `
+                <div class="post-footer">
+                    <div class="post-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Budget</span>
+                            <span class="detail-value budget-amount">LKR ${post.Requesting_Price || 0}/= (${post.Price_Type || 'Fixed'})</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Final Proposals</span>
+                            <span class="detail-value proposals-count">${post.Proposal_Count || post.ProposalsCount || 0}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Duration</span>
+                            <span class="detail-value project-duration">${post.Duration || 0} ${post.Duration_Type || 'Days'}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            footerHTML = `
+                <div class="post-footer">
+                    <div class="post-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Budget</span>
+                            <span class="detail-value budget-amount">LKR ${post.Requesting_Price || 0}/= (${post.Price_Type || 'Fixed'})</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Proposals Received</span>
+                            <span class="detail-value proposals-count">${post.Proposal_Count || post.ProposalsCount || 0}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Level</span>
+                            <span class="detail-value project-level">${post.Level || 'N/A'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Duration</span>
+                            <span class="detail-value project-duration">${post.Duration || 0} ${post.Duration_Type || 'Days'}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Different engagement stats based on status
+        let engagementHTML = '';
+        if (status === 'expired') { // Ensure post is marked as expired
+            engagementHTML = `
+                <div class="engagement-stats">
+                    <div class="stat-item">
+                        <i class="fas fa-eye"></i>
+                        <span>${post.Views || post.View_Count || 0} views</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-clock"></i>
+                        <span>Expired</span>
+                    </div>
+                </div>
+            `;
+        } else if (status === 'draft') {
+            engagementHTML = ''; // No engagement stats for drafts
+        } else {
+            engagementHTML = `
+                <div class="engagement-stats">
+                    <div class="stat-item">
+                        <i class="fas fa-eye"></i>
+                        <span>${post.Views || post.View_Count || 0} views</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-clock"></i>
+                        <span>${daysLeft}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        return `
+            <div class="search-item">
+                <input type="hidden" class="post-id" value="${post.Post_ID}">
+                <div class="post-header">
+                    <div class="post-meta">
+                        <div class="post-date">
+                            <i class="fas fa-calendar"></i>
+                            <span>${dateLabel}</span>
+                        </div>
+                    </div>
+                    <div class="post-actions">
+                        ${actionsHTML}
+                    </div>
+                </div>
+                <h3 class="post-title">${escapeHtml(post.Title)}</h3>
+                <div class="post-description">${snippet}</div>
+                <div class="post-skills">
+                    <span class="skills-label">Required Skills:</span>
+                    <div class="skills-tags">${skillsHTML}</div>
+                </div>
+                ${footerHTML}
+                ${engagementHTML}
+            </div>
+        `;
+    }
+
+    /**
+     * Show empty state
+     */
+    function showEmptyState(status, container) {
+        let message = '';
+        let icon = 'fa-inbox';
+
+        if (status === 'active') {
+            message = `
+                <h2>No active requests right now</h2>
+                <p>Click "Create New Request" to post your first service request.</p>
+            `;
+        } else if (status === 'draft') {
+            message = `
+                <h2>No draft requests right now</h2>
+                <p>Create drafts to save your job requests and publish them later.</p>
+            `;
+        } else if (status === 'expired') {
+            message = `
+                <h2>No expired requests</h2>
+                <p>Your expired requests will appear here.</p>
+            `;
+        }
+
+        container.innerHTML = `
+            <section class="empty-state">
+                <i class="fas ${icon}"></i>
+                ${message}
+            </section>
+        `;
+    }
+
+    /**
+     * Helper function to escape HTML
+     */
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text || '';
+        return div.innerHTML;
+    }
+
+    /**
+     * Helper function to format date
+     */
+    function formatDate(dateString) {
+        if (!dateString) return 'N/A';
+
+        const date = new Date(dateString);
+        const now = new Date();
+
+        // Reset time parts to compare only dates
+        const dateOnly = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        const nowOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+        // Calculate difference in days
+        const diffTime = nowOnly - dateOnly;
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+        console.log('Date comparison:', {
+            input: dateString,
+            parsed: date.toISOString(),
+            now: now.toISOString(),
+            dateOnly: dateOnly.toISOString(),
+            nowOnly: nowOnly.toISOString(),
+            diffDays: diffDays
+        });
+
+        if (diffDays === 0) return 'Today';
+        if (diffDays === 1) return 'Yesterday';
+        if (diffDays < 7) return `${diffDays} days ago`;
+        if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+    }
+
+    /**
+     * Helper function to calculate days left
+     */
+    function calculateDaysLeft(endDate) {
+        if (!endDate) return 'N/A';
+
+        const end = new Date(endDate);
+        const now = new Date();
+        const diffTime = end - now;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays < 0) return 'Expired';
+        if (diffDays === 0) return 'Expires today';
+        if (diffDays === 1) return '1 day left';
+        return `${diffDays} days left`;
+    }
+
+    function selectCategory(e, skipReset = false) {
         // same behavior as registration, but robustly read the clicked option
         const opt = e?.target?.closest('[data-id]');
         if (opt) {
@@ -744,6 +742,12 @@ if (!function_exists('str_snippet')) {
         }
         const CategoryID = document.getElementById("Category_ID").value;
         // reset skills dropdown UI
+        if (!skipReset) {
+            const currentChips = document.getElementById('SkillsChips').querySelectorAll(".chip");
+            for (let j = 0; j < currentChips.length; j++) {
+                removeChip(currentChips[j]);
+            }
+        }
         document.getElementById("SkillAddInput").value = "";
         document.getElementById("SkillsOptionList").innerHTML = "";
         document.getElementById("SkillAddInput").parentElement
@@ -759,7 +763,7 @@ if (!function_exists('str_snippet')) {
             .then(data => {
                 if (data.status === 'ok') {
                     data.result.forEach(element => {
-                        addItemToDropdown("SkillAddInput", element.Skill, false);
+                        addItemToDropdown("SkillAddInput", element.Skill, false, element.Skill_ID);
                     });
                 } else {
                     console.log(data);
@@ -769,7 +773,7 @@ if (!function_exists('str_snippet')) {
     }
 
     function addSkill() {
-        if (addChip('SkillsChips', document.getElementById("SkillAddInput").value)) {
+        if (addChip('SkillsChips', document.getElementById("SkillAddInput").value, document.getElementById("SkillAddInput").dataset.id)) {
             document.getElementById("SkillAddInput").value = "";
             document.getElementById("SkillAddInput").parentElement
                 .querySelector(".label").classList.remove("label-float");
@@ -778,14 +782,7 @@ if (!function_exists('str_snippet')) {
         }
     }
     // expose to inline onclick
-    window.submitCreatePost = function (action) {
-        const BASE = "<?= BASE_URL ?>";
-        const form = document.getElementById('create-post-form');
-        if (!form) return;
-        form.action = BASE + '/requests/' + (action === 'draft' ? 'draft' : 'publish');
-        form.method = 'POST';
-        form.submit();
-    };
+
 
     function daysConvert(days) {
 
@@ -805,27 +802,179 @@ if (!function_exists('str_snippet')) {
         }
     }
 
+    function validateEmpty(inputField) {
+        if (!inputField || inputField.value.trim() === '') {
+            showValidationTooltip(inputField, "This field is required");
+            return false;
+        }
+        return true;
+    }
 
 
-    function viewPost(id) {
-        // Wait for clientPosts.js to load, then call its function
-        if (typeof openPostModal === 'function') {
-            openPostModal();
-        } else {
-            // Fallback: manually toggle modal classes
-            const root = document.getElementById('postDetailsRoot');
-            const modal = document.getElementById('postDetailsModal');
-            if (root && modal) {
-                root.classList.remove('deactive');
-                modal.classList.remove('deactive');
+    function submitPost(action) {
+
+        // Validate required fields
+        const title = document.querySelector("input[name='title']");
+        const description = document.querySelector("textarea[name='description']");
+        const categoryId = document.getElementById("Category_ID");
+        const skillsString = document.getElementById("Skills").value;
+        const skillIds = skillsString.match(/\d+/g)?.map(id => parseInt(id, 10)) || [];
+        const skillIdsString = skillIds.join(','); // "1,5,8,12"
+
+        // console.log("Skills IDs String:", skillIdsString);
+        const price = document.querySelector("input[name='price']");
+        const price_type = document.querySelector("input[name='pricetype']");
+        const duration = document.querySelector("input[name='duration']");
+        const duration_type = document.querySelector("input[name='durationtype']");
+        const level = document.querySelector("input[name='level']");
+        const end_at = document.querySelector("input[name='endat']");
+
+        // Check if any field is empty
+
+        const form = document.getElementById('create-post-form');
+        const inputs = form.querySelectorAll('input[type="text"], textarea, input[type="date"]');
+        let isEmpty = false;
+        for (let i = 0; i < inputs.length; i++) {
+            const element = inputs[i];
+            if (element.value.trim() === '' && element.id !== 'SkillAddInput' && element.classList.contains('text-field-search') === false && element.name !== 'skills') {
+                showValidationTooltip(element, "This field is required");
+                console.log("Empty field:", element);
+                isEmpty = true;
             }
         }
 
-        fetch("<?= BASE_URL ?>/posts/view/" + id)
+        if (isEmpty) {
+            closeDialogBox('confirm-publish');
+            console.log("Form has empty fields");
+            return;
+        }
+
+        console.log("All required fields are filled.");
+
+        if (price.value.trim() !== '' && (isNaN(price.value.trim()) || price.value.trim() < 0)) {
+            showValidationTooltip(price, "Please enter a valid number");
+            console.log("Invalid price:", price.value);
+            closeDialogBox('confirm-publish');
+            return;
+        }
+
+        if (duration.value.trim() !== '' && (isNaN(duration.value.trim()) || duration.value.trim() < 0)) {
+            showValidationTooltip(duration, "Please enter a valid number");
+            closeDialogBox('confirm-publish');
+            return;
+        }
+
+        // Collect all form data manually
+        const postData = {
+            title: title.value.trim() || '',
+            description: description.value.trim() || '',
+            category_id: categoryId.value,
+            skills: skillIdsString,
+            price: price.value.trim() || '',
+            price_type: price_type.value.trim() || '',
+            duration: duration.value.trim() || '',
+            duration_type: duration_type.value.trim() || '',
+            level: level.value.trim() || '',
+            end_at: end_at.value || '',
+            status: action // 'draft' or 'publish'
+        };
+
+        // Convert to URL-encoded format
+        const urlEncodedData = Object.keys(postData)
+            .map(key => encodeURIComponent(key) + '=' + encodeURIComponent(postData[key]))
+            .join('&');
+
+        const url = "<?= BASE_URL ?>/requests/create";
+        console.log("Calling URL:", url);
+        console.log("POST data:", postData);
+        // Send AJAX request
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: urlEncodedData
+        })
+            .then(response => {
+                console.log("Response status:", response.status);
+                console.log("Response headers:", response.headers.get('content-type'));
+
+                // Get the raw text first to see what's being returned
+                return response.text().then(text => {
+                    console.log("Raw response:", text);
+
+                    // Try to parse as JSON
+                    try {
+                        return JSON.parse(text);
+                    } catch (e) {
+                        console.error("Failed to parse JSON:", e);
+                        throw new Error("Server returned invalid JSON: " + text.substring(0, 200));
+                    }
+                });
+            })
+            .then(data => {
+                console.log("Parsed data:", data);
+                if (data.success) {
+                    closeDialogBox('confirm-publish');
+                    closeDialogBox('create-post-popup');
+
+                    window.showSuccessToast('Post Saved', action === 'draft' ? 'Draft saved successfully!' : 'Post published successfully!');
+
+                    // Reload the appropriate section
+                    const status = action === 'draft' ? 'draft' : 'active';
+                    setTimeout(() => {
+                        loadPosts(status);
+
+                        // Switch to the correct tab if not already there
+                        const targetButton = document.getElementById(`${status}-posts`);
+                        if (targetButton && !targetButton.classList.contains('active')) {
+                            targetButton.click();
+                        }
+                    }, 500);
+
+                    // Reset form
+                    document.getElementById('create-post-form').reset();
+                    inputReset('create-post-form');
+                } else {
+                    window.showErrorToast("Error", data.error || 'An unknown error occurred while saving the post.');
+                    closeDialogBox('confirm-publish');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showErrorToast("Error", 'An error occurred while saving the post. Please try again.');
+                closeDialogBox('confirm-publish');
+            });
+    }
+
+    function viewPost(id) {
+        viewDialogBox('view-post-popup');
+
+        // Show loading state
+        const formContainer = document.querySelector("#view-post-popup .dialog-body");
+        formContainer.innerHTML = `
+            <div class="loading-state">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading post details...</p>
+            </div>
+        `;
+
+        fetch("<?= BASE_URL ?>/requests/view/" + id)
             .then(response => response.json())
+            .then(post => {
+                // Add delay to make loading animation visible
+                return new Promise(resolve => setTimeout(() => resolve(post), 300));
+            })
             .then(post => {
                 if (post.error) {
                     console.error('Error fetching post:', post.error);
+                    formContainer.innerHTML = `
+                        <div class="error-state">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <p>Failed to load post details</p>
+                            <button onclick="viewPost(${id})" class="retry-btn">Retry</button>
+                        </div>
+                    `;
                     return;
                 }
 
@@ -842,51 +991,190 @@ if (!function_exists('str_snippet')) {
                     ? post.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')
                     : '<span>No skills specified</span>';
 
-                document.querySelector("#postDetailsRoot #postContent").innerHTML = `
-                    <div class="post-view-title" id="modalPostTitle">${post.Title || 'Untitled'}</div>
+                // Replace form content with a div wrapper for proper styling
+                formContainer.innerHTML = `
+                <div class="post-view">
+                    <div class="post-view-title">${post.Title || 'Untitled'}</div>
                     <div class="post-view-meta">
-                        <span class="chip"><i class="fa-regular fa-calendar"></i><span id="modalPostDate">${publishDate}</span></span>
+                        <span class="chip"><i class="fa-regular fa-calendar"></i><span>${publishDate}</span></span>
                     </div>
                     <div class="post-view-section">
                         <div class="section-title">Description</div>
-                        <div id="modalPostDescription" class="section-body">${post.Description || 'No description provided'}</div>
+                        <div class="section-body">${post.Description || 'No description provided'}</div>
                     </div>
                     <div class="post-view-section">
                         <div class="section-title">Required Skills</div>
-                        <div id="modalPostSkills" class="skills-row">${skillsHTML}</div>
+                        <div class="skills-row">${skillsHTML}</div>
                     </div>
                     <div class="post-view-section">
                         <div class="section-title">Details</div>
-                        <div id="modalPostKV" class="kv-grid">
-                            <div class="kv-item"><span class="kv-label">Budget: </span><span class="kv-value"></t>LKR ${post.Requesting_Price || '0'}/= (${post.Price_Type || 'N/A'})</span></div>
-                            <div class="kv-item"><span class="kv-label">Level:  </span><span class="kv-value">${post.Level || 'N/A'}</span></div>
-                            <div class="kv-item"><span class="kv-label">Duration:   </span><span class="kv-value">${post.Duration || 'N/A'} ${post.Duration_Type || 'N/A'}</span></div>
-                            <div class="kv-item"><span class="kv-label">Proposals:  </span><span class="kv-value">${post.Proposal_Count || '0'}</span></div>
+                        <div class="kv-grid">
+                            <div class="kv-item"><span class="kv-label">Budget:</span><span class="kv-value">LKR ${post.Requesting_Price || '0'}/= (${post.Price_Type || 'N/A'})</span></div>
+                            <div class="kv-item"><span class="kv-label">Level:</span><span class="kv-value">${post.Level || 'N/A'}</span></div>
+                            <div class="kv-item"><span class="kv-label">Duration:</span><span class="kv-value">${post.Duration || 'N/A'} ${post.Duration_Type || 'N/A'}</span></div>
+                            <div class="kv-item"><span class="kv-label">Proposals:</span><span class="kv-value">${post.Proposal_Count || '0'}</span></div>
                         </div>
                     </div>
-                    <div class="post-view-section" id="modalEngagementSection">
+                    <div class="post-view-section">
                         <div class="section-title">Engagement</div>
-                        <div id="modalPostEngagement" class="engagement-row">
+                        <div class="engagement-row">
                             <span class="chip"><i class="fa-regular fa-eye"></i> ${post.Views || '0'} views</span>
                         </div>
                     </div>
-                `;
+                </div>
+            `;
             })
             .catch(error => {
                 console.error('Error fetching post:', error);
-                alert('Failed to load post details. Please try again.');
+                formContainer.innerHTML = `
+                    <div class="error-state">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <p>Failed to load post details. Please try again.</p>
+                        <button onclick="viewPost(${id})" class="retry-btn">Retry</button>
+                    </div>
+                `;
             });
     }
 
-    function editPost(id) {
-        const root = document.querySelector('.create-post-pop-up');
-        const modal = root.querySelector('.pop-up');
-        if (root && modal) {
-            root.classList.remove('deactive');
-            modal.classList.remove('deactive');
+    // Add this function to handle save post button
+    function saveEditedPost() {
+        const root = document.getElementById('create-post-popup');
+        const postId = root.querySelector('[data-role="save-post"]').dataset.postId;
+
+        if (!postId) {
+            window.showErrorToast("Error", "Post ID not found");
+            return;
         }
 
-        fetch("<?= BASE_URL ?>/posts/view/" + id)
+        const title = root.querySelector("input[name='title']");
+        const description = root.querySelector("textarea[name='description']");
+        const categoryId = document.getElementById("Category_ID");
+        const skills = document.getElementById("Skills");
+
+        // ADD THIS DEBUG LINE
+        console.log("Skills input element:", skills);
+        console.log("Skills value:", skills.value);
+        console.log("Skills value type:", typeof skills.value);
+
+        const price = root.querySelector("input[name='price']");
+        const price_type = root.querySelector("input[name='pricetype']");
+        const duration = root.querySelector("input[name='duration']");
+        const duration_type = root.querySelector("input[name='durationtype']");
+        const level = root.querySelector("input[name='level']");
+        const end_at = root.querySelector("input[name='endat']");
+
+        console.log("End date value:", end_at.value);
+
+        endDateValue = end_at.value;
+
+        // If empty or invalid, set to 30 days from now
+        if (!endDateValue || endDateValue === '0000-00-00') {
+            const futureDate = new Date();
+            futureDate.setDate(futureDate.getDate() + 30);
+            const year = futureDate.getFullYear();
+            const month = String(futureDate.getMonth() + 1).padStart(2, '0');
+            const day = String(futureDate.getDate()).padStart(2, '0');
+            endDateValue = `${year}-${month}-${day}`;
+            console.log("Setting default end date:", endDateValue);
+        }
+
+        // Validate date format (YYYY-MM-DD)
+        const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+        if (!datePattern.test(endDateValue)) {
+            window.showWarningToast("Validation Error", "Invalid end date format");
+            return;
+        }
+
+        // Validation
+        if (!title.value.trim() || !description.value.trim() || !categoryId.value) {
+            window.showWarningToast("Validation Error", "Please fill all required fields");
+            return;
+        }
+
+        // Get the skill IDs - NEED TO CHECK THE FORMAT
+        const skillIdsString = skills.value || '';
+
+        console.log("skillIdsString:", skillIdsString);
+
+        // If it's JSON array like '[{"value":"Graphic Card","id":"3"}]', parse it
+        let cleanedSkills = skillIdsString;
+        try {
+            // Check if it's JSON
+            if (skillIdsString.startsWith('[')) {
+                const skillsArray = JSON.parse(skillIdsString);
+                cleanedSkills = skillsArray.map(s => s.id).join(',');
+                console.log("Parsed from JSON, cleaned skills:", cleanedSkills);
+            }
+        } catch (e) {
+            console.log("Not JSON, using as-is");
+        }
+
+        const postData = {
+            title: title.value.trim(),
+            description: description.value.trim(),
+            category_id: categoryId.value,
+            skills: cleanedSkills,  // Use cleaned skills
+            price: price.value.trim() || '0',
+            price_type: price_type.value.trim() || 'Fixed',
+            duration: duration.value.trim() || '0',
+            duration_type: duration_type.value.trim() || 'Days',
+            level: level.value.trim() || 'Beginner',
+            end_at: endDateValue || ''
+        };
+
+        console.log('Final post data:', postData);
+
+        const urlEncodedData = Object.keys(postData)
+            .map(key => encodeURIComponent(key) + '=' + encodeURIComponent(postData[key]))
+            .join('&');
+
+        fetch(`<?= BASE_URL ?>/requests/update/${postId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: urlEncodedData
+        })
+            .then(response => response.text().then(text => {
+                console.log('Raw response:', text);
+                try {
+                    return JSON.parse(text);
+                } catch (e) {
+                    console.error('JSON parse error:', e);
+                    throw new Error('Server returned invalid JSON');
+                }
+            }))
+            .then(data => {
+                console.log('Parsed response:', data);
+
+                if (data.success) {
+                    closeDialogBox('create-post-popup');
+                    window.showSuccessToast('Success!', 'Post updated successfully!');
+
+                    setTimeout(() => {
+                        const activeSection = document.querySelector('.requests-section:not([style*="display: none"])');
+                        const status = activeSection.classList.contains('active-posts') ? 'active' :
+                            activeSection.classList.contains('draft-posts') ? 'draft' : 'expired';
+                        loadPosts(status);
+                    }, 500);
+
+                    document.getElementById('create-post-form').reset();
+                    inputReset('create-post-form');
+                } else {
+                    window.showErrorToast("Error", data.message || 'Failed to update post');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                window.showErrorToast("Error", error.message || 'An error occurred');
+            });
+    }
+
+    // Update the editPost function to attach save handler
+    function editPost(id) {
+        viewDialogBox('create-post-popup');
+
+        fetch("<?= BASE_URL ?>/requests/view/" + id)
             .then(response => response.json())
             .then(post => {
                 if (post.error) {
@@ -894,35 +1182,17 @@ if (!function_exists('str_snippet')) {
                     return;
                 }
 
-                // Format date
-                const publishDate = post.Published_At ?
-                    new Date(post.Published_At).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                    }) : 'N/A';
-
-                root.querySelector(".pop-up-title").innerText = "Edit Post";
+                const root = document.getElementById("create-post-popup");
+                root.querySelector(".title").innerText = "Edit Post";
                 root.querySelectorAll(".label").forEach(label => {
                     label.classList.add("label-float");
                 });
                 root.querySelector("#field-skill-label").classList.remove("label-float");
+
                 root.querySelector("input[name='title']").value = post.Title || '';
                 root.querySelector("textarea[name='description']").value = post.Description || '';
-
                 root.querySelector("input[name='category']").value = post.Category_Name || '';
                 document.getElementById("Category_ID").value = post.Category_ID || '';
-
-                // Clear existing skills first
-                const skillsChips = root.querySelector("#SkillsChips");
-                skillsChips.innerHTML = '<input type="hidden" id="Skills" name="skills"><p>No skill selected</p>';
-
-                // Add each skill using the existing addChip function
-                if (post.skills && post.skills.length > 0) {
-                    post.skills.forEach(skill => {
-                        addChip('SkillsChips', skill);
-                    });
-                }
 
                 root.querySelector("input[name='price']").value = post.Requesting_Price || '';
                 root.querySelector("input[name='pricetype']").value = post.Price_Type || '';
@@ -930,17 +1200,57 @@ if (!function_exists('str_snippet')) {
                 root.querySelector("input[name='durationtype']").value = post.Duration_Type || '';
                 root.querySelector("input[name='level']").value = post.Level || '';
 
-
                 const endAtInput = root.querySelector("input[name='endat']");
                 if (post.End_At) {
-                    // Extract date part from datetime string (format: YYYY-MM-DD HH:MM:SS)
-                    const datePart = post.End_At.split(' ')[0];
-                    endAtInput.value = datePart;
+                    // End_At might be "2025-12-31 00:00:00" or "2025-12-31"
+                    let dateValue = post.End_At.split(' ')[0]; // Get just the date part "2025-12-31"
+
+                    // Verify it's a valid date and format is correct
+                    const dateObj = new Date(dateValue);
+                    if (!isNaN(dateObj.getTime())) {
+                        // Format as YYYY-MM-DD
+                        const year = dateObj.getFullYear();
+                        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                        const day = String(dateObj.getDate()).padStart(2, '0');
+                        dateValue = `${year}-${month}-${day}`;
+
+                        console.log("Setting end date to:", dateValue);
+                        endAtInput.value = dateValue;
+                    } else {
+                        console.error("Invalid date:", post.End_At);
+                        endAtInput.value = '';
+                    }
                 } else {
                     endAtInput.value = '';
                 }
 
-                // Change buttons: hide draft/publish, show save button
+                // Use selectCategory to load skills for the category
+                if (post.Category_ID) {
+                    const categoryOption = document.querySelector(`.search-select-container [data-id="${post.Category_ID}"]`);
+                    if (categoryOption) {
+                        // Call selectCategory with skipReset = true to not clear existing chips yet
+                        selectCategory({ target: categoryOption }, true);
+                    }
+                }
+
+                // Add skills after loading category skills
+                setTimeout(() => {
+                    const skillsChips = root.querySelector("#SkillsChips");
+                    skillsChips.innerHTML = '<input type="hidden" id="Skills" name="skills"><p>No skill selected</p>';
+
+                    if (post.skills && post.skills.length > 0) {
+                        post.skills.forEach(skill => {
+                            const skillOptions = document.getElementById("SkillsOptionList").querySelectorAll('[data-id]');
+                            const matchingOption = Array.from(skillOptions).find(opt => opt.textContent.trim() === skill);
+
+                            if (matchingOption) {
+                                addChip('SkillsChips', skill, matchingOption.dataset.id);
+                            }
+                        });
+                    }
+                }, 500);
+
+                // Change buttons
                 const saveDraftBtn = root.querySelector('[data-role="save-draft"]');
                 const publishBtn = root.querySelector('[data-role="publish"]');
                 const savePostBtn = root.querySelector('[data-role="save-post"]');
@@ -949,30 +1259,13 @@ if (!function_exists('str_snippet')) {
                 if (publishBtn) publishBtn.style.display = 'none';
                 if (savePostBtn) {
                     savePostBtn.style.display = '';
-                    // Set the post ID for update
                     savePostBtn.setAttribute('data-post-id', post.Post_ID);
-                }
 
-                // Load skills for the selected category
-                if (post.Category_ID) {
-                    fetch("<?= BASE_URL ?>/posts/get-skills", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                        body: "category_id=" + encodeURIComponent(post.Category_ID)
-                    })
-                        .then(res => res.json())
-                        .then(data => {
-                            if (data.status === 'ok') {
-                                const skillsOptionList = document.getElementById("SkillsOptionList");
-                                skillsOptionList.innerHTML = '';
-                                data.result.forEach(element => {
-                                    addItemToDropdown("SkillAddInput", element.Skill, false);
-                                });
-                            }
-                        })
-                        .catch(err => console.error('Error loading skills:', err));
+                    // Remove old event listeners and add new one
+                    const newSaveBtn = savePostBtn.cloneNode(true);
+                    savePostBtn.parentNode.replaceChild(newSaveBtn, savePostBtn);
+                    newSaveBtn.onclick = saveEditedPost;
                 }
-
             })
             .catch(error => {
                 console.error('Error fetching post:', error);
@@ -980,69 +1273,227 @@ if (!function_exists('str_snippet')) {
             });
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
-        // Get all elements with id 'create-post-pop-up' (buttons to open modal)
-        const createPostBtns = document.querySelectorAll('[id="create-post-pop-up"]');
+    function deletePost(id) {
+        viewDialogBox('confirm-delete');
 
-        createPostBtns.forEach(btn => {
-            btn.addEventListener('click', function (e) {
-                const root = document.querySelector('.create-post-pop-up');
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
 
-                // Check if we're opening the modal (has deactive class)
-                if (root && root.classList.contains('deactive')) {
-                    // Reset the entire form
-                    const form = document.getElementById('create-post-form');
-                    if (form) {
-                        form.reset();
+        // Remove previous event listeners to avoid multiple triggers
+        const newConfirmDeleteBtn = confirmDeleteBtn.cloneNode(true);
+        confirmDeleteBtn.parentNode.replaceChild(newConfirmDeleteBtn, confirmDeleteBtn);
+
+        newConfirmDeleteBtn.addEventListener('click', function () {
+            fetch("<?= BASE_URL ?>/requests/delete/" + id, {
+                method: 'POST'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        closeDialogBox('confirm-delete');
+                        window.showSuccessToast("Success!", "Post deleted successfully");
+
+                        // Remove from DOM with animation
+                        const postElement = document.querySelector(`.search-item input[value="${id}"]`)?.closest('.search-item');
+                        if (postElement) {
+                            postElement.style.transition = 'all 0.3s ease';
+                            postElement.style.opacity = '0';
+                            postElement.style.transform = 'translateX(-20px)';
+
+                            setTimeout(() => {
+                                postElement.remove();
+
+                                // Check if section is now empty
+                                const activeSection = document.querySelector('.requests-section:not([style*="display: none"])');
+                                const itemList = activeSection?.querySelector('.item-list');
+                                const remainingPosts = itemList?.querySelectorAll('.search-item');
+
+                                if (remainingPosts && remainingPosts.length === 0) {
+                                    const status = activeSection.classList.contains('active-posts') ? 'active' :
+                                        activeSection.classList.contains('draft-posts') ? 'draft' : 'expired';
+                                    showEmptyState(status, itemList);
+                                }
+                            }, 300);
+                        }
+                    } else {
+                        window.showErrorToast("Error", data.error || 'Failed to delete post');
                     }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showErrorToast("Error", 'An error occurred while deleting the post. Please try again.');
+                });
+        });
+    }
 
-                    // Clear skills chips
-                    const skillsChips = document.querySelector("#SkillsChips");
-                    if (skillsChips) {
-                        skillsChips.innerHTML = '<input type="hidden" id="Skills" name="skills"><p>No skill selected</p>';
+    function publishDraft(id) {
+        viewDialogBox('confirm-publish');
+
+        const confirmPublishBtn = document.getElementById('confirmPublishBtn');
+        const newConfirmPublishBtn = confirmPublishBtn.cloneNode(true);
+        confirmPublishBtn.parentNode.replaceChild(newConfirmPublishBtn, confirmPublishBtn);
+
+        newConfirmPublishBtn.onclick = function () {
+            fetch(`<?= BASE_URL ?>/requests/publish/${id}`, {
+                method: 'POST'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        closeDialogBox('confirm-publish');
+                        window.showSuccessToast('Success!', 'Draft published successfully!');
+
+                        // Reload draft section and switch to active
+                        loadPosts('draft');
+                        setTimeout(() => {
+                            document.getElementById('active-posts').click();
+                        }, 500);
+                    } else {
+                        window.showErrorToast('Error', data.message || 'Failed to publish draft');
                     }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    window.showErrorToast('Error', 'An error occurred while publishing');
+                });
+        };
+    }
 
-                    // Clear category ID
-                    const categoryId = document.getElementById("Category_ID");
-                    if (categoryId) {
-                        categoryId.value = "";
-                    }
+    function repostExpired(id) {
+        // Load the post data into the create form and allow user to update end date
+        editPost(id);
 
-                    // Remove label-float from all labels
-                    root.querySelectorAll(".label").forEach(label => {
-                        label.classList.remove("label-float");
-                    });
+        // Change the title to indicate it's a repost
+        const root = document.getElementById("create-post-popup");
+        root.querySelector(".title").innerText = "Repost Service Request";
+        const saveDraftBtn = root.querySelector('[data-role="save-draft"]');
+        const publishBtn = root.querySelector('[data-role="publish"]');
+        const savePostBtn = root.querySelector('[data-role="save-post"]');
 
-                    // Clear skills dropdown
-                    const skillAddInput = document.getElementById("SkillAddInput");
-                    if (skillAddInput) {
-                        skillAddInput.value = "";
-                    }
-                    const skillsOptionList = document.getElementById("SkillsOptionList");
-                    if (skillsOptionList) {
-                        skillsOptionList.innerHTML = "";
-                    }
+        if (savePostBtn) savePostBtn.style.display = 'none';
+        if (saveDraftBtn && publishBtn) {
+            saveDraftBtn.style.display = '';
+            publishBtn.style.display = '';
+        }
 
-                    // Set title to "Create a New Post"
-                    const title = root.querySelector(".pop-up-title");
-                    if (title) {
-                        title.innerText = "Create a New Post";
-                    }
 
-                    // Show the draft/publish buttons, hide save button
-                    const saveDraftBtn = root.querySelector('[data-role="save-draft"]');
-                    const publishBtn = root.querySelector('[data-role="publish"]');
-                    const savePostBtn = root.querySelector('[data-role="save-post"]');
+    }
 
-                    if (saveDraftBtn) saveDraftBtn.style.display = '';
-                    if (publishBtn) publishBtn.style.display = '';
-                    if (savePostBtn) savePostBtn.style.display = 'none';
+
+    function updateAsExpired(id) {
+        fetch(`<?= BASE_URL ?>/requests/update-expired/${id}`, {
+            method: 'POST'
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Post marked as expired successfully');
+                } else {
+                    console.log('Error', data.message || 'Failed to mark post as expired');
                 }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+
+    function openCreateForm(id) {
+        const root = document.getElementById(id);
+        root.querySelector(".title").innerText = "Create A New Service Request";
+        // Change buttons: hide draft/publish, show save button
+        const saveDraftBtn = root.querySelector('[data-role="save-draft"]');
+        const publishBtn = root.querySelector('[data-role="publish"]');
+        const savePostBtn = root.querySelector('[data-role="save-post"]');
+
+        if (savePostBtn) savePostBtn.style.display = 'none';
+        if (saveDraftBtn && publishBtn) {
+            saveDraftBtn.style.display = '';
+            publishBtn.style.display = '';
+        }
+        viewDialogBox(id);
+    }
+
+    /**
+     * Initialize on page load
+     */
+    document.addEventListener('DOMContentLoaded', function () {
+        // Setup search input handler with debouncing
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', function(e) {
+                // Clear previous timeout
+                if (searchTimeout) {
+                    clearTimeout(searchTimeout);
+                }
+                
+                // Set new timeout to debounce search (wait 300ms after user stops typing)
+                searchTimeout = setTimeout(() => {
+                    currentSearch = e.target.value.trim();
+                    
+                    // Reload posts with search filter
+                    const activeSection = document.querySelector('.requests-section:not([style*="display: none"])');
+                    const status = activeSection.classList.contains('active-posts') ? 'active' :
+                                   activeSection.classList.contains('draft-posts') ? 'draft' : 'expired';
+                    loadPosts(status);
+                }, 300);
+            });
+        }
+        
+        // Setup sort dropdown handler
+        const sortOptions = document.getElementById('sortOptions');
+        if (sortOptions) {
+            sortOptions.addEventListener('click', function(e) {
+                const option = e.target.closest('[data-sort]');
+                if (option) {
+                    const sortValue = option.dataset.sort;
+                    const sortText = option.textContent;
+                    
+                    // Update dropdown display
+                    document.getElementById('sortDropdown').value = sortText;
+                    
+                    // Update global sort variable
+                    currentSort = sortValue;
+                    
+                    // Reload posts with new sort
+                    const activeSection = document.querySelector('.requests-section:not([style*="display: none"])');
+                    const status = activeSection.classList.contains('active-posts') ? 'active' :
+                                   activeSection.classList.contains('draft-posts') ? 'draft' : 'expired';
+                    loadPosts(status);
+                }
+            });
+        }
+
+        // Load active posts on initial page load
+        loadPosts('active');
+
+        // Handle tab switching
+        const tabButtons = {
+            'active-posts': document.getElementById('active-posts'),
+            'draft-posts': document.getElementById('draft-posts'),
+            'expired-posts': document.getElementById('expired-posts')
+        };
+
+        const sections = {
+            'active-posts': document.querySelector('.active-posts'),
+            'draft-posts': document.querySelector('.draft-posts'),
+            'expired-posts': document.querySelector('.expired-posts')
+        };
+
+        Object.keys(tabButtons).forEach(key => {
+            tabButtons[key].addEventListener('click', function () {
+                // Remove active class from all buttons
+                Object.values(tabButtons).forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+
+                // Hide all sections
+                Object.values(sections).forEach(section => section.style.display = 'none');
+
+                // Show selected section and load posts
+                const status = key.replace('-posts', '');
+                sections[key].style.display = 'block';
+                loadPosts(status);
             });
         });
     });
-
-
 
 </script>
 

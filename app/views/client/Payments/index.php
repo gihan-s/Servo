@@ -12,15 +12,6 @@
 
 <body>
 
-  <!-- Breadcrumb -->
-  <!--<div class="breadcrumb">
-        <div class="breadcrumb-content">
-            <a href="client-dashboard.html">Dashboard</a>
-            <span>›</span>
-            <span>My Jobs</span>
-        </div>
-    </div>-->
-
   <?php require_once __DIR__ . '/../../includes/navbar.php'; ?>
   <!-- Main Content -->
   <div class="main-content">
@@ -29,7 +20,6 @@
 
   <!-- Footer -->
   <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
-
   
 </body>
 

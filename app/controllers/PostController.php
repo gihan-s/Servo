@@ -1,16 +1,12 @@
 <?php
 
-require_once __DIR__ . '/../models/ClientModel.php';
-require_once __DIR__ . '/../models/ProviderModel.php';
 require_once __DIR__ . '/../models/PostModel.php';
 require_once __DIR__ . '/../models/PostSkillsModel.php';
 require_once __DIR__ . '/../models/SkillsModel.php';
 require_once __DIR__ . '/../models/CategoryModel.php';
 
-class PostController
+class PostController extends BaseController
 {
-    private ClientModel $clientModel;
-    private ProviderModel $providerModel;
     private PostModel $postModel;
     private PostSkillsModel $postSkillsModel;
     private SkillsModel $skillsModel;
@@ -18,8 +14,7 @@ class PostController
 
     public function __construct()
     {
-        $this->clientModel = new ClientModel();
-        $this->providerModel = new ProviderModel();
+        parent::__construct();
         $this->postModel = new PostModel();
         $this->postSkillsModel = new PostSkillsModel();
         $this->skillsModel = new SkillsModel();
@@ -79,6 +74,36 @@ class PostController
         return $out;
     }
 
+    public function getPosts(): void
+    {
+        header('Content-Type: application/json');
+
+        $this->ensureAuth();
+
+        $userId = $_SESSION['user_id'];
+        $status = $_GET['status'] ?? 'active'; // active, draft, or expired
+        $sort = $_GET['sort'] ?? 'date_desc'; // date_desc, date_asc, price_desc, price_asc, views_desc, views_asc
+        $search = $_GET['search'] ?? ''; // search query
+
+        error_log("getPosts - User: $userId, Status: $status, Sort: $sort, Search: '$search'");
+
+        try {
+            $posts = $this->postModel->getPosts($userId, $status, $sort, $search);
+            $postsWithSkills = $this->assemblePostsWithSkills($posts);
+
+            echo json_encode([
+                'success' => true,
+                'posts' => $postsWithSkills
+            ]);
+        } catch (Exception $e) {
+            error_log('Error fetching posts: ' . $e->getMessage());
+            echo json_encode([
+                'success' => false,
+                'message' => 'Failed to fetch posts'
+            ]);
+        }
+    }
+
     public function index(): void
     {
         $this->ensureAuth();
@@ -87,19 +112,11 @@ class PostController
         $role = $_SESSION['role'];
 
         if ($role === 'Client') {
-            $actives = $this->postModel->getPosts($userId, 'active');
-            $drafts = $this->postModel->getPosts($userId, 'draft');
-            $expireds = $this->postModel->getPosts($userId, 'expired');
-
-            // Each is an array of dictionaries with keys: post, skills
-            $activePosts = $this->assemblePostsWithSkills($actives);
-            $draftPosts = $this->assemblePostsWithSkills($drafts);
-            $expiredPosts = $this->assemblePostsWithSkills($expireds);
-
+            // Don't load posts here - let JavaScript do it via AJAX
             $data = [
-                'activePosts' => $activePosts,
-                'draftPosts' => $draftPosts,
-                'expiredPosts' => $expiredPosts,
+                'activePosts' => [],
+                'draftPosts' => [],
+                'expiredPosts' => [],
             ];
             $categories = $this->categoryModel->getCategories();
 
@@ -116,127 +133,413 @@ class PostController
     }
 
 
-    public function draftPost(): void
+    // public function draftPost(): void
+    // {
+    //     $this->ensureAuth();
+    //     $Published_At = null;
+    //     $this->create('draft', $Published_At);
+    // }
+
+    // public function publishPost(): void
+    // {
+    //     $this->ensureAuth();
+    //     $Published_At = date('Y-m-d H:i:s');
+    //     $this->create( $Published_At);
+    // }
+
+    public function create(): void
     {
-        $this->ensureAuth();
-        $Published_At = null;
-        $this->create('draft', $Published_At);
+        if (ob_get_level())
+            ob_clean();
+
+        header('Content-Type: application/json');
+
+        try {
+            // Log received data
+            error_log("Received POST data: " . print_r($_POST, true));
+
+            $title = $_POST['title'] ?? '';
+            $description = $_POST['description'] ?? '';
+            $categoryId = $_POST['category_id'] ?? '';
+            $skills = $_POST['skills'] ?? '';
+            $price = $_POST['price'] ?? '';
+            $priceType = $_POST['price_type'] ?? '';
+            $duration = $_POST['duration'] ?? '';
+            $durationType = $_POST['duration_type'] ?? '';
+            $level = $_POST['level'] ?? '';
+            $endAt = $_POST['end_at'] ?? '';
+            $status = $_POST['status'] ?? 'draft';
+            $publishedAt = $status === 'publish' ? date('Y-m-d H:i:s') : null;
+
+            if (empty($title) || empty($description) || empty($categoryId)) {
+                error_log("Validation failed - missing required fields");
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Title, description, and category are required'
+                ]);
+                return;
+            }
+
+            $clientId = $_SESSION['user_id'] ?? null;
+            error_log("Client ID from session: " . $clientId);
+
+            if (!$clientId) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'User not authenticated'
+                ]);
+                return;
+            }
+
+            $postData = [
+                'Client_ID' => $clientId,
+                'Title' => $title,
+                'Description' => $description,
+                'Category_ID' => $categoryId,
+                'Requesting_Price' => $price ?: '0',
+                'Price_Type' => $priceType ?: 'Fixed',
+                'Duration' => $duration ?: '0',
+                'Duration_Type' => $durationType ?: 'Days',
+                'Level' => $level ?: 'Beginner',
+                'End_At' => $endAt ?: date('Y-m-d', strtotime('+30 days')),
+                'Status' => $status === 'publish' ? 'active' : 'draft',
+                'Published_At' => $publishedAt
+            ];
+
+            error_log("Creating post with data: " . print_r($postData, true));
+
+            $postId = $this->postModel->createPost($postData);
+            error_log("createPost returned: " . var_export($postId, true));
+
+            if (!$postId) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Failed to create post - check error log'
+                ]);
+                return;
+            }
+
+            // Add skills
+            if (!empty($skills)) {
+                $skillIds = explode(',', $skills);
+                error_log("Adding skills: " . print_r($skillIds, true));
+                foreach ($skillIds as $skillId) {
+                    $skillId = trim($skillId);
+                    if (!empty($skillId)) {
+                        $this->postSkillsModel->addPostSkill($postId, $skillId);
+                    }
+                }
+            }
+
+            echo json_encode([
+                'success' => true,
+                'message' => $status === 'publish' ? 'Post published successfully' : 'Draft saved successfully',
+                'post_id' => $postId
+            ]);
+
+        } catch (Exception $e) {
+            error_log('Error creating post: ' . $e->getMessage());
+            error_log('Stack trace: ' . $e->getTraceAsString());
+            echo json_encode([
+                'success' => false,
+                'message' => 'An error occurred while creating the post'
+            ]);
+        }
     }
 
-    public function publishPost(): void
+    public function viewPost($id): void
     {
-        $this->ensureAuth();
-        $Published_At = date('Y-m-d H:i:s');
-        $this->create('active', $Published_At);
-    }
+        header('Content-Type: application/json');
 
-    public function create($status, $Published_At): void
-    {
-        $this->ensureAuth();
-
-        $userId = (int) $_SESSION['user_id'];
-        $role = $_SESSION['role'];
-
-        $title = $_POST['title'] ?? '';
-        $description = $_POST['description'] ?? '';
-        $categoryId = (int) ($_POST['categoryid'] ?? 0);
-        $price = (float) ($_POST['price'] ?? 0);
-        $pricetype = $_POST['pricetype'] ?? 'fixed';
-        $duration = (int) ($_POST['duration'] ?? 0);
-        $durationtype = $_POST['durationtype'] ?? 'days';
-        $createdAt = date('Y-m-d H:i:s');
-        $level = $_POST['level'] ?? 'beginner';
-        $endAt = $_POST['endat'];
-
-        if ($categoryId <= 0) {
-            $_SESSION['form_error'] = 'Please select a category.';
-            header('Location: ' . '/requests');
-            exit;
+        $id = (int) $id;
+        if ($id <= 0) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid post id']);
+            return;
         }
 
-        // skills can arrive as JSON string or array
-        $skills = $_POST['skills'] ?? '[]';
+        // Implement this in PostModel to return ONE row (or rename to your actual method)
+        $post = $this->postModel->getPostById($id);
 
-        $postId = $this->postModel->createPost(
-            $userId,
-            $title,
-            $description,
-            $price,
-            $pricetype,
-            $duration,
-            $durationtype,
-            $categoryId,
-            $createdAt,
-            $level,
-            $endAt,
-            $Published_At,
-            $status,
-            "post"
-        );
+        if (!$post) {
+            http_response_code(404);
+            echo json_encode(['error' => 'Post not found']);
+            return;
+        }
 
-        if ($postId > 0) {
-            // $skills is array of IDs (preferred) or names
-            $this->skillsModel->insertPostSkill($postId, $skills);
-            header('Location: ' . '/requests');
+        // Reuse existing helper to get skills for this post
+        $skills = $this->postSkillsModel->getPostSkills($id);
+
+        $response = [
+            'Post_ID' => $post['Post_ID'] ?? null,
+            'Title' => $post['Title'] ?? '',
+            'Description' => $post['Description'] ?? '',
+            'Requesting_Price' => $post['Requesting_Price'] ?? '',
+            'Price_Type' => $post['Price_Type'] ?? '',
+            'Level' => $post['Level'] ?? '',
+            'Duration' => $post['Duration'] ?? '',
+            'Duration_Type' => $post['Duration_Type'] ?? '',
+            'Proposal_Count' => $post['Proposal_Count'] ?? ($post['ProposalsCount'] ?? 0),
+            'Published_At' => $post['Published_At'] ?? ($post['Created_At'] ?? null),
+            'End_At' => $post['End_At'] ?? null,
+            'Views' => $post['Views'] ?? ($post['View_Count'] ?? null),
+            'Category_Name' => $post['CategoryName'] ?? '',
+            'Category_ID' => $post['Category_ID'] ?? null,
+            'skills' => array_column($skills, 'Skill'),
+        ];
+
+        echo json_encode($response);
+    }
+
+    public function deletePost($id): void
+    {
+        header('Content-Type: application/json');
+
+        $id = (int) $id;
+        if ($id <= 0) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid post id']);
+            return;
+        }
+
+        $success = $this->postModel->deletePost($id);
+
+        if ($success) {
+            echo json_encode(['success' => true, 'message' => 'Post deleted successfully']);
         } else {
-            error_log('createPost failed, got PostID=0');
-            $_SESSION['form_error'] = 'Could not create post. Please try again.';
-            header('Location: ' . '/requests');
-            exit;
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => 'Failed to delete post']);
         }
     }
 
-public function viewPost($id): void
-{
-    header('Content-Type: application/json');
-
-    $id = (int) $id;
-    if ($id <= 0) {
-        http_response_code(400);
-        echo json_encode(['error' => 'Invalid post id']);
-        return;
-    }
-
-    // Implement this in PostModel to return ONE row (or rename to your actual method)
-    $post = $this->postModel->getPostById($id);
-
-    if (!$post) {
-        http_response_code(404);
-        echo json_encode(['error' => 'Post not found']);
-        return;
-    }
-
-    // Reuse existing helper to get skills for this post
-    $skills = $this->postSkillsModel->getPostSkills($id);
-
-    $response = [
-        'Post_ID'          => $post['Post_ID'] ?? null,
-        'Title'            => $post['Title'] ?? '',
-        'Description'      => $post['Description'] ?? '',
-        'Requesting_Price' => $post['Requesting_Price'] ?? '',
-        'Price_Type'       => $post['Price_Type'] ?? '',
-        'Level'            => $post['Level'] ?? '',
-        'Duration'         => $post['Duration'] ?? '',
-        'Duration_Type'    => $post['Duration_Type'] ?? '',
-        'Proposal_Count'   => $post['Proposal_Count'] ?? ($post['ProposalsCount'] ?? 0),
-        'Published_At'     => $post['Published_At'] ?? ($post['Created_At'] ?? null),
-        'Views'            => $post['Views'] ?? ($post['View_Count'] ?? null),
-        'Category_Name'    => $post['CategoryName'] ?? '',
-        'Category_ID'      => $post['Category_ID'] ?? null,
-        'skills'           => array_column($skills, 'Skill'),
-    ];
-
-    echo json_encode($response);
-}
-
-
-    private function ensureAuth(): void
+    public function markAsExpired($id): void
     {
-        if (empty($_SESSION['user_id']) || empty($_SESSION['role'])) {
-            $_SESSION['flash'] = ['type' => 'error', 'message' => 'Please log in first'];
-            header("Location: /login");
-            exit;
+        if (ob_get_level())
+            ob_clean();
+
+        header('Content-Type: application/json');
+
+        try {
+            $id = (int) $id;
+            if ($id <= 0) {
+                error_log("Invalid post ID for expiring: $id");
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Invalid post ID'
+                ]);
+                exit;
+            }
+
+            error_log("Attempting to mark post ID as expired: $id");
+
+            $success = $this->postModel->markPostAsExpired($id);
+
+            if ($success) {
+                error_log("Post $id marked as expired successfully");
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Post marked as expired successfully'
+                ]);
+            } else {
+                error_log("Failed to mark post $id as expired");
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Failed to mark post as expired. Post may not exist.'
+                ]);
+            }
+
+        } catch (Exception $e) {
+            error_log('Exception marking post as expired: ' . $e->getMessage());
+            echo json_encode([
+                'success' => false,
+                'message' => 'An error occurred while marking as expired: ' . $e->getMessage()
+            ]);
         }
+
+        exit;
     }
 
+    public function updatePost($id): void
+    {
+        error_log("=== UPDATE POST CALLED ===");
+        error_log("Post ID: $id");
+        error_log("POST Data: " . print_r($_POST, true));
+
+        if (ob_get_level())
+            ob_clean();
+
+        header('Content-Type: application/json');
+
+        try {
+            $id = (int) $id;
+            if ($id <= 0) {
+                error_log("ERROR: Invalid post ID");
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Invalid post ID'
+                ]);
+                exit;
+            }
+
+            $title = $_POST['title'] ?? '';
+            $description = $_POST['description'] ?? '';
+            $categoryId = $_POST['category_id'] ?? '';
+            $skills = $_POST['skills'] ?? '';
+            $price = $_POST['price'] ?? '';
+            $priceType = $_POST['price_type'] ?? '';
+            $duration = $_POST['duration'] ?? '';
+            $durationType = $_POST['duration_type'] ?? '';
+            $level = $_POST['level'] ?? '';
+            $endAt = $_POST['end_at'] ?? '';
+
+            error_log("Raw end_at received: '$endAt'");
+
+            // Validate and format the date
+            if (empty($endAt) || $endAt === '0000-00-00') {
+                error_log("Empty or zero date, using default");
+                $endAt = date('Y-m-d', strtotime('+30 days'));
+            } else {
+                // Validate date format
+                $dateObj = DateTime::createFromFormat('Y-m-d', $endAt);
+                if ($dateObj && $dateObj->format('Y-m-d') === $endAt) {
+                    // Date is valid
+                    error_log("Valid date format: '$endAt'");
+                } else {
+                    error_log("Invalid date format: '$endAt', using default");
+                    $endAt = date('Y-m-d', strtotime('+30 days'));
+                }
+            }
+
+            error_log("Final end_at to save: '$endAt'");
+
+            if (empty($title) || empty($description) || empty($categoryId)) {
+                error_log("ERROR: Missing required fields");
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Title, description, and category are required'
+                ]);
+                exit;
+            }
+
+            $postData = [
+                'Title' => $title,
+                'Description' => $description,
+                'Category_ID' => $categoryId,
+                'Requesting_Price' => $price ?: '0',
+                'Price_Type' => $priceType ?: 'Fixed',
+                'Duration' => $duration ?: '0',
+                'Duration_Type' => $durationType ?: 'Days',
+                'Level' => $level ?: 'Beginner',
+                'End_At' => $endAt
+            ];
+
+            error_log("Post data to update: " . json_encode($postData));
+
+            $success = $this->postModel->updatePost($id, $postData);
+            error_log("postModel->updatePost result: " . ($success ? 'TRUE' : 'FALSE'));
+
+            if (!$success) {
+                error_log("ERROR: Failed to update post in database");
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Failed to update post'
+                ]);
+                exit;
+            }
+
+            // Update skills
+            error_log("=== STARTING SKILLS UPDATE ===");
+            $this->postSkillsModel->deletePostSkills($id);
+
+            if (!empty($skills)) {
+                error_log("Raw skills received: '$skills'");
+
+                $skillIds = [];
+                if (strpos($skills, '[') === 0 || strpos($skills, '{') === 0) {
+                    $decoded = json_decode($skills, true);
+                    if (is_array($decoded)) {
+                        foreach ($decoded as $item) {
+                            if (isset($item['id'])) {
+                                $skillIds[] = $item['id'];
+                            }
+                        }
+                    }
+                } else {
+                    $skillIds = array_map('trim', explode(',', $skills));
+                }
+
+                foreach ($skillIds as $skillId) {
+                    if (!empty($skillId) && is_numeric($skillId)) {
+                        $this->postSkillsModel->addPostSkill($id, (int) $skillId);
+                    }
+                }
+            }
+
+            error_log("=== UPDATE POST COMPLETED SUCCESSFULLY ===");
+            echo json_encode([
+                'success' => true,
+                'message' => 'Post updated successfully',
+                'post_id' => $id
+            ]);
+
+        } catch (Exception $e) {
+            error_log('=== UPDATE POST EXCEPTION ===');
+            error_log('Error: ' . $e->getMessage());
+            error_log('Stack trace: ' . $e->getTraceAsString());
+
+            echo json_encode([
+                'success' => false,
+                'message' => 'An error occurred while updating the post'
+            ]);
+        }
+
+        exit;
+    }
+
+    public function publishById($id): void
+    {
+        if (ob_get_level())
+            ob_clean();
+
+        header('Content-Type: application/json');
+
+        try {
+            $id = (int) $id;
+            if ($id <= 0) {
+                error_log("Invalid post ID for publishing: $id");
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Invalid post ID'
+                ]);
+                exit;
+            }
+
+            error_log("Attempting to publish post ID: $id");
+
+            $success = $this->postModel->publishPost($id);
+
+            if ($success) {
+                error_log("Post $id published successfully");
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Draft published successfully'
+                ]);
+            } else {
+                error_log("Failed to publish post $id");
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Failed to publish draft. Post may not exist or is not a draft.'
+                ]);
+            }
+
+        } catch (Exception $e) {
+            error_log('Exception publishing post: ' . $e->getMessage());
+            echo json_encode([
+                'success' => false,
+                'message' => 'An error occurred while publishing: ' . $e->getMessage()
+            ]);
+        }
+
+        exit;
+    }
 }

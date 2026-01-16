@@ -255,37 +255,89 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // Tab switching functionality for client-side job management
+
+const tabs = document.querySelectorAll('.buttons');
+const sections = document.querySelectorAll('.requests-section');
+
+tabs.forEach(tab => {
+    tab.addEventListener('click', function () {
+        // Remove active class from all tabs and sections
+        tabs.forEach(t => t.classList.remove('active'));
+        sections.forEach(s => {
+            s.classList.remove('active');
+            s.style.display = 'none';
+        });
+
+        // Add active class to clicked tab
+        this.classList.add('active');
+
+        // Show corresponding section based on tab ID
+        let sectionClass = '';
+        if (this.id === 'active-posts') {
+            sectionClass = 'active-posts';
+        } else if (this.id === 'draft-posts') {
+            sectionClass = 'draft-posts';
+        } else if (this.id === 'expired-posts') {
+            sectionClass = 'expired-posts';
+        }
+
+        const section = document.querySelector('.' + sectionClass);
+        if (section) {
+            section.classList.add('active');
+            section.style.display = 'block';
+        }
+    });
+});
+
 document.addEventListener('DOMContentLoaded', function () {
-    const tabs = document.querySelectorAll('.buttons');
-    const sections = document.querySelectorAll('.requests-section');
-
-    tabs.forEach(tab => {
-        tab.addEventListener('click', function () {
-            // Remove active class from all tabs and sections
-            tabs.forEach(t => t.classList.remove('active'));
-            sections.forEach(s => {
-                s.classList.remove('active');
-                s.style.display = 'none';
-            });
-
-            // Add active class to clicked tab
-            this.classList.add('active');
-
-            // Show corresponding section based on tab ID
-            let sectionClass = '';
-            if (this.id === 'active-posts') {
-                sectionClass = 'active-posts';
-            } else if (this.id === 'draft-posts') {
-                sectionClass = 'draft-posts';
-            } else if (this.id === 'expired-posts') {
-                sectionClass = 'expired-posts';
-            }
-
-            const section = document.querySelector('.' + sectionClass);
-            if (section) {
-                section.classList.add('active');
-                section.style.display = 'block';
+    document.querySelectorAll('.search-filters .filter-item .radios li').forEach(option => {
+        option.addEventListener('click', function () {
+            if (!this.querySelector('input').checked) {
+                this.querySelector('input').checked = true;
             }
         });
     });
+
+    // Toggle the checkbox state when the label is clicked
+
+    document.querySelectorAll('.search-filters .filter-item .checkboxes li').forEach(option => {
+        option.addEventListener('click', function () {
+            if (!this.querySelector('input').checked) {
+                this.querySelector('input').checked = true;
+            }
+            else {
+                this.querySelector('input').checked = false;
+            }
+        });
+    });
+
+    // Toggle the checkbox state when the input is clicked
+
+    document.querySelectorAll('.search-filters .filter-item .checkboxes li input').forEach(option => {
+        option.addEventListener('click', function () {
+            if (!this.checked) {
+                this.checked = true;
+            }
+            else {
+                this.checked = false;
+            }
+        });
+    });
+
+    // Toggle the filter options when the title is clicked
+
+    document.querySelectorAll('.filter-item .filter-title').forEach(option => {
+        option.addEventListener('click', function () {
+            this.querySelector('i').classList.toggle('rotated');
+            if (this.nextElementSibling.clientHeight === 0) {
+                this.nextElementSibling.style.height = this.nextElementSibling.children[0].offsetHeight * this.nextElementSibling.childElementCount + 'px';
+            }
+            else {
+                this.nextElementSibling.style.height = '0';
+            }
+        });
+    });
+
+
 });
+

@@ -1,3 +1,18 @@
+.main-container {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.filter-container {
+  min-width: 250px;
+} 
+
+.item-container {
+  width: 100%;
+}
+
+
 .buttons {
   padding: 12px 24px;
   border-radius: 12px;
@@ -19,7 +34,6 @@
 .item-list {
   display: grid;
   gap: 24px;
-  max-width: 1200px;
   margin: 0 auto;
   position: relative;
 }
@@ -112,9 +126,8 @@
 }
 
 .btn-edit:hover {
-  background: #008500;
+  background: #006800;
   color: white;
-  transform: translateY(-1px);
 }
 
 .btn-view {
@@ -124,9 +137,9 @@
 }
 
 .btn-view:hover {
-  background: #e5e7eb;
-  border-color: #d1d5db;
-  transform: translateY(-1px);
+  background: #006800;
+  border: 2px solid #006800;
+  color: white;
 }
 
 .btn-delete {
@@ -138,7 +151,6 @@
 .btn-delete:hover {
   background: #dc2626;
   color: white;
-  transform: translateY(-1px);
 }
 
 /* Post Content Section */
@@ -365,7 +377,7 @@
   white-space: nowrap;
   /* keep text on one line */
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   font-weight: 700;
   font-size: 13px;
   /* slightly smaller text */
@@ -383,8 +395,6 @@
 
 .post-job-btn:hover {
   background: #006600;
-  /* darker solid on hover */
-  transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(0, 133, 0, 0.4);
   text-decoration: none;
   /* ensure no underline on hover */
@@ -410,6 +420,7 @@
 .service-requests .container-changer {
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 20px;
 }
 
 .service-requests .container-changer .tab-buttons {
@@ -440,7 +451,7 @@
   display: flex;
   gap: 8px;
   align-items: center;
-  margin-top: -4px;
+  margin-top: 6px;
 }
 
 .post-view .chip {
@@ -457,7 +468,7 @@
 }
 
 .post-view-section {
-  margin-top: 10px;
+  margin-top: 15px;
 }
 
 .post-view-section .section-title {
@@ -531,6 +542,7 @@
   color: #6b7280;
   font-size: 13px;
   align-items: center;
+  margin-bottom: 20px;
 }
 
 /* Ensure all modals overlay above page content and are hidden when inactive */
@@ -626,27 +638,153 @@
   position: sticky;
   bottom: 0;
   background: #fff;
-  padding-top: 16px; /* visual separation when sticky */
-  z-index: 9999;
+  padding: 20px 0; /* visual separation when sticky */
+  z-index: 99;
 }
 
-.modal-actions .btn-edit {
-  border-color: #008500;
-  color: #008500;
-  background: #ffffff;
+/* ============================================
+   AJAX Loading States
+   ============================================ */
+
+/* Loading State */
+.loading-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--textColorGray, #6b7280);
 }
 
-.modal-actions .btn-edit:hover {
-  background: #008500;
-  color: #fff;
+.loading-state i {
+  font-size: 48px;
+  margin-bottom: 20px;
+  color: var(--accentColor, #ff6b35);
+  opacity: 0.8;
+  animation: spin 1s linear infinite;
 }
 
-.modal-actions .btn-view {
-  background: #f3f4f6;
-  color: #374151;
-  border: 2px solid #e5e7eb;
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-.modal-actions .btn-view:hover {
-  background: #e5e7eb;
+.loading-state p {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--textColor, #1f2937);
+}
+
+/* Error State */
+.error-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--textColorGray, #6b7280);
+}
+
+.error-state i {
+  font-size: 48px;
+  margin-bottom: 20px;
+  color: #ef4444;
+  opacity: 0.8;
+}
+
+.error-state p {
+  font-size: 16px;
+  margin-bottom: 20px;
+  color: var(--textColor, #1f2937);
+}
+
+.retry-btn {
+  margin-top: 15px;
+  padding: 12px 24px;
+  background-color: var(--accentColor, #ff6b35);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.retry-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  color: var(--textColorGray, #6b7280);
+}
+
+.empty-state i {
+  font-size: 64px;
+  margin-bottom: 24px;
+  opacity: 0.4;
+  color: var(--textColorGray, #9ca3af);
+}
+
+.empty-state h2 {
+  font-size: 22px;
+  margin-bottom: 12px;
+  color: var(--textColor, #1f2937);
+  font-weight: 600;
+}
+
+.empty-state p {
+  font-size: 15px;
+  color: var(--textColorGray, #6b7280);
+  line-height: 1.6;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* No Skills Indicator */
+.no-skills {
+  color: var(--textColorGray, #9ca3af);
+  font-style: italic;
+  font-size: 14px;
+}
+
+/* Smooth transitions for dynamically added posts */
+.search-item {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .loading-state,
+  .error-state,
+  .empty-state {
+    padding: 40px 15px;
+  }
+  
+  .loading-state i,
+  .error-state i {
+    font-size: 36px;
+  }
+  
+  .empty-state i {
+    font-size: 48px;
+  }
+  
+  .empty-state h2 {
+    font-size: 18px;
+  }
+  
+  .empty-state p {
+    font-size: 14px;
+  }
 }
