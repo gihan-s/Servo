@@ -7,25 +7,9 @@ $TopBarHeader = "Dashboard";
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
 
-    <!-- Fonts -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter">
-
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
-
-    <!-- css -->
-    <link rel="stylesheet" href="/assets/css/elementStyles.css">
-    <link rel="stylesheet" href="/assets/css/gridTemplates.css">
-
-    <link rel="stylesheet" href="/assets/css/admin-main.css">
-    <link rel="stylesheet" href="/assets/css/admin-sidebar.css">
-
-    <!-- Javascript -->
-    <script src="/assets/js/elementScript.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <script src="/assets/js/admin-script.js" defer></script>
-    <script src="/assets/js/admin-dashboardCharts.js" defer></script>
+    <?php include 'includes/links.php' ?>
+    
+    <script src="<?= BASE_URL ?>/assets/js/admin-dashboardCharts.js" defer></script>
 
 </head>
 
@@ -33,7 +17,6 @@ $TopBarHeader = "Dashboard";
 
     <?php include 'includes/sidebar.php'; ?>
     <?php include 'includes/topbar.php'; ?>
-
 
 
 
@@ -48,7 +31,7 @@ $TopBarHeader = "Dashboard";
                 <span>Currently Using the System</span>
             </div>
 
-            <img src="/assets/img/admin-icon/softwares.jpg" alt="">
+            <img src="<?= BASE_URL ?>/assets/img/admin-icon/softwares.jpg" alt="">
 
         </div>
 
@@ -60,7 +43,7 @@ $TopBarHeader = "Dashboard";
                 <span>Currently Delivering Services</span>
             </div>
 
-            <img src="/assets/img/admin-icon/invoices.webp" alt="">
+            <img src="<?= BASE_URL ?>/assets/img/admin-icon/invoices.webp" alt="">
 
         </div>
 
@@ -72,7 +55,7 @@ $TopBarHeader = "Dashboard";
                 <span>Currently Published</span>
             </div>
 
-            <img src="/assets/img/admin-icon/sales.webp" alt="">
+            <img src="<?= BASE_URL ?>/assets/img/admin-icon/sales.webp" alt="">
 
         </div>
 
@@ -84,7 +67,7 @@ $TopBarHeader = "Dashboard";
                 <span>No of Customers Added</span>
             </div>
 
-            <img src="/assets/img/admin-icon/accounting.png" alt="">
+            <img src="<?= BASE_URL ?>/assets/img/admin-icon/accounting.png" alt="">
 
         </div>
 

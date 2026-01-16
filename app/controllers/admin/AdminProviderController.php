@@ -1,6 +1,9 @@
 <?php
 
 require_once __DIR__ . '/../../models/ProviderModel.php';
+require_once __DIR__ . '/../../models/CategoryModel.php';
+require_once __DIR__ . '/../../models/SkillsModel.php';
+require_once __DIR__ . '/../../models/LocationModel.php';
 
 class AdminProviderController
 {
@@ -30,16 +33,36 @@ class AdminProviderController
 
     public function view($id)
     {
-        $model = new ProviderModel();
-        $user = $model->getProviderById($id);
-        
+        $ProviderModel = new ProviderModel();
+        $user = $ProviderModel->getProviderById($id);
         if (!$user) {
             echo "<p style='color:red;'>Provider not found</p>";
             return;
         }
-        
+
+        $categoryModel = new CategoryModel();
+        $categories = $categoryModel->getByProviderId($id);
+        $categoryIds = array_column($categories, 'ID');
+
+
+        $skillModel = new SkillsModel();
+        $skills    = $skillModel->getByProviderCategoryIds($categoryIds);
+
+        $locationModel = new LocationModel();
+        $locations = $locationModel->getByProviderCategoryIds($categoryIds);
+
+        foreach ($categories as &$category) {
+            $categoryId = $category['ID'];
+            $category['Skills']    = $skills[$categoryId] ?? [];
+            $category['Locations'] = $locations[$categoryId] ?? [];
+        }
+
+
+        $user['Categories'] = $categories;
+
         include __DIR__ . '/../../views/admin/providerView.php';
     }
+
 
     public function review()
     {
@@ -55,7 +78,7 @@ class AdminProviderController
         }
 
         $model->updateProviderStatus($_POST["provider_id"], $Status);
-        
+
         header("Location: ../Providers");
     }
 }

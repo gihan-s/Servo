@@ -7,24 +7,7 @@ $TopBarHeader = "Providers";
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Providers</title>
 
-    <!-- Fonts -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter">
-
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
-
-    <!-- css -->
-    <link rel="stylesheet" href="/assets/css/elementStyles.css">
-    <link rel="stylesheet" href="/assets/css/gridTemplates.css">
-
-    <link rel="stylesheet" href="/assets/css/admin-main.css">
-    <link rel="stylesheet" href="/assets/css/admin-sidebar.css">
-
-    <!-- Javascript -->
-    <script src="/assets/js/elementScript.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <script src="/assets/js/admin-script.js" defer></script>
+    <?php include 'includes/links.php' ?>
 
 </head>
 
@@ -44,7 +27,7 @@ $TopBarHeader = "Providers";
                 <span>Total Providers in System</span>
             </div>
 
-            <img src="/assets/img/admin-icon/customers.jpg" alt="">
+            <img src="<?= BASE_URL ?>/assets/img/admin-icon/customers.jpg" alt="">
 
         </div>
 
@@ -56,7 +39,7 @@ $TopBarHeader = "Providers";
                 <span>Pending for Approval</span>
             </div>
 
-            <img src="/assets/img/admin-icon/softwares.jpg" alt="">
+            <img src="<?= BASE_URL ?>/assets/img/admin-icon/softwares.jpg" alt="">
 
         </div>
 
@@ -68,7 +51,7 @@ $TopBarHeader = "Providers";
                 <span>Currently Providing Service</span>
             </div>
 
-            <img src="/assets/img/admin-icon/websites.jpg" alt="">
+            <img src="<?= BASE_URL ?>/assets/img/admin-icon/websites.jpg" alt="">
 
         </div>
 
@@ -81,7 +64,7 @@ $TopBarHeader = "Providers";
                 <span>Banned by System</span>
             </div>
 
-            <img src="/assets/img/admin-icon/pendingImp.webp" alt="">
+            <img src="<?= BASE_URL ?>/assets/img/admin-icon/pendingImp.webp" alt="">
 
         </div>
 
