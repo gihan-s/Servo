@@ -14,6 +14,12 @@
 // | Action_URL      | varchar(255)| YES  |     | NULL    |       |
 // +-----------------+-------------+------+-----+---------+-------+
 
+// Notification Data JSON Structure Examples:
+// {
+//     "title": "Your appointment is confirmed.",
+//     "content": 12345
+// }
+
 require_once __DIR__ . '/../core/Database.php';
 
 class NotificationModel extends Database {
@@ -87,6 +93,14 @@ class NotificationModel extends Database {
     public function markAllNotificationsAsReadByProviderId($providerId) {
         // $stmt = $this->conn->prepare("UPDATE Notification SET Is_Read = 1, Read_At = NOW() WHERE Provider_ID = ?");
         // $stmt->bind_param("i", $providerId);
+        // $stmt->execute();
+        // $stmt->close();
+        return true; // Placeholder
+    }
+
+    public function createNotification($data) {
+        // $stmt = $this->conn->prepare("INSERT INTO Notification (Client_ID, Provider_ID, Type, Data, Is_Read, Created_At, Action_URL) VALUES (?, ?, ?, ?, 0, NOW(), ?)");
+        // $stmt->bind_param("iisss", $data['client_id'], $data['provider_id'], $data['type'], json_encode($data['data']), $data['action_url']);
         // $stmt->execute();
         // $stmt->close();
         return true; // Placeholder
