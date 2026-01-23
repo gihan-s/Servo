@@ -16,8 +16,8 @@
 
 // Notification Data JSON Structure Examples:
 // {
-//     "title": "Your appointment is confirmed.",
-//     "content": 12345
+//     "Title": "Your appointment is confirmed.",
+//     "Content": 12345
 // }
 
 require_once __DIR__ . '/../core/Database.php';
@@ -34,6 +34,7 @@ class NotificationModel extends Database {
         return 5; // Placeholder
     } 
 
+    // direct method to get notifications for a client
     public function getNotificationsByClientId($clientId, $limit = 5, $offset = 0) {
         // $stmt = $this->conn->prepare("SELECT * FROM Notification WHERE Client_ID = ? ORDER BY Created_At DESC LIMIT ? OFFSET ?");
         // $stmt->bind_param("iii", $clientId, $limit, $offset);
@@ -41,9 +42,17 @@ class NotificationModel extends Database {
         // $result = $stmt->get_result();
         // $stmt->close();
         // return $result->fetch_all(MYSQLI_ASSOC);
-        return []; // Placeholder
+        return
+            [
+                ['Notification_ID' => 1, 'Data' => '{"Title": "Payment of $250 released for Project Alpha."}', 'Created_At' => '2025-12-30 11:39:00', 'Type' => 'payment', 'Is_Read' => true],
+                ['Notification_ID' => 2, 'Data' => '{"Title": "New bid received on your post: UI Revamp"}', 'Created_At' => '2025-12-30 11:30:00', 'Type' => 'bid', 'Is_Read' => true],
+                ['Notification_ID' => 3, 'Data' => '{"Title": "DevStudio Labs sent you a message."}', 'Created_At' => '2025-12-30 11:22:00', 'Type' => 'message', 'Is_Read' => false],
+                ['Notification_ID' => 4, 'Data' => '{"Title": "Contract milestone approved."}', 'Created_At' => '2025-12-30 10:00:00', 'Type' => 'milestone', 'Is_Read' => false],
+                ['Notification_ID' => 5, 'Data' => '{"Title": "New bid received on your post: Mobile App Development"}', 'Created_At' => '2025-12-29 16:45:00', 'Type' => 'bid', 'Is_Read' => true],
+            ]; // Placeholder
     }
 
+    // direct method to get notifications for a provider
     public function getNotificationsByProviderId($providerId, $limit = 5, $offset = 0) {
         // $stmt = $this->conn->prepare("SELECT * FROM Notification WHERE Provider_ID = ? ORDER BY Created_At DESC LIMIT ? OFFSET ?");
         // $stmt->bind_param("iii", $providerId, $limit, $offset);
@@ -54,6 +63,7 @@ class NotificationModel extends Database {
         return []; // Placeholder
     }
 
+    // method used for polling latest notifications since a given timestamp
     public function getLatestNotificationsByClientId($clientId, $sinceTimestamp, $limit = 5) {
         // $stmt = $this->conn->prepare("SELECT * FROM Notification WHERE Client_ID = ? AND Created_At > ? ORDER BY Created_At DESC LIMIT ?");
         // $stmt->bind_param("isi", $clientId, $sinceTimestamp, $limit);
@@ -64,6 +74,7 @@ class NotificationModel extends Database {
         return []; // Placeholder
     }
 
+    // method used for polling latest notifications since a given timestamp
     public function getLatestNotificationsByProviderId($providerId, $sinceTimestamp, $limit = 5) {
         // $stmt = $this->conn->prepare("SELECT * FROM Notification WHERE Provider_ID = ? AND Created_At > ? ORDER BY Created_At DESC LIMIT ?");
         // $stmt->bind_param("isi", $providerId, $sinceTimestamp, $limit);

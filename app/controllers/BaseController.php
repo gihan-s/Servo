@@ -11,8 +11,6 @@ class BaseController
     protected $providerModel;
     protected $notificationModel;
 
-    protected $notifications = [];
-    protected $unreadMessageCount = 3;
     protected $unreadNotificationCount = 2;
 
     public function __construct()
@@ -27,12 +25,25 @@ class BaseController
 
     public function loadNotifs($userId, $role)
     {
+        $this->notifications = [];
+        $this->unprocessedNotifications = [];
+        $this->unreadNotificationCount = 0;
         if ($role === 'Client') {
-            $notifications = $this->notificationModel->getNotificationsByClientId($userId, 10);
+            $this->unprocessedNotifications = $this->notificationModel->getNotificationsByClientId($userId, 10);
+            $this->unreadNotificationCount = $this->notificationModel->getUnreadNotificationsCountByClientId($userId);
+            foreach ($this->unprocessedNotifications as $notif) {
+                $data = json_decode($notif['Data'], true);
+                $this->notifications[] = array_merge($notif, $data);
+            }
         } elseif ($role === 'Provider') {
-            $notifications = $this->notificationModel->getNotificationsByProviderId($userId, 10);
+            $this->unprocessedNotifications = $this->notificationModel->getNotificationsByProviderId($userId, 10);
+            $this->unreadNotificationCount = $this->notificationModel->getUnreadNotificationsCountByProviderId($userId);
+            foreach ($this->unprocessedNotifications as $notif) {
+                $data = json_decode($notif['Data'], true);
+                $this->notifications[] = array_merge($notif, $data);
+            }
         }
-        return [];
+        return;
     }
 
     protected function ensureAuth(): void
