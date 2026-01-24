@@ -27,9 +27,7 @@ class LoginController {
 
         $user = $model->getByEmail($email);
         if ($user && !empty($user['Password']) && password_verify($password, $user['Password'])) {
-            $status = $user['Status'];
-
-            $status = strtolower($status);
+            $status = strtolower($user['Status']);
 
             switch ($status) {
                 case 'pending':

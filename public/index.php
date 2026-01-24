@@ -2,6 +2,7 @@
 session_start();
 
 require_once '../config.php';
+require_once '../app/controllers/BaseController.php';
 require_once '../app/controllers/HomeController.php';
 require_once '../app/controllers/RegisterController.php';
 require_once '../app/controllers/NotFoundController.php';
@@ -177,37 +178,40 @@ switch ($url) {
         $controller->index();
         break;
 
+    case 'requests/list':
+        $controller = new PostController();
+        $controller->getPosts();
+        break;
+
     case 'requests/get-skills':
         $controller = new PostController();
         $controller->getSkills();
         break;
 
-    case 'requests/draft':
+    case 'requests/create':
         $controller = new PostController();
-        $controller->draftPost();
-        break;
-
-    case 'requests/publish':
-        $controller = new PostController();
-        $controller->publishPost();
+        $controller->create();
         break;
 
     case (preg_match('#^requests/view/(\d+)$#', $url, $m) ? true : false):
         (new PostController())->viewPost((int)$m[1]);
         break;
 
-    // case (preg_match('#^requests/edit/(\d+)$#', $url, $m) ? true : false):
-    //     (new PostController())->editPost((int)$m[1]);
-    //     break;
+    case (preg_match('#^requests/delete/(\d+)$#', $url, $m) ? true : false):
+        (new PostController())->deletePost((int)$m[1]);
+        break;
 
-    // case (preg_match('#^requests/delete/(\d+)$#', $url, $m) ? true : false):
-    //     (new PostController())->deletePost((int)$m[1]);
-    //     break;
+    case (preg_match('#^requests/update/(\d+)$#', $url, $m) ? true : false):
+        (new PostController())->updatePost((int)$m[1]);
+        break;
 
-    // case (preg_match('#^requests/publish/(\d+)$#', $url, $m) ? true : false):
-    //     (new PostController())->publishById((int)$m[1]);
-    //     break;
+    case (preg_match('#^requests/publish/(\d+)$#', $url, $m) ? true : false):
+        (new PostController())->publishById((int)$m[1]);
+        break;
 
+    case (preg_match('#^requests/update-expired/(\d+)$#', $url, $m) ? true : false):
+        (new PostController())->markAsExpired((int)$m[1]);
+        break;
 
     case 'messages':
         $controller = new MessageController();
