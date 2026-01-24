@@ -33,6 +33,10 @@ class LoginController {
 
             switch ($status) {
                 case 'pending':
+                    $_SESSION['login_error'] = "Your registration is currently under review. You'll receive an email as soon as it's approved.";
+                    header("Location: " . BASE_URL . "/../login");
+                    return;
+
                 case 'active':
                     $_SESSION['user_id'] = $user['Client_ID'] ?? $user['Provider_ID'];
                     $_SESSION['role'] = $type;

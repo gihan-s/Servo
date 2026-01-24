@@ -21,7 +21,7 @@ if (session_status() === PHP_SESSION_NONE) {
 </head>
 
 <body>
-    <button class="button home-btn" onclick="window.location.href='<?= BASE_URL ?>'">Home</button>
+    <button class="button home-btn" onclick="window.location.href='/'">Home</button>
     <div class="main-section">
         <img src="<?= BASE_URL ?>/assets/img/logo.png" alt="Servo">
         <?php
