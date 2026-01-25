@@ -11,7 +11,9 @@ class BaseController
     protected $providerModel;
     protected $notificationModel;
 
-    protected $unreadNotificationCount = 2;
+    protected $unreadNotificationCount = 0;
+    protected $notifications = [];
+    protected $offset = 0;
 
     public function __construct()
     {
@@ -21,28 +23,39 @@ class BaseController
 
         $this->ensureAuth();
         $this->loadNotifs($_SESSION['user_id'], $_SESSION['role']);
+        return;
     }
+
+    // method to process and append notifications to controller
+    protected function appendNotifications($unprocessedNotifications, &$notifications)
+    {
+        foreach ($unprocessedNotifications as $notif) {
+            $data = json_decode($notif['Data'], true);
+            $notifications[] = array_merge($notif, $data);
+        }
+        return;
+    } 
 
     public function loadNotifs($userId, $role)
     {
-        $this->notifications = [];
-        $this->unprocessedNotifications = [];
-        $this->unreadNotificationCount = 0;
+        $notifications = [];
+        $unprocessedNotifications = [];
+        $unreadNotificationCount = 0;
+
         if ($role === 'Client') {
-            $this->unprocessedNotifications = $this->notificationModel->getNotificationsByClientId($userId, 10);
-            $this->unreadNotificationCount = $this->notificationModel->getUnreadNotificationsCountByClientId($userId);
-            foreach ($this->unprocessedNotifications as $notif) {
-                $data = json_decode($notif['Data'], true);
-                $this->notifications[] = array_merge($notif, $data);
-            }
+            $unprocessedNotifications = $this->notificationModel->getNotificationsByClientId($userId, 10);
+            $unreadNotificationCount = $this->notificationModel->getUnreadNotificationsCountByClientId($userId);
+            $this->appendNotifications($unprocessedNotifications, $notifications);
         } elseif ($role === 'Provider') {
-            $this->unprocessedNotifications = $this->notificationModel->getNotificationsByProviderId($userId, 10);
-            $this->unreadNotificationCount = $this->notificationModel->getUnreadNotificationsCountByProviderId($userId);
-            foreach ($this->unprocessedNotifications as $notif) {
-                $data = json_decode($notif['Data'], true);
-                $this->notifications[] = array_merge($notif, $data);
-            }
+            $unprocessedNotifications = $this->notificationModel->getNotificationsByProviderId($userId, 10);
+            $unreadNotificationCount = $this->notificationModel->getUnreadNotificationsCountByProviderId($userId);
+            $this->appendNotifications($unprocessedNotifications, $notifications);
         }
+
+        $this->unreadNotificationCount = $unreadNotificationCount;
+        $this->notifications = $notifications;
+        $this->offset = count($notifications);
+
         return;
     }
 
@@ -53,5 +66,6 @@ class BaseController
             header("Location: /login");
             exit;
         }
+        return;
     }
 }

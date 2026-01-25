@@ -29,4 +29,56 @@ class NotificationController extends BaseController
         include $viewFile;
     }
 
+    public function loadMoreNotifs()
+    {
+        $this->ensureAuth();
+
+        $userId = $_SESSION['user_id'];
+        $role   = $_SESSION['role'];
+
+        // Load more notifications based on role
+        if ($role === 'Client') {
+            $unprocessedNotifications = $this->notificationModel->getNotificationsByClientId($userId, 10, isset($_GET['offset']) ? intval($_GET['offset']) : 0);
+        } elseif ($role === 'Provider') {
+            $unprocessedNotifications = $this->notificationModel->getNotificationsByProviderId($userId, 10, isset($_GET['offset']) ? intval($_GET['offset']) : 0);
+        } else {
+            http_response_code(403);
+            echo "Invalid role";
+            return;
+        }
+
+        $notifications = [];
+        $this->appendNotifications($unprocessedNotifications, $notifications);
+        $this->offset = count($notifications);
+
+        // Return JSON response
+        header('Content-Type: application/json');
+        echo json_encode(['notifications' => $notifications]);
+
+        return;
+    }
+
+    // public function markAsRead($notificationId)
+    // {
+    //     $this->ensureAuth();
+
+    //     $userId = $_SESSION['user_id'];
+    //     $role   = $_SESSION['role'];
+
+    //     // Mark notification as read based on role
+    //     if ($role === 'Client') {
+    //         $this->notificationModel->markAsReadByClient($notificationId, $userId);
+    //     } elseif ($role === 'Provider') {
+    //         $this->notificationModel->markAsReadByProvider($notificationId, $userId);
+    //     } else {
+    //         http_response_code(403);
+    //         echo "Invalid role";
+    //         return;
+    //     }
+
+    //     // Redirect back to notifications page
+    //     header("Location: /notifications");
+    //     exit;
+    // }
+
 }
