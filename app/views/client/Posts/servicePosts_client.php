@@ -1,20 +1,3 @@
-<?php
-// Fallback-safe text snipping helper for servers without mbstring
-if (!function_exists('str_snippet')) {
-    function str_snippet($text, $limit = 160, $suffix = '…')
-    {
-        $text = (string) $text;
-        // Prefer multibyte-aware trim when available
-        if (function_exists('mb_strimwidth')) {
-            return mb_strimwidth($text, 0, (int) $limit, (string) $suffix, 'UTF-8');
-        }
-        // Basic fallback (byte-based)
-        if (strlen($text) <= $limit)
-            return $text;
-        return rtrim(substr($text, 0, $limit)) . $suffix;
-    }
-}
-?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -57,7 +40,7 @@ if (!function_exists('str_snippet')) {
 
                 <div class="search-button">
                     <input type="text" id="searchInput" placeholder="Search my service requests...">
-                    <button><i class="fa-light fa-magnifying-glass"></i></button>
+                    <button id="searchButton"><i class="fa-light fa-magnifying-glass"></i></button>
                 </div>
                 <button class="filter" id="filter-pop-up"><i class="fa-light fa-filter-list"
                         onclick="window.showSuccessToast('Test','Test Message')"></i><span>filter</span></button>
@@ -69,7 +52,8 @@ if (!function_exists('str_snippet')) {
                         <div class="text-container">
                             <div class="label dropdown-label" style="visibility: hidden;"></div>
                             <input type="text" id="sortDropdown" class="text-field-dropdown"
-                                style="padding: 10px; background-color: var(--containerColor);" value="Date (Newest)" readonly>
+                                style="padding: 10px; background-color: var(--containerColor);" value="Date (Newest)"
+                                readonly>
                         </div>
 
                         <div class="options" id="sortOptions" style='max-height:none;'>
@@ -480,7 +464,7 @@ if (!function_exists('str_snippet')) {
 
         const publishedDate = formatDate(post.Published_At || post.Created_At);
         const daysLeft = calculateDaysLeft(post.End_At);
-        if (daysLeft == 'Expired'){
+        if (daysLeft == 'Expired') {
             updateAsExpired(post.Post_ID);
         }
 
@@ -1417,46 +1401,45 @@ if (!function_exists('str_snippet')) {
      */
     document.addEventListener('DOMContentLoaded', function () {
         // Setup search input handler with debouncing
-        const searchInput = document.getElementById('searchInput');
-        if (searchInput) {
-            searchInput.addEventListener('input', function(e) {
-                // Clear previous timeout
-                if (searchTimeout) {
-                    clearTimeout(searchTimeout);
-                }
-                
-                // Set new timeout to debounce search (wait 300ms after user stops typing)
-                searchTimeout = setTimeout(() => {
-                    currentSearch = e.target.value.trim();
-                    
-                    // Reload posts with search filter
-                    const activeSection = document.querySelector('.requests-section:not([style*="display: none"])');
-                    const status = activeSection.classList.contains('active-posts') ? 'active' :
-                                   activeSection.classList.contains('draft-posts') ? 'draft' : 'expired';
-                    loadPosts(status);
-                }, 300);
-            });
+        document.getElementById('searchInput').addEventListener('change', handleSearch);
+        document.getElementById('searchButton').addEventListener('click', handleSearch);
+
+        function handleSearch() {
+            if (searchTimeout) {
+                clearTimeout(searchTimeout);
+            }
+
+            // Set new timeout to debounce search (wait 300ms after user stops typing)
+            searchTimeout = setTimeout(() => {
+                currentSearch = document.getElementById('searchInput').value.trim();
+
+                // Reload posts with search filter
+                const activeSection = document.querySelector('.requests-section:not([style*="display: none"])');
+                const status = activeSection.classList.contains('active-posts') ? 'active' :
+                    activeSection.classList.contains('draft-posts') ? 'draft' : 'expired';
+                loadPosts(status);
+            }, 300);
         }
-        
+
         // Setup sort dropdown handler
         const sortOptions = document.getElementById('sortOptions');
         if (sortOptions) {
-            sortOptions.addEventListener('click', function(e) {
+            sortOptions.addEventListener('click', function (e) {
                 const option = e.target.closest('[data-sort]');
                 if (option) {
                     const sortValue = option.dataset.sort;
                     const sortText = option.textContent;
-                    
+
                     // Update dropdown display
                     document.getElementById('sortDropdown').value = sortText;
-                    
+
                     // Update global sort variable
                     currentSort = sortValue;
-                    
+
                     // Reload posts with new sort
                     const activeSection = document.querySelector('.requests-section:not([style*="display: none"])');
                     const status = activeSection.classList.contains('active-posts') ? 'active' :
-                                   activeSection.classList.contains('draft-posts') ? 'draft' : 'expired';
+                        activeSection.classList.contains('draft-posts') ? 'draft' : 'expired';
                     loadPosts(status);
                 }
             });
