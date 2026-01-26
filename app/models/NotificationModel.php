@@ -35,9 +35,9 @@ class NotificationModel extends Database {
     } 
 
     // direct method to get notifications for a client
-    public function getNotificationsByClientId($clientId, $limit = 5, $offset = 0) {
-        // $stmt = $this->conn->prepare("SELECT * FROM Notification WHERE Client_ID = ? ORDER BY Created_At DESC LIMIT ? OFFSET ?");
-        // $stmt->bind_param("iii", $clientId, $limit, $offset);
+    public function getNotificationsByClientId($clientId, $limit = 5, $beforeTimestamp = null) {
+        // $stmt = $this->conn->prepare("SELECT * FROM Notification WHERE Client_ID = ? AND Created_At < ? ORDER BY Created_At DESC LIMIT ?");
+        // $stmt->bind_param("isi", $clientId, $beforeTimestamp, $limit);
         // $stmt->execute();
         // $result = $stmt->get_result();
         // $stmt->close();
@@ -53,9 +53,9 @@ class NotificationModel extends Database {
     }
 
     // direct method to get notifications for a provider
-    public function getNotificationsByProviderId($providerId, $limit = 5, $offset = 0) {
-        // $stmt = $this->conn->prepare("SELECT * FROM Notification WHERE Provider_ID = ? ORDER BY Created_At DESC LIMIT ? OFFSET ?");
-        // $stmt->bind_param("iii", $providerId, $limit, $offset);
+    public function getNotificationsByProviderId($providerId, $limit = 5, $beforeTimestamp = null) {
+        // $stmt = $this->conn->prepare("SELECT * FROM Notification WHERE Provider_ID = ? AND Created_At < ? ORDER BY Created_At DESC LIMIT ?");
+        // $stmt->bind_param("isi", $providerId, $beforeTimestamp, $limit);
         // $stmt->execute();
         // $result = $stmt->get_result();
         // $stmt->close();

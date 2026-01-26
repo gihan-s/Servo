@@ -13,7 +13,8 @@ class BaseController
 
     protected $unreadNotificationCount = 0;
     protected $notifications = [];
-    protected $offset = 0;
+    protected $lastNotifTimestamp = null; // latest loaded notification timestamp
+    protected $firstNotifTimestamp = null; // oldest loaded notification timestamp
 
     public function __construct()
     {
@@ -54,7 +55,9 @@ class BaseController
 
         $this->unreadNotificationCount = $unreadNotificationCount;
         $this->notifications = $notifications;
-        $this->offset = count($notifications);
+        // update notification timestamps
+        $this->lastNotifTimestamp = !empty($notifications) ? $notifications[0]['Timestamp'] : null;
+        $this->firstNotifTimestamp = !empty($notifications) ? $notifications[count($notifications) - 1]['Timestamp'] : null;
 
         return;
     }
