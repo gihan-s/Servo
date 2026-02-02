@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Link to external CSS files -->
+    <link rel="stylesheet" href="assets/css/cardList.css">
     <link rel="stylesheet" href="assets/css/searchForProviderStyle.css">
     <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
 
