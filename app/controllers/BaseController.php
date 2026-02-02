@@ -56,8 +56,8 @@ class BaseController
         $this->unreadNotificationCount = $unreadNotificationCount;
         $this->notifications = $notifications;
         // update notification timestamps
-        $this->lastNotifTimestamp = !empty($notifications) ? $notifications[0]['Timestamp'] : null;
-        $this->firstNotifTimestamp = !empty($notifications) ? $notifications[count($notifications) - 1]['Timestamp'] : null;
+        $this->lastNotifTimestamp = !empty($notifications) ? $notifications[0]['Created_At'] : null;
+        $this->firstNotifTimestamp = !empty($notifications) ? $notifications[count($notifications) - 1]['Created_At'] : null;
 
         return;
     }
