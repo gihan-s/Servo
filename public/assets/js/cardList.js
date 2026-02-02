@@ -130,61 +130,66 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // Pagination functionality for .page-btn buttons
-    // Handles click events and active state management
+    // Handles click events, active state management, and prev/next navigation
     
-    document.querySelectorAll('.pagination .page-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            // Don't do anything if button is disabled
-            if (this.disabled) return;
+    const paginationContainers = document.querySelectorAll('.pagination');
+    
+    paginationContainers.forEach(pagination => {
+        // Use event delegation for better performance
+        pagination.addEventListener('click', function(e) {
+            const button = e.target.closest('.page-btn');
+            if (!button || button.disabled) return;
             
-            // Don't do anything for prev/next buttons (these should be handled by parent application)
-            if (this.classList.contains('prev') || this.classList.contains('next')) return;
+            const allPageBtns = Array.from(pagination.querySelectorAll('.page-btn:not(.prev):not(.next)'));
+            const prevBtn = pagination.querySelector('.page-btn.prev');
+            const nextBtn = pagination.querySelector('.page-btn.next');
+            
+            // Handle prev/next buttons
+            if (button.classList.contains('prev') || button.classList.contains('next')) {
+                const currentActive = pagination.querySelector('.page-btn.active');
+                const currentIndex = allPageBtns.indexOf(currentActive);
+                
+                let targetIndex;
+                if (button.classList.contains('prev')) {
+                    targetIndex = Math.max(0, currentIndex - 1);
+                } else {
+                    targetIndex = Math.min(allPageBtns.length - 1, currentIndex + 1);
+                }
+                
+                if (allPageBtns[targetIndex]) {
+                    // Remove active class from all page buttons
+                    allPageBtns.forEach(btn => {
+                        btn.classList.remove('active');
+                        btn.removeAttribute('aria-current');
+                    });
+                    
+                    // Add active class to target button
+                    allPageBtns[targetIndex].classList.add('active');
+                    allPageBtns[targetIndex].setAttribute('aria-current', 'page');
+                    
+                    // Update button states
+                    if (prevBtn) prevBtn.disabled = targetIndex === 0;
+                    if (nextBtn) nextBtn.disabled = targetIndex === allPageBtns.length - 1;
+                }
+                return;
+            }
+            
+            // Handle numbered page buttons
+            const currentIndex = allPageBtns.indexOf(button);
             
             // Remove active class from all page buttons
-            document.querySelectorAll('.pagination .page-btn').forEach(btn => {
+            allPageBtns.forEach(btn => {
                 btn.classList.remove('active');
                 btn.removeAttribute('aria-current');
             });
             
             // Add active class to clicked button
-            this.classList.add('active');
-            this.setAttribute('aria-current', 'page');
+            button.classList.add('active');
+            button.setAttribute('aria-current', 'page');
             
             // Update prev/next button states
-            const allPageBtns = Array.from(document.querySelectorAll('.pagination .page-btn:not(.prev):not(.next)'));
-            const currentIndex = allPageBtns.indexOf(this);
-            const prevBtn = document.querySelector('.pagination .page-btn.prev');
-            const nextBtn = document.querySelector('.pagination .page-btn.next');
-            
-            if (prevBtn) {
-                prevBtn.disabled = currentIndex === 0;
-            }
-            
-            if (nextBtn) {
-                nextBtn.disabled = currentIndex === allPageBtns.length - 1;
-            }
-        });
-    });
-    
-    // Handle prev/next button clicks
-    document.querySelectorAll('.pagination .page-btn.prev, .pagination .page-btn.next').forEach(button => {
-        button.addEventListener('click', function() {
-            if (this.disabled) return;
-            
-            const allPageBtns = Array.from(document.querySelectorAll('.pagination .page-btn:not(.prev):not(.next)'));
-            const currentActive = document.querySelector('.pagination .page-btn.active');
-            const currentIndex = allPageBtns.indexOf(currentActive);
-            
-            let targetIndex;
-            if (this.classList.contains('prev')) {
-                targetIndex = Math.max(0, currentIndex - 1);
-            } else {
-                targetIndex = Math.min(allPageBtns.length - 1, currentIndex + 1);
-            }
-            
-            if (allPageBtns[targetIndex]) {
-                allPageBtns[targetIndex].click();
-            }
+            if (prevBtn) prevBtn.disabled = currentIndex === 0;
+            if (nextBtn) nextBtn.disabled = currentIndex === allPageBtns.length - 1;
         });
     });
 
