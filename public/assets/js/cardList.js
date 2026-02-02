@@ -129,6 +129,63 @@ document.addEventListener('DOMContentLoaded', () => {
     }); 
 
 
+    // Pagination functionality for .page-btn buttons
+    // Handles click events and active state management
     
+    document.querySelectorAll('.pagination .page-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            // Don't do anything if button is disabled
+            if (this.disabled) return;
+            
+            // Don't do anything for prev/next buttons (these should be handled by parent application)
+            if (this.classList.contains('prev') || this.classList.contains('next')) return;
+            
+            // Remove active class from all page buttons
+            document.querySelectorAll('.pagination .page-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.removeAttribute('aria-current');
+            });
+            
+            // Add active class to clicked button
+            this.classList.add('active');
+            this.setAttribute('aria-current', 'page');
+            
+            // Update prev/next button states
+            const allPageBtns = Array.from(document.querySelectorAll('.pagination .page-btn:not(.prev):not(.next)'));
+            const currentIndex = allPageBtns.indexOf(this);
+            const prevBtn = document.querySelector('.pagination .page-btn.prev');
+            const nextBtn = document.querySelector('.pagination .page-btn.next');
+            
+            if (prevBtn) {
+                prevBtn.disabled = currentIndex === 0;
+            }
+            
+            if (nextBtn) {
+                nextBtn.disabled = currentIndex === allPageBtns.length - 1;
+            }
+        });
+    });
+    
+    // Handle prev/next button clicks
+    document.querySelectorAll('.pagination .page-btn.prev, .pagination .page-btn.next').forEach(button => {
+        button.addEventListener('click', function() {
+            if (this.disabled) return;
+            
+            const allPageBtns = Array.from(document.querySelectorAll('.pagination .page-btn:not(.prev):not(.next)'));
+            const currentActive = document.querySelector('.pagination .page-btn.active');
+            const currentIndex = allPageBtns.indexOf(currentActive);
+            
+            let targetIndex;
+            if (this.classList.contains('prev')) {
+                targetIndex = Math.max(0, currentIndex - 1);
+            } else {
+                targetIndex = Math.min(allPageBtns.length - 1, currentIndex + 1);
+            }
+            
+            if (allPageBtns[targetIndex]) {
+                allPageBtns[targetIndex].click();
+            }
+        });
+    });
 
 });
