@@ -52,7 +52,7 @@
 
 
 <script>
-    function showAlert(alertMessage, Title = 'Error', Icon = 'fa-regular fa-circle-exclamation', Color = "Black") {
+    function showAlert(alertMessage, Title = 'Error', Icon = 'fa-solid fa-circle-exclamation', Color = "Black") {
         document.getElementById("AlertMessage").innerHTML = alertMessage;
         viewDialogBox2("AlertDialog");
 
@@ -82,7 +82,7 @@
         </div>
 
         <div style="font-size: 15px; gap:20px; display: flex; align-items: center; margin-bottom: 20px;">
-            <i class="fa-regular fa-circle-exclamation" style="font-size: 32px;"></i>
+            <i class="fa-solid fa-circle-exclamation" style="font-size: 32px;"></i>
             <span id="AlertMessage"></span>
         </div>
 

@@ -11,7 +11,7 @@ $TopBarHeader = "Dashboard";
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter">
 
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <!-- css -->
     <link rel="stylesheet" href="/assets/css/elementStyles.css">

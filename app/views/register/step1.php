@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="<?= $BaseURL ?>/assets/css/elementStyles.css">
     <link rel="stylesheet" href="<?= $BaseURL ?>/assets/css/gridTemplates.css">
     <link rel="stylesheet" href="<?= $BaseURL ?>/assets/css/register-inline.css">
-    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <script src="<?= $BaseURL ?>/assets/js/elementScript.js" defer></script>
     <script src="<?= $BaseURL ?>/assets/js/registerScript.js" defer></script>
@@ -103,7 +103,7 @@
 
                     <div class="button-section">
                         <button type="submit" class="button" id="nextBtn">Next
-                            <i class="fa-regular fa-arrow-right"></i>
+                            <i class="fa-solid fa-arrow-right"></i>
                         </button>
                     </div>
                 </div>
