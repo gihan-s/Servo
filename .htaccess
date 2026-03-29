@@ -1,0 +1,11 @@
+Options -MultiViews
+RewriteEngine On
+
+# Block path traversal attempts
+RewriteCond %{REQUEST_URI} \.\. [NC]
+RewriteRule ^ - [F,L]
+
+# Forward requests for files/dirs that don't exist at the root to the public/ folder
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ public/$1 [L]
