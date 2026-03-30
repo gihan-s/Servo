@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/main.css" />
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/dashboard.css" />
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/provider-dashboard.css" />
-    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 </head>
 
 <body>
@@ -87,9 +87,9 @@
                             <span class="status-badge status-pending">Pending</span>
                         </div>
                         <div class="item-meta">
-                            <span><i class="fa-regular fa-calendar"></i> Sep 02, 2025</span>
-                            <span><i class="fa-regular fa-coins"></i> $1,200.00</span>
-                            <span><i class="fa-regular fa-credit-card"></i> Visa</span>
+                            <span><i class="fa-solid fa-calendar"></i> Sep 02, 2025</span>
+                            <span><i class="fa-solid fa-coins"></i> $1,200.00</span>
+                            <span><i class="fa-solid fa-credit-card"></i> Visa</span>
                         </div>
                     </li>
                     <li class="list-item">
@@ -98,9 +98,9 @@
                             <span class="status-badge status-paid">Paid</span>
                         </div>
                         <div class="item-meta">
-                            <span><i class="fa-regular fa-calendar"></i> Aug 28, 2025</span>
-                            <span><i class="fa-regular fa-coins"></i> $950.00</span>
-                            <span><i class="fa-regular fa-credit-card"></i> Stripe</span>
+                            <span><i class="fa-solid fa-calendar"></i> Aug 28, 2025</span>
+                            <span><i class="fa-solid fa-coins"></i> $950.00</span>
+                            <span><i class="fa-solid fa-credit-card"></i> Stripe</span>
                         </div>
                     </li>
                     <li class="list-item">
@@ -109,14 +109,14 @@
                             <span class="status-badge status-refunded">Refunded</span>
                         </div>
                         <div class="item-meta">
-                            <span><i class="fa-regular fa-calendar"></i> Aug 30, 2025</span>
-                            <span><i class="fa-regular fa-coins"></i> $420.00</span>
-                            <span><i class="fa-regular fa-credit-card"></i> Stripe</span>
+                            <span><i class="fa-solid fa-calendar"></i> Aug 30, 2025</span>
+                            <span><i class="fa-solid fa-coins"></i> $420.00</span>
+                            <span><i class="fa-solid fa-credit-card"></i> Stripe</span>
                         </div>
                     </li>
                 </ul>
                 <div style="margin-top:18px; text-align:right;">
-                    <button class="link-btn"><i class="fa-regular fa-arrow-right"></i> View All Payments</button>
+                    <button class="link-btn"><i class="fa-solid fa-arrow-right"></i> View All Payments</button>
                 </div>
             </div>
             <div class="activity-card">
@@ -128,9 +128,9 @@
                             <span class="status-badge status-open">Open</span>
                         </div>
                         <div class="item-meta">
-                            <span><i class="fa-regular fa-calendar"></i> 2d ago</span>
-                            <span><i class="fa-regular fa-users"></i> 23 proposals</span>
-                            <span><i class="fa-regular fa-hourglass"></i> 5 days left</span>
+                            <span><i class="fa-solid fa-calendar"></i> 2d ago</span>
+                            <span><i class="fa-solid fa-users"></i> 23 proposals</span>
+                            <span><i class="fa-solid fa-hourglass"></i> 5 days left</span>
                         </div>
                     </li>
                     <li class="list-item">
@@ -139,9 +139,9 @@
                             <span class="status-badge status-open">Open</span>
                         </div>
                         <div class="item-meta">
-                            <span><i class="fa-regular fa-calendar"></i> 1w ago</span>
-                            <span><i class="fa-regular fa-users"></i> 47 proposals</span>
-                            <span><i class="fa-regular fa-hourglass"></i> 12 days left</span>
+                            <span><i class="fa-solid fa-calendar"></i> 1w ago</span>
+                            <span><i class="fa-solid fa-users"></i> 47 proposals</span>
+                            <span><i class="fa-solid fa-hourglass"></i> 12 days left</span>
                         </div>
                     </li>
                     <li class="list-item">
@@ -150,14 +150,14 @@
                             <span class="status-badge status-draft">Draft</span>
                         </div>
                         <div class="item-meta">
-                            <span><i class="fa-regular fa-calendar"></i> 3d ago</span>
-                            <span><i class="fa-regular fa-pen"></i> 75% complete</span>
-                            <span><i class="fa-regular fa-layer-group"></i> Draft</span>
+                            <span><i class="fa-solid fa-calendar"></i> 3d ago</span>
+                            <span><i class="fa-solid fa-pen"></i> 75% complete</span>
+                            <span><i class="fa-solid fa-layer-group"></i> Draft</span>
                         </div>
                     </li>
                 </ul>
                 <div style="margin-top:18px; text-align:right;">
-                    <button class="link-btn"><i class="fa-regular fa-arrow-right"></i> Manage Posts</button>
+                    <button class="link-btn"><i class="fa-solid fa-arrow-right"></i> Manage Posts</button>
                 </div>
             </div>
         </section>
@@ -167,8 +167,8 @@
             <div class="section-header">
                 <h2>Active Projects</h2>
                 <div class="section-actions">
-                    <button class="link-btn"><i class="fa-regular fa-eye"></i> View All</button>
-                    <button class="link-btn"><i class="fa-regular fa-plus"></i> New Project</button>
+                    <button class="link-btn"><i class="fa-solid fa-eye"></i> View All</button>
+                    <button class="link-btn"><i class="fa-solid fa-plus"></i> New Project</button>
                 </div>
             </div>
             <div class="card" style="padding:0; overflow:hidden;">
@@ -199,7 +199,7 @@
                                 </div>
                             </td>
                             <td style="padding:16px 20px; text-align:right;">
-                                <button class="ghost-btn"><i class="fa-regular fa-eye"></i> Details</button>
+                                <button class="ghost-btn"><i class="fa-solid fa-eye"></i> Details</button>
                             </td>
                         </tr>
                         <tr style="border-top:1px solid #e5e7eb;">
@@ -216,7 +216,7 @@
                                 </div>
                             </td>
                             <td style="padding:16px 20px; text-align:right;">
-                                <button class="ghost-btn"><i class="fa-regular fa-eye"></i> Details</button>
+                                <button class="ghost-btn"><i class="fa-solid fa-eye"></i> Details</button>
                             </td>
                         </tr>
                         <tr style="border-top:1px solid #e5e7eb;">
@@ -233,7 +233,7 @@
                                 </div>
                             </td>
                             <td style="padding:16px 20px; text-align:right;">
-                                <button class="ghost-btn"><i class="fa-regular fa-eye"></i> Details</button>
+                                <button class="ghost-btn"><i class="fa-solid fa-eye"></i> Details</button>
                             </td>
                         </tr>
                     </tbody>
@@ -250,22 +250,22 @@
                 <div class="action-card">
                     <h3>Create a New Post</h3>
                     <p>Describe the work you need and start receiving proposals from verified providers.</p>
-                    <button class="primary-btn"><i class="fa-regular fa-plus"></i> New Post</button>
+                    <button class="primary-btn"><i class="fa-solid fa-plus"></i> New Post</button>
                 </div>
                 <div class="action-card">
                     <h3>Start a Project</h3>
                     <p>Scope multi-milestone work with structured timelines and payment stages.</p>
-                    <button class="primary-btn"><i class="fa-regular fa-folder-plus"></i> New Project</button>
+                    <button class="primary-btn"><i class="fa-solid fa-folder-plus"></i> New Project</button>
                 </div>
                 <div class="action-card">
                     <h3>Find Providers</h3>
                     <p>Search and filter professionals by skill, rating, price and availability.</p>
-                    <button class="primary-btn"><i class="fa-regular fa-magnifying-glass"></i> Search</button>
+                    <button class="primary-btn"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
                 </div>
                 <div class="action-card">
                     <h3>Manage Payments</h3>
                     <p>Review pending invoices, download receipts or request a refund.</p>
-                    <button class="primary-btn"><i class="fa-regular fa-file-invoice-dollar"></i> Payments</button>
+                    <button class="primary-btn"><i class="fa-solid fa-file-invoice-dollar"></i> Payments</button>
                 </div>
             </div>
         </section>
@@ -281,9 +281,9 @@
                     <p style="margin:0 0 16px; color:#475569; line-height:1.6; font-size:14px;">Browse FAQs, open a
                         support ticket or chat with our team about billing, security or project concerns.</p>
                     <div style="display:flex; gap:12px; flex-wrap:wrap;">
-                        <button class="ghost-btn"><i class="fa-regular fa-circle-question"></i> FAQs</button>
-                        <button class="ghost-btn"><i class="fa-regular fa-message-dots"></i> Contact Support</button>
-                        <button class="ghost-btn"><i class="fa-regular fa-shield-check"></i> Trust & Safety</button>
+                        <button class="ghost-btn"><i class="fa-solid fa-circle-question"></i> FAQs</button>
+                        <button class="ghost-btn"><i class="fa-solid fa-message-dots"></i> Contact Support</button>
+                        <button class="ghost-btn"><i class="fa-solid fa-shield-check"></i> Trust & Safety</button>
                     </div>
                 </div>
                 <div

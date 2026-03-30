@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/dashboard.css" />
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/client-dashboard.css" />
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/footer.css" />
-    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <script src="<?= BASE_URL ?>/assets/js/dashboard.js"></script>
     
 </head>
@@ -80,15 +80,15 @@
                             <span class="status-badge status-<?= strtolower($payment['Status']) ?>"><?= $payment['Status'] ?></span>
                         </div> 
                         <div class="item-meta">
-                            <span><i class="fa-regular fa-calendar"></i> <?= $payment['Due_Date'] ?></span>
-                            <span><i class="fa-regular fa-coins"></i> $<?= number_format($payment['Amount'], 2) ?></span>
-                            <span><i class="fa-regular fa-credit-card"></i> <?= $payment['Method'] ?></span>
+                            <span><i class="fa-solid fa-calendar"></i> <?= $payment['Due_Date'] ?></span>
+                            <span><i class="fa-solid fa-coins"></i> $<?= number_format($payment['Amount'], 2) ?></span>
+                            <span><i class="fa-solid fa-credit-card"></i> <?= $payment['Method'] ?></span>
                         </div>
                     </li>
                     <?php endforeach; ?>
                 </ul>
                 <div class="activity-card-actions">
-                    <button class="link-btn" id="viewPaymentsButton"><i class="fa-regular fa-arrow-right"></i>View All Payments</button>
+                    <button class="link-btn" id="viewPaymentsButton"><i class="fa-solid fa-arrow-right"></i>View All Payments</button>
                 </div>
             </div>
 
@@ -103,22 +103,22 @@
                             <span class="status-badge status-<?= strtolower($request['Post_Status']) ?>"><?= $request['Post_Status'] ?></span>
                         </div>
                         <div class="item-meta">
-                            <span><i class="fa-regular fa-calendar"></i> <?= $request['Time_Ago'] ?></span>
+                            <span><i class="fa-solid fa-calendar"></i> <?= $request['Time_Ago'] ?></span>
 
                             <?php if ($request['Proposals'] !== null): ?>
-                            <span><i class="fa-regular fa-users"></i> <?= $request['Proposals'] ?> proposals</span>
+                            <span><i class="fa-solid fa-users"></i> <?= $request['Proposals'] ?> proposals</span>
                             <?php else: ?>
-                            <span><i class="fa-regular fa-users"></i> 0 proposals</span>
+                            <span><i class="fa-solid fa-users"></i> 0 proposals</span>
                             <?php endif; ?>
 
                             <?php if ($request['Time_Left'] !== null): ?>
-                            <span><i class="fa-regular fa-hourglass"></i> <?= $request['Time_Left'] ?></span>
+                            <span><i class="fa-solid fa-hourglass"></i> <?= $request['Time_Left'] ?></span>
                             <?php endif; ?>
                     </li>
                     <?php endforeach; ?>
                 </ul>
                 <div class="activity-card-actions">
-                    <button class="link-btn" id="viewRequestsButton"><i class="fa-regular fa-arrow-right"></i>Manage Requests</button>
+                    <button class="link-btn" id="viewRequestsButton"><i class="fa-solid fa-arrow-right"></i>Manage Requests</button>
                 </div>
             </div>
         </section>
@@ -128,8 +128,8 @@
             <div class="section-header">
                 <h2>Active Projects</h2>
                 <div class="section-actions">
-                    <button class="link-btn" id="viewProjectsButton"><i class="fa-regular fa-eye"></i> View All</button>
-                    <button class="link-btn"><i class="fa-regular fa-plus"></i> New Project</button>
+                    <button class="link-btn" id="viewProjectsButton"><i class="fa-solid fa-eye"></i> View All</button>
+                    <button class="link-btn"><i class="fa-solid fa-plus"></i> New Project</button>
                 </div>
             </div>
             <div class="card project-table-card">
@@ -157,7 +157,7 @@
                                 </div>
                             </td>
                             <td>
-                                <button class="ghost-btn"><i class="fa-regular fa-eye"></i> Details</button>
+                                <button class="ghost-btn"><i class="fa-solid fa-eye"></i> Details</button>
                             </td>
                         </tr>
                         <?php endforeach; ?>
@@ -175,12 +175,12 @@
                 <div class="action-card">
                     <h3>Create a New Request</h3>
                     <p>Describe the work you need and start receiving proposals from verified providers.</p>
-                    <button class="primary-btn"><i class="fa-regular fa-plus"></i> New Request</button>
+                    <button class="primary-btn"><i class="fa-solid fa-plus"></i> New Request</button>
                 </div>
                 <div class="action-card">
                     <h3>Find Providers</h3>
                     <p>Search and filter professionals by skill, rating, price and availability.</p>
-                    <button class="primary-btn"><i class="fa-regular fa-magnifying-glass"></i> Search</button>
+                    <button class="primary-btn"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
                 </div>
             </div>
         </section>
@@ -196,9 +196,9 @@
                     <p style="margin:0 0 16px; color:#475569; line-height:1.6; font-size:14px;">Browse FAQs, open a
                         support ticket or chat with our team about billing, security or project concerns.</p>
                     <div style="display:flex; gap:12px; flex-wrap:wrap;">
-                        <button class="ghost-btn"><i class="fa-regular fa-circle-question"></i> FAQs</button>
-                        <button class="ghost-btn"><i class="fa-regular fa-message-dots"></i> Contact Support</button>
-                        <button class="ghost-btn"><i class="fa-regular fa-shield-check"></i> Trust & Safety</button>
+                        <button class="ghost-btn"><i class="fa-solid fa-circle-question"></i> FAQs</button>
+                        <button class="ghost-btn"><i class="fa-solid fa-message-dots"></i> Contact Support</button>
+                        <button class="ghost-btn"><i class="fa-solid fa-shield-check"></i> Trust & Safety</button>
                     </div>
                 </div>
                 <div
