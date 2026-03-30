@@ -1,20 +1,3 @@
-<?php
-// Fallback-safe text snipping helper for servers without mbstring
-if (!function_exists('str_snippet')) {
-    function str_snippet($text, $limit = 160, $suffix = '…')
-    {
-        $text = (string) $text;
-        // Prefer multibyte-aware trim when available
-        if (function_exists('mb_strimwidth')) {
-            return mb_strimwidth($text, 0, (int) $limit, (string) $suffix, 'UTF-8');
-        }
-        // Basic fallback (byte-based)
-        if (strlen($text) <= $limit)
-            return $text;
-        return rtrim(substr($text, 0, $limit)) . $suffix;
-    }
-}
-?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -25,7 +8,7 @@ if (!function_exists('str_snippet')) {
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/clientPosts.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/elementStyles.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/gridTemplates.css">
-    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <script src="<?= BASE_URL ?>/assets/js/elementScript.js" defer></script>
     <script src="<?= BASE_URL ?>/assets/js/cardList.js" defer></script>
@@ -40,7 +23,7 @@ if (!function_exists('str_snippet')) {
                 <h1>My Service Requests</h1>
 
                 <button type="button" class="post-job-btn" onclick="openCreateForm('create-post-popup')"><i
-                        class="fa-regular fa-plus"></i>
+                        class="fa-solid fa-plus"></i>
                     Create Request</button>
             </div>
 
@@ -57,9 +40,9 @@ if (!function_exists('str_snippet')) {
 
                 <div class="search-button">
                     <input type="text" id="searchInput" placeholder="Search my service requests...">
-                    <button><i class="fa-light fa-magnifying-glass"></i></button>
+                    <button id="searchButton"><i class="fa-solid fa-magnifying-glass"></i></button>
                 </div>
-                <button class="filter" id="filter-pop-up"><i class="fa-light fa-filter-list"
+                <button class="filter" id="filter-pop-up"><i class="fa-solid fa-filter"
                         onclick="window.showSuccessToast('Test','Test Message')"></i><span>filter</span></button>
 
                 <div class="advance-search">
@@ -69,7 +52,8 @@ if (!function_exists('str_snippet')) {
                         <div class="text-container">
                             <div class="label dropdown-label" style="visibility: hidden;"></div>
                             <input type="text" id="sortDropdown" class="text-field-dropdown"
-                                style="padding: 10px; background-color: var(--containerColor);" value="Date (Newest)" readonly>
+                                style="padding: 10px; background-color: var(--containerColor);" value="Date (Newest)"
+                                readonly>
                         </div>
 
                         <div class="options" id="sortOptions" style='max-height:none;'>
@@ -253,17 +237,17 @@ if (!function_exists('str_snippet')) {
                     onclick="inputReset('create-post-form')">Reset</button>
                 <button type="button" class="action-btn btn-view" onclick="submitPost('draft')" id="create-post-pop-up"
                     data-role="save-draft">
-                    <i class="fa-regular fa-floppy-disk"></i>
+                    <i class="fa-solid fa-floppy-disk"></i>
                     Save Draft
                 </button>
                 <button type="button" class="action-btn btn-edit" onclick="viewDialogBox('confirm-publish')"
                     id="create-post-pop-up" data-role="publish">
-                    <i class="fa-regular fa-rocket"></i>
+                    <i class="fa-solid fa-rocket"></i>
                     Publish Request
                 </button>
                 <button type="button" class="action-btn btn-edit" onclick="saveEditedPost()" data-role="save-post"
                     style="display:none;">
-                    <i class="fa-regular fa-floppy-disk"></i>
+                    <i class="fa-solid fa-floppy-disk"></i>
                     Save Request
                 </button>
             </div>
@@ -288,7 +272,7 @@ if (!function_exists('str_snippet')) {
             <button class="action-btn btn-delete" id="confirmPublishKeep"
                 onclick="closeDialogBox('confirm-publish')">Cancel</button>
             <button class="action-btn btn-edit" id="confirmPublishBtn" onclick="submitPost('publish')"><i
-                    class="fa-regular fa-rocket"></i>
+                    class="fa-solid fa-rocket"></i>
                 Publish
             </button>
         </div>
@@ -312,7 +296,7 @@ if (!function_exists('str_snippet')) {
         <div class="modal-actions">
             <button class="action-btn btn-view" id="confirmKeep"
                 onclick="closeDialogBox('confirm-delete')">Keep</button>
-            <button class="action-btn btn-delete" id="confirmDeleteBtn"><i class="fa-regular fa-circle-xmark"></i> Yes,
+            <button class="action-btn btn-delete" id="confirmDeleteBtn"><i class="fa-solid fa-circle-xmark"></i> Yes,
                 Delete</button>
         </div>
 
@@ -338,7 +322,7 @@ if (!function_exists('str_snippet')) {
     <div class="pop-up deactive">
         <div class="pop-up-header">
             <div class="pop-up-title">Create A New Service Request</div>
-            <i class="fa-light fa-xmark" id="create-post-pop-up"></i>
+            <i class="fa-solid fa-xmark" id="create-post-pop-up"></i>
         </div>
         <hr>
         <div class="pop-up-content">
@@ -351,14 +335,14 @@ if (!function_exists('str_snippet')) {
     <div class="pop-up deactive" id="postDetailsModal" style="max-width:720px; border-radius:16px;">
         <div class="pop-up-header" style="display:flex; align-items:center; justify-content:space-between;">
             <div class="pop-up-title">Post Details</div>
-            <i class="fa-light fa-xmark" id="postDetailsClose" style="cursor:pointer;"></i>
+            <i class="fa-solid fa-xmark" id="postDetailsClose" style="cursor:pointer;"></i>
         </div>
         <hr>
         <div class="pop-up-content post-view" id="postContent" style="display:flex; flex-direction:column; gap:12px;">
 
         </div>
         <div class="modal-actions" style="justify-content:flex-end;">
-            <button class="action-btn btn-delete" id="modalDeleteBtn"><i class="fa-regular fa-circle-xmark"></i>
+            <button class="action-btn btn-delete" id="modalDeleteBtn"><i class="fa-solid fa-circle-xmark"></i>
                 Delete</button>
         </div>
     </div>
@@ -370,7 +354,7 @@ if (!function_exists('str_snippet')) {
     <div class="pop-up deactive" id="confirmDelete">
         <div class="pop-up-header" style="display:flex; align-items:center; justify-content:space-between;">
             <div class="pop-up-title">Confirm Delete</div>
-            <i class="fa-light fa-xmark" id="confirmDeleteClose" style="cursor:pointer;"></i>
+            <i class="fa-solid fa-xmark" id="confirmDeleteClose" style="cursor:pointer;"></i>
         </div>
         <hr>
         <div class="pop-up-content">
@@ -378,7 +362,7 @@ if (!function_exists('str_snippet')) {
         </div>
         <div class="modal-actions">
             <button class="action-btn btn-view" id="confirmKeep">Keep</button>
-            <button class="action-btn btn-delete" id="confirmDeleteBtn"><i class="fa-regular fa-circle-xmark"></i> Yes,
+            <button class="action-btn btn-delete" id="confirmDeleteBtn"><i class="fa-solid fa-circle-xmark"></i> Yes,
                 Delete</button>
         </div>
     </div>
@@ -389,7 +373,7 @@ if (!function_exists('str_snippet')) {
     <div class="pop-up deactive" id="confirmPublish">
         <div class="pop-up-header" style="display:flex; align-items:center; justify-content:space-between;">
             <div class="pop-up-title">Publish Request</div>
-            <i class="fa-light fa-xmark" id="confirmPublishClose" style="cursor:pointer;"></i>
+            <i class="fa-solid fa-xmark" id="confirmPublishClose" style="cursor:pointer;"></i>
         </div>
         <hr>
         <div class="pop-up-content">
@@ -397,7 +381,7 @@ if (!function_exists('str_snippet')) {
         </div>
         <div class="modal-actions">
             <button class="action-btn btn-view" id="confirmPublishKeep">Cancel</button>
-            <button class="action-btn btn-edit" id="confirmPublishBtn"><i class="fa-regular fa-rocket"></i>
+            <button class="action-btn btn-edit" id="confirmPublishBtn"><i class="fa-solid fa-rocket"></i>
                 Publish
             </button>
         </div>
@@ -408,12 +392,83 @@ if (!function_exists('str_snippet')) {
     let currentSort = 'date_desc';
     let currentSearch = '';
     let searchTimeout = null;
+    const PAGE_SIZE = 5;
+    const postsState = {
+        active: { posts: [], visibleCount: 0 },
+        draft: { posts: [], visibleCount: 0 },
+        expired: { posts: [], visibleCount: 0 }
+    };
+
+    function getListContainer(status) {
+        return document.querySelector(`.${status}-posts .item-list`);
+    }
+
+    function clearLoadMoreButton(status) {
+        const section = document.querySelector(`.${status}-posts`);
+        if (!section) return;
+        const existing = section.querySelector('.load-more-wrap');
+        if (existing) existing.remove();
+    }
+
+    function renderLoadMoreButton(status) {
+        const section = document.querySelector(`.${status}-posts`);
+        const container = getListContainer(status);
+        if (!section || !container) return;
+
+        clearLoadMoreButton(status);
+
+        const state = postsState[status];
+        if (!state || state.visibleCount >= state.posts.length) {
+            return;
+        }
+
+        const wrap = document.createElement('div');
+        wrap.className = 'load-more-wrap';
+        wrap.style.display = 'flex';
+        wrap.style.justifyContent = 'center';
+        wrap.style.marginTop = '35px';
+
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'action-btn btn-view';
+        button.textContent = 'Load More';
+        button.addEventListener('click', function () {
+            state.visibleCount = Math.min(state.visibleCount + PAGE_SIZE, state.posts.length);
+            renderPosts(status);
+        });
+
+        wrap.appendChild(button);
+        section.appendChild(wrap);
+    }
+
+    function renderPosts(status) {
+        const container = getListContainer(status);
+        if (!container) return;
+
+        const state = postsState[status];
+        const visiblePosts = state.posts.slice(0, state.visibleCount);
+
+        if (visiblePosts.length === 0) {
+            showEmptyState(status, container);
+            clearLoadMoreButton(status);
+            return;
+        }
+
+        container.innerHTML = '';
+        visiblePosts.forEach(item => {
+            const postHTML = createPostCard(item.post, item.skills, status);
+            container.insertAdjacentHTML('beforeend', postHTML);
+        });
+
+        renderLoadMoreButton(status);
+    }
 
     /**
      * Load posts via AJAX
      */
     function loadPosts(status = 'active') {
-        const container = document.querySelector(`.${status}-posts .item-list`);
+        const container = getListContainer(status);
+        if (!container) return;
 
         container.innerHTML = `
         <div class="loading-state">
@@ -421,6 +476,7 @@ if (!function_exists('str_snippet')) {
             <p>Loading posts...</p>
         </div>
     `;
+        clearLoadMoreButton(status);
 
         console.log('Loading posts for status:', status, 'with sort:', currentSort, 'search:', currentSearch);
 
@@ -442,15 +498,16 @@ if (!function_exists('str_snippet')) {
                 return new Promise(resolve => setTimeout(() => resolve(data), 300));
             })
             .then(data => {
-                if (data.success && data.posts && data.posts.length > 0) {
-                    container.innerHTML = '';
-                    data.posts.forEach(item => {
-                        const postHTML = createPostCard(item.post, item.skills, status);
-                        container.insertAdjacentHTML('beforeend', postHTML);
-                    });
-                } else {
-                    showEmptyState(status, container);
+                if (data.success && data.posts) {
+                    postsState[status].posts = data.posts;
+                    postsState[status].visibleCount = Math.min(PAGE_SIZE, data.posts.length);
+                    renderPosts(status);
+                    return;
                 }
+
+                postsState[status].posts = [];
+                postsState[status].visibleCount = 0;
+                showEmptyState(status, container);
             })
             .catch(error => {
                 console.error('Error loading posts:', error);
@@ -462,6 +519,7 @@ if (!function_exists('str_snippet')) {
                     <button onclick="loadPosts('${status}')" class="retry-btn">Retry</button>
                 </div>
             `;
+                clearLoadMoreButton(status);
             });
     }
 
@@ -480,7 +538,7 @@ if (!function_exists('str_snippet')) {
 
         const publishedDate = formatDate(post.Published_At || post.Created_At);
         const daysLeft = calculateDaysLeft(post.End_At);
-        if (daysLeft == 'Expired'){
+        if (daysLeft == 'Expired') {
             updateAsExpired(post.Post_ID);
         }
 
@@ -996,7 +1054,7 @@ if (!function_exists('str_snippet')) {
                 <div class="post-view">
                     <div class="post-view-title">${post.Title || 'Untitled'}</div>
                     <div class="post-view-meta">
-                        <span class="chip"><i class="fa-regular fa-calendar"></i><span>${publishDate}</span></span>
+                        <span class="chip"><i class="fa-solid fa-calendar"></i><span>${publishDate}</span></span>
                     </div>
                     <div class="post-view-section">
                         <div class="section-title">Description</div>
@@ -1018,7 +1076,7 @@ if (!function_exists('str_snippet')) {
                     <div class="post-view-section">
                         <div class="section-title">Engagement</div>
                         <div class="engagement-row">
-                            <span class="chip"><i class="fa-regular fa-eye"></i> ${post.Views || '0'} views</span>
+                            <span class="chip"><i class="fa-solid fa-eye"></i> ${post.Views || '0'} views</span>
                         </div>
                     </div>
                 </div>
@@ -1170,8 +1228,25 @@ if (!function_exists('str_snippet')) {
             });
     }
 
+    function getTodayDateString() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    function openPublishConfirmWithAction(onConfirm) {
+        viewDialogBox('confirm-publish');
+
+        const confirmPublishBtn = document.getElementById('confirmPublishBtn');
+        const newConfirmPublishBtn = confirmPublishBtn.cloneNode(true);
+        confirmPublishBtn.parentNode.replaceChild(newConfirmPublishBtn, confirmPublishBtn);
+        newConfirmPublishBtn.onclick = onConfirm;
+    }
+
     // Update the editPost function to attach save handler
-    function editPost(id) {
+    function editPost(id, mode = 'edit') {
         viewDialogBox('create-post-popup');
 
         fetch("<?= BASE_URL ?>/requests/view/" + id)
@@ -1255,16 +1330,38 @@ if (!function_exists('str_snippet')) {
                 const publishBtn = root.querySelector('[data-role="publish"]');
                 const savePostBtn = root.querySelector('[data-role="save-post"]');
 
-                if (saveDraftBtn) saveDraftBtn.style.display = 'none';
-                if (publishBtn) publishBtn.style.display = 'none';
-                if (savePostBtn) {
-                    savePostBtn.style.display = '';
-                    savePostBtn.setAttribute('data-post-id', post.Post_ID);
+                if (mode === 'repost') {
+                    // Repost flow: force date to today and use confirmation before publishing.
+                    root.querySelector("input[name='endat']").value = getTodayDateString();
 
-                    // Remove old event listeners and add new one
-                    const newSaveBtn = savePostBtn.cloneNode(true);
-                    savePostBtn.parentNode.replaceChild(newSaveBtn, savePostBtn);
-                    newSaveBtn.onclick = saveEditedPost;
+                    if (saveDraftBtn) saveDraftBtn.style.display = 'none';
+                    if (publishBtn) publishBtn.style.display = 'none';
+                    if (savePostBtn) {
+                        savePostBtn.style.display = '';
+                        savePostBtn.removeAttribute('data-post-id');
+                        savePostBtn.innerHTML = '<i class="fa-solid fa-rocket"></i> Repost Request';
+
+                        const newSaveBtn = savePostBtn.cloneNode(true);
+                        savePostBtn.parentNode.replaceChild(newSaveBtn, savePostBtn);
+                        newSaveBtn.onclick = function () {
+                            openPublishConfirmWithAction(function () {
+                                submitPost('publish');
+                            });
+                        };
+                    }
+                } else {
+                    if (saveDraftBtn) saveDraftBtn.style.display = 'none';
+                    if (publishBtn) publishBtn.style.display = 'none';
+                    if (savePostBtn) {
+                        savePostBtn.style.display = '';
+                        savePostBtn.setAttribute('data-post-id', post.Post_ID);
+                        savePostBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Request';
+
+                        // Remove old event listeners and add new one
+                        const newSaveBtn = savePostBtn.cloneNode(true);
+                        savePostBtn.parentNode.replaceChild(newSaveBtn, savePostBtn);
+                        newSaveBtn.onclick = saveEditedPost;
+                    }
                 }
             })
             .catch(error => {
@@ -1359,23 +1456,8 @@ if (!function_exists('str_snippet')) {
     }
 
     function repostExpired(id) {
-        // Load the post data into the create form and allow user to update end date
-        editPost(id);
-
-        // Change the title to indicate it's a repost
-        const root = document.getElementById("create-post-popup");
-        root.querySelector(".title").innerText = "Repost Service Request";
-        const saveDraftBtn = root.querySelector('[data-role="save-draft"]');
-        const publishBtn = root.querySelector('[data-role="publish"]');
-        const savePostBtn = root.querySelector('[data-role="save-post"]');
-
-        if (savePostBtn) savePostBtn.style.display = 'none';
-        if (saveDraftBtn && publishBtn) {
-            saveDraftBtn.style.display = '';
-            publishBtn.style.display = '';
-        }
-
-
+        // Load the post as repost mode (special button + today date + publish confirmation).
+        editPost(id, 'repost');
     }
 
 
@@ -1417,46 +1499,45 @@ if (!function_exists('str_snippet')) {
      */
     document.addEventListener('DOMContentLoaded', function () {
         // Setup search input handler with debouncing
-        const searchInput = document.getElementById('searchInput');
-        if (searchInput) {
-            searchInput.addEventListener('input', function(e) {
-                // Clear previous timeout
-                if (searchTimeout) {
-                    clearTimeout(searchTimeout);
-                }
-                
-                // Set new timeout to debounce search (wait 300ms after user stops typing)
-                searchTimeout = setTimeout(() => {
-                    currentSearch = e.target.value.trim();
-                    
-                    // Reload posts with search filter
-                    const activeSection = document.querySelector('.requests-section:not([style*="display: none"])');
-                    const status = activeSection.classList.contains('active-posts') ? 'active' :
-                                   activeSection.classList.contains('draft-posts') ? 'draft' : 'expired';
-                    loadPosts(status);
-                }, 300);
-            });
+        document.getElementById('searchInput').addEventListener('change', handleSearch);
+        document.getElementById('searchButton').addEventListener('click', handleSearch);
+
+        function handleSearch() {
+            if (searchTimeout) {
+                clearTimeout(searchTimeout);
+            }
+
+            // Set new timeout to debounce search (wait 300ms after user stops typing)
+            searchTimeout = setTimeout(() => {
+                currentSearch = document.getElementById('searchInput').value.trim();
+
+                // Reload posts with search filter
+                const activeSection = document.querySelector('.requests-section:not([style*="display: none"])');
+                const status = activeSection.classList.contains('active-posts') ? 'active' :
+                    activeSection.classList.contains('draft-posts') ? 'draft' : 'expired';
+                loadPosts(status);
+            }, 300);
         }
-        
+
         // Setup sort dropdown handler
         const sortOptions = document.getElementById('sortOptions');
         if (sortOptions) {
-            sortOptions.addEventListener('click', function(e) {
+            sortOptions.addEventListener('click', function (e) {
                 const option = e.target.closest('[data-sort]');
                 if (option) {
                     const sortValue = option.dataset.sort;
                     const sortText = option.textContent;
-                    
+
                     // Update dropdown display
                     document.getElementById('sortDropdown').value = sortText;
-                    
+
                     // Update global sort variable
                     currentSort = sortValue;
-                    
+
                     // Reload posts with new sort
                     const activeSection = document.querySelector('.requests-section:not([style*="display: none"])');
                     const status = activeSection.classList.contains('active-posts') ? 'active' :
-                                   activeSection.classList.contains('draft-posts') ? 'draft' : 'expired';
+                        activeSection.classList.contains('draft-posts') ? 'draft' : 'expired';
                     loadPosts(status);
                 }
             });

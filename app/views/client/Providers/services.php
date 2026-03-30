@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="assets/css/cardList.css">
-    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <title>Document</title>
 </head>
 
@@ -16,15 +16,15 @@
             <div class="search-header">
                 <div class="search-button">
                     <input type="text" placeholder="Search for Providers...">
-                    <button><i class="fa-light fa-magnifying-glass"></i></button>
+                    <button><i class="fa-solid fa-magnifying-glass"></i></button>
                 </div>
                 <button class="filter" id="filter-pop-up"><i
-                        class="fa-light fa-filter-list"></i><span>Filter</span></button>
+                        class="fa-solid fa-filter"></i><span>Filter</span></button>
                 <div class="advance-search">
                     <div class="sort-selection">
                         <div class="selection-input-field">
                             <input type="selection-input" id="selection-input" name="sort" value="Sort By Relevence"
-                                disabled><i class="fa-light fa-chevron-down"></i>
+                                disabled><i class="fa-solid fa-chevron-down"></i>
                         </div>
                         <div class="selection-options" id="selection-options">
                             <div class="opt">Sort By Relevence</div>
@@ -54,14 +54,14 @@
         <div class="pop-up deactive">
             <div class="pop-up-header">
                 <div class="pop-up-title">Add Filters</div>
-                <i class="fa-light fa-xmark" id="filter-pop-up"></i>
+                <i class="fa-solid fa-xmark" id="filter-pop-up"></i>
             </div>
             <hr>
             <div class="pop-up-content">
                 <div class="search-filters">
                     <div class="filter-item">
                         <div class="filter-title"><span>Hourly rate</span><i
-                                class="fa-light fa-chevron-down rotated"></i>
+                                class="fa-solid fa-chevron-down rotated"></i>
                         </div>
                         <ul class="filter-options active radios">
                             <li><input type="radio" name="rate" id="rate" checked>Any hourly rate</li>
@@ -72,7 +72,7 @@
                         </ul>
                     </div>
                     <div class="filter-item">
-                        <div class="filter-title"><span>Project success</span><i class="fa-light fa-chevron-down"></i>
+                        <div class="filter-title"><span>Project success</span><i class="fa-solid fa-chevron-down"></i>
                         </div>
                         <ul class="filter-options radios">
                             <li><input type="radio" name="success" id="success" checked>Any success rate</li>
@@ -83,7 +83,7 @@
                         </ul>
                     </div>
                     <div class="filter-item">
-                        <div class="filter-title"><span>Total Earnings</span><i class="fa-light fa-chevron-down"></i>
+                        <div class="filter-title"><span>Total Earnings</span><i class="fa-solid fa-chevron-down"></i>
                         </div>
                         <ul class="filter-options radios">
                             <li><input type="radio" name="earnings" id="earnings" checked>Any amount earned</li>
@@ -95,7 +95,7 @@
                         </ul>
                     </div>
                     <div class="filter-item">
-                        <div class="filter-title"><span>Language</span><i class="fa-light fa-chevron-down"></i></div>
+                        <div class="filter-title"><span>Language</span><i class="fa-solid fa-chevron-down"></i></div>
                         <ul class="filter-options checkboxes">
                             <li><input type="checkbox" name="language" id="language" checked>English</li>
                             <li><input type="checkbox" name="language" id="language">Sinhala</li>
@@ -117,7 +117,7 @@
         <div class="pop-up deactive">
             <div class="pop-up-header">
                 <div class="pop-up-title">Request Details</div>
-                <i class="fa-light fa-xmark" id="request-det-pop-up"></i>
+                <i class="fa-solid fa-xmark" id="request-det-pop-up"></i>
             </div>
             <hr>
             <div class="pop-up-content">
@@ -147,9 +147,9 @@
             </div>
             <hr>
             <div class="button" style="width:100%">
-                <button class="decline"><i class="fa-regular fa-circle-xmark"
+                <button class="decline"><i class="fa-solid fa-circle-xmark"
                         style="padding-right:0.5rem"></i>Decline</button>
-                <button class="accept"><i class="fa-regular fa-circle-check"
+                <button class="accept"><i class="fa-solid fa-circle-check"
                         style="padding-right:0.5rem"></i>Accept</button>
             </div>
         </div>

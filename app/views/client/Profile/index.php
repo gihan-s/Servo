@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/footer.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/elementStyles.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/gridTemplates.css">
-    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
     <!--scripts-->
     <script src="<?= BASE_URL ?>/assets/js/elementScript.js" defer></script>
@@ -33,20 +33,20 @@
                     <img class="hero-avatar" id="avatarPublicPreview"
                         src="<?= BASE_URL . "/../uploads/Users/" . htmlspecialchars($user['Profile_Picture']) ?? '' ?>" />
                     <button id="avatarSaveBtn" class="avatar-save-btn" style="display:none;" onclick="saveAvatar()"><i
-                            class="fa-regular fa-floppy-disk"></i> Save</button>
+                            class="fa-solid fa-floppy-disk"></i> Save</button>
                 </div>
                 <div class="hero-text">
                     <h1 id="publicSummaryName"><?= htmlspecialchars($user['First_Name']) ?>
                         <?= htmlspecialchars($user['Last_Name']) ?>
                     </h1>
-                    <div class="muted"><i class="fa-regular fa-envelope"></i> <span
+                    <div class="muted"><i class="fa-solid fa-envelope"></i> <span
                             id="publicSummaryEmail"><?= htmlspecialchars($user['Email']) ?></span>
 
                     </div>
                 </div>
                 <div class="hero-actions">
                     <button class="btn btn-primary" onclick="document.getElementById('avatarPublicInput').click()"><i
-                            class="fa-regular fa-camera"></i> Edit Photo</button>
+                            class="fa-solid fa-camera"></i> Edit Photo</button>
                     <input type="file" id="avatarPublicInput" accept="image/*" style="display:none" />
                 </div>
             </div>
@@ -55,11 +55,11 @@
         <div class="profile-shell">
             <nav class="profile-nav" aria-label="Profile sections">
                 <button class="pill" data-target="section-personal" aria-current="true"><i
-                        class="fa-regular fa-user"></i> Personal <span class="count">Info</span></button>
+                        class="fa-solid fa-user"></i> Personal <span class="count">Info</span></button>
                 <button class="pill" data-target="section-account" aria-current="false"><i
-                        class="fa-regular fa-shield-check"></i> Security <span class="count">Settings</span></button>
+                        class="fa-solid fa-shield-check"></i> Security <span class="count">Settings</span></button>
                 <a href="<?= BASE_URL ?>/logout" class="btn-logout pill">
-                    <i class="fa-regular fa-right-from-bracket"></i> Logout
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
                 </a>
 
 
@@ -67,7 +67,7 @@
             <div class="profile-content">
                 <section id="section-personal" class="profile-section active" aria-label="Personal information">
                     <div class="card">
-                        <h2 class="section-title"><i class="fa-regular fa-user"></i> Personal Information</h2>
+                        <h2 class="section-title"><i class="fa-solid fa-user"></i> Personal Information</h2>
                         <form id="personalForm" action="/update" onsubmit="savePersonal(event)">
                             <div class="input-grid-3">
                                 <div class="text-container">
@@ -124,10 +124,10 @@
                                 </div>
                             </div>
                             <div class="actions">
-                                <button class="btn btn-primary" type="submit"><i class="fa-regular fa-floppy-disk"></i>
+                                <button class="btn btn-primary" type="submit"><i class="fa-solid fa-floppy-disk"></i>
                                     Save Personal</button>
                                 <button class="btn btn-outline" type="reset" onclick="resetPersonal()"><i
-                                        class="fa-regular fa-rotate-left"></i> Reset</button>
+                                        class="fa-solid fa-rotate-left"></i> Reset</button>
                             </div>
                         </form>
                     </div>
@@ -135,7 +135,7 @@
 
                 <section id="section-account" class="profile-section" aria-label="Account & security">
                     <div class="card">
-                        <h2 class="section-title"><i class="fa-regular fa-shield-keyhole"></i> Account & Security</h2>
+                        <h2 class="section-title"><i class="fa-solid fa-shield-keyhole"></i> Account & Security</h2>
                         <form id="accountForm" onsubmit="saveAccount(event)">
                             <div class="input-grid-2">
                                 <div class="text-container">
@@ -158,7 +158,7 @@
                                 </div>
                             </div>
                             <div class="password-box">
-                                <h4><i class="fa-regular fa-lock"></i> Password & Recovery</h4>
+                                <h4><i class="fa-solid fa-lock"></i> Password & Recovery</h4>
                                 <div class="field-row">
                                     <div class="field">
                                         <label for="acc_new_pass">New Password</label>
@@ -178,19 +178,19 @@
                                 </div>
                                 <div class="small">Leave password fields empty if you don't want to change it.</div>
                                 <button type="button" class="link-inline" onclick="forgotPassword()"><i
-                                        class="fa-regular fa-envelope"></i> Send Reset Password Code</button>
+                                        class="fa-solid fa-envelope"></i> Send Reset Password Code</button>
                             </div>
                             <div class="actions">
-                                <button class="btn btn-primary" type="submit"><i class="fa-regular fa-floppy-disk"></i>
+                                <button class="btn btn-primary" type="submit"><i class="fa-solid fa-floppy-disk"></i>
                                     Save
                                     Account</button>
                             </div>
                             <div class="divider" style="margin:22px 0;"></div>
                         </form>
                         <div class="danger-zone">
-                            <h4><i class="fa-regular fa-triangle-exclamation"></i> Danger Zone</h4>
+                            <h4><i class="fa-solid fa-triangle-exclamation"></i> Danger Zone</h4>
                             <p>Deleting your account removes all associated data. This cannot be undone.</p>
-                            <button class="danger-btn" onclick="deleteAccount()"><i class="fa-regular fa-trash"></i>
+                            <button class="danger-btn" onclick="deleteAccount()"><i class="fa-solid fa-trash"></i>
                                 Delete Account</button>
                         </div>
                     </div>
@@ -201,22 +201,22 @@
     <?php include_once __DIR__ . '/../../includes/footer.php'; ?>
 
 
-    <div class="toast" id="toast"><i class="fa-regular fa-circle-check" style="color:#008500;"></i><span
+    <div class="toast" id="toast"><i class="fa-solid fa-circle-check" style="color:#008500;"></i><span
             id="toastMsg">Saved</span></div>
 
     <!-- Forgot Password Modal -->
     <div class="modal-overlay" id="fpOverlay" role="dialog" aria-modal="true" aria-labelledby="fpTitle">
         <div class="modal">
             <button class="close-btn" onclick="closeFP()" aria-label="Close"><i
-                    class="fa-regular fa-xmark"></i></button>
+                    class="fa-solid fa-xmark"></i></button>
             <h3 id="fpTitle">Reset Your Password</h3>
             <form onsubmit="sendFP(event)">
                 <input type="email" name="fp_email" id="fp_email" placeholder="you@example.com"
                     value="<?= htmlspecialchars($user['Email']) ?>" required readonly />
                 <div class="actions" style="margin-top:4px;">
-                    <button type="submit" class="btn btn-primary"><i class="fa-regular fa-paper-plane"></i> Send
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Send
                         Code</button>
-                    <button type="button" class="btn btn-ghost" onclick="closeFP()"><i class="fa-regular fa-xmark"></i>
+                    <button type="button" class="btn btn-ghost" onclick="closeFP()"><i class="fa-solid fa-xmark"></i>
                         Cancel</button>
                 </div>
             </form>
@@ -227,7 +227,7 @@
     <div class="modal-overlay" id="catOverlay" role="dialog" aria-modal="true" aria-labelledby="catTitle">
         <div class="modal">
             <button class="close-btn" onclick="closeCategoryModal()" aria-label="Close"><i
-                    class="fa-regular fa-xmark"></i></button>
+                    class="fa-solid fa-xmark"></i></button>
             <h3 id="catTitle">Add Category</h3>
             <form id="catModalForm" onsubmit="saveCategoryModal(event)">
                 <div class="field-row">
@@ -256,21 +256,21 @@
                         <label>Locations</label>
                         <div id="m_cat_locations" class="chip-input"></div>
                         <button class="btn btn-ghost" type="button" onclick="pickLocations(true)"><i
-                                class="fa-regular fa-location-dot"></i> Add Locations</button>
+                                class="fa-solid fa-location-dot"></i> Add Locations</button>
                     </div>
                     <div class="field">
                         <label>Skills</label>
                         <div id="m_cat_skills" class="chip-input"></div>
                         <button class="btn btn-ghost" type="button" onclick="pickSkills(true)"><i
-                                class="fa-regular fa-wand-magic-sparkles"></i> Add Skills</button>
+                                class="fa-solid fa-wand-magic-sparkles"></i> Add Skills</button>
                     </div>
                 </div>
                 <input type="hidden" id="m_cat_edit_index" value="" />
                 <div class="actions">
-                    <button class="btn btn-primary" type="submit"><i class="fa-regular fa-floppy-disk"></i>
+                    <button class="btn btn-primary" type="submit"><i class="fa-solid fa-floppy-disk"></i>
                         Save</button>
                     <button class="btn btn-outline" type="button" onclick="closeCategoryModal()"><i
-                            class="fa-regular fa-xmark"></i> Cancel</button>
+                            class="fa-solid fa-xmark"></i> Cancel</button>
                 </div>
             </form>
         </div>
@@ -280,7 +280,7 @@
     <div class="modal-overlay" id="catViewOverlay" role="dialog" aria-modal="true" aria-labelledby="catViewTitle">
         <div class="modal">
             <button class="close-btn" onclick="closeCategoryView()" aria-label="Close"><i
-                    class="fa-regular fa-xmark"></i></button>
+                    class="fa-solid fa-xmark"></i></button>
             <h3 id="catViewTitle">Category Details</h3>
             <div id="catViewBody" class="small"></div>
         </div>

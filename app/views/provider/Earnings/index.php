@@ -7,7 +7,7 @@
     <title>Earnings | Provider Dashboard</title>
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/cardList.css" />
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/main.css" />
-    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/earnings.css" />
     
 </head>
@@ -90,7 +90,7 @@
                 </div>
                 <div class="chart-placeholder">
                     <div style="text-align: center;">
-                        <i class="fa-regular fa-chart-bar" style="font-size: 48px; margin-bottom: 16px; display: block;"></i>
+                        <i class="fa-solid fa-chart-bar" style="font-size: 48px; margin-bottom: 16px; display: block;"></i>
                         Earnings chart visualization<br>
                         <span style="font-size: 12px;">(Interactive chart would be implemented with a charting library)</span>
                     </div>
@@ -103,8 +103,8 @@
             <div class="section-header">
                 <h2>Recent Transactions</h2>
                 <div class="section-actions">
-                    <button class="ghost-btn"><i class="fa-regular fa-download"></i> Export CSV</button>
-                    <button class="link-btn"><i class="fa-regular fa-arrow-right"></i> View All</button>
+                    <button class="ghost-btn"><i class="fa-solid fa-download"></i> Export CSV</button>
+                    <button class="link-btn"><i class="fa-solid fa-arrow-right"></i> View All</button>
                 </div>
             </div>
             <div class="card" style="padding: 0; overflow: hidden;">
@@ -133,7 +133,7 @@
                             </td>
                             <td><span class="transaction-status status-completed">Completed</span></td>
                             <td style="text-align: right;">
-                                <button class="ghost-btn"><i class="fa-regular fa-receipt"></i> Receipt</button>
+                                <button class="ghost-btn"><i class="fa-solid fa-receipt"></i> Receipt</button>
                             </td>
                         </tr>
                         <tr>
@@ -149,7 +149,7 @@
                             </td>
                             <td><span class="transaction-status status-completed">Completed</span></td>
                             <td style="text-align: right;">
-                                <button class="ghost-btn"><i class="fa-regular fa-receipt"></i> Receipt</button>
+                                <button class="ghost-btn"><i class="fa-solid fa-receipt"></i> Receipt</button>
                             </td>
                         </tr>
                         <tr>
@@ -165,7 +165,7 @@
                             </td>
                             <td><span class="transaction-status status-pending">Pending</span></td>
                             <td style="text-align: right;">
-                                <button class="ghost-btn"><i class="fa-regular fa-eye"></i> View</button>
+                                <button class="ghost-btn"><i class="fa-solid fa-eye"></i> View</button>
                             </td>
                         </tr>
                         <tr>
@@ -181,7 +181,7 @@
                             </td>
                             <td><span class="transaction-status status-processing">Processing</span></td>
                             <td style="text-align: right;">
-                                <button class="ghost-btn"><i class="fa-regular fa-eye"></i> View</button>
+                                <button class="ghost-btn"><i class="fa-solid fa-eye"></i> View</button>
                             </td>
                         </tr>
                         <tr>
@@ -197,7 +197,7 @@
                             </td>
                             <td><span class="transaction-status status-completed">Completed</span></td>
                             <td style="text-align: right;">
-                                <button class="ghost-btn"><i class="fa-regular fa-receipt"></i> Receipt</button>
+                                <button class="ghost-btn"><i class="fa-solid fa-receipt"></i> Receipt</button>
                             </td>
                         </tr>
                     </tbody>
@@ -210,7 +210,7 @@
         <section class="payout-section">
             <div class="section-header">
                 <h2>Payout Methods</h2>
-                <button class="primary-btn"><i class="fa-regular fa-plus"></i> Add Method</button>
+                <button class="primary-btn"><i class="fa-solid fa-plus"></i> Add Method</button>
             </div>
             <div class="payout-methods">
                 <div class="payout-method active">
@@ -225,7 +225,7 @@
                 </div>
                 <div class="payout-method">
                     <div class="method-icon" style="background:#ecfdf5; color:#008500;">
-                        <i class="fa-regular fa-building-columns"></i>
+                        <i class="fa-solid fa-building-columns"></i>
                     </div>
                     <div class="method-details">
                         <div class="method-name">Bank Transfer</div>
@@ -235,7 +235,7 @@
                 </div>
                 <div class="payout-method">
                     <div class="method-icon" style="background:#fef3c7; color:#b45309;">
-                        <i class="fa-regular fa-credit-card"></i>
+                        <i class="fa-solid fa-credit-card"></i>
                     </div>
                     <div class="method-details">
                         <div class="method-name">Direct Card</div>
@@ -251,7 +251,7 @@
         <section class="tax-section">
             <div class="section-header">
                 <h2>Tax Information</h2>
-                <button class="ghost-btn"><i class="fa-regular fa-download"></i> Tax Documents</button>
+                <button class="ghost-btn"><i class="fa-solid fa-download"></i> Tax Documents</button>
             </div>
             <div class="card">
                 <div class="tax-summary">
@@ -269,7 +269,7 @@
                     </div>
                 </div>
                 <div style="font-size: 13px; color: #64748b; text-align: center;">
-                    <i class="fa-regular fa-circle-info"></i> 
+                    <i class="fa-solid fa-circle-info"></i> 
                     These are estimates for informational purposes. Consult a tax professional for accurate tax calculations.
                 </div>
             </div>
@@ -280,7 +280,7 @@
         <section class="payout-section">
             <div class="section-header">
                 <h2>Next Payout</h2>
-                <button class="primary-btn"><i class="fa-regular fa-arrow-down"></i> Request Early Payout</button>
+                <button class="primary-btn"><i class="fa-solid fa-arrow-down"></i> Request Early Payout</button>
             </div>
             <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
