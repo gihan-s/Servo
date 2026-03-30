@@ -4,6 +4,9 @@ require_once __DIR__ . '/../models/ClientModel.php';
 require_once __DIR__ . '/../models/ProviderModel.php';
 require_once __DIR__ . '/../models/CategoryModel.php';
 require_once __DIR__ . '/../models/LocationModel.php';
+require_once __DIR__ . '/../../helpers/upload.php';
+require_once __DIR__ . '/../../helpers/email.php';
+
 
 class RegisterController
 {
@@ -36,16 +39,9 @@ class RegisterController
         $_SESSION['register']['website'] = $_POST['website'] ?? '';
 
         if ($_FILES['profile_picture']['name'] != '') {
-            $targetDir = __DIR__ . '/../../uploads/temp/';
-            if (!is_dir($targetDir)) {
-                mkdir($targetDir, 0777, true);
-            }
-
-            $filename = uniqid() . '_' . $_FILES['profile_picture']['name'];
-            $targetFile = $targetDir . $filename;
-
-            if (move_uploaded_file($_FILES['profile_picture']['tmp_name'], $targetFile)) {
-                $_SESSION['register']['profile_picture'] = $filename; // just store the filename in session
+            $profile_picture = uploadFile('profile_picture', __DIR__ . '/../../uploads/temp/', 'image/*');
+            if ($profile_picture) {
+                $_SESSION['register']['profile_picture'] = $profile_picture; // just store the filename in session
             }
         }
 
@@ -172,7 +168,7 @@ class RegisterController
                         if ($value2 == 'All Districts') {
                             $District = "All";
                             $City = "All";
-                        } else if (strpos($value2, "District") > -1){
+                        } else if (strpos($value2, "District") > -1) {
                             $District = str_replace(" District", "", $value2);
                         } else {
                             $City = $value2;
@@ -181,11 +177,10 @@ class RegisterController
                         $LocationID = $model->getLocationID($District, $City)[0]["Location_ID"];
 
                         $model->insertLocation($ProviderCategoryID, $LocationID);
-                        
                     }
                 }
 
-                $_SESSION["New_Register"] = "provider";
+                $_SESSION['reg_pending_notice'] = "Provider";
                 unset($_SESSION['register']);
                 header('Location: ../login');
                 exit;
@@ -203,47 +198,25 @@ class RegisterController
 
     public function documentsubmit()
     {
+
         if ($_FILES['nic_front']['name'] != '') {
-            $targetDir = __DIR__ . '/../../uploads/temp/';
-            if (!is_dir($targetDir)) {
-                mkdir($targetDir, 0777, true);
-            }
-
-            $filename = uniqid() . '_' . $_FILES['nic_front']['name'];
-            $targetFile = $targetDir . $filename;
-
-            if (move_uploaded_file($_FILES['nic_front']['tmp_name'], $targetFile)) {
-                $_SESSION['register']['nic_front'] = $filename; // just store the filename in session
+            $nic_front = uploadFile('nic_front', __DIR__ . '/../../uploads/temp/', 'image/*');
+            if ($nic_front) {
+                $_SESSION['register']['nic_front'] = $nic_front; // just store the filename in session
             }
         }
-
 
         if ($_FILES['nic_back']['name'] != '') {
-            $targetDir = __DIR__ . '/../../uploads/temp/';
-            if (!is_dir($targetDir)) {
-                mkdir($targetDir, 0777, true);
-            }
-
-            $filename = uniqid() . '_' . $_FILES['nic_back']['name'];
-            $targetFile = $targetDir . $filename;
-
-            if (move_uploaded_file($_FILES['nic_back']['tmp_name'], $targetFile)) {
-                $_SESSION['register']['nic_back'] = $filename; // just store the filename in session
+            $nic_back = uploadFile('nic_back', __DIR__ . '/../../uploads/temp/', 'image/*');
+            if ($nic_back) {
+                $_SESSION['register']['nic_back'] = $nic_back; // just store the filename in session
             }
         }
 
-
         if ($_FILES['resume']['name'] != '') {
-            $targetDir = __DIR__ . '/../../uploads/temp/';
-            if (!is_dir($targetDir)) {
-                mkdir($targetDir, 0777, true);
-            }
-
-            $filename = uniqid() . '_' . $_FILES['resume']['name'];
-            $targetFile = $targetDir . $filename;
-
-            if (move_uploaded_file($_FILES['resume']['tmp_name'], $targetFile)) {
-                $_SESSION['register']['resume'] = $filename; // just store the filename in session
+            $resume = uploadFile('resume', __DIR__ . '/../../uploads/temp/', ['application/pdf']);
+            if ($resume) {
+                $_SESSION['register']['resume'] = $resume; // just store the filename in session
             }
         }
 
@@ -309,4 +282,74 @@ class RegisterController
         echo json_encode(['status' => 'ok', 'result' => $model->getAllSkills($CategoryID)]);
     }
 
+
+    public function sendEmailOTP()
+    {
+        header('Content-Type: application/json');
+
+        if (!isset($_POST['Email'])) {
+            echo json_encode(['status' => 'error', 'message' => 'No email provided']);
+            return;
+        }
+
+        $_SESSION['otp'] = random_int(100000, 999999);
+        $_SESSION['otp_expire'] = time() + 300;
+
+        $EmailTemplate = '
+        <!DOCTYPE html>
+        <html>
+        <body style="font-family: Arial, sans-serif; color: #333333;">
+            <p>Hello ' . $_POST["First_Name"] . ',</p>
+
+            <p>Use the following One-Time Password (OTP) to complete your verification.</p>
+
+            <p style="font-size: 24px; font-weight: bold; letter-spacing: 4px;">
+            ' . $_SESSION['otp'] . '
+            </p>
+
+            <p>This OTP is valid for 5 minutes.</p>
+
+            <p>If you did not request this, please ignore this email.</p>
+
+            <p>Thanks,<br>Servo Team</p>
+        </body>
+        </html>
+        ';
+
+        $response = sendEmail(
+            $_POST["Email"],
+            $_POST["First_Name"] . " " . $_POST["Last_Name"],
+            "Verify Your Email",
+            $EmailTemplate
+        );
+
+        if (trim($response) == 'Success') {
+            echo json_encode(['status' => 'success', 'message' => 'OTP Sent Success']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => $response]);
+        }
+    }
+
+    public function verifyEmailOTP()
+    {
+        header('Content-Type: application/json');
+
+        if (!isset($_POST['OTP'])) {
+            echo json_encode(['status' => 'error', 'message' => 'No OTP provided']);
+            return;
+        }
+
+        if (time() > $_SESSION['otp_expire']) {
+            echo json_encode(['status' => 'error', 'message' => 'OTP Expired']);
+            return;
+        }
+
+        if ($_SESSION['otp'] == $_POST['OTP']) {
+            echo json_encode(['status' => 'success', 'message' => 'OTP Verified']);
+            return;
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Invalid OTP']);
+            return;
+        }
+    }
 }

@@ -87,7 +87,7 @@ if (document.getElementById("registrationForm1")) {
                     if (data.status == 'ok') {
 
                         if (document.getElementById("user_type").value == 'client') {
-                            event.target.submit();
+                            sendEmailVerification();
                         } else {
 
 
@@ -99,8 +99,7 @@ if (document.getElementById("registrationForm1")) {
                                 .then(res => res.json())
                                 .then(data => {
                                     if (data.status == 'ok') {
-                                        event.target.submit();
-                                        
+                                        sendEmailVerification();
                                     } else {
                                         showValidationTooltip(document.getElementsByName("nic_no")[0], data.message);
                                         submitButton.style.opacity = '1';
@@ -684,4 +683,63 @@ if (document.getElementById("registrationForm5")) {
         }
     })
 }
-});
+
+
+
+function sendEmailVerification() {
+    viewDialogBox('EmailVerificationDialog');
+
+    const formData = new FormData();
+    formData.append('Email', document.getElementsByName("email")[0].value);
+    formData.append('First_Name', document.getElementsByName("first_name")[0].value);
+    formData.append('Last_Name', document.getElementsByName("last_name")[0].value);
+
+    fetch('./register/send-email-otp', {
+        method: 'POST',
+        body: formData
+    })
+        .then(res => res.json())
+        .then(data => console.log(data));
+
+}
+
+const EmailVerificationForm = document.getElementById("EmailVerificationForm");
+const EmailVerificationButton = document.querySelector("#EmailVerificationForm button");
+if (EmailVerificationForm) {
+    EmailVerificationForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        EmailVerificationButton.innerText = 'Verifying...';
+        EmailVerificationButton.disabled = true;
+
+        const formData = new FormData();
+        formData.append('OTP', document.getElementById("Email_OTP").value);
+
+        fetch('./register/verify-email-otp', {
+            method: 'POST',
+            body: formData
+        })
+            .then(res => res.json())
+            .then((data) => {
+                console.log(data);
+
+                if (data.status == 'error') {
+                    if (data.message == 'OTP Expired') {
+                        alert("Oops! " + data.message + ". We sent a new OTP.");
+                        sendEmailVerification();
+                    } else {
+                        alert("Oops! " + data.message + ".");
+                    }
+
+                    EmailVerificationButton.innerText = 'Verify';
+                    EmailVerificationButton.disabled = false;
+
+                } else if (data.status == 'success') {
+                    document.getElementById("registrationForm1").submit();
+                }
+            });
+
+    })
+}
+
+

@@ -1,6 +1,6 @@
 <div class="sidebar-new">
 
-    <img src="/assets/img/logo.png" alt="">
+    <img src="<?= BASE_URL ?>/assets/img/logo.png" alt="">
 
     <div style="width: 100%;">
 

@@ -37,7 +37,7 @@ class ProviderModel extends Database
         $nicf = $data['nic_front'] ?? null;
         $nicb = $data['nic_back'] ?? null;
         $resume = $data['resume'] ?? null;
-        
+
         // Convert email to lowercase
         $email = strtolower($data['email']);
 
@@ -189,17 +189,17 @@ class ProviderModel extends Database
 
 
     // Get provider by ID
-    public function getProviderById($id)
+    public function getProviderById(int $id): ?array
     {
-        $id = $this->conn->real_escape_string($id);
-        $sql = "SELECT * FROM Provider WHERE Provider_ID = $id";
-        $result = $this->conn->query($sql);
+        $stmt = $this->conn->prepare(
+            "SELECT * FROM Provider WHERE Provider_ID = ?"
+        );
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
 
-        if ($result->num_rows > 0) {
-            return $result->fetch_assoc();
-        }
-        return null;
+        return $stmt->get_result()->fetch_assoc() ?: null;
     }
+
 
     // Update provider profile (example)
     public function updateProfile($id, $firstName, $lastName, $contact, $gender, $website, $bio)
@@ -229,7 +229,8 @@ class ProviderModel extends Database
 
 
 
-    public function nicExists($nic_no) {
+    public function nicExists($nic_no)
+    {
         $stmt = $this->conn->prepare("SELECT Provider_ID FROM Provider WHERE NIC_No = ?");
         $stmt->bind_param("s", $nic_no);
         $stmt->execute();
@@ -248,7 +249,8 @@ class ProviderModel extends Database
     }
 
 
-     public function getAllProviders($limit, $offset) {
+    public function getAllProviders($limit, $offset)
+    {
         $stmt = $this->conn->prepare("SELECT Provider_ID, First_Name, Last_Name, Contact_No, Email, NIC_No, Status FROM Provider WHERE Status <> 'Deleted' ORDER BY Provider_ID DESC LIMIT ? OFFSET ?");
         $stmt->bind_param("ii", $limit, $offset);
         $stmt->execute();
@@ -256,7 +258,8 @@ class ProviderModel extends Database
         return $result->fetch_all(MYSQLI_ASSOC);
     }
 
-    public function getUserCount() {
+    public function getUserCount()
+    {
         $result = $this->conn->query("SELECT COUNT(Provider_ID) AS Total_Providers FROM Provider WHERE Status <> 'Deleted'");
         return $result->fetch_assoc()['Total_Providers'];
     }
@@ -270,6 +273,4 @@ class ProviderModel extends Database
         $stmt->bind_param("si", $status, $provider_id);
         return $stmt->execute();
     }
-
-
 }
