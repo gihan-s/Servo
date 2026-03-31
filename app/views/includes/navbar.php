@@ -10,6 +10,7 @@
         ['Notification_ID' => 2, 'Title' => 'New bid received on your post: UI Revamp', 'Timestamp' => '2025-12-30 11:30:00', 'Type' => 'bid', 'Unread' => true],
         ['Notification_ID' => 3, 'Title' => 'DevStudio Labs sent you a message.', 'Timestamp' => '2025-12-30 11:22:00', 'Type' => 'message', 'Unread' => false],
         ['Notification_ID' => 4, 'Title' => 'Contract milestone approved.', 'Timestamp' => '2025-12-30 10:00:00', 'Type' => 'milestone', 'Unread' => false],
+        ['Notification_ID' => 5, 'Title' => 'New bid received on your post: Mobile App Development', 'Timestamp' => '2025-12-29 16:45:00', 'Type' => 'bid', 'Unread' => true],
     ];
 ?>
 

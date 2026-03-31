@@ -1,4 +1,21 @@
 <?php
+// CLIENT TABLE STRUCTURE
+// +-----------------+---------------+------+-----+---------+----------------+
+// | Field           | Type          | Null | Key | Default | Extra          |
+// +-----------------+---------------+------+-----+---------+----------------+
+// | Client_ID       | int           | NO   | PRI | NULL    | auto_increment |
+// | Email           | varchar(256)  | YES  | UNI | NULL    |                |
+// | Contact_No      | varchar(45)   | YES  |     | NULL    |                |
+// | Password        | varchar(512)  | YES  |     | NULL    |                |
+// | Created_At      | datetime      | YES  |     | NULL    |                |
+// | First_Name      | varchar(100)  | YES  |     | NULL    |                |
+// | Last_Name       | varchar(100)  | YES  |     | NULL    |                |
+// | Gender          | varchar(45)   | YES  |     | NULL    |                |
+// | Profile_Picture | varchar(512)  | YES  |     | NULL    |                |
+// | Social_Link     | varchar(512)  | YES  |     | NULL    |                |
+// | Bio             | varchar(1024) | YES  |     | NULL    |                |
+// | Status          | varchar(45)   | YES  |     | NULL    |                |
+// +-----------------+---------------+------+-----+---------+----------------+
 
 require_once __DIR__ . '/../core/Database.php';
 
