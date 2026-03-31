@@ -11,7 +11,7 @@ $TopBarHeader = "Providers";
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter">
 
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <!-- css -->
     <link rel="stylesheet" href="/assets/css/elementStyles.css">
@@ -44,7 +44,7 @@ $TopBarHeader = "Providers";
                 <span>Total Providers in System</span>
             </div>
 
-            <img src="/assets/img/admin-icon/customers.jpg" alt="">
+            <img src="<?= BASE_URL ?>/assets/img/admin-icon/customers.jpg" alt="">
 
         </div>
 
@@ -56,7 +56,7 @@ $TopBarHeader = "Providers";
                 <span>Pending for Approval</span>
             </div>
 
-            <img src="/assets/img/admin-icon/softwares.jpg" alt="">
+            <img src="<?= BASE_URL ?>/assets/img/admin-icon/softwares.jpg" alt="">
 
         </div>
 
@@ -68,7 +68,7 @@ $TopBarHeader = "Providers";
                 <span>Currently Providing Service</span>
             </div>
 
-            <img src="/assets/img/admin-icon/websites.jpg" alt="">
+            <img src="<?= BASE_URL ?>/assets/img/admin-icon/websites.jpg" alt="">
 
         </div>
 
@@ -81,7 +81,7 @@ $TopBarHeader = "Providers";
                 <span>Banned by System</span>
             </div>
 
-            <img src="/assets/img/admin-icon/pendingImp.webp" alt="">
+            <img src="<?= BASE_URL ?>/assets/img/admin-icon/pendingImp.webp" alt="">
 
         </div>
 
@@ -162,13 +162,13 @@ $TopBarHeader = "Providers";
 
 
         <div class="pagination" aria-label="Approved Requests Pagination">
-            <button class="page-btn prev" onclick="previosPagination(this)"><i class="fa-regular fa-chevron-left"></i></button>
+            <button class="page-btn prev" onclick="previosPagination(this)"><i class="fa-solid fa-chevron-left"></i></button>
 
             <?php for ($i = 1; $i <= $totalPages; $i++): ?>
                 <button onclick="window.location=`?page=<?= $i ?>`" class="page-btn <?= $i == $page ? 'active' : '' ?>"><?= $i ?></button>
             <?php endfor; ?>
 
-            <button class="page-btn next" onclick="nextPagination(this)"><i class="fa-regular fa-chevron-right"></i></button>
+            <button class="page-btn next" onclick="nextPagination(this)"><i class="fa-solid fa-chevron-right"></i></button>
         </div>
 
 

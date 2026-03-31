@@ -1,5 +1,7 @@
 <?php
-// Reuse existing login UI with minimal changes: post to /login with type param
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -12,7 +14,7 @@
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/gridTemplates.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/login.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/login-inline.css">
-    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
 <body>
@@ -20,16 +22,14 @@
     <div class="main-section">
         <img src="<?= BASE_URL ?>/assets/img/logo.png" alt="Servo">
         <?php
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
         $loginError = $_SESSION['login_error'] ?? null;
         unset($_SESSION['login_error']);
         if (!empty($_SESSION['reg_pending_notice'])): ?>
-            <div class="reg-pending-notice">
+            <div class="reg-pending-notice" style="text-align: center;">
                 <strong>Registration received.</strong><br />You will get an email after approved by an admin.
             </div>
-            <?php unset($_SESSION['reg_pending_notice']); endif; ?>
+        <?php unset($_SESSION['reg_pending_notice']);
+        endif; ?>
         <?php if ($loginError): ?>
             <div class="login-error-message">
                 <?= htmlspecialchars($loginError) ?>

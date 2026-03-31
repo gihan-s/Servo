@@ -126,9 +126,8 @@
 }
 
 .btn-edit:hover {
-  background: #008500;
+  background: #006800;
   color: white;
-  transform: translateY(-1px);
 }
 
 .btn-view {
@@ -138,9 +137,9 @@
 }
 
 .btn-view:hover {
-  background: #e5e7eb;
-  border-color: #d1d5db;
-  transform: translateY(-1px);
+  background: #006800;
+  border: 2px solid #006800;
+  color: white;
 }
 
 .btn-delete {
@@ -152,7 +151,6 @@
 .btn-delete:hover {
   background: #dc2626;
   color: white;
-  transform: translateY(-1px);
 }
 
 /* Post Content Section */
@@ -644,4 +642,149 @@
   z-index: 99;
 }
 
+/* ============================================
+   AJAX Loading States
+   ============================================ */
 
+/* Loading State */
+.loading-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--textColorGray, #6b7280);
+}
+
+.loading-state i {
+  font-size: 48px;
+  margin-bottom: 20px;
+  color: #008500;
+  opacity: 0.8;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-state p {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--textColor, #1f2937);
+}
+
+/* Error State */
+.error-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--textColorGray, #6b7280);
+}
+
+.error-state i {
+  font-size: 48px;
+  margin-bottom: 20px;
+  color: #ef4444;
+  opacity: 0.8;
+}
+
+.error-state p {
+  font-size: 16px;
+  margin-bottom: 20px;
+  color: var(--textColor, #1f2937);
+}
+
+.retry-btn {
+  margin-top: 15px;
+  padding: 12px 24px;
+  background-color: var(--accentColor, #ff6b35);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.retry-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  color: var(--textColorGray, #6b7280);
+}
+
+.empty-state i {
+  font-size: 64px;
+  margin-bottom: 24px;
+  opacity: 0.4;
+  color: var(--textColorGray, #9ca3af);
+}
+
+.empty-state h2 {
+  font-size: 22px;
+  margin-bottom: 12px;
+  color: var(--textColor, #1f2937);
+  font-weight: 600;
+}
+
+.empty-state p {
+  font-size: 15px;
+  color: var(--textColorGray, #6b7280);
+  line-height: 1.6;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* No Skills Indicator */
+.no-skills {
+  color: var(--textColorGray, #9ca3af);
+  font-style: italic;
+  font-size: 14px;
+}
+
+/* Smooth transitions for dynamically added posts */
+.search-item {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .loading-state,
+  .error-state,
+  .empty-state {
+    padding: 40px 15px;
+  }
+  
+  .loading-state i,
+  .error-state i {
+    font-size: 36px;
+  }
+  
+  .empty-state i {
+    font-size: 48px;
+  }
+  
+  .empty-state h2 {
+    font-size: 18px;
+  }
+  
+  .empty-state p {
+    font-size: 14px;
+  }
+}

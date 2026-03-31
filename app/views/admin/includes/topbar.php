@@ -10,7 +10,7 @@
 
     <div class="user-wrapper">
         <div class="user-image">
-            <img src="/assets/img/user.jpeg" alt="">
+            <img src="<?= BASE_URL ?>/assets/img/user.jpeg" alt="">
         </div>
 
         <div>

@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/cardList.css">
-    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/payments.css">
 
     
@@ -23,15 +23,15 @@
             <div class="search-header">
                 <div class="search-button">
                     <input type="text" placeholder="Search my payments...">
-                    <button><i class="fa-light fa-magnifying-glass"></i></button>
+                    <button><i class="fa-solid fa-magnifying-glass"></i></button>
                 </div>
                 <button class="filter" id="filter-pop-up"><i
-                        class="fa-light fa-filter-list"></i><span>Filter</span></button>
+                        class="fa-solid fa-filter"></i><span>Filter</span></button>
                 <div class="advance-search">
                     <div class="sort-selection">
                         <div class="selection-input-field">
                             <input type="selection-input" id="selection-input" name="sort" value="Sort By Relevence"
-                                disabled><i class="fa-light fa-chevron-down"></i>
+                                disabled><i class="fa-solid fa-chevron-down"></i>
                         </div>
                         <div class="selection-options" id="selection-options">
                             <div class="opt">Sort By Relevence</div>
@@ -106,11 +106,11 @@
                         </div>
                     </div>
                     <div class="pagination" aria-label="Pagination Pending Payments">
-                        <button class="page-btn prev" disabled><i class="fa-regular fa-chevron-left"></i></button>
+                        <button class="page-btn prev" disabled><i class="fa-solid fa-chevron-left"></i></button>
                         <button class="page-btn active">1</button>
                         <button class="page-btn">2</button>
                         <button class="page-btn">3</button>
-                        <button class="page-btn next"><i class="fa-regular fa-chevron-right"></i></button>
+                        <button class="page-btn next"><i class="fa-solid fa-chevron-right"></i></button>
                     </div>
                 </div>
             </div>
@@ -158,11 +158,11 @@
                         </div></div>
                     </div>
                     <div class="pagination" aria-label="Pagination Completed Payments">
-                        <button class="page-btn prev" disabled><i class="fa-regular fa-chevron-left"></i></button>
+                        <button class="page-btn prev" disabled><i class="fa-solid fa-chevron-left"></i></button>
                         <button class="page-btn active">1</button>
                         <button class="page-btn">2</button>
                         <button class="page-btn">3</button>
-                        <button class="page-btn next"><i class="fa-regular fa-chevron-right"></i></button>
+                        <button class="page-btn next"><i class="fa-solid fa-chevron-right"></i></button>
                     </div>
                 </div>
             </div>
@@ -208,11 +208,11 @@
                         </div></div>
                     </div>
                     <div class="pagination" aria-label="Pagination Refunded Payments">
-                        <button class="page-btn prev" disabled><i class="fa-regular fa-chevron-left"></i></button>
+                        <button class="page-btn prev" disabled><i class="fa-solid fa-chevron-left"></i></button>
                         <button class="page-btn active">1</button>
                         <button class="page-btn">2</button>
                         <button class="page-btn">3</button>
-                        <button class="page-btn next"><i class="fa-regular fa-chevron-right"></i></button>
+                        <button class="page-btn next"><i class="fa-solid fa-chevron-right"></i></button>
                     </div>
                 </div>
             </div>

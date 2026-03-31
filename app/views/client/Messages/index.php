@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Servo | Messages</title>
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/cardList.css" />
-    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/messages.css" />
     
 </head>
@@ -21,14 +21,14 @@
                 <h1>Messages</h1>
             </div>
             <div class="sidebar-search" style="position:relative;">
-                <i class="fa-regular fa-magnifying-glass icon"></i>
+                <i class="fa-solid fa-magnifying-glass icon"></i>
                 <input type="text" id="convSearch" placeholder="Search conversations" />
             </div>
             <div class="chat-filters">
-                <div class="filter-chip active" data-filter="all"><i class="fa-regular fa-inbox"></i> All</div>
-                <div class="filter-chip" data-filter="unread"><i class="fa-regular fa-envelope"></i> Unread</div>
-                <div class="filter-chip" data-filter="starred"><i class="fa-regular fa-star"></i> Starred</div>
-                <div class="filter-chip" data-filter="archived"><i class="fa-regular fa-box-archive"></i> Archived</div>
+                <div class="filter-chip active" data-filter="all"><i class="fa-solid fa-inbox"></i> All</div>
+                <div class="filter-chip" data-filter="unread"><i class="fa-solid fa-envelope"></i> Unread</div>
+                <div class="filter-chip" data-filter="starred"><i class="fa-solid fa-star"></i> Starred</div>
+                <div class="filter-chip" data-filter="archived"><i class="fa-solid fa-box-archive"></i> Archived</div>
             </div>
             <div class="divider-label">Recent</div>
             <div class="conversation-list" id="conversationList" role="list">
@@ -49,11 +49,11 @@
                     </div>
                 </div>
                 <div class="header-actions">
-                    <button class="toggle-sidebar" onclick="toggleSidebar()"><i class="fa-regular fa-bars"></i></button>
-                    <button class="h-btn" id="starBtn" disabled><i class="fa-regular fa-star"></i> Star</button>
-                    <button class="h-btn" id="archiveBtn" disabled><i class="fa-regular fa-box-archive"></i>
+                    <button class="toggle-sidebar" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+                    <button class="h-btn" id="starBtn" disabled><i class="fa-solid fa-star"></i> Star</button>
+                    <button class="h-btn" id="archiveBtn" disabled><i class="fa-solid fa-box-archive"></i>
                         Archive</button>
-                    <button class="h-btn" id="moreBtn" disabled><i class="fa-regular fa-ellipsis"></i> More</button>
+                    <button class="h-btn" id="moreBtn" disabled><i class="fa-solid fa-ellipsis"></i> More</button>
                 </div>
             </div>
             <div class="messages-scroll" id="messagesScroll">
@@ -68,18 +68,18 @@
                         <textarea id="messageInput" rows="1" placeholder="Type a message"
                             oninput="autoGrow(this)"></textarea>
                         <button class="attach-btn" title="Attach" onclick="attachFile()"><i
-                                class="fa-regular fa-paperclip"></i></button>
+                                class="fa-solid fa-paperclip"></i></button>
                     </div>
-                    <button class="send-btn" onclick="sendMessage()"><i class="fa-regular fa-paper-plane"></i>
+                    <button class="send-btn" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i>
                         Send</button>
                 </div>
                 <div class="toolbar">
                     <button class="t-btn" onclick="insertTemplate('Thanks for the update!')"><i
-                            class="fa-regular fa-message-smile"></i> Quick Reply</button>
+                            class="fa-solid fa-message-smile"></i> Quick Reply</button>
                     <button class="t-btn" onclick="insertTemplate('Can you clarify the timeline?')"><i
-                            class="fa-regular fa-clock"></i> Timeline</button>
+                            class="fa-solid fa-clock"></i> Timeline</button>
                     <button class="t-btn" onclick="insertTemplate('Let\'s schedule a call to discuss further.')"><i
-                            class="fa-regular fa-phone"></i> Call</button>
+                            class="fa-solid fa-phone"></i> Call</button>
                 </div>
             </div>
         </section>
@@ -183,9 +183,9 @@
             <div class="bubble">
                 <div class="text">${escapeHTML(msg.text)}</div>
                 <div class="msg-actions">
-                    <button class="icon-btn" title="Reply" onclick="quoteMessage(event,'${escapeQuotes(msg.text)}')"><i class="fa-regular fa-reply"></i></button>
-                    <button class="icon-btn" title="Copy" onclick="copyMessage(event,'${escapeQuotes(msg.text)}')"><i class="fa-regular fa-copy"></i></button>
-                    <button class="icon-btn" title="More"><i class="fa-regular fa-ellipsis"></i></button>
+                    <button class="icon-btn" title="Reply" onclick="quoteMessage(event,'${escapeQuotes(msg.text)}')"><i class="fa-solid fa-reply"></i></button>
+                    <button class="icon-btn" title="Copy" onclick="copyMessage(event,'${escapeQuotes(msg.text)}')"><i class="fa-solid fa-copy"></i></button>
+                    <button class="icon-btn" title="More"><i class="fa-solid fa-ellipsis"></i></button>
                 </div>
                 <div class="meta"><span>${msg.at}</span><span>${msg.read ? 'Read' : 'Sent'}</span></div>
             </div>`;

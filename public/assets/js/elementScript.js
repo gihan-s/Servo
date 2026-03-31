@@ -375,6 +375,7 @@ for (let i = 0; i < searchDropdowns.length; i++) {
 
 // Dialog Boxes
 function viewDialogBox(id) {
+    inputReset(id);
     document.getElementById(id).classList.add("dialog-box-2-view");
 }
 
@@ -511,7 +512,7 @@ function addItemToDropdown(DropdownID, value, isDefault = true, valueID) {
 
     element.addEventListener("click", () => {
         var searchDD = element.parentElement.parentElement.parentElement;
-        searchDD.querySelector(".text-field-search-dropdown").value = element.innerHTML;if (element.dataset.id) {
+        searchDD.querySelector(".text-field-search-dropdown").value = element.innerHTML; if (element.dataset.id) {
             searchDD.querySelector(".text-field-search-dropdown").dataset.id = element.dataset.id;
         }
         searchDD.querySelector(".search-dropdown-label").classList.add("label-float");
@@ -527,7 +528,9 @@ function addItemToDropdown(DropdownID, value, isDefault = true, valueID) {
 
 
 function inputReset(formID) {
-    const elementArray = document.getElementById(formID).querySelectorAll("input");
+    const root = document.getElementById(formID);
+
+    const elementArray = root.querySelectorAll("input");
     for (let i = 0; i < elementArray.length; i++) {
         const element = elementArray[i];
 
@@ -635,20 +638,20 @@ for (let i = 0; i < OptionMenus.length; i++) {
 
 
 //pagination
-function nextPagination(element){
+function nextPagination(element) {
     if (!element.parentElement.querySelector(".active").nextElementSibling.classList.contains("next")) {
         element.parentElement.querySelector(".active").nextElementSibling.click();
     }
 }
-function previosPagination(element){
+function previosPagination(element) {
     if (!element.parentElement.querySelector(".active").previousElementSibling.classList.contains("prev")) {
         element.parentElement.querySelector(".active").previousElementSibling.click();
     }
 }
 
-function showLoadingOn(elementID){
+function showLoadingOn(elementID) {
     const element = document.getElementById(elementID);
-    
+
     const div = document.createElement("div");
     div.style.display = 'flex';
     div.style.justifyContent = 'center';
@@ -659,3 +662,143 @@ function showLoadingOn(elementID){
     element.innerHTML = '';
     element.appendChild(div);
 }
+
+
+
+
+/**
+ * Toast Notification System
+ * Usage:
+ *   showToast('success', 'Success!', 'Your post was published successfully.');
+ *   showToast('error', 'Error!', 'Failed to save post.');
+ *   showToast('warning', 'Warning!', 'Please fill all required fields.');
+ *   showToast('info', 'Info', 'New updates available.');
+ */
+
+// Initialize toast container on page load
+document.addEventListener('DOMContentLoaded', function() {
+    if (!document.querySelector('.toast-container')) {
+        const container = document.createElement('div');
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+    }
+});
+
+/**
+ * Show a toast notification
+ * @param {string} type - Toast type: 'success', 'error', 'warning', 'info'
+ * @param {string} title - Toast title
+ * @param {string} message - Toast message
+ * @param {number} duration - Duration in milliseconds (default: 5000)
+ */
+function showToast(type = 'info', title = '', message = '', duration = 5000) {
+    // Get or create container
+    let container = document.querySelector('.toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+    }
+
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    // Get icon based on type
+    const icons = {
+        success: 'fa-circle-check',
+        error: 'fa-circle-xmark',
+        warning: 'fa-triangle-exclamation',
+        info: 'fa-circle-info'
+    };
+    
+    const icon = icons[type] || icons.info;
+
+    // Build toast HTML
+    toast.innerHTML = `
+        <div class="toast-icon">
+            <i class="fa-solid ${icon}"></i>
+        </div>
+        <div class="toast-content">
+            ${title ? `<div class="toast-title">${title}</div>` : ''}
+            ${message ? `<div class="toast-message">${message}</div>` : ''}
+        </div>
+        <div class="toast-close">
+            <i class="fa-solid fa-xmark"></i>
+        </div>
+        <div class="toast-progress" style="width: 100%;"></div>
+    `;
+
+    // Add to container
+    container.appendChild(toast);
+
+    // Show toast with animation
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 10);
+
+    // Progress bar animation
+    const progressBar = toast.querySelector('.toast-progress');
+    if (progressBar && duration > 0) {
+        progressBar.style.transition = `width ${duration}ms linear`;
+        setTimeout(() => {
+            progressBar.style.width = '0%';
+        }, 50);
+    }
+
+    // Close button functionality
+    const closeBtn = toast.querySelector('.toast-close');
+    closeBtn.addEventListener('click', () => {
+        removeToast(toast);
+    });
+
+    // Auto remove after duration
+    if (duration > 0) {
+        setTimeout(() => {
+            removeToast(toast);
+        }, duration);
+    }
+
+    return toast;
+}
+
+/**
+ * Remove a toast with animation
+ * @param {HTMLElement} toast - Toast element to remove
+ */
+function removeToast(toast) {
+    toast.classList.remove('show');
+    toast.classList.add('hide');
+    
+    setTimeout(() => {
+        if (toast.parentElement) {
+            toast.parentElement.removeChild(toast);
+        }
+    }, 300);
+}
+
+/**
+ * Shorthand functions for different toast types
+ */
+function showSuccessToast(title, message, duration) {
+    return showToast('success', title, message, duration);
+}
+
+function showErrorToast(title, message, duration) {
+    return showToast('error', title, message, duration);
+}
+
+function showWarningToast(title, message, duration) {
+    return showToast('warning', title, message, duration);
+}
+
+function showInfoToast(title, message, duration) {
+    return showToast('info', title, message, duration);
+}
+
+// Make functions globally available
+window.showToast = showToast;
+window.showSuccessToast = showSuccessToast;
+window.showErrorToast = showErrorToast;
+window.showWarningToast = showWarningToast;
+window.showInfoToast = showInfoToast;

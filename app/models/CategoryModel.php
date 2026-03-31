@@ -23,4 +23,18 @@ class CategoryModel extends Database
         $stmt->close();
         return $result->fetch_all(MYSQLI_ASSOC);
     }
+
+    public function getByProviderId(int $providerId): array
+    {
+        $stmt = $this->conn->prepare(
+            "SELECT Provider_Categories.*, Category.Name AS Category_Type
+            FROM Provider_Categories
+            INNER JOIN Category ON Provider_Categories.Category_ID = Category.Category_ID
+            WHERE Provider_ID = ?"
+        );
+        $stmt->bind_param("i", $providerId);
+        $stmt->execute();
+
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
 }

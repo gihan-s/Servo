@@ -2,9 +2,6 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-
-$baseURL = "../../../";
-
 ?>
 
 <!DOCTYPE html>
@@ -18,13 +15,13 @@ $baseURL = "../../../";
     <link rel="stylesheet" href="<?= BASE_URL ?>/../assets/css/gridTemplates.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/../assets/css/login.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/../assets/css/login-inline.css">
-    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
 <body>
-    <button class="button home-btn" onclick="window.location.href='/'">Home</button>
+    <button class="button home-btn" onclick="window.location.href='<?= BASE_URL ?>'">Home</button>
     <div class="main-section">
-        <img src="<?= BASE_URL ?>/../assets/img/logo.png" alt="Servo">
+        <img src="<?= BASE_URL ?>/assets/img/logo.png" alt="Servo">
         <?php
         $loginError = $_SESSION['login_error'] ?? null;
         ?>
@@ -38,7 +35,7 @@ $baseURL = "../../../";
             <h2>Admin Panel</h2>
         </div>
 
-        <form class="login-form" method="POST" action="<?= BASE_URL ?>/login/authenticate">
+        <form class="login-form" method="POST" action="<?= BASE_URL ?>/admin/login/authenticate">
 
             <div class="input-group">
                 <i class="fa-solid fa-user"></i>

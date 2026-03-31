@@ -11,7 +11,7 @@ $TopBarHeader = "Dashboard";
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter">
 
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <!-- css -->
     <link rel="stylesheet" href="/assets/css/elementStyles.css">
@@ -37,7 +37,6 @@ $TopBarHeader = "Dashboard";
 
 
 
-
     <div class="card-wrapper">
 
         <div class="container top-card">
@@ -48,7 +47,7 @@ $TopBarHeader = "Dashboard";
                 <span>Currently Using the System</span>
             </div>
 
-            <img src="/assets/img/admin-icon/softwares.jpg" alt="">
+            <img src="<?= BASE_URL ?>/assets/img/admin-icon/softwares.jpg" alt="">
 
         </div>
 
@@ -60,7 +59,7 @@ $TopBarHeader = "Dashboard";
                 <span>Currently Delivering Services</span>
             </div>
 
-            <img src="/assets/img/admin-icon/invoices.webp" alt="">
+            <img src="<?= BASE_URL ?>/assets/img/admin-icon/invoices.webp" alt="">
 
         </div>
 
@@ -72,7 +71,7 @@ $TopBarHeader = "Dashboard";
                 <span>Currently Published</span>
             </div>
 
-            <img src="/assets/img/admin-icon/sales.webp" alt="">
+            <img src="<?= BASE_URL ?>/assets/img/admin-icon/sales.webp" alt="">
 
         </div>
 
@@ -84,7 +83,7 @@ $TopBarHeader = "Dashboard";
                 <span>No of Customers Added</span>
             </div>
 
-            <img src="/assets/img/admin-icon/accounting.png" alt="">
+            <img src="<?= BASE_URL ?>/assets/img/admin-icon/accounting.png" alt="">
 
         </div>
 

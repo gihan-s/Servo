@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="<?= $BaseURL ?>/assets/css/elementStyles.css">
     <link rel="stylesheet" href="<?= $BaseURL ?>/assets/css/gridTemplates.css">
     <link rel="stylesheet" href="<?= $BaseURL ?>/assets/css/register-inline.css">
-    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <script src="<?= $BaseURL ?>/assets/js/elementScript.js" defer></script>
     <script src="<?= $BaseURL ?>/assets/js/registerScript.js" defer></script>
@@ -103,7 +103,7 @@
 
                     <div class="button-section">
                         <button type="submit" class="button" id="nextBtn">Next
-                            <i class="fa-regular fa-arrow-right"></i>
+                            <i class="fa-solid fa-arrow-right"></i>
                         </button>
                     </div>
                 </div>
@@ -112,6 +112,60 @@
         </div>
 
     </form>
+
+
+    <form id="EmailVerificationForm">
+        <div class="dialog-box-2" id="EmailVerificationDialog">
+            <div class="dialog-content" style="width: 400px;">
+                <div class="dialog-title">
+                    <div class="title">Email Verification</div>
+                    <div>
+                        <i class="fa-solid fa-xmark dialog-close-button-2"
+                            onclick="closeDialogBox('EmailVerificationDialog')"></i>
+                    </div>
+                </div>
+
+                <p>We have sent a verification code to your email. Please enter it below to verify your account.</p>
+                <input type="text" id="Email_OTP" maxlength="6" minlength="6" required>
+
+
+                <button type="submit" class="button">Verify</button>
+            </div>
+        </div>
+    </form>
+
+    <style>
+        #EmailVerificationDialog p {
+            font-size: 0.9em;
+            opacity: 0.8;
+            text-align: center;
+        }
+
+        #EmailVerificationDialog input {
+            width: 100%;
+            font-size: 1.8em;
+            padding: 7px;
+            border: none;
+            outline: 2px solid #00000030;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: bold;
+            margin-top: 15px;
+            letter-spacing: 15px;
+            transition: all 0.3s;
+            color: #282828;
+        }
+
+        #EmailVerificationDialog input:focus {
+            outline: 2px solid var(--primary-color);
+        }
+
+        #EmailVerificationDialog button{
+            width: 100%;
+            margin-top: 15px;
+        }
+    </style>
+
 
 </body>
 </html>
