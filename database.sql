@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 04, 2026 at 11:03 PM
+-- Generation Time: Apr 02, 2026 at 04:21 AM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.5.1
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -49,8 +49,16 @@ CREATE TABLE `bids` (
   `Created_At` datetime DEFAULT NULL,
   `Est_Date` datetime DEFAULT NULL,
   `Status` varchar(45) DEFAULT NULL,
-  `Post_ID` int(11) NOT NULL
+  `Post_ID` int(11) NOT NULL,
+  `Provider_ID` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+--
+-- Dumping data for table `bids`
+--
+
+INSERT INTO `bids` (`Bid_ID`, `Comment`, `Amount`, `Created_At`, `Est_Date`, `Status`, `Post_ID`, `Provider_ID`) VALUES
+(1, 'I can do this', 800, '2026-04-01 17:04:58', '2026-06-01 17:04:58', 'active', 40, 4);
 
 -- --------------------------------------------------------
 
@@ -233,40 +241,25 @@ CREATE TABLE `post` (
   `Post_Status` varchar(45) DEFAULT NULL,
   `Client_ID` int(11) NOT NULL,
   `Provider_ID` int(11) DEFAULT NULL,
+  `Provider_Categories_ID` int(11) DEFAULT NULL,
   `Title` varchar(100) DEFAULT NULL,
   `Description` varchar(2048) DEFAULT NULL,
   `Requesting_Price` double DEFAULT NULL,
   `Price_Type` varchar(25) NOT NULL,
-  `Duration` varchar(50) NOT NULL,
   `Level` varchar(30) NOT NULL,
-  `End_At` date NOT NULL,
-  `Published_At` datetime NOT NULL,
-  `Duration_Type` varchar(25) NOT NULL
+  `End_At` date DEFAULT NULL,
+  `Published_At` datetime DEFAULT NULL,
+  `Est_Date` date NOT NULL,
+  `Request_Status` varchar(15) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Dumping data for table `post`
 --
 
-INSERT INTO `post` (`Post_ID`, `Created_At`, `Category_ID`, `Post_Type`, `Post_Status`, `Client_ID`, `Provider_ID`, `Title`, `Description`, `Requesting_Price`, `Price_Type`, `Duration`, `Level`, `End_At`, `Published_At`, `Duration_Type`) VALUES
-(1, '2025-10-01 09:15:00', 1, 'Job', 'active', 4, 3, 'Website Redesign', 'I’m a passionate Web Designer and Developer with a strong focus on creating visually appealing, responsive, and user-friendly websites. With a background in Computer Science and hands-on experience using HTML, CSS, JavaScript, PHP, and MySQL, I build sites that are both functional and beautifully designed.\n\nI specialize in crafting clean, modern interfaces that adapt perfectly to all screen sizes — from desktops to smartphones. Whether it’s a portfolio, business site, eCommerce store, or booking platform, I handle everything from front-end design to back-end logic using the MVC architecture.\n\nHaving worked closely with real businesses, I understand the importance of blending creativity with results — ensuring every project not only looks great but also helps my clients attract customers and grow their brand online.', 450, 'Fixed', '2', 'Intermediate', '2025-11-05', '2025-10-14 00:00:00', ''),
-(2, '2025-10-02 10:40:00', 1, 'Task', 'active', 4, 5, 'Logo Creation', 'Looking for a unique logo for a clothing brand.', 120, 'Fixed', '3', 'Beginner', '2025-10-26', '2025-10-14 17:41:40', ''),
-(3, '2025-10-04 11:05:00', 1, 'Gig', 'expired', 4, 2, 'SEO Optimization', 'Need on-page SEO for a WordPress site.', 300, 'Hourly', '1 week', 'Intermediate', '2025-10-29', '2025-10-20 17:42:32', ''),
-(4, '2025-10-05 12:10:00', 1, 'Job', 'active', 4, 4, 'Mobile App Prototype', 'Design a clickable prototype for a finance app.', 600, 'Fixed', '10 days', 'Advanced', '2025-11-01', '2025-10-12 17:42:37', ''),
-(5, '2025-10-03 13:45:00', 1, 'Task', 'draft', 4, 6, 'Bug Fixing', 'Fix UI bugs and minor API issues in dashboard.', 200, 'Hourly', '5 days', 'Intermediate', '2025-10-28', '2025-10-15 17:42:51', ''),
-(6, '2025-10-22 14:20:00', 1, 'Gig', 'draft', 4, 8, 'Data Entry Work', 'Need accurate entry of product listings.', 80, 'Fixed', '1 week', 'Beginner', '2025-10-29', '0000-00-00 00:00:00', ''),
-(7, '2025-10-22 15:10:00', 1, 'Job', 'active', 4, 9, 'Landing Page Design', 'Design a responsive landing page for a SaaS.', 250, 'Fixed', '4 days', 'Intermediate', '2025-10-26', '0000-00-00 00:00:00', ''),
-(8, '2025-10-22 15:45:00', 1, 'Task', 'expired', 4, 7, 'API Integration', 'Integrate payment gateway with backend.', 350, 'Hourly', '1 week', 'Advanced', '2025-10-30', '0000-00-00 00:00:00', ''),
-(9, '2025-10-22 16:30:00', 1, 'Gig', 'expired', 4, 10, 'Database Cleanup', 'Normalize and clean up redundant database entries.', 150, 'Fixed', '3 days', 'Intermediate', '2025-10-25', '0000-00-00 00:00:00', ''),
-(10, '2025-10-22 17:00:00', 1, 'Job', 'draft', 4, 11, 'Content Writing', 'Write 5 SEO-friendly blog posts.', 100, 'Fixed', '1 week', 'Beginner', '2025-10-29', '0000-00-00 00:00:00', ''),
-(11, '2025-10-22 22:36:28', 1, NULL, 'draft', 4, NULL, 'csad', 'sdadasd', 321, 'Hourly', '32', 'Intermediate', '2025-10-23', '0000-00-00 00:00:00', 'Days'),
-(12, '2025-10-22 22:37:20', 1, NULL, 'draft', 4, NULL, 'csad', 'sdadasd', 321, 'Hourly', '32', 'Intermediate', '2025-10-23', '0000-00-00 00:00:00', 'Days'),
-(13, '2025-10-22 22:42:17', 1, 'post', 'active', 4, NULL, 'Professional Web Designer for Modern, Responsive, and SEO-Optimized Websites', 'I’m a creative and detail-oriented Web Designer with experience in building clean, responsive, and visually appealing websites using HTML, CSS, JavaScript, PHP, and MySQL.\r\n\r\nI design and develop websites that not only look professional but also perform efficiently across all devices. Whether you need a personal portfolio, a business website, or a complete online store, I can deliver a full solution — from layout design to final deployment.\r\n\r\nWhat I Offer:\r\n• Custom website design (HTML/CSS/JS/PHP)\r\n• Mobile-friendly and SEO-optimized pages\r\n• Website redesigns and UI/UX improvements\r\n• Fast loading speed and clean code\r\n• Integration with forms, databases, or APIs\r\n\r\nLet’s work together to turn your vision into a professional, user-friendly website that stands out online', 200, 'Hourly', '4', 'Intermediate', '2025-10-30', '2025-10-22 22:42:17', 'Months'),
-(14, '2025-10-22 22:51:22', 1, 'post', 'active', 4, NULL, 'Professional Web Designer for Modern, Responsive, and SEO-Optimized Websites', 'I’m a creative and detail-oriented Web Designer with experience in building clean, responsive, and visually appealing websites using HTML, CSS, JavaScript, PHP, and MySQL.\r\n\r\nI design and develop websites that not only look professional but also perform efficiently across all devices. Whether you need a personal portfolio, a business website, or a complete online store, I can deliver a full solution — from layout design to final deployment.\r\n\r\nWhat I Offer:\r\n• Custom website design (HTML/CSS/JS/PHP)\r\n• Mobile-friendly and SEO-optimized pages\r\n• Website redesigns and UI/UX improvements\r\n• Fast loading speed and clean code\r\n• Integration with forms, databases, or APIs\r\n\r\nLet’s work together to turn your vision into a professional, user-friendly website that stands out online.', 200, 'Hourly', '12', 'Intermediate', '2025-10-30', '2025-10-22 22:51:22', 'Weeks'),
-(15, '2025-10-22 22:52:16', 1, 'post', 'active', 4, NULL, 'Professional Web Designer for Modern, Responsive, and SEO-Optimized Websites', 'I’m a creative and detail-oriented Web Designer with experience in building clean, responsive, and visually appealing websites using HTML, CSS, JavaScript, PHP, and MySQL.\r\n\r\nI design and develop websites that not only look professional but also perform efficiently across all devices. Whether you need a personal portfolio, a business website, or a complete online store, I can deliver a full solution — from layout design to final deployment.\r\n\r\nWhat I Offer:\r\n• Custom website design (HTML/CSS/JS/PHP)\r\n• Mobile-friendly and SEO-optimized pages\r\n• Website redesigns and UI/UX improvements\r\n• Fast loading speed and clean code\r\n• Integration with forms, databases, or APIs\r\n\r\nLet’s work together to turn your vision into a professional, user-friendly website that stands out online.', 200, 'Hourly', '12', 'Intermediate', '2025-10-30', '2025-10-22 22:52:16', 'Weeks'),
-(16, '2025-10-22 22:52:25', 1, 'post', 'active', 4, NULL, 'Professional Web Designer for Modern, Responsive, and SEO-Optimized Websites', 'I’m a creative and detail-oriented Web Designer with experience in building clean, responsive, and visually appealing websites using HTML, CSS, JavaScript, PHP, and MySQL.\r\n\r\nI design and develop websites that not only look professional but also perform efficiently across all devices. Whether you need a personal portfolio, a business website, or a complete online store, I can deliver a full solution — from layout design to final deployment.\r\n\r\nWhat I Offer:\r\n• Custom website design (HTML/CSS/JS/PHP)\r\n• Mobile-friendly and SEO-optimized pages\r\n• Website redesigns and UI/UX improvements\r\n• Fast loading speed and clean code\r\n• Integration with forms, databases, or APIs\r\n\r\nLet’s work together to turn your vision into a professional, user-friendly website that stands out online.', 200, 'Hourly', '12', 'Intermediate', '2025-10-30', '2025-10-22 22:52:25', 'Weeks'),
-(17, '2025-10-22 22:53:22', 1, 'post', 'active', 4, NULL, 'Im in', 'I’m a creative and detail-oriented Web Designer with experience in building clean, responsive, and visually appealing websites using HTML, CSS, JavaScript, PHP, and MySQL.\r\n\r\nI design and develop websites that not only look professional but also perform efficiently across all devices. Whether you need a personal portfolio, a business website, or a complete online store, I can deliver a full solution — from layout design to final deployment.\r\n\r\nWhat I Offer:\r\n• Custom website design (HTML/CSS/JS/PHP)\r\n• Mobile-friendly and SEO-optimized pages\r\n• Website redesigns and UI/UX improvements\r\n• Fast loading speed and clean code\r\n• Integration with forms, databases, or APIs\r\n\r\nLet’s work together to turn your vision into a professional, user-friendly website that stands out online.', 23, 'Fixed', '12', 'Intermediate', '0000-00-00', '2025-10-22 22:53:22', 'Days'),
-(18, '2025-10-22 22:54:33', 1, 'post', 'active', 4, NULL, 'Im in', 'I’m a creative and detail-oriented Web Designer with experience in building clean, responsive, and visually appealing websites using HTML, CSS, JavaScript, PHP, and MySQL.\r\n\r\nI design and develop websites that not only look professional but also perform efficiently across all devices. Whether you need a personal portfolio, a business website, or a complete online store, I can deliver a full solution — from layout design to final deployment.\r\n\r\nWhat I Offer:\r\n• Custom website design (HTML/CSS/JS/PHP)\r\n• Mobile-friendly and SEO-optimized pages\r\n• Website redesigns and UI/UX improvements\r\n• Fast loading speed and clean code\r\n• Integration with forms, databases, or APIs\r\n\r\nLet’s work together to turn your vision into a professional, user-friendly website that stands out online.', 23, 'Fixed', '12', 'Intermediate', '0000-00-00', '2025-10-22 22:54:33', 'Days');
+INSERT INTO `post` (`Post_ID`, `Created_At`, `Category_ID`, `Post_Type`, `Post_Status`, `Client_ID`, `Provider_ID`, `Title`, `Description`, `Requesting_Price`, `Price_Type`, `Level`, `End_At`, `Published_At`, `Est_Date`, `Request_Status`) VALUES
+(40, '2026-04-01 16:54:37', 1, 'post', 'expired', 4, 4, 'New Project', 'This Project is for beginners', 1000, '0', 'Beginner', '2026-03-30', '2026-04-01 16:54:37', '2026-06-15', 'ongoing'),
+(41, '2026-04-01 18:06:09', 1, 'post', 'active', 4, NULL, 'New Project', 'This Project is for beginners', 1000, 'Fixed', 'Beginner', '2026-04-01', '2026-04-01 18:06:09', '2026-06-15', '');
 
 -- --------------------------------------------------------
 
@@ -313,12 +306,8 @@ CREATE TABLE `post_need_skills` (
 --
 
 INSERT INTO `post_need_skills` (`ID`, `Skill_ID`, `Post_ID`) VALUES
-(1, 1, 1),
-(2, 1, 2),
-(3, 3, 1),
-(4, 4, 1),
-(5, 3, 18),
-(6, 1, 18);
+(93, 3, 40),
+(94, 3, 41);
 
 -- --------------------------------------------------------
 
@@ -370,6 +359,8 @@ CREATE TABLE `provider` (
   `NIC_Back` varchar(512) DEFAULT NULL,
   `Resume` varchar(512) DEFAULT NULL,
   `Website` varchar(256) DEFAULT NULL,
+  `Total_Earning` double NOT NULL,
+  `Rating` double NOT NULL,
   `Status` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
@@ -377,10 +368,10 @@ CREATE TABLE `provider` (
 -- Dumping data for table `provider`
 --
 
-INSERT INTO `provider` (`Provider_ID`, `Email`, `Contact_No`, `NIC_No`, `Password`, `Created_At`, `First_Name`, `Last_Name`, `Gender`, `Profile_Picture`, `Bio`, `NIC_Front`, `NIC_Back`, `Resume`, `Website`, `Status`) VALUES
-(4, 'Chethiya@gmail.com', '0782332537', '200335900739', '$2y$10$TfS.1w9aDzfZV5wsuuY12uGtz5C0qqe3o8VsFHkH5xhZnlGYwhKTW', '2025-09-12 01:14:07', 'P.G.Chethiya', 'Bandara', 'Male', '/uploads/providers/4/profile_1757619847.jpg', '', '/uploads/providers/4/nic_front_1757619847.jpg', '/uploads/providers/4/nic_back_1757619847.jpg', NULL, '', 'pending'),
-(5, 'Bagya@gmail.com', '0782332537', '200335900738', '$2y$10$x3CYSC8ac2ic.RQvuMTwe.jHkWZ6meNzPkrIp0xHkoKrJGlPkif/y', '2025-09-12 01:23:55', 'P.G.Chethiya', 'Bandara', 'Male', '/uploads/providers/5/profile_1757620435.jpg', '', '/uploads/providers/5/nic_front_1757620435.jpg', '/uploads/providers/5/nic_back_1757620435.jpg', NULL, '', 'pending'),
-(6, 'himath@gmail.com', '0782332537', '200335900731', '$2y$10$lz6PfkrZLTTquxMa2GHJIOGBxDdtGFHLL9ZfYcLVhxX0MHzASj5lO', '2025-09-12 12:52:57', 'Himath', 'Adithya', 'Male', '/uploads/providers/6/profile_1757661777.jpg', 'Mama malak.....', '/uploads/providers/6/nic_front_1757661777.jpg', '/uploads/providers/6/nic_back_1757661777.jpg', NULL, 'himath.malkakula.lk', 'pending');
+INSERT INTO `provider` (`Provider_ID`, `Email`, `Contact_No`, `NIC_No`, `Password`, `Created_At`, `First_Name`, `Last_Name`, `Gender`, `Profile_Picture`, `Bio`, `NIC_Front`, `NIC_Back`, `Resume`, `Website`, `Total_Earning`, `Rating`, `Status`) VALUES
+(4, 'Chethiya@gmail.com', '0782332537', '200335900739', '$2y$10$TfS.1w9aDzfZV5wsuuY12uGtz5C0qqe3o8VsFHkH5xhZnlGYwhKTW', '2025-09-12 01:14:07', 'P.G.Chethiya', 'Bandara', 'Male', '/uploads/providers/4/profile_1757619847.jpg', '', '/uploads/providers/4/nic_front_1757619847.jpg', '/uploads/providers/4/nic_back_1757619847.jpg', NULL, '', 0, 0, 'pending'),
+(5, 'Bagya@gmail.com', '0782332537', '200335900738', '$2y$10$x3CYSC8ac2ic.RQvuMTwe.jHkWZ6meNzPkrIp0xHkoKrJGlPkif/y', '2025-09-12 01:23:55', 'P.G.Chethiya', 'Bandara', 'Male', '/uploads/providers/5/profile_1757620435.jpg', '', '/uploads/providers/5/nic_front_1757620435.jpg', '/uploads/providers/5/nic_back_1757620435.jpg', NULL, '', 0, 0, 'pending'),
+(6, 'himath@gmail.com', '0782332537', '200335900731', '$2y$10$lz6PfkrZLTTquxMa2GHJIOGBxDdtGFHLL9ZfYcLVhxX0MHzASj5lO', '2025-09-12 12:52:57', 'Himath', 'Adithya', 'Male', '/uploads/providers/6/profile_1757661777.jpg', 'Mama malak.....', '/uploads/providers/6/nic_front_1757661777.jpg', '/uploads/providers/6/nic_back_1757661777.jpg', NULL, 'himath.malkakula.lk', 0, 0, 'pending');
 
 -- --------------------------------------------------------
 
@@ -394,20 +385,22 @@ CREATE TABLE `provider_categories` (
   `Provider_ID` int(11) NOT NULL,
   `Title` varchar(100) DEFAULT NULL,
   `Description` varchar(1024) DEFAULT NULL,
-  `Default_Price` double DEFAULT NULL
+  `Default_Price` double DEFAULT NULL,
+  `Price_Type` varchar(50) NOT NULL,
+  `Portfolio_Link` varchar(2048) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Dumping data for table `provider_categories`
 --
 
-INSERT INTO `provider_categories` (`ID`, `Category_ID`, `Provider_ID`, `Title`, `Description`, `Default_Price`) VALUES
-(1, 1, 4, 'fafdad', 'dasdasd', NULL),
-(2, 2, 4, 'dsada', 'sdad', NULL),
-(3, 1, 5, 'feec', 'fxzcxz', NULL),
-(4, 2, 5, 'dada', 'dsadsa', NULL),
-(5, 1, 6, 'Kari Designer', 'Gammata gahala dennam (Athe)', 2000),
-(6, 2, 6, 'Kari Bas', 'bata bassala dennam athulatama', NULL);
+INSERT INTO `provider_categories` (`ID`, `Category_ID`, `Provider_ID`, `Title`, `Description`, `Default_Price`, `Price_Type`, `Portfolio_Link`) VALUES
+(1, 1, 4, 'fafdad', 'dasdasd', NULL, '', ''),
+(2, 2, 4, 'dsada', 'sdad', NULL, '', ''),
+(3, 1, 5, 'feec', 'fxzcxz', NULL, '', ''),
+(4, 2, 5, 'dada', 'dsadsa', NULL, '', ''),
+(5, 1, 6, 'Kari Designer', 'Gammata gahala dennam (Athe)', 2000, '', ''),
+(6, 2, 6, 'Kari Bas', 'bata bassala dennam athulatama', NULL, '', '');
 
 -- --------------------------------------------------------
 
@@ -461,6 +454,27 @@ INSERT INTO `provider_categories_has_skills` (`Provider_Categories_ID`, `Skills_
 (4, 2),
 (5, 1),
 (6, 2);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `provider_social`
+--
+
+CREATE TABLE `provider_social` (
+  `Social_ID` int(11) NOT NULL,
+  `Social_Type` varchar(50) NOT NULL,
+  `Social_Link` varchar(2048) NOT NULL,
+  `Provider_ID` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `provider_social`
+--
+
+INSERT INTO `provider_social` (`Social_ID`, `Social_Type`, `Social_Link`, `Provider_ID`) VALUES
+(1, 'Facebook', 'https://www.google.com/', 6),
+(2, 'Instagram', 'https://www.google.com/', 6);
 
 -- --------------------------------------------------------
 
@@ -559,7 +573,8 @@ ALTER TABLE `admin`
 --
 ALTER TABLE `bids`
   ADD PRIMARY KEY (`Bid_ID`),
-  ADD KEY `fk_Bids_Post1_idx` (`Post_ID`);
+  ADD KEY `fk_Bids_Post1_idx` (`Post_ID`),
+  ADD KEY `fk_Bids_Provider` (`Provider_ID`);
 
 --
 -- Indexes for table `category`
@@ -630,7 +645,8 @@ ALTER TABLE `post`
   ADD PRIMARY KEY (`Post_ID`),
   ADD KEY `fk_Post_Category1_idx` (`Category_ID`),
   ADD KEY `fk_Post_Client1_idx` (`Client_ID`),
-  ADD KEY `fk_Post_Provider1_idx` (`Provider_ID`);
+  ADD KEY `fk_Post_Provider1_idx` (`Provider_ID`),
+  ADD KEY `fk_Post_Provider_Categories1_idx` (`Provider_Categories_ID`);
 
 --
 -- Indexes for table `post_data`
@@ -651,8 +667,8 @@ ALTER TABLE `post_inputs`
 --
 ALTER TABLE `post_need_skills`
   ADD PRIMARY KEY (`ID`),
-  ADD KEY `Post_ID` (`Post_ID`),
-  ADD KEY `Skill_ID` (`Skill_ID`);
+  ADD KEY `Skill_ID` (`Skill_ID`),
+  ADD KEY `post_need_skills_ibfk_1` (`Post_ID`);
 
 --
 -- Indexes for table `project`
@@ -700,6 +716,12 @@ ALTER TABLE `provider_categories_has_skills`
   ADD PRIMARY KEY (`Provider_Categories_ID`,`Skills_Skill_ID`),
   ADD KEY `fk_Provider_Categories_has_Skills_Skills1_idx` (`Skills_Skill_ID`),
   ADD KEY `fk_Provider_Categories_has_Skills_Provider_Categories1_idx` (`Provider_Categories_ID`);
+
+--
+-- Indexes for table `provider_social`
+--
+ALTER TABLE `provider_social`
+  ADD KEY `fk_Social_Provider` (`Provider_ID`);
 
 --
 -- Indexes for table `reports`
@@ -769,13 +791,13 @@ ALTER TABLE `notification_center`
 -- AUTO_INCREMENT for table `post`
 --
 ALTER TABLE `post`
-  MODIFY `Post_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `Post_ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
 
 --
 -- AUTO_INCREMENT for table `post_need_skills`
 --
 ALTER TABLE `post_need_skills`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=95;
 
 --
 -- AUTO_INCREMENT for table `provider`
@@ -791,7 +813,8 @@ ALTER TABLE `provider`
 -- Constraints for table `bids`
 --
 ALTER TABLE `bids`
-  ADD CONSTRAINT `fk_Bids_Post1` FOREIGN KEY (`Post_ID`) REFERENCES `post` (`Post_ID`);
+  ADD CONSTRAINT `fk_Bids_Post1` FOREIGN KEY (`Post_ID`) REFERENCES `post` (`Post_ID`),
+  ADD CONSTRAINT `fk_Bids_Provider` FOREIGN KEY (`Provider_ID`) REFERENCES `provider` (`Provider_ID`);
 
 --
 -- Constraints for table `conversation`
@@ -831,7 +854,8 @@ ALTER TABLE `payment`
 ALTER TABLE `post`
   ADD CONSTRAINT `fk_Post_Category1` FOREIGN KEY (`Category_ID`) REFERENCES `category` (`Category_ID`),
   ADD CONSTRAINT `fk_Post_Client1` FOREIGN KEY (`Client_ID`) REFERENCES `client` (`Client_ID`),
-  ADD CONSTRAINT `fk_Post_Provider1` FOREIGN KEY (`Provider_ID`) REFERENCES `provider` (`Provider_ID`);
+  ADD CONSTRAINT `fk_Post_Provider1` FOREIGN KEY (`Provider_ID`) REFERENCES `provider` (`Provider_ID`),
+  ADD CONSTRAINT `fk_Post_ProviderCategories1` FOREIGN KEY (`Provider_Categories_ID`) REFERENCES `provider_categories` (`ID`);
 
 --
 -- Constraints for table `post_data`
@@ -844,7 +868,7 @@ ALTER TABLE `post_data`
 -- Constraints for table `post_need_skills`
 --
 ALTER TABLE `post_need_skills`
-  ADD CONSTRAINT `post_need_skills_ibfk_1` FOREIGN KEY (`Post_ID`) REFERENCES `post` (`Post_ID`),
+  ADD CONSTRAINT `post_need_skills_ibfk_1` FOREIGN KEY (`Post_ID`) REFERENCES `post` (`Post_ID`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `post_need_skills_ibfk_2` FOREIGN KEY (`Skill_ID`) REFERENCES `skills` (`Skill_ID`);
 
 --
@@ -880,6 +904,12 @@ ALTER TABLE `provider_categories_has_location`
 ALTER TABLE `provider_categories_has_skills`
   ADD CONSTRAINT `fk_Provider_Categories_has_Skills_Provider_Categories1` FOREIGN KEY (`Provider_Categories_ID`) REFERENCES `provider_categories` (`ID`),
   ADD CONSTRAINT `fk_Provider_Categories_has_Skills_Skills1` FOREIGN KEY (`Skills_Skill_ID`) REFERENCES `skills` (`Skill_ID`);
+
+--
+-- Constraints for table `provider_social`
+--
+ALTER TABLE `provider_social`
+  ADD CONSTRAINT `fk_Social_Provider` FOREIGN KEY (`Provider_ID`) REFERENCES `provider` (`Provider_ID`);
 
 --
 -- Constraints for table `reports`

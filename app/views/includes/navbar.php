@@ -1,5 +1,6 @@
 <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/styles.css">
 <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/navbar.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <!-- Header -->
 
 <?php
@@ -9,6 +10,7 @@
         ['Notification_ID' => 2, 'Title' => 'New bid received on your post: UI Revamp', 'Timestamp' => '2025-12-30 11:30:00', 'Type' => 'bid', 'Unread' => true],
         ['Notification_ID' => 3, 'Title' => 'DevStudio Labs sent you a message.', 'Timestamp' => '2025-12-30 11:22:00', 'Type' => 'message', 'Unread' => false],
         ['Notification_ID' => 4, 'Title' => 'Contract milestone approved.', 'Timestamp' => '2025-12-30 10:00:00', 'Type' => 'milestone', 'Unread' => false],
+        ['Notification_ID' => 5, 'Title' => 'New bid received on your post: Mobile App Development', 'Timestamp' => '2025-12-29 16:45:00', 'Type' => 'bid', 'Unread' => true],
     ];
 ?>
 
@@ -26,7 +28,7 @@ if ($_SESSION['role'] === 'Provider') {
         ['label' => 'Dashboard', 'href' => BASE_URL . '/dashboard', 'class' => '"fas fa-gauge"'],
         ['label' => 'Feeds', 'href' => BASE_URL . '/feeds', 'class' => '"fas fa-briefcase"'],
         ['label' => 'Bids', 'href' => BASE_URL . '/bids', 'class' => '"fas fa-coins"'],
-        ['label' => 'Projects', 'href' => BASE_URL . '/projects', 'class' => '"fas fa-layer-plus"'],
+        ['label' => 'Projects', 'href' => BASE_URL . '/projects', 'class' => '"fas fa-layer-group"'],
         ['label' => 'Earnings', 'href' => BASE_URL . '/earnings', 'class' => '"fas fa-money-bill-wave"'],
     ];
 }
@@ -35,14 +37,14 @@ elseif ($_SESSION['role'] === 'Client') {
         ['label' => 'Dashboard', 'href' => BASE_URL . '/dashboard', 'class' => '"fas fa-chart-simple"'],
         ['label' => 'Projects', 'href' => BASE_URL . '/projects', 'class' => '"fas fa-briefcase"'],
         ['label' => 'Providers', 'href' => BASE_URL . '/providers', 'class' => '"fas fa-users"'],
-        ['label' => 'Requests', 'href' => BASE_URL . '/requests', 'class' => '"fas fa-layer-plus"'],
+        ['label' => 'Requests', 'href' => BASE_URL . '/requests', 'class' => '"fas fa-layer-group"'],
         ['label' => 'Payments', 'href' => BASE_URL . '/payments', 'class' => '"fas fa-credit-card"'],
     ];
 }
 
 $navRight = [
-    ['type' => 'icon', 'icon' => 'fa-regular fa-envelope', 'href' => BASE_URL . '/messages', 'aria' => 'Messages'],
-    ['type' => 'icon', 'icon' => 'fa-regular fa-bell', 'href' => BASE_URL . '/notifications', 'aria' => 'Notifications'],
+    ['type' => 'icon', 'icon' => 'fa-solid fa-envelope', 'href' => BASE_URL . '/messages', 'aria' => 'Messages'],
+    ['type' => 'icon', 'icon' => 'fa-solid fa-bell', 'href' => BASE_URL . '/notifications', 'aria' => 'Notifications'],
     ['type' => 'profile', 'href' => BASE_URL . '/profile'], // profile/avatar
 ];
 

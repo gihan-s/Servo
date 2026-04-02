@@ -20,15 +20,15 @@
             <div class="search-header">
                 <div class="search-button">
                     <input type="text" placeholder="Search for Requests...">
-                    <button><i class="fa-light fa-magnifying-glass"></i></button>
+                    <button><i class="fa-solid fa-magnifying-glass"></i></button>
                 </div>
                 <button class="filter" id="filter-pop-up"><i
-                        class="fa-light fa-filter-list"></i><span>Filter</span></button>
+                        class="fa-solid fa-filter"></i><span>Filter</span></button>
                 <div class="advance-search">
                     <div class="sort-selection">
                         <div class="selection-input-field">
                             <input type="selection-input" id="selection-input" name="sort" value="Sort By Relevence"
-                                disabled><i class="fa-light fa-chevron-down"></i>
+                                disabled><i class="fa-solid fa-chevron-down"></i>
                         </div>
                         <div class="selection-options" id="selection-options">
                             <div class="opt">Sort By Relevence</div>
@@ -64,27 +64,27 @@
                             </div>
                             <div class="button">
                                 <button class="btn-outline btn-view" title="View Request"><i
-                                        class="fa-regular fa-eye"></i> View</button>
+                                        class="fa-solid fa-eye"></i> View</button>
                                 <button class="btn-primary btn-propose" title="Send Proposal"><i
-                                        class="fa-regular fa-paper-plane"></i> Propose</button>
+                                        class="fa-solid fa-paper-plane"></i> Propose</button>
                                 <button class="btn-danger btn-decline" title="Decline Request"><i
-                                        class="fa-regular fa-circle-xmark"></i> Decline</button>
+                                        class="fa-solid fa-circle-xmark"></i> Decline</button>
                             </div>
                         </div>
                         <div class="item-middle">
-                            <div><i class="fa-regular fa-clock"></i> Timeline: 2 weeks</div>
-                            <div><i class="fa-regular fa-tag"></i> Category: Graphic Design</div>
+                            <div><i class="fa-solid fa-clock"></i> Timeline: 2 weeks</div>
+                            <div><i class="fa-solid fa-tag"></i> Category: Graphic Design</div>
                         </div>
                         <div class="item-description">Looking for a modern, minimalist logo for our new SaaS platform. Should work well in both digital and print formats.</div>
                         <div class="status-bottom"><span class="status-chip status-new">New Request</span></div>
                     </div>
                 </div>
                 <div class="pagination" aria-label="New Requests Pagination">
-                    <button class="page-btn prev" disabled><i class="fa-regular fa-chevron-left"></i></button>
+                    <button class="page-btn prev" disabled><i class="fa-solid fa-chevron-left"></i></button>
                     <button class="page-btn active">1</button>
                     <button class="page-btn">2</button>
                     <button class="page-btn">3</button>
-                    <button class="page-btn next"><i class="fa-regular fa-chevron-right"></i></button>
+                    <button class="page-btn next"><i class="fa-solid fa-chevron-right"></i></button>
                 </div>
             </div>
     -->
@@ -104,27 +104,27 @@
                             </div>
                             <div class="button">
                                 <button class="btn-outline btn-view" title="View Proposal"><i
-                                        class="fa-regular fa-eye"></i> View</button>
+                                        class="fa-solid fa-eye"></i> View</button>
                                 <button class="btn-outline btn-message" title="Message Client"><i
-                                        class="fa-regular fa-messages"></i> Message</button>
+                                        class="fa-solid fa-messages"></i> Message</button>
                                 <button class="btn-danger btn-withdraw" title="Withdraw Proposal"><i
-                                        class="fa-regular fa-trash"></i> Withdraw</button>
+                                        class="fa-solid fa-trash"></i> Withdraw</button>
                             </div>
                         </div>
                         <div class="item-middle">
-                            <div><i class="fa-regular fa-clock"></i> Timeline: 4 weeks</div>
-                            <div><i class="fa-regular fa-tag"></i> Proposed: $2,500</div>
+                            <div><i class="fa-solid fa-clock"></i> Timeline: 4 weeks</div>
+                            <div><i class="fa-solid fa-tag"></i> Proposed: $2,500</div>
                         </div>
                         <div class="item-description">Full e-commerce site with product catalog, shopping cart, and payment integration.</div>
                         <div class="status-bottom"><span class="status-chip status-pending">Pending Response</span></div>
                     </div>
                 </div>
                 <div class="pagination" aria-label="Pending Requests Pagination">
-                    <button class="page-btn prev" disabled><i class="fa-regular fa-chevron-left"></i></button>
+                    <button class="page-btn prev" disabled><i class="fa-solid fa-chevron-left"></i></button>
                     <button class="page-btn active">1</button>
                     <button class="page-btn">2</button>
                     <button class="page-btn">3</button>
-                    <button class="page-btn next"><i class="fa-regular fa-chevron-right"></i></button>
+                    <button class="page-btn next"><i class="fa-solid fa-chevron-right"></i></button>
                 </div>
             </div>
 
@@ -143,15 +143,15 @@
                                 </div>
                             </div>
                             <div class="button">
-                                <button class="btn-outline btn-view" title="View Project"><i class="fa-regular fa-eye"></i> View</button>
-                                <button class="btn-outline btn-message" title="Message Client"><i class="fa-regular fa-messages"></i> Message</button>
-                                <button class="btn-primary btn-update" title="Update Progress"><i class="fa-regular fa-arrow-up"></i> Update</button>
-                                <button class="btn-primary btn-submit" title="Submit for Review"><i class="fa-regular fa-paper-plane"></i> Submit</button>
+                                <button class="btn-outline btn-view" title="View Project"><i class="fa-solid fa-eye"></i> View</button>
+                                <button class="btn-outline btn-message" title="Message Client"><i class="fa-solid fa-messages"></i> Message</button>
+                                <button class="btn-primary btn-update" title="Update Progress"><i class="fa-solid fa-arrow-up"></i> Update</button>
+                                <button class="btn-primary btn-submit" title="Submit for Review"><i class="fa-solid fa-paper-plane"></i> Submit</button>
                             </div>
                         </div>
                         <div class="item-middle">
-                            <div><i class="fa-regular fa-hourglass"></i> ETA 12d</div>
-                            <div><i class="fa-regular fa-clock"></i> Logged 32h</div>
+                            <div><i class="fa-solid fa-hourglass"></i> ETA 12d</div>
+                            <div><i class="fa-solid fa-clock"></i> Logged 32h</div>
                         </div>
                         <div class="progress-container" aria-label="Project progress">
                             <div class="progress-label">Progress: <span class="progress-percent">65%</span> <span class="progress-detail" style="color:#64748b;">(32h of 50h)</span></div>
@@ -162,11 +162,11 @@
                     </div>
                 </div>
                 <div class="pagination" aria-label="In Progress Pagination">
-                    <button class="page-btn prev" disabled><i class="fa-regular fa-chevron-left"></i></button>
+                    <button class="page-btn prev" disabled><i class="fa-solid fa-chevron-left"></i></button>
                     <button class="page-btn active">1</button>
                     <button class="page-btn">2</button>
                     <button class="page-btn">3</button>
-                    <button class="page-btn next"><i class="fa-regular fa-chevron-right"></i></button>
+                    <button class="page-btn next"><i class="fa-solid fa-chevron-right"></i></button>
                 </div>
             </div>
 
@@ -185,21 +185,21 @@
                                 </div>
                             </div>
                             <div class="button">
-                                <button class="btn-outline btn-view" title="View Submission"><i class="fa-regular fa-eye"></i> View</button>
-                                <button class="btn-outline btn-message" title="Message Client"><i class="fa-regular fa-messages"></i> Message</button>
+                                <button class="btn-outline btn-view" title="View Submission"><i class="fa-solid fa-eye"></i> View</button>
+                                <button class="btn-outline btn-message" title="Message Client"><i class="fa-solid fa-messages"></i> Message</button>
                             </div>
                         </div>
                         <div class="item-description">Wrote homepage, about us, and services page content for a digital marketing agency.</div>
                         <div class="status-bottom"><span class="status-chip status-review"><i
-                                    class="fa-regular fa-clipboard-check"></i> Pending Review</span></div>
+                                    class="fa-solid fa-clipboard-check"></i> Pending Review</span></div>
                     </div>
                 </div>
                 <div class="pagination" aria-label="Pending Review Pagination">
-                    <button class="page-btn prev" disabled><i class="fa-regular fa-chevron-left"></i></button>
+                    <button class="page-btn prev" disabled><i class="fa-solid fa-chevron-left"></i></button>
                     <button class="page-btn active">1</button>
                     <button class="page-btn">2</button>
                     <button class="page-btn">3</button>
-                    <button class="page-btn next"><i class="fa-regular fa-chevron-right"></i></button>
+                    <button class="page-btn next"><i class="fa-solid fa-chevron-right"></i></button>
                 </div>
             </div>
 
@@ -218,21 +218,21 @@
                                 </div>
                             </div>
                             <div class="button">
-                                <button class="btn-outline btn-view" title="View Project"><i class="fa-regular fa-eye"></i> View</button>
-                                <button class="btn-outline" title="Download Files"><i class="fa-regular fa-download"></i> Files</button>
+                                <button class="btn-outline btn-view" title="View Project"><i class="fa-solid fa-eye"></i> View</button>
+                                <button class="btn-outline" title="Download Files"><i class="fa-solid fa-download"></i> Files</button>
                             </div>
                         </div>
                         <div class="item-description">30-day social media campaign with content creation and community management across 3 platforms.</div>
                         <div class="status-bottom"><span class="status-chip status-complete"><i
-                                    class="fa-regular fa-circle-check"></i> Completed</span></div>
+                                    class="fa-solid fa-circle-check"></i> Completed</span></div>
                     </div>
                 </div>
                 <div class="pagination" aria-label="Completed Jobs Pagination">
-                    <button class="page-btn prev" disabled><i class="fa-regular fa-chevron-left"></i></button>
+                    <button class="page-btn prev" disabled><i class="fa-solid fa-chevron-left"></i></button>
                     <button class="page-btn active">1</button>
                     <button class="page-btn">2</button>
                     <button class="page-btn">3</button>
-                    <button class="page-btn next"><i class="fa-regular fa-chevron-right"></i></button>
+                    <button class="page-btn next"><i class="fa-solid fa-chevron-right"></i></button>
                 </div>
             </div>
         </div>
@@ -243,14 +243,14 @@
         <div class="pop-up deactive">
             <div class="pop-up-header">
                 <div class="pop-up-title">Add Filters</div>
-                <i class="fa-light fa-xmark" id="filter-pop-up-close"></i>
+                <i class="fa-solid fa-xmark" id="filter-pop-up-close"></i>
             </div>
             <hr>
             <div class="pop-up-content">
                 <div class="search-filters">
                     <div class="filter-item">
                         <div class="filter-title"><span>Project Budget</span><i
-                                class="fa-light fa-chevron-down rotated"></i>
+                                class="fa-solid fa-chevron-down rotated"></i>
                         </div>
                         <ul class="filter-options active radios">
                             <li><input type="radio" name="budget" id="budget" checked>Any budget</li>
@@ -261,7 +261,7 @@
                         </ul>
                     </div>
                     <div class="filter-item">
-                        <div class="filter-title"><span>Project Duration</span><i class="fa-light fa-chevron-down"></i>
+                        <div class="filter-title"><span>Project Duration</span><i class="fa-solid fa-chevron-down"></i>
                         </div>
                         <ul class="filter-options radios">
                             <li><input type="radio" name="duration" id="duration" checked>Any duration</li>
@@ -272,7 +272,7 @@
                         </ul>
                     </div>
                     <div class="filter-item">
-                        <div class="filter-title"><span>Project Category</span><i class="fa-light fa-chevron-down"></i>
+                        <div class="filter-title"><span>Project Category</span><i class="fa-solid fa-chevron-down"></i>
                         </div>
                         <ul class="filter-options checkboxes">
                             <li><input type="checkbox" name="category" id="category" checked>Web Development</li>
@@ -295,7 +295,7 @@
         <div class="pop-up" id="requestModal" style="max-width:680px; border-radius:16px;">
             <div class="pop-up-header" style="display:flex; align-items:center; justify-content:space-between;">
                 <div class="pop-up-title">Request Details</div>
-                <i class="fa-light fa-xmark" id="requestModalClose" style="cursor:pointer;"></i>
+                <i class="fa-solid fa-xmark" id="requestModalClose" style="cursor:pointer;"></i>
             </div>
             <hr>
             <div class="pop-up-content" style="display:flex; flex-direction:column; gap:12px;">
@@ -309,11 +309,11 @@
                     goes here.</div>
                 <div style="display:flex; gap:10px; align-items:center;">
                     <span class="status-chip" style="background:#ecfdf5; color:#008500; border-color:#bbf7d0;">
-                        <i class="fa-regular fa-tag"></i>
+                        <i class="fa-solid fa-tag"></i>
                         <span id="reqBudget">Budget: $0</span>
                     </span>
                     <span class="status-chip" style="background:#f2effd; color:#4c1d95; border-color:#d7ccfa;">
-                        <i class="fa-regular fa-clock"></i>
+                        <i class="fa-solid fa-clock"></i>
                         <span id="reqTimeline">Timeline: —</span>
                     </span>
                 </div>
@@ -329,12 +329,12 @@
                 </div>
             </div>
             <div class="modal-actions">
-                <button class="btn-primary" id="btnPropose" style="display:none;"><i class="fa-regular fa-paper-plane"></i> Send Proposal</button>
-                <button class="btn-primary" id="btnSubmit" style="display:none;"><i class="fa-regular fa-paper-plane"></i> Submit for Review</button>
-                <button class="btn-primary" id="btnUpdate" style="display:none;"><i class="fa-regular fa-arrow-up"></i> Update Progress</button>
-                <button class="btn-outline" id="btnMessage"><i class="fa-regular fa-messages"></i> Message Client</button>
-                <button class="btn-danger" id="btnDecline"><i class="fa-regular fa-circle-xmark"></i> Decline</button>
-                <button class="btn-danger" id="btnWithdraw" style="display:none;"><i class="fa-regular fa-trash"></i> Withdraw</button>
+                <button class="btn-primary" id="btnPropose" style="display:none;"><i class="fa-solid fa-paper-plane"></i> Send Proposal</button>
+                <button class="btn-primary" id="btnSubmit" style="display:none;"><i class="fa-solid fa-paper-plane"></i> Submit for Review</button>
+                <button class="btn-primary" id="btnUpdate" style="display:none;"><i class="fa-solid fa-arrow-up"></i> Update Progress</button>
+                <button class="btn-outline" id="btnMessage"><i class="fa-solid fa-messages"></i> Message Client</button>
+                <button class="btn-danger" id="btnDecline"><i class="fa-solid fa-circle-xmark"></i> Decline</button>
+                <button class="btn-danger" id="btnWithdraw" style="display:none;"><i class="fa-solid fa-trash"></i> Withdraw</button>
             </div>
         </div>
     </div>
@@ -344,7 +344,7 @@
         <div class="pop-up" id="proposalModal" style="max-width:680px; border-radius:16px;">
             <div class="pop-up-header" style="display:flex; align-items:center; justify-content:space-between;">
                 <div class="pop-up-title">Send Proposal</div>
-                <i class="fa-light fa-xmark" id="proposalModalClose" style="cursor:pointer;"></i>
+                <i class="fa-solid fa-xmark" id="proposalModalClose" style="cursor:pointer;"></i>
             </div>
             <hr>
             <div class="pop-up-content" style="display:flex; flex-direction:column; gap:12px;">
@@ -375,7 +375,7 @@
                 </div>
             </div>
             <div class="modal-actions">
-                <button class="btn-primary" id="btnSendProposal"><i class="fa-regular fa-paper-plane"></i> Send Proposal</button>
+                <button class="btn-primary" id="btnSendProposal"><i class="fa-solid fa-paper-plane"></i> Send Proposal</button>
             </div>
         </div>
     </div>
@@ -385,7 +385,7 @@
         <div class="pop-up" id="progressModal" style="max-width:680px; border-radius:16px;">
             <div class="pop-up-header" style="display:flex; align-items:center; justify-content:space-between;">
                 <div class="pop-up-title">Update Progress</div>
-                <i class="fa-light fa-xmark" id="progressModalClose" style="cursor:pointer;"></i>
+                <i class="fa-solid fa-xmark" id="progressModalClose" style="cursor:pointer;"></i>
             </div>
             <hr>
             <div class="pop-up-content" style="display:flex; flex-direction:column; gap:12px;">
@@ -417,7 +417,7 @@
                 </div>
             </div>
             <div class="modal-actions">
-                <button class="btn-primary" id="btnUpdateProgress"><i class="fa-regular fa-arrow-up"></i> Update Progress</button>
+                <button class="btn-primary" id="btnUpdateProgress"><i class="fa-solid fa-arrow-up"></i> Update Progress</button>
             </div>
         </div>
     </div>
@@ -427,7 +427,7 @@
         <div class="pop-up" id="submitModal" style="max-width:680px; border-radius:16px;">
             <div class="pop-up-header" style="display:flex; align-items:center; justify-content:space-between;">
                 <div class="pop-up-title">Submit for Review</div>
-                <i class="fa-light fa-xmark" id="submitModalClose" style="cursor:pointer;"></i>
+                <i class="fa-solid fa-xmark" id="submitModalClose" style="cursor:pointer;"></i>
             </div>
             <hr>
             <div class="pop-up-content" style="display:flex; flex-direction:column; gap:12px;">
@@ -449,7 +449,7 @@
                 </div>
             </div>
             <div class="modal-actions">
-                <button class="btn-primary" id="btnSubmitForReview"><i class="fa-regular fa-paper-plane"></i> Submit for Review</button>
+                <button class="btn-primary" id="btnSubmitForReview"><i class="fa-solid fa-paper-plane"></i> Submit for Review</button>
             </div>
         </div>
     </div>
@@ -459,7 +459,7 @@
         <div class="pop-up" id="confirmModal">
             <div class="pop-up-header" style="display:flex; align-items:center; justify-content:space-between;">
                 <div class="pop-up-title" id="confirmTitle">Confirm Action</div>
-                <i class="fa-light fa-xmark" id="confirmModalClose" style="cursor:pointer;"></i>
+                <i class="fa-solid fa-xmark" id="confirmModalClose" style="cursor:pointer;"></i>
             </div>
             <hr>
             <div class="pop-up-content" id="confirmMessage">
@@ -467,7 +467,7 @@
             </div>
             <div class="modal-actions">
                 <button class="btn-secondary" id="btnCancelAction">Cancel</button>
-                <button class="btn-danger" id="btnConfirmAction"><i class="fa-regular fa-circle-check"></i> Confirm</button>
+                <button class="btn-danger" id="btnConfirmAction"><i class="fa-solid fa-circle-check"></i> Confirm</button>
             </div>
         </div>
     </div>

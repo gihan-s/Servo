@@ -18,15 +18,15 @@
             <div class="search-header">
                 <div class="search-button">
                     <input type="text" placeholder="Search for Requests...">
-                    <button><i class="fa-light fa-magnifying-glass"></i></button>
+                    <button><i class="fa-solid fa-magnifying-glass"></i></button>
                 </div>
                 <button class="filter" id="filter-pop-up"><i
-                        class="fa-light fa-filter-list"></i><span>Filter</span></button>
+                        class="fa-solid fa-filter"></i><span>Filter</span></button>
                 <div class="advance-search">
                     <div class="sort-selection">
                         <div class="selection-input-field">
                             <input type="selection-input" id="selection-input" name="sort" value="Sort By Relevence"
-                                disabled><i class="fa-light fa-chevron-down"></i>
+                                disabled><i class="fa-solid fa-chevron-down"></i>
                         </div>
                         <div class="selection-options" id="selection-options">
                             <div class="opt">Sort By Relevence</div>
@@ -64,15 +64,15 @@
                             </div>
                             <div class="button">
                                 <button class="btn-outline btn-view" title="View Request"><i
-                                        class="fa-regular fa-eye"></i> View</button>
+                                        class="fa-solid fa-eye"></i> View</button>
                                 <button class="btn-outline" title="Message Provider" aria-label="Message"><i
-                                        class="fa-regular fa-messages"></i></button>
+                                        class="fa-solid fa-messages"></i></button>
                                 <button class="btn-danger" title="Cancel Request"><i
-                                        class="fa-regular fa-circle-xmark"></i> Cancel</button>
+                                        class="fa-solid fa-circle-xmark"></i> Cancel</button>
                             </div>
                         </div>
                         <div class="item-middle">
-                            <div><i class="fa-regular fa-tag"></i> Proposed: <?= htmlspecialchars($request['proposedRate']); ?></div>
+                            <div><i class="fa-solid fa-tag"></i> Proposed: <?= htmlspecialchars($request['proposedRate']); ?></div>
                         </div>
                         <div class="item-description"><?= htmlspecialchars($request['description']); ?></div>
                         <div class="status-bottom"><span class="status-chip status-awaiting"><?= htmlspecialchars($request['status']); ?></span></div>
@@ -81,11 +81,11 @@
 
                 </div>
                 <div class="pagination" aria-label="Pending Requests Pagination">
-                    <button class="page-btn prev" disabled><i class="fa-regular fa-chevron-left"></i></button>
+                    <button class="page-btn prev" disabled><i class="fa-solid fa-chevron-left"></i></button>
                     <button class="page-btn active">1</button>
                     <button class="page-btn">2</button>
                     <button class="page-btn">3</button>
-                    <button class="page-btn next"><i class="fa-regular fa-chevron-right"></i></button>
+                    <button class="page-btn next"><i class="fa-solid fa-chevron-right"></i></button>
                 </div>
             </div>
             <!-- Completed Projects Section -->
@@ -106,23 +106,23 @@
                                 </div>
                             </div>
                             <div class="button">
-                                <button class="btn-outline"><i class="fa-regular fa-file"></i> Contract</button>
-                                <button class="btn-primary"><i class="fa-regular fa-stars"></i> Review</button>
+                                <button class="btn-outline"><i class="fa-solid fa-file"></i> Contract</button>
+                                <button class="btn-primary"><i class="fa-solid fa-stars"></i> Review</button>
                             </div>
                         </div>
                         <div class="item-description"><?= htmlspecialchars($project['description']); ?></div>
                         <div class="status-bottom"><span class="status-chip status-complete"><i
-                                    class="fa-regular fa-circle-check"></i> Completed</span></div>
+                                    class="fa-solid fa-circle-check"></i> Completed</span></div>
                     </div>
                     <?php endforeach; ?>
 
                 </div>
                 <div class="pagination" aria-label="Completed Jobs Pagination">
-                    <button class="page-btn prev" disabled><i class="fa-regular fa-chevron-left"></i></button>
+                    <button class="page-btn prev" disabled><i class="fa-solid fa-chevron-left"></i></button>
                     <button class="page-btn active">1</button>
                     <button class="page-btn">2</button>
                     <button class="page-btn">3</button>
-                    <button class="page-btn next"><i class="fa-regular fa-chevron-right"></i></button>
+                    <button class="page-btn next"><i class="fa-solid fa-chevron-right"></i></button>
                 </div>
             </div>
 
@@ -145,25 +145,25 @@
                                 </div>
                             </div>
                             <div class="button">
-                                <button class="btn-primary btn-approve"><i class="fa-regular fa-circle-check"></i> Approve</button>
-                                <button class="btn-outline btn-request-changes"><i class="fa-regular fa-rotate-left"></i> Request
+                                <button class="btn-primary btn-approve"><i class="fa-solid fa-circle-check"></i> Approve</button>
+                                <button class="btn-outline btn-request-changes"><i class="fa-solid fa-rotate-left"></i> Request
                                     Changes</button>
-                                <button class="btn-outline"><i class="fa-regular fa-messages"></i> Message</button>
+                                <button class="btn-outline"><i class="fa-solid fa-messages"></i> Message</button>
                             </div>
                         </div>
                         <div class="item-description"><?php echo htmlspecialchars($project['description']); ?></div>
                         <div class="status-bottom"><span class="status-chip status-review"><i
-                                    class="fa-regular fa-clipboard-check"></i> Pending Review</span></div>
+                                    class="fa-solid fa-clipboard-check"></i> Pending Review</span></div>
                     </div>
                     <?php endforeach; ?>
 
                 </div>
                 <div class="pagination" aria-label="Pending Review Pagination">
-                    <button class="page-btn prev" disabled><i class="fa-regular fa-chevron-left"></i></button>
+                    <button class="page-btn prev" disabled><i class="fa-solid fa-chevron-left"></i></button>
                     <button class="page-btn active">1</button>
                     <button class="page-btn">2</button>
                     <button class="page-btn">3</button>
-                    <button class="page-btn next"><i class="fa-regular fa-chevron-right"></i></button>
+                    <button class="page-btn next"><i class="fa-solid fa-chevron-right"></i></button>
                 </div>
             </div>
             <!-- Approved Requests Section -->
@@ -183,13 +183,13 @@
                                 </div>
                             </div>
                             <div class="button">
-                                <button class="btn-outline"><i class="fa-regular fa-messages"></i> Message</button>
-                                <button class="btn-primary btn-pay"><i class="fa-regular fa-dollar-sign"></i> Pay</button>
-                                <button class="btn-danger"><i class="fa-regular fa-circle-xmark"></i> Cancel</button>
+                                <button class="btn-outline"><i class="fa-solid fa-messages"></i> Message</button>
+                                <button class="btn-primary btn-pay"><i class="fa-solid fa-dollar-sign"></i> Pay</button>
+                                <button class="btn-danger"><i class="fa-solid fa-circle-xmark"></i> Cancel</button>
                             </div>
                         </div>
                         <div class="item-middle">
-                            <div><i class="fa-regular fa-hourglass"></i> Estimated Time <?= htmlspecialchars($project['estimatedTime']); ?></div>
+                            <div><i class="fa-solid fa-hourglass"></i> Estimated Time <?= htmlspecialchars($project['estimatedTime']); ?></div>
                         </div>
                         <div class="item-description"><?= htmlspecialchars($project['description']); ?>
                         </div>
@@ -199,11 +199,11 @@
 
                 </div>
                 <div class="pagination" aria-label="Approved Requests Pagination">
-                    <button class="page-btn prev" disabled><i class="fa-regular fa-chevron-left"></i></button>
+                    <button class="page-btn prev" disabled><i class="fa-solid fa-chevron-left"></i></button>
                     <button class="page-btn active">1</button>
                     <button class="page-btn">2</button>
                     <button class="page-btn">3</button>
-                    <button class="page-btn next"><i class="fa-regular fa-chevron-right"></i></button>
+                    <button class="page-btn next"><i class="fa-solid fa-chevron-right"></i></button>
                 </div>
             </div>
 
@@ -224,13 +224,13 @@
                                 </div>
                             </div>
                             <div class="button">
-                                <button class="btn-outline btn-view" title="View Project"><i class="fa-regular fa-eye"></i> View</button>
-                                <button class="btn-outline" title="Message Provider"><i class="fa-regular fa-messages"></i> Message</button>
-                                <button class="btn-danger"><i class="fa-regular fa-circle-xmark"></i> Cancel</button>
+                                <button class="btn-outline btn-view" title="View Project"><i class="fa-solid fa-eye"></i> View</button>
+                                <button class="btn-outline" title="Message Provider"><i class="fa-solid fa-messages"></i> Message</button>
+                                <button class="btn-danger"><i class="fa-solid fa-circle-xmark"></i> Cancel</button>
                             </div>
                         </div>
                         <div class="item-middle">
-                            <div><i class="fa-regular fa-hourglass"></i> ETA <?= htmlspecialchars($project['estimatedTime']); ?></div>
+                            <div><i class="fa-solid fa-hourglass"></i> ETA <?= htmlspecialchars($project['estimatedTime']); ?></div>
                         </div>
                         <div class="progress-container" aria-label="Project progress">
                             <div class="progress-label">Progress: <span class="progress-percent"><?= htmlspecialchars($project['progress']); ?>%</span> <span class="progress-detail" style="color:#64748b;">(0h of 0h)</span></div>
@@ -244,11 +244,11 @@
 
                 </div>
                 <div class="pagination" aria-label="Approved Requests Pagination">
-                    <button class="page-btn prev" disabled><i class="fa-regular fa-chevron-left"></i></button>
+                    <button class="page-btn prev" disabled><i class="fa-solid fa-chevron-left"></i></button>
                     <button class="page-btn active">1</button>
                     <button class="page-btn">2</button>
                     <button class="page-btn">3</button>
-                    <button class="page-btn next"><i class="fa-regular fa-chevron-right"></i></button>
+                    <button class="page-btn next"><i class="fa-solid fa-chevron-right"></i></button>
                 </div>
             </div>
         </div>
@@ -259,14 +259,14 @@
         <div class="pop-up deactive">
             <div class="pop-up-header">
                 <div class="pop-up-title">Add Filters</div>
-                <i class="fa-light fa-xmark" id="filter-pop-up"></i>
+                <i class="fa-solid fa-xmark" id="filter-pop-up"></i>
             </div>
             <hr>
             <div class="pop-up-content">
                 <div class="search-filters">
                     <div class="filter-item">
                         <div class="filter-title"><span>Hourly rate</span><i
-                                class="fa-light fa-chevron-down rotated"></i>
+                                class="fa-solid fa-chevron-down rotated"></i>
                         </div>
                         <ul class="filter-options active radios">
                             <li><input type="radio" name="rate" id="rate" checked>Any hourly rate</li>
@@ -277,7 +277,7 @@
                         </ul>
                     </div>
                     <div class="filter-item">
-                        <div class="filter-title"><span>Project success</span><i class="fa-light fa-chevron-down"></i>
+                        <div class="filter-title"><span>Project success</span><i class="fa-solid fa-chevron-down"></i>
                         </div>
                         <ul class="filter-options radios">
                             <li><input type="radio" name="success" id="success" checked>Any success rate</li>
@@ -288,7 +288,7 @@
                         </ul>
                     </div>
                     <!-- <div class="filter-item">
-                        <div class="filter-title"><span>Total Earnings</span><i class="fa-light fa-chevron-down"></i>
+                        <div class="filter-title"><span>Total Earnings</span><i class="fa-solid fa-chevron-down"></i>
                         </div>
                         <ul class="filter-options radios">
                             <li><input type="radio" name="earnings" id="earnings" checked>Any amount earned</li>
@@ -300,7 +300,7 @@
                         </ul>
                     </div> -->
                     <!-- <div class="filter-item">
-                        <div class="filter-title"><span>Language</span><i class="fa-light fa-chevron-down"></i></div>
+                        <div class="filter-title"><span>Language</span><i class="fa-solid fa-chevron-down"></i></div>
                         <ul class="filter-options checkboxes">
                             <li><input type="checkbox" name="language" id="language" checked>English</li>
                             <li><input type="checkbox" name="language" id="language">Sinhala</li>
@@ -324,7 +324,7 @@
         <div class="pop-up" id="requestModal" style="max-width:680px; border-radius:16px;">
             <div class="pop-up-header" style="display:flex; align-items:center; justify-content:space-between;">
                 <div class="pop-up-title">Request Details</div>
-                <i class="fa-light fa-xmark" id="requestModalClose" style="cursor:pointer;"></i>
+                <i class="fa-solid fa-xmark" id="requestModalClose" style="cursor:pointer;"></i>
             </div>
             <hr>
             <div class="pop-up-content" style="display:flex; flex-direction:column; gap:12px;">
@@ -338,7 +338,7 @@
                     goes here.</div>
                 <div style="display:flex; gap:10px; align-items:center;">
                     <span class="status-chip" style="background:#ecfdf5; color:#008500; border-color:#bbf7d0;">
-                        <i class="fa-regular fa-tag"></i>
+                        <i class="fa-solid fa-tag"></i>
                         <span id="reqPrice">Proposed: $0</span>
                     </span>
                 </div>
@@ -354,10 +354,10 @@
                 </div>
             </div>
             <div class="modal-actions">
-                <button class="btn-primary" id="btnPay" style="display:none;"><i class="fa-regular fa-dollar-sign"></i> Pay</button>
-                <button class="btn-primary" id="btnApprove" style="display:none;"><i class="fa-regular fa-circle-check"></i> Approve</button>
-                <button class="btn-outline" id="btnRequestChanges" style="display:none;"><i class="fa-regular fa-rotate-left"></i> Request Changes</button>
-                <button class="btn-danger" id="btnDecline"><i class="fa-regular fa-circle-xmark"></i> Cancel</button>
+                <button class="btn-primary" id="btnPay" style="display:none;"><i class="fa-solid fa-dollar-sign"></i> Pay</button>
+                <button class="btn-primary" id="btnApprove" style="display:none;"><i class="fa-solid fa-circle-check"></i> Approve</button>
+                <button class="btn-outline" id="btnRequestChanges" style="display:none;"><i class="fa-solid fa-rotate-left"></i> Request Changes</button>
+                <button class="btn-danger" id="btnDecline"><i class="fa-solid fa-circle-xmark"></i> Cancel</button>
             </div>
         </div>
     </div>
@@ -369,7 +369,7 @@
                 <div class="pop-up-title">
                     Confirm Cancel
                 </div>
-                <i class="fa-light fa-xmark" id="confirmCancelClose" style="cursor:pointer;"></i>
+                <i class="fa-solid fa-xmark" id="confirmCancelClose" style="cursor:pointer;"></i>
             </div>
             <hr>
             <div class="pop-up-content">
@@ -377,7 +377,7 @@
             </div>
             <div class="modal-actions">
                 <button class="btn-secondary" id="btnKeep">Keep</button>
-                <button class="btn-danger" id="btnConfirmCancel"><i class="fa-regular fa-circle-xmark"></i> Yes,
+                <button class="btn-danger" id="btnConfirmCancel"><i class="fa-solid fa-circle-xmark"></i> Yes,
                     Cancel</button>
             </div>
         </div>
@@ -388,7 +388,7 @@
         <div class="pop-up" id="requestChangesModal" style="max-width:640px; border-radius:16px;">
             <div class="pop-up-header" style="display:flex; align-items:center; justify-content:space-between;">
                 <div class="pop-up-title">Request Changes</div>
-                <i class="fa-light fa-xmark" id="requestChangesClose" style="cursor:pointer;"></i>
+                <i class="fa-solid fa-xmark" id="requestChangesClose" style="cursor:pointer;"></i>
             </div>
             <hr>
             <div class="pop-up-content" style="display:flex; flex-direction:column; gap:12px;">
@@ -400,7 +400,7 @@
                 </div>
             </div>
             <div class="modal-actions">
-                <button class="btn-primary" id="btnSubmitRequestChanges"><i class="fa-regular fa-paper-plane"></i> Request</button>
+                <button class="btn-primary" id="btnSubmitRequestChanges"><i class="fa-solid fa-paper-plane"></i> Request</button>
             </div>
         </div>
     </div>

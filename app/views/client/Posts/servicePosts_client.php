@@ -1,20 +1,3 @@
-<?php
-// Fallback-safe text snipping helper for servers without mbstring
-if (!function_exists('str_snippet')) {
-    function str_snippet($text, $limit = 160, $suffix = '…')
-    {
-        $text = (string) $text;
-        // Prefer multibyte-aware trim when available
-        if (function_exists('mb_strimwidth')) {
-            return mb_strimwidth($text, 0, (int) $limit, (string) $suffix, 'UTF-8');
-        }
-        // Basic fallback (byte-based)
-        if (strlen($text) <= $limit)
-            return $text;
-        return rtrim(substr($text, 0, $limit)) . $suffix;
-    }
-}
-?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -40,7 +23,7 @@ if (!function_exists('str_snippet')) {
                 <h1>My Service Requests</h1>
 
                 <button type="button" class="post-job-btn" onclick="openCreateForm('create-post-popup')"><i
-                        class="fa-regular fa-plus"></i>
+                        class="fa-solid fa-plus"></i>
                     Create Request</button>
             </div>
 
@@ -57,11 +40,8 @@ if (!function_exists('str_snippet')) {
 
                 <div class="search-button">
                     <input type="text" id="searchInput" placeholder="Search my service requests...">
-                    <button><i class="fa-light fa-magnifying-glass"></i></button>
+                    <button id="searchButton"><i class="fa-solid fa-magnifying-glass"></i></button>
                 </div>
-                <button class="filter" id="filter-pop-up"><i class="fa-light fa-filter-list"
-                        onclick="window.showSuccessToast('Test','Test Message')"></i><span>filter</span></button>
-
                 <div class="advance-search">
                     <span>Sort By: </span>
                     <div class="select-container" style="width: 150px;">
@@ -69,7 +49,8 @@ if (!function_exists('str_snippet')) {
                         <div class="text-container">
                             <div class="label dropdown-label" style="visibility: hidden;"></div>
                             <input type="text" id="sortDropdown" class="text-field-dropdown"
-                                style="padding: 10px; background-color: var(--containerColor);" value="Date (Newest)" readonly>
+                                style="padding: 10px; background-color: var(--containerColor);" value="Date (Newest)"
+                                readonly>
                         </div>
 
                         <div class="options" id="sortOptions" style='max-height:none;'>
@@ -205,28 +186,8 @@ if (!function_exists('str_snippet')) {
                     </div>
                 </div>
             </div>
-            <div class="input-grid-2">
-                <div class="text-container">
-                    <div class="label text-label">Duration</div>
-                    <input type="text" class="text-field" name="duration" id="">
-                </div>
-                <div class="search-select-container">
-                    <div class="text-container">
-                        <div class="label search-dropdown-label">Duration Type</div>
-                        <input type="text" class="text-field-search-dropdown" autocomplete="off"
-                            onkeydown="return false" name="durationtype" id="">
-                    </div>
-                    <div class="options">
-                        <div class="option-list">
-                            <div>Days</div>
-                            <div>Weeks</div>
-                            <div>Months</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-            <div class="input-grid-2">
+            <div class="input-grid-1">
                 <div class="search-select-container">
                     <div class="text-container">
                         <div class="label search-dropdown-label">Level</div>
@@ -242,8 +203,15 @@ if (!function_exists('str_snippet')) {
                     </div>
                 </div>
 
+            </div>
+            
+            <div class="input-grid-2">
                 <div class="text-container">
-                    <div class="label text-label label-float">Expired Date</div>
+                    <div class="label text-label label-float">Estimated Date</div>
+                    <input type="date" class="text-field" name="estdate" id="">
+                </div>
+                <div class="text-container">
+                    <div class="label text-label label-float"> Post Expired Date</div>
                     <input type="date" class="text-field" name="endat" id="">
                 </div>
             </div>
@@ -253,17 +221,17 @@ if (!function_exists('str_snippet')) {
                     onclick="inputReset('create-post-form')">Reset</button>
                 <button type="button" class="action-btn btn-view" onclick="submitPost('draft')" id="create-post-pop-up"
                     data-role="save-draft">
-                    <i class="fa-regular fa-floppy-disk"></i>
+                    <i class="fa-solid fa-floppy-disk"></i>
                     Save Draft
                 </button>
                 <button type="button" class="action-btn btn-edit" onclick="viewDialogBox('confirm-publish')"
                     id="create-post-pop-up" data-role="publish">
-                    <i class="fa-regular fa-rocket"></i>
+                    <i class="fa-solid fa-rocket"></i>
                     Publish Request
                 </button>
                 <button type="button" class="action-btn btn-edit" onclick="saveEditedPost()" data-role="save-post"
                     style="display:none;">
-                    <i class="fa-regular fa-floppy-disk"></i>
+                    <i class="fa-solid fa-floppy-disk"></i>
                     Save Request
                 </button>
             </div>
@@ -288,7 +256,7 @@ if (!function_exists('str_snippet')) {
             <button class="action-btn btn-delete" id="confirmPublishKeep"
                 onclick="closeDialogBox('confirm-publish')">Cancel</button>
             <button class="action-btn btn-edit" id="confirmPublishBtn" onclick="submitPost('publish')"><i
-                    class="fa-regular fa-rocket"></i>
+                    class="fa-solid fa-rocket"></i>
                 Publish
             </button>
         </div>
@@ -312,7 +280,7 @@ if (!function_exists('str_snippet')) {
         <div class="modal-actions">
             <button class="action-btn btn-view" id="confirmKeep"
                 onclick="closeDialogBox('confirm-delete')">Keep</button>
-            <button class="action-btn btn-delete" id="confirmDeleteBtn"><i class="fa-regular fa-circle-xmark"></i> Yes,
+            <button class="action-btn btn-delete" id="confirmDeleteBtn"><i class="fa-solid fa-circle-xmark"></i> Yes,
                 Delete</button>
         </div>
 
@@ -338,7 +306,7 @@ if (!function_exists('str_snippet')) {
     <div class="pop-up deactive">
         <div class="pop-up-header">
             <div class="pop-up-title">Create A New Service Request</div>
-            <i class="fa-light fa-xmark" id="create-post-pop-up"></i>
+            <i class="fa-solid fa-xmark" id="create-post-pop-up"></i>
         </div>
         <hr>
         <div class="pop-up-content">
@@ -351,14 +319,14 @@ if (!function_exists('str_snippet')) {
     <div class="pop-up deactive" id="postDetailsModal" style="max-width:720px; border-radius:16px;">
         <div class="pop-up-header" style="display:flex; align-items:center; justify-content:space-between;">
             <div class="pop-up-title">Post Details</div>
-            <i class="fa-light fa-xmark" id="postDetailsClose" style="cursor:pointer;"></i>
+            <i class="fa-solid fa-xmark" id="postDetailsClose" style="cursor:pointer;"></i>
         </div>
         <hr>
         <div class="pop-up-content post-view" id="postContent" style="display:flex; flex-direction:column; gap:12px;">
 
         </div>
         <div class="modal-actions" style="justify-content:flex-end;">
-            <button class="action-btn btn-delete" id="modalDeleteBtn"><i class="fa-regular fa-circle-xmark"></i>
+            <button class="action-btn btn-delete" id="modalDeleteBtn"><i class="fa-solid fa-circle-xmark"></i>
                 Delete</button>
         </div>
     </div>
@@ -370,7 +338,7 @@ if (!function_exists('str_snippet')) {
     <div class="pop-up deactive" id="confirmDelete">
         <div class="pop-up-header" style="display:flex; align-items:center; justify-content:space-between;">
             <div class="pop-up-title">Confirm Delete</div>
-            <i class="fa-light fa-xmark" id="confirmDeleteClose" style="cursor:pointer;"></i>
+            <i class="fa-solid fa-xmark" id="confirmDeleteClose" style="cursor:pointer;"></i>
         </div>
         <hr>
         <div class="pop-up-content">
@@ -378,7 +346,7 @@ if (!function_exists('str_snippet')) {
         </div>
         <div class="modal-actions">
             <button class="action-btn btn-view" id="confirmKeep">Keep</button>
-            <button class="action-btn btn-delete" id="confirmDeleteBtn"><i class="fa-regular fa-circle-xmark"></i> Yes,
+            <button class="action-btn btn-delete" id="confirmDeleteBtn"><i class="fa-solid fa-circle-xmark"></i> Yes,
                 Delete</button>
         </div>
     </div>
@@ -389,7 +357,7 @@ if (!function_exists('str_snippet')) {
     <div class="pop-up deactive" id="confirmPublish">
         <div class="pop-up-header" style="display:flex; align-items:center; justify-content:space-between;">
             <div class="pop-up-title">Publish Request</div>
-            <i class="fa-light fa-xmark" id="confirmPublishClose" style="cursor:pointer;"></i>
+            <i class="fa-solid fa-xmark" id="confirmPublishClose" style="cursor:pointer;"></i>
         </div>
         <hr>
         <div class="pop-up-content">
@@ -397,7 +365,7 @@ if (!function_exists('str_snippet')) {
         </div>
         <div class="modal-actions">
             <button class="action-btn btn-view" id="confirmPublishKeep">Cancel</button>
-            <button class="action-btn btn-edit" id="confirmPublishBtn"><i class="fa-regular fa-rocket"></i>
+            <button class="action-btn btn-edit" id="confirmPublishBtn"><i class="fa-solid fa-rocket"></i>
                 Publish
             </button>
         </div>
@@ -408,12 +376,83 @@ if (!function_exists('str_snippet')) {
     let currentSort = 'date_desc';
     let currentSearch = '';
     let searchTimeout = null;
+    const PAGE_SIZE = 5;
+    const postsState = {
+        active: { posts: [], visibleCount: 0 },
+        draft: { posts: [], visibleCount: 0 },
+        expired: { posts: [], visibleCount: 0 }
+    };
+
+    function getListContainer(status) {
+        return document.querySelector(`.${status}-posts .item-list`);
+    }
+
+    function clearLoadMoreButton(status) {
+        const section = document.querySelector(`.${status}-posts`);
+        if (!section) return;
+        const existing = section.querySelector('.load-more-wrap');
+        if (existing) existing.remove();
+    }
+
+    function renderLoadMoreButton(status) {
+        const section = document.querySelector(`.${status}-posts`);
+        const container = getListContainer(status);
+        if (!section || !container) return;
+
+        clearLoadMoreButton(status);
+
+        const state = postsState[status];
+        if (!state || state.visibleCount >= state.posts.length) {
+            return;
+        }
+
+        const wrap = document.createElement('div');
+        wrap.className = 'load-more-wrap';
+        wrap.style.display = 'flex';
+        wrap.style.justifyContent = 'center';
+        wrap.style.marginTop = '35px';
+
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'action-btn btn-view';
+        button.textContent = 'Load More';
+        button.addEventListener('click', function () {
+            state.visibleCount = Math.min(state.visibleCount + PAGE_SIZE, state.posts.length);
+            renderPosts(status);
+        });
+
+        wrap.appendChild(button);
+        section.appendChild(wrap);
+    }
+
+    function renderPosts(status) {
+        const container = getListContainer(status);
+        if (!container) return;
+
+        const state = postsState[status];
+        const visiblePosts = state.posts.slice(0, state.visibleCount);
+
+        if (visiblePosts.length === 0) {
+            showEmptyState(status, container);
+            clearLoadMoreButton(status);
+            return;
+        }
+
+        container.innerHTML = '';
+        visiblePosts.forEach(item => {
+            const postHTML = createPostCard(item.post, item.skills, status);
+            container.insertAdjacentHTML('beforeend', postHTML);
+        });
+
+        renderLoadMoreButton(status);
+    }
 
     /**
      * Load posts via AJAX
      */
     function loadPosts(status = 'active') {
-        const container = document.querySelector(`.${status}-posts .item-list`);
+        const container = getListContainer(status);
+        if (!container) return;
 
         container.innerHTML = `
         <div class="loading-state">
@@ -421,6 +460,7 @@ if (!function_exists('str_snippet')) {
             <p>Loading posts...</p>
         </div>
     `;
+        clearLoadMoreButton(status);
 
         console.log('Loading posts for status:', status, 'with sort:', currentSort, 'search:', currentSearch);
 
@@ -442,15 +482,16 @@ if (!function_exists('str_snippet')) {
                 return new Promise(resolve => setTimeout(() => resolve(data), 300));
             })
             .then(data => {
-                if (data.success && data.posts && data.posts.length > 0) {
-                    container.innerHTML = '';
-                    data.posts.forEach(item => {
-                        const postHTML = createPostCard(item.post, item.skills, status);
-                        container.insertAdjacentHTML('beforeend', postHTML);
-                    });
-                } else {
-                    showEmptyState(status, container);
+                if (data.success && data.posts) {
+                    postsState[status].posts = data.posts;
+                    postsState[status].visibleCount = Math.min(PAGE_SIZE, data.posts.length);
+                    renderPosts(status);
+                    return;
                 }
+
+                postsState[status].posts = [];
+                postsState[status].visibleCount = 0;
+                showEmptyState(status, container);
             })
             .catch(error => {
                 console.error('Error loading posts:', error);
@@ -462,6 +503,7 @@ if (!function_exists('str_snippet')) {
                     <button onclick="loadPosts('${status}')" class="retry-btn">Retry</button>
                 </div>
             `;
+                clearLoadMoreButton(status);
             });
     }
 
@@ -480,7 +522,7 @@ if (!function_exists('str_snippet')) {
 
         const publishedDate = formatDate(post.Published_At || post.Created_At);
         const daysLeft = calculateDaysLeft(post.End_At);
-        if (daysLeft == 'Expired'){
+        if (daysLeft == 'Expired') {
             updateAsExpired(post.Post_ID);
         }
 
@@ -549,8 +591,8 @@ if (!function_exists('str_snippet')) {
                             <span class="detail-value proposals-count">${post.Proposal_Count || post.ProposalsCount || 0}</span>
                         </div>
                         <div class="detail-item">
-                            <span class="detail-label">Duration</span>
-                            <span class="detail-value project-duration">${post.Duration || 0} ${post.Duration_Type || 'Days'}</span>
+                            <span class="detail-label">Estimated Date</span>
+                            <span class="detail-value project-duration">${post.Est_Date || 'N/A'}</span>
                         </div>
                     </div>
                 </div>
@@ -572,8 +614,8 @@ if (!function_exists('str_snippet')) {
                             <span class="detail-value project-level">${post.Level || 'N/A'}</span>
                         </div>
                         <div class="detail-item">
-                            <span class="detail-label">Duration</span>
-                            <span class="detail-value project-duration">${post.Duration || 0} ${post.Duration_Type || 'Days'}</span>
+                            <span class="detail-label">Estimated Date</span>
+                            <span class="detail-value project-duration">${post.Est_Date || 'N/A'}</span>
                         </div>
                     </div>
                 </div>
@@ -824,8 +866,7 @@ if (!function_exists('str_snippet')) {
         // console.log("Skills IDs String:", skillIdsString);
         const price = document.querySelector("input[name='price']");
         const price_type = document.querySelector("input[name='pricetype']");
-        const duration = document.querySelector("input[name='duration']");
-        const duration_type = document.querySelector("input[name='durationtype']");
+        const est_date = document.querySelector("input[name='estdate']");
         const level = document.querySelector("input[name='level']");
         const end_at = document.querySelector("input[name='endat']");
 
@@ -858,12 +899,6 @@ if (!function_exists('str_snippet')) {
             return;
         }
 
-        if (duration.value.trim() !== '' && (isNaN(duration.value.trim()) || duration.value.trim() < 0)) {
-            showValidationTooltip(duration, "Please enter a valid number");
-            closeDialogBox('confirm-publish');
-            return;
-        }
-
         // Collect all form data manually
         const postData = {
             title: title.value.trim() || '',
@@ -872,8 +907,7 @@ if (!function_exists('str_snippet')) {
             skills: skillIdsString,
             price: price.value.trim() || '',
             price_type: price_type.value.trim() || '',
-            duration: duration.value.trim() || '',
-            duration_type: duration_type.value.trim() || '',
+            est_date: est_date.value || '',
             level: level.value.trim() || '',
             end_at: end_at.value || '',
             status: action // 'draft' or 'publish'
@@ -991,12 +1025,48 @@ if (!function_exists('str_snippet')) {
                     ? post.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')
                     : '<span>No skills specified</span>';
 
+                const bids = Array.isArray(post.bids) ? post.bids : [];
+                const providerBidsHTML = bids.length > 0
+                    ? bids.map((bid) => {
+                        const fullName = `${bid.First_Name || ''} ${bid.Last_Name || ''}`.trim() || 'Unknown Provider';
+                        const initials = fullName.split(' ').map((n) => n.charAt(0)).join('').substring(0, 2).toUpperCase();
+                        const rating = bid.Provider_Rating ? Number(bid.Provider_Rating).toFixed(1) : 'N/A';
+                        const imagePath = bid.Profile_Picture ? `<?= BASE_URL ?>/../uploads/Users/${bid.Profile_Picture}` : '';
+                        const safeComment = bid.Comment ? bid.Comment : 'No comment provided';
+                        const bidAmount = bid.Amount ? Number(bid.Amount).toLocaleString() : '0';
+                        const bidEstDate = bid.Est_Date ? String(bid.Est_Date).split(' ')[0] : 'N/A';
+
+                        return `
+                            <article class="provider-bid-card">
+                                <div class="provider-bid-top">
+                                    ${imagePath
+                                        ? `<img class="provider-avatar-img" src="${imagePath}" alt="">`
+                                        : `<div class="provider-avatar">${initials}</div>`
+                                    }
+                                    <div class="provider-meta">
+                                        <h4>${fullName}</h4>
+                                        <p><i class="fa-solid fa-star"></i> ${rating}</p>
+                                    </div>
+                                    <span class="provider-bid-price">LKR ${bidAmount}</span>
+                                </div>
+                                <div class="provider-bid-bottom">
+                                    <span><i class="fa-solid fa-calendar-days"></i> Est: ${bidEstDate}</span>
+                                    <span><i class="fa-solid fa-message"></i> ${safeComment}</span>
+                                </div>
+                                <div class="provider-bid-actions">
+                                    <button class="action-btn btn-edit provider-request-btn" data-provider-id="${bid.Provider_ID}" onclick="sendRequestToProvider(${post.Post_ID}, ${bid.Provider_ID}, this)">Send Request</button>
+                                </div>
+                            </article>
+                        `;
+                    }).join('')
+                    : '<div class="provider-bid-empty">No bids received for this post yet.</div>';
+
                 // Replace form content with a div wrapper for proper styling
                 formContainer.innerHTML = `
                 <div class="post-view">
                     <div class="post-view-title">${post.Title || 'Untitled'}</div>
                     <div class="post-view-meta">
-                        <span class="chip"><i class="fa-regular fa-calendar"></i><span>${publishDate}</span></span>
+                        <span class="chip"><i class="fa-solid fa-calendar"></i><span>${publishDate}</span></span>
                     </div>
                     <div class="post-view-section">
                         <div class="section-title">Description</div>
@@ -1011,18 +1081,57 @@ if (!function_exists('str_snippet')) {
                         <div class="kv-grid">
                             <div class="kv-item"><span class="kv-label">Budget:</span><span class="kv-value">LKR ${post.Requesting_Price || '0'}/= (${post.Price_Type || 'N/A'})</span></div>
                             <div class="kv-item"><span class="kv-label">Level:</span><span class="kv-value">${post.Level || 'N/A'}</span></div>
-                            <div class="kv-item"><span class="kv-label">Duration:</span><span class="kv-value">${post.Duration || 'N/A'} ${post.Duration_Type || 'N/A'}</span></div>
+                            <div class="kv-item"><span class="kv-label">Estimated Date:</span><span class="kv-value">${post.Est_Date || 'N/A'}</span></div>
                             <div class="kv-item"><span class="kv-label">Proposals:</span><span class="kv-value">${post.Proposal_Count || '0'}</span></div>
+                        </div>
+                    </div>
+                    <div class="post-view-section">
+                        <div class="section-title">Bidded Providers</div>
+                        <div class="request-status-note" id="requestStatusNote"></div>
+                        <div class="bidded-providers-grid">
+                            ${providerBidsHTML}
                         </div>
                     </div>
                     <div class="post-view-section">
                         <div class="section-title">Engagement</div>
                         <div class="engagement-row">
-                            <span class="chip"><i class="fa-regular fa-eye"></i> ${post.Views || '0'} views</span>
+                            <span class="chip"><i class="fa-solid fa-eye"></i> ${post.Views || '0'} views</span>
                         </div>
                     </div>
                 </div>
             `;
+
+                const requestStatus = (post.Request_Status || '').toLowerCase();
+                const postStatus = (post.Post_Status || '').toLowerCase();
+                const canSendRequest = postStatus === 'active' && (requestStatus === '' || requestStatus === 'declined');
+                const statusNote = document.getElementById('requestStatusNote');
+                const requestButtons = formContainer.querySelectorAll('.provider-request-btn');
+
+                if (statusNote) {
+                    if (canSendRequest) {
+                        statusNote.textContent = 'You can send a request to one provider.';
+                    } else if (requestStatus === 'ongoing' || requestStatus === 'accepted') {
+                        statusNote.textContent = `Requests are locked because current status is ${requestStatus}.`;
+                    } else {
+                        statusNote.textContent = 'Requests are available only for active posts.';
+                    }
+                }
+
+                requestButtons.forEach((btn) => {
+                    if (!canSendRequest) {
+                        btn.disabled = true;
+                        btn.textContent = requestStatus === 'accepted' ? 'Accepted' : 'Request Sent';
+                        btn.classList.remove('btn-edit');
+                        btn.classList.add('btn-view');
+                    }
+
+                    if ((requestStatus === 'ongoing' || requestStatus === 'accepted') && post.Provider_ID && Number(btn.dataset.providerId) === Number(post.Provider_ID)) {
+                        btn.disabled = true;
+                        btn.textContent = requestStatus === 'accepted' ? 'Accepted' : 'Request Sent';
+                        btn.classList.remove('btn-edit');
+                        btn.classList.add('btn-view');
+                    }
+                });
             })
             .catch(error => {
                 console.error('Error fetching post:', error);
@@ -1033,6 +1142,55 @@ if (!function_exists('str_snippet')) {
                         <button onclick="viewPost(${id})" class="retry-btn">Retry</button>
                     </div>
                 `;
+            });
+    }
+
+    function sendRequestToProvider(postId, providerId, button) {
+        if (!postId || !providerId) {
+            window.showErrorToast('Error', 'Invalid post/provider data');
+            return;
+        }
+
+        button.disabled = true;
+        const originalText = button.textContent;
+        button.textContent = 'Sending...';
+
+        fetch(`<?= BASE_URL ?>/requests/send-request/${postId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: `provider_id=${encodeURIComponent(providerId)}`
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    button.disabled = false;
+                    button.textContent = originalText;
+                    window.showErrorToast('Request Not Sent', data.message || 'Unable to send request');
+                    return;
+                }
+
+                window.showSuccessToast('Request Sent', 'Provider request status is now ongoing.');
+
+                const allButtons = document.querySelectorAll('.provider-request-btn');
+                allButtons.forEach((btn) => {
+                    btn.disabled = true;
+                    btn.textContent = 'Request Sent';
+                    btn.classList.remove('btn-edit');
+                    btn.classList.add('btn-view');
+                });
+
+                const statusNote = document.getElementById('requestStatusNote');
+                if (statusNote) {
+                    statusNote.textContent = 'Request status is ongoing. You cannot send another request right now.';
+                }
+            })
+            .catch((error) => {
+                console.error('sendRequestToProvider error:', error);
+                button.disabled = false;
+                button.textContent = originalText;
+                window.showErrorToast('Error', 'Failed to send request');
             });
     }
 
@@ -1051,19 +1209,11 @@ if (!function_exists('str_snippet')) {
         const categoryId = document.getElementById("Category_ID");
         const skills = document.getElementById("Skills");
 
-        // ADD THIS DEBUG LINE
-        console.log("Skills input element:", skills);
-        console.log("Skills value:", skills.value);
-        console.log("Skills value type:", typeof skills.value);
-
         const price = root.querySelector("input[name='price']");
         const price_type = root.querySelector("input[name='pricetype']");
-        const duration = root.querySelector("input[name='duration']");
-        const duration_type = root.querySelector("input[name='durationtype']");
+        const est_date = root.querySelector("input[name='estdate']");
         const level = root.querySelector("input[name='level']");
         const end_at = root.querySelector("input[name='endat']");
-
-        console.log("End date value:", end_at.value);
 
         endDateValue = end_at.value;
 
@@ -1116,8 +1266,7 @@ if (!function_exists('str_snippet')) {
             skills: cleanedSkills,  // Use cleaned skills
             price: price.value.trim() || '0',
             price_type: price_type.value.trim() || 'Fixed',
-            duration: duration.value.trim() || '0',
-            duration_type: duration_type.value.trim() || 'Days',
+            est_date: est_date.value || '',
             level: level.value.trim() || 'Beginner',
             end_at: endDateValue || ''
         };
@@ -1170,8 +1319,25 @@ if (!function_exists('str_snippet')) {
             });
     }
 
+    function getTodayDateString() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    function openPublishConfirmWithAction(onConfirm) {
+        viewDialogBox('confirm-publish');
+
+        const confirmPublishBtn = document.getElementById('confirmPublishBtn');
+        const newConfirmPublishBtn = confirmPublishBtn.cloneNode(true);
+        confirmPublishBtn.parentNode.replaceChild(newConfirmPublishBtn, confirmPublishBtn);
+        newConfirmPublishBtn.onclick = onConfirm;
+    }
+
     // Update the editPost function to attach save handler
-    function editPost(id) {
+    function editPost(id, mode = 'edit') {
         viewDialogBox('create-post-popup');
 
         fetch("<?= BASE_URL ?>/requests/view/" + id)
@@ -1196,8 +1362,7 @@ if (!function_exists('str_snippet')) {
 
                 root.querySelector("input[name='price']").value = post.Requesting_Price || '';
                 root.querySelector("input[name='pricetype']").value = post.Price_Type || '';
-                root.querySelector("input[name='duration']").value = post.Duration || '';
-                root.querySelector("input[name='durationtype']").value = post.Duration_Type || '';
+                root.querySelector("input[name='estdate']").value = post.Est_Date || '';
                 root.querySelector("input[name='level']").value = post.Level || '';
 
                 const endAtInput = root.querySelector("input[name='endat']");
@@ -1255,16 +1420,38 @@ if (!function_exists('str_snippet')) {
                 const publishBtn = root.querySelector('[data-role="publish"]');
                 const savePostBtn = root.querySelector('[data-role="save-post"]');
 
-                if (saveDraftBtn) saveDraftBtn.style.display = 'none';
-                if (publishBtn) publishBtn.style.display = 'none';
-                if (savePostBtn) {
-                    savePostBtn.style.display = '';
-                    savePostBtn.setAttribute('data-post-id', post.Post_ID);
+                if (mode === 'repost') {
+                    // Repost flow: force date to today and use confirmation before publishing.
+                    root.querySelector("input[name='endat']").value = getTodayDateString();
 
-                    // Remove old event listeners and add new one
-                    const newSaveBtn = savePostBtn.cloneNode(true);
-                    savePostBtn.parentNode.replaceChild(newSaveBtn, savePostBtn);
-                    newSaveBtn.onclick = saveEditedPost;
+                    if (saveDraftBtn) saveDraftBtn.style.display = 'none';
+                    if (publishBtn) publishBtn.style.display = 'none';
+                    if (savePostBtn) {
+                        savePostBtn.style.display = '';
+                        savePostBtn.removeAttribute('data-post-id');
+                        savePostBtn.innerHTML = '<i class="fa-solid fa-rocket"></i> Repost Request';
+
+                        const newSaveBtn = savePostBtn.cloneNode(true);
+                        savePostBtn.parentNode.replaceChild(newSaveBtn, savePostBtn);
+                        newSaveBtn.onclick = function () {
+                            openPublishConfirmWithAction(function () {
+                                submitPost('publish');
+                            });
+                        };
+                    }
+                } else {
+                    if (saveDraftBtn) saveDraftBtn.style.display = 'none';
+                    if (publishBtn) publishBtn.style.display = 'none';
+                    if (savePostBtn) {
+                        savePostBtn.style.display = '';
+                        savePostBtn.setAttribute('data-post-id', post.Post_ID);
+                        savePostBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Request';
+
+                        // Remove old event listeners and add new one
+                        const newSaveBtn = savePostBtn.cloneNode(true);
+                        savePostBtn.parentNode.replaceChild(newSaveBtn, savePostBtn);
+                        newSaveBtn.onclick = saveEditedPost;
+                    }
                 }
             })
             .catch(error => {
@@ -1359,23 +1546,8 @@ if (!function_exists('str_snippet')) {
     }
 
     function repostExpired(id) {
-        // Load the post data into the create form and allow user to update end date
-        editPost(id);
-
-        // Change the title to indicate it's a repost
-        const root = document.getElementById("create-post-popup");
-        root.querySelector(".title").innerText = "Repost Service Request";
-        const saveDraftBtn = root.querySelector('[data-role="save-draft"]');
-        const publishBtn = root.querySelector('[data-role="publish"]');
-        const savePostBtn = root.querySelector('[data-role="save-post"]');
-
-        if (savePostBtn) savePostBtn.style.display = 'none';
-        if (saveDraftBtn && publishBtn) {
-            saveDraftBtn.style.display = '';
-            publishBtn.style.display = '';
-        }
-
-
+        // Load the post as repost mode (special button + today date + publish confirmation).
+        editPost(id, 'repost');
     }
 
 
@@ -1417,46 +1589,45 @@ if (!function_exists('str_snippet')) {
      */
     document.addEventListener('DOMContentLoaded', function () {
         // Setup search input handler with debouncing
-        const searchInput = document.getElementById('searchInput');
-        if (searchInput) {
-            searchInput.addEventListener('input', function(e) {
-                // Clear previous timeout
-                if (searchTimeout) {
-                    clearTimeout(searchTimeout);
-                }
-                
-                // Set new timeout to debounce search (wait 300ms after user stops typing)
-                searchTimeout = setTimeout(() => {
-                    currentSearch = e.target.value.trim();
-                    
-                    // Reload posts with search filter
-                    const activeSection = document.querySelector('.requests-section:not([style*="display: none"])');
-                    const status = activeSection.classList.contains('active-posts') ? 'active' :
-                                   activeSection.classList.contains('draft-posts') ? 'draft' : 'expired';
-                    loadPosts(status);
-                }, 300);
-            });
+        document.getElementById('searchInput').addEventListener('change', handleSearch);
+        document.getElementById('searchButton').addEventListener('click', handleSearch);
+
+        function handleSearch() {
+            if (searchTimeout) {
+                clearTimeout(searchTimeout);
+            }
+
+            // Set new timeout to debounce search (wait 300ms after user stops typing)
+            searchTimeout = setTimeout(() => {
+                currentSearch = document.getElementById('searchInput').value.trim();
+
+                // Reload posts with search filter
+                const activeSection = document.querySelector('.requests-section:not([style*="display: none"])');
+                const status = activeSection.classList.contains('active-posts') ? 'active' :
+                    activeSection.classList.contains('draft-posts') ? 'draft' : 'expired';
+                loadPosts(status);
+            }, 300);
         }
-        
+
         // Setup sort dropdown handler
         const sortOptions = document.getElementById('sortOptions');
         if (sortOptions) {
-            sortOptions.addEventListener('click', function(e) {
+            sortOptions.addEventListener('click', function (e) {
                 const option = e.target.closest('[data-sort]');
                 if (option) {
                     const sortValue = option.dataset.sort;
                     const sortText = option.textContent;
-                    
+
                     // Update dropdown display
                     document.getElementById('sortDropdown').value = sortText;
-                    
+
                     // Update global sort variable
                     currentSort = sortValue;
-                    
+
                     // Reload posts with new sort
                     const activeSection = document.querySelector('.requests-section:not([style*="display: none"])');
                     const status = activeSection.classList.contains('active-posts') ? 'active' :
-                                   activeSection.classList.contains('draft-posts') ? 'draft' : 'expired';
+                        activeSection.classList.contains('draft-posts') ? 'draft' : 'expired';
                     loadPosts(status);
                 }
             });

@@ -85,11 +85,11 @@ $BaseURL = "..";
                     <div class="button-section">
 
                         <button type="button" onclick="window.location = `../register`" class="button outline">Back
-                            <i class="fa-regular fa-arrow-left" style="padding-left: 5px"></i>
+                            <i class="fa-solid fa-arrow-left" style="padding-left: 5px"></i>
                         </button>
 
                         <button type="submit" class="button" id="nextBtn">Next
-                            <i class="fa-regular fa-arrow-right" style="padding-left: 5px"></i>
+                            <i class="fa-solid fa-arrow-right" style="padding-left: 5px"></i>
                         </button>
                     </div>
                 </div>

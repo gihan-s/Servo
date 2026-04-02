@@ -14,9 +14,7 @@
 
 	<script src="<?= BASE_URL ?>/assets/js/landing.js" defer></script>
 
-	<!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"> -->
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
 	<meta name="description" content="BSK connects clients & providers with verified skills, secure payments and collaborative project tools." />
 </head>
 
@@ -309,14 +307,14 @@
 					<textarea id="c_message" name="message" rows="6" required placeholder="Tell us how we can help..."></textarea>
 				</div>
 				<div class="actions">
-					<button type="submit" class="send-btn-alt"><i class="fa-regular fa-paper-plane"></i> Send Message</button>
+					<button type="submit" class="send-btn-alt"><i class="fa-solid fa-paper-plane"></i> Send Message</button>
 					<div class="form-status" aria-live="polite"></div>
 				</div>
 			</form>
 		</div>
 	</section>
 
-	<?php include __DIR__ . '/includes/footer.php'; ?>
+	<?php $isLandingPage = true; include __DIR__ . '/includes/footer.php'; ?>
 
 </body>
 

@@ -7,7 +7,24 @@ $TopBarHeader = "Providers";
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Providers</title>
 
-    <?php include 'includes/links.php' ?>
+    <!-- Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- css -->
+    <link rel="stylesheet" href="/assets/css/elementStyles.css">
+    <link rel="stylesheet" href="/assets/css/gridTemplates.css">
+
+    <link rel="stylesheet" href="/assets/css/admin-main.css">
+    <link rel="stylesheet" href="/assets/css/admin-sidebar.css">
+
+    <!-- Javascript -->
+    <script src="/assets/js/elementScript.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script src="/assets/js/admin-script.js" defer></script>
 
 </head>
 
@@ -145,13 +162,13 @@ $TopBarHeader = "Providers";
 
 
         <div class="pagination" aria-label="Approved Requests Pagination">
-            <button class="page-btn prev" onclick="previosPagination(this)"><i class="fa-regular fa-chevron-left"></i></button>
+            <button class="page-btn prev" onclick="previosPagination(this)"><i class="fa-solid fa-chevron-left"></i></button>
 
             <?php for ($i = 1; $i <= $totalPages; $i++): ?>
                 <button onclick="window.location=`?page=<?= $i ?>`" class="page-btn <?= $i == $page ? 'active' : '' ?>"><?= $i ?></button>
             <?php endfor; ?>
 
-            <button class="page-btn next" onclick="nextPagination(this)"><i class="fa-regular fa-chevron-right"></i></button>
+            <button class="page-btn next" onclick="nextPagination(this)"><i class="fa-solid fa-chevron-right"></i></button>
         </div>
 
 
