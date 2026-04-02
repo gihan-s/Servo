@@ -2,14 +2,18 @@
 
 require_once __DIR__ . '/../models/ClientModel.php';
 require_once __DIR__ . '/../models/ProviderModel.php';
+require_once __DIR__ . '/../../config.php';
 
-class LoginController {
-    public function view() {
+class LoginController
+{
+    public function view()
+    {
         include __DIR__ . '/../views/login/index.php';
     }
 
 
-    public function authenticate() {
+    public function authenticate()
+    {
 
         $type = $_POST['type'] ?? '';
         $email = strtolower($_POST['email'] ?? '');
@@ -40,6 +44,12 @@ class LoginController {
                     $_SESSION['role'] = $type;
                     $_SESSION['user_name'] = $user['First_Name'] . ' ' . $user['Last_Name'];
                     $_SESSION['user_image'] = $user['Profile_Picture'] ?? null;
+
+
+                    $token = LoginController::createAuthToken($_SESSION['user_id'], $type);
+                    $_SESSION['authorize_token'] = $token;
+
+
                     header("Location: " . BASE_URL . "/../dashboard");
                     return;
 
@@ -58,7 +68,6 @@ class LoginController {
                     header("Location: " . BASE_URL . "/../login");
                     return;
             }
-
         } else {
             $_SESSION['login_error'] = 'Invalid email or password.';
             header("Location: " . BASE_URL . "/../login");
@@ -66,7 +75,8 @@ class LoginController {
         }
     }
 
-    public function logout() {
+    public function logout()
+    {
         session_start();
         session_unset();
         session_destroy();
@@ -74,4 +84,47 @@ class LoginController {
         exit;
     }
 
+
+    public static function createAuthToken($userId, $role)
+    {
+        $payload = json_encode([
+            'uid' => $userId,
+            'role' => $role,
+            'exp' => time() + 3600 * 24 // 1 hour
+        ]);
+
+        $signature = hash_hmac(
+            'sha256',
+            $payload,
+            $_ENV['APP_SECRET']
+        );
+
+        return base64_encode($payload) . '.' . $signature;
+    }
+
+
+    public static function verifyAuthToken(string $token)
+    {
+        [$payloadB64, $signature] = explode('.', $token);
+
+        $payload = base64_decode($payloadB64);
+
+        $expectedSig = hash_hmac(
+            'sha256',
+            $payload,
+            APP_SECRET
+        );
+
+        if (!hash_equals($expectedSig, $signature)) {
+            return null;
+        }
+
+        $data = json_decode($payload, true);
+
+        if ($data['exp'] < time()) {
+            return null;
+        }
+
+        return ['User_ID' => $data['uid'], 'Role' => $data['role']];
+    }
 }

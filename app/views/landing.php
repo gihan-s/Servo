@@ -14,7 +14,9 @@
 
 	<script src="<?= BASE_URL ?>/assets/js/landing.js" defer></script>
 
-	<link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
+	<!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"> -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
 	<meta name="description" content="BSK connects clients & providers with verified skills, secure payments and collaborative project tools." />
 </head>
 
@@ -99,7 +101,7 @@
 			</div>
 			<div class="features-grid">
 				<div class="feature-card reveal">
-					<div class="feature-icon"><i class="fa-solid fa-shield-check"></i></div>
+					<div class="feature-icon"><i class="fa-solid fa-shield"></i></div>
 					<h3>Verified Talent</h3>
 					<p>Identity + profile checks, skill tagging and review system for confident hiring decisions.</p>
 				</div>
@@ -141,27 +143,27 @@
 			<div class="boost-card reveal"><span class="flag">BOOSTED</span>
 				<h4>UI/UX Redesign for SaaS Dashboard</h4>
 				<p>Modern conversion‑focused revamp emphasizing accessibility.</p>
-				<div class="boost-meta"><span><i class="fa-regular fa-coins"></i> $800</span><span><i class="fa-regular fa-clock"></i> 5d left</span></div>
+				<div class="boost-meta"><span><i class="fa-solid fa-coins"></i> $800</span><span><i class="fa-solid fa-clock"></i> 5d left</span></div>
 			</div>
 			<div class="boost-card reveal"><span class="flag">BOOSTED</span>
 				<h4>Local Photography – Product Shoot</h4>
 				<p>Lifestyle product imagery; preference to Colombo district talent.</p>
-				<div class="boost-meta"><span><i class="fa-regular fa-coins"></i> $320</span><span><i class="fa-regular fa-clock"></i> 2d left</span></div>
+				<div class="boost-meta"><span><i class="fa-solid fa-coins"></i> $320</span><span><i class="fa-solid fa-clock"></i> 2d left</span></div>
 			</div>
 			<div class="boost-card reveal"><span class="flag">BOOSTED</span>
 				<h4>React / API Integration</h4>
 				<p>Enhance listing filters & optimize performance bundle.</p>
-				<div class="boost-meta"><span><i class="fa-regular fa-coins"></i> $1.2k</span><span><i class="fa-regular fa-clock"></i> 7d left</span></div>
+				<div class="boost-meta"><span><i class="fa-solid fa-coins"></i> $1.2k</span><span><i class="fa-solid fa-clock"></i> 7d left</span></div>
 			</div>
 			<div class="boost-card reveal"><span class="flag">BOOSTED</span>
 				<h4>Logo & Brand Kit for Eco Startup</h4>
 				<p>Minimal vector logo + social branding assets.</p>
-				<div class="boost-meta"><span><i class="fa-regular fa-coins"></i> $250</span><span><i class="fa-regular fa-clock"></i> 1d left</span></div>
+				<div class="boost-meta"><span><i class="fa-solid fa-coins"></i> $250</span><span><i class="fa-solid fa-clock"></i> 1d left</span></div>
 			</div>
 			<div class="boost-card reveal"><span class="flag">BOOSTED</span>
 				<h4>Laravel Payment Gateway Setup</h4>
 				<p>Multi‑provider secure checkout & reporting integration.</p>
-				<div class="boost-meta"><span><i class="fa-regular fa-coins"></i> $600</span><span><i class="fa-regular fa-clock"></i> 4d left</span></div>
+				<div class="boost-meta"><span><i class="fa-solid fa-coins"></i> $600</span><span><i class="fa-solid fa-clock"></i> 4d left</span></div>
 			</div>
 		</div>
 	</section>

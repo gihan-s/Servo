@@ -13,30 +13,30 @@
 	                <button class="social-btn" aria-label="Dribbble"><i class="fa-brands fa-dribbble"></i></button>
 	            </div> -->
 	            <div class="footer-mini-stats">
-	                <div class="mini-stat"><i class="fa-regular fa-briefcase"></i> 120+ Projects</div>
-	                <div class="mini-stat"><i class="fa-regular fa-users"></i> 75 Providers</div>
-	                <!-- <div class="mini-stat"><i class="fa-regular fa-shield-check"></i> Secure</div> -->
+	                <div class="mini-stat"><i class="fa-solid fa-briefcase"></i> 120+ Projects</div>
+	                <div class="mini-stat"><i class="fa-solid fa-users"></i> 75 Providers</div>
+	                <!-- <div class="mini-stat"><i class="fa-solid fa-shield-check"></i> Secure</div> -->
 	            </div>
 	        </div>
 	        <div class="footer-section">
 	            <h5>Navigation</h5>
 	            <ul class="footer-links">
-	                <li><a href="#features"><i class="fa-regular fa-gauge"></i> Features</a></li>
-	                <li><a href="#boosted"><i class="fa-regular fa-rocket"></i> Boosted Posts</a></li>
-	                <li><a href="#categories"><i class="fa-regular fa-grid"></i> Categories</a></li>
-	                <li><a href="#workflow"><i class="fa-regular fa-diagram-project"></i> How it Works</a></li>
-	                <li><a href="#feedback"><i class="fa-regular fa-comments"></i> Success Stories</a></li>
+	                <li><a href="#features"><i class="fa-solid fa-gauge"></i> Features</a></li>
+	                <li><a href="#boosted"><i class="fa-solid fa-rocket"></i> Boosted Posts</a></li>
+	                <li><a href="#categories"><i class="fa-solid fa-list"></i> Categories</a></li>
+	                <li><a href="#workflow"><i class="fa-solid fa-diagram-project"></i> How it Works</a></li>
+	                <li><a href="#feedback"><i class="fa-solid fa-comments"></i> Success Stories</a></li>
 	            </ul>
 	        </div>
 	        <div class="footer-section">
 	            <h5>Support</h5>
 	            <ul class="footer-links">
-	                <li><a href="#"><i class="fa-regular fa-circle-question"></i> Help Center</a></li>
-	                <li><a href="#"><i class="fa-regular fa-envelope"></i> Contact</a></li>
-	                <li><a href="#"><i class="fa-regular fa-shield"></i> Privacy Policy</a></li>
-	                <li><a href="#"><i class="fa-regular fa-scale-balanced"></i> Terms of Service</a></li>
-	                <li><a href="#"><i class="fa-regular fa-shield-halved"></i> Trust & Safety</a></li>
-					<li><a href="#"><i class="fa-regular fa-book"></i> Documentation</a></li>
+	                <li><a href="#"><i class="fa-solid fa-circle-question"></i> Help Center</a></li>
+	                <li><a href="#"><i class="fa-solid fa-envelope"></i> Contact</a></li>
+	                <li><a href="#"><i class="fa-solid fa-shield"></i> Privacy Policy</a></li>
+	                <li><a href="#"><i class="fa-solid fa-scale-balanced"></i> Terms of Service</a></li>
+	                <li><a href="#"><i class="fa-solid fa-shield-halved"></i> Trust & Safety</a></li>
+					<li><a href="#"><i class="fa-solid fa-book"></i> Documentation</a></li>
 	            </ul>
 	        </div>
 	        
@@ -58,11 +58,11 @@
 	        if (!input.value) return;
 	        const btn = form.querySelector('button');
 	        btn.disabled = true;
-	        btn.innerHTML = '<i class="fa-regular fa-check"></i> Subscribed';
+	        btn.innerHTML = '<i class="fa-solid fa-check"></i> Subscribed';
 	        btn.style.background = '#008500';
 	        setTimeout(() => {
 	            btn.disabled = false;
-	            btn.innerHTML = '<i class="fa-regular fa-paper-plane"></i> Subscribe';
+	            btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Subscribe';
 	            input.value = '';
 	        }, 4000);
 	    }

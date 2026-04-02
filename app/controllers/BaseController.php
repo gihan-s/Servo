@@ -21,7 +21,7 @@ class BaseController
         $this->clientModel = new ClientModel();
         $this->providerModel = new ProviderModel();
         $this->notificationModel = new NotificationModel();
-        $this->messageModel = new MessageModel();
+        // $this->messageModel = new MessageModel();
 
         $this->ensureAuth();
         $this->loadNotificationsAndMessages($_SESSION['user_id'], $_SESSION['role']);
@@ -31,10 +31,10 @@ class BaseController
     {
         if ($role === 'Client') {
             $notifications = $this->notificationModel->getNotificationsByClientId($userId, 10);
-            $messages = $this->messageModel->getMessagesByClientId($userId, 10);
+            // $messages = $this->messageModel->getMessagesByClientId($userId, 10);
         } elseif ($role === 'Provider') {
             $notifications = $this->notificationModel->getNotificationsByProviderId($userId, 10);
-            $messages = $this->messageModel->getMessagesByProviderId($userId, 10);
+            // $messages = $this->messageModel->getMessagesByProviderId($userId, 10);
         }
         return [];
     }
