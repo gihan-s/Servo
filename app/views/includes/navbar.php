@@ -89,7 +89,7 @@ $navRight = [
             <!-- user profile section -->
             <div class="user-profile" onclick="window.location.href='<?= $navRight[2]['href'] ?>'" role="button"
                 tabindex="0" aria-label="Profile">
-                <div class="user-avatar" style="overflow: hidden; background-color: transparent; border: 1px solid #33333353;"><img src="<?= BASE_URL . '/../uploads/Users/'. $_SESSION['user_image']?>" alt="" style="height: 100%; width: 100%;"></div>
+                <div class="user-avatar" style="overflow: hidden; background-color: transparent; border: 1px solid #33333353;"><img src="<?= BASE_URL . '/file/user-files/'. $_SESSION['user_image']?>" alt="" style="height: 100%; width: 100%;"></div>
                 <div class="user-name"><?= $_SESSION['user_name']?></div>
             </div>
             <!-- notifications pop-up panel -->

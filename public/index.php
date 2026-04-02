@@ -292,6 +292,11 @@ switch ($url) {
         $controller->review();
         break;
 
+    case 'messages/get-messages':
+        $controller = new MessageController();
+        $controller->getMessages();
+        break;
+
     default:
         $controller = new NotFoundController();
         $controller->index();

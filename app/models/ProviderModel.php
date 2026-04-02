@@ -349,12 +349,12 @@ class ProviderModel extends Database
     }
 
 
-    public function updateProviderStatus($provider_id, $status)
+    public function updateProviderStatus($provider_id, $status, $reason_for_rejection = null)
     {
         // mark status as 'Deleted' instead of hard-deleting the row
-        $stmt = $this->conn->prepare("UPDATE Provider SET Status = ? WHERE Provider_ID = ?");
+        $stmt = $this->conn->prepare("UPDATE Provider SET Status = ?, Reason_For_Rejection  = ? WHERE Provider_ID = ?");
         if (!$stmt) return false;
-        $stmt->bind_param("si", $status, $provider_id);
+        $stmt->bind_param("ssi", $status, $reason_for_rejection, $provider_id);
         return $stmt->execute();
     }
 
