@@ -545,6 +545,122 @@
   margin-bottom: 20px;
 }
 
+.post-view .bidded-providers-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.post-view .provider-bid-card {
+  background: #f8fafc;
+  border: 1px solid #dbe4ef;
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.post-view .provider-bid-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.post-view .provider-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #008500, #22c55e);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 38px;
+}
+
+.post-view .provider-meta {
+  min-width: 0;
+}
+
+.post-view .provider-meta h4 {
+  margin: 0;
+  font-size: 14px;
+  color: #111827;
+  font-weight: 700;
+}
+
+.post-view .provider-meta p {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: #64748b;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.post-view .provider-meta p i {
+  color: #f59e0b;
+}
+
+.post-view .provider-bid-price {
+  margin-left: auto;
+  font-size: 13px;
+  font-weight: 800;
+  color: #008500;
+  background: #eaf8ea;
+  border: 1px solid #c7ebc7;
+  border-radius: 999px;
+  padding: 5px 10px;
+  white-space: nowrap;
+}
+
+.post-view .provider-bid-bottom {
+  margin-top: 10px;
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.post-view .provider-bid-bottom span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.post-view .provider-bid-actions {
+  margin-top: 10px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.post-view .provider-bid-actions .action-btn {
+  padding: 7px 12px;
+  font-size: 12px;
+}
+
+.post-view .provider-bid-actions .action-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.post-view .request-status-note {
+  margin: 2px 0 10px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+@media (max-width: 520px) {
+  .post-view .provider-bid-top {
+    flex-wrap: wrap;
+  }
+
+  .post-view .provider-bid-price {
+    margin-left: 0;
+  }
+}
+
 /* Ensure all modals overlay above page content and are hidden when inactive */
 .pop-up-section.request-modal,
 .pop-up-section.confirm-modal,

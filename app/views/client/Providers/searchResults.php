@@ -1,3 +1,70 @@
+<?php
+if (!empty($cardsOnly)) {
+?>
+    <div class="item-list">
+        <?php for ($i = 0; $i < 2; $i++): ?>
+            <div class="search-item">
+                <div class="post-header">
+                    <div class="post-meta">
+                        <div class="provider-info">
+                            <div class="provider-image"><img src="sampleImg.jpg" alt="Provider"></div>
+                            <div class="provider-details">
+                                <div class="provider-name">Chethiya Bandara</div>
+                                <div class="provider-location">Gampaha</div>
+                                <div class="provider-meta-row">
+                                    <span class="provider-rating"><i class="fa-solid fa-star"></i>4.9</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="post-actions">
+                        <button class="action-btn btn-view" title="Message Provider"><i class="fa-solid fa-messages"></i> Message</button>
+                        <button class="action-btn btn-view" title="View Profile"><i class="fa-solid fa-user"></i> View Profile</button>
+                        <button class="action-btn btn-edit" title="Hire"><i class="fa-solid fa-briefcase"></i> Hire</button>
+                    </div>
+                </div>
+                <h3 class="post-title">Full Stack Web Developer - Expert in PHP, Laravel, and WordPress</h3>
+                <div class="post-description">Turn Your Web App Idea into a Fast, Scalable, and Beautiful Reality - Delivered On Time, Every Time! Hi, I'm Junaid - a results-driven Full-Stack Web Application Developer specializing in React, Next.js, MERN stack, and API integrations. Whether you need</div>
+                <div class="post-skills">
+                    <span class="skills-label">Skills:</span>
+                    <div class="skills-tags">
+                        <span class="skill-tag">Content SEO</span>
+                        <span class="skill-tag">Adobe XD</span>
+                        <span class="skill-tag">Web Design</span>
+                        <span class="skill-tag">Shopify</span>
+                    </div>
+                </div>
+                <div class="post-footer">
+                    <div class="post-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Rate</span>
+                            <span class="detail-value budget-amount">$40/hr</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Success</span>
+                            <span class="detail-value">90%</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Earnings</span>
+                            <span class="detail-value">$10K+</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <?php endfor; ?>
+        <div class="pagination" aria-label="Service pagination">
+            <button class="page-btn prev" disabled><i class="fa-solid fa-chevron-left"></i></button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn next"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+    </div>
+<?php
+    return;
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -7,6 +74,7 @@
 
     <!-- Link to external CSS files -->
     <link rel="stylesheet" href="assets/css/cardList.css">
+    <link rel="stylesheet" href="assets/css/clientPosts.css">
     <link rel="stylesheet" href="assets/css/searchResultsStyle.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
@@ -107,44 +175,56 @@
                 <!-- Search Results -->
 
                 <div class="item-list">
-                    <?php
-                    // Sample data for demonstration
-                    $len = 2; // Replace with the actual number of providers
-                    for ($i = 0; $i < $len; $i++) { ?>
+                    <?php for ($i = 0; $i < 2; $i++): ?>
                         <div class="search-item">
-                            <div class="item-head">
-                                <div class="item-img"><img src="sampleImg.jpg" alt=""></div>
-                                <div class="item-main-dets">
-                                    <div class="item-name">Chethiya Bandara</div>
-                                    <div class="item-title">Full Stack Web Developer - Expert in PHP, Laravel, and WordPress
+                            <div class="post-header">
+                                <div class="post-meta">
+                                    <div class="provider-info">
+                                        <div class="provider-image"><img src="sampleImg.jpg" alt="Provider"></div>
+                                        <div class="provider-details">
+                                            <div class="provider-name">Chethiya Bandara</div>
+                                            <div class="provider-location">Gampaha</div>
+                                            <div class="provider-meta-row">
+                                                <span class="provider-rating"><i class="fa-solid fa-star"></i>4.9</span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="item-district">Gampaha</div>
                                 </div>
-                                <div class="button">
-                                    <button class="message-btn" title="Message Provider"><i class="fa-solid fa-messages"></i></button>
-                                    <button class="view-profile"><i class="fa-solid fa-user"></i> View Profile</button>
-                                    <button class="hire-btn"><i class="fa-solid fa-briefcase"></i> Hire</button>
+                                <div class="post-actions">
+                                    <button class="action-btn btn-view" title="Message Provider"><i class="fa-solid fa-messages"></i> Message</button>
+                                    <button class="action-btn btn-view" title="View Profile"><i class="fa-solid fa-user"></i> View Profile</button>
+                                    <button class="action-btn btn-edit" title="Hire"><i class="fa-solid fa-briefcase"></i> Hire</button>
                                 </div>
                             </div>
-                            <div class="item-middle">
-                                <div class="rate">$40/hr</div>
-                                <div class="success"><i class="fa-solid fa-shield-check"></i>90% Project Success</div>
-                                <div class="total-earn">$10K+ earned</div>
+                            <h3 class="post-title">Full Stack Web Developer - Expert in PHP, Laravel, and WordPress</h3>
+                            <div class="post-description">Turn Your Web App Idea into a Fast, Scalable, and Beautiful Reality - Delivered On Time, Every Time! Hi, I'm Junaid - a results-driven Full-Stack Web Application Developer specializing in React, Next.js, MERN stack, and API integrations. Whether you need</div>
+                            <div class="post-skills">
+                                <span class="skills-label">Skills:</span>
+                                <div class="skills-tags">
+                                    <span class="skill-tag">Content SEO</span>
+                                    <span class="skill-tag">Adobe XD</span>
+                                    <span class="skill-tag">Web Design</span>
+                                    <span class="skill-tag">Shopify</span>
+                                </div>
                             </div>
-                            <div class="item-tags">
-                                <span>Conten SEO</span>
-                                <span>Adobe XD</span>
-                                <span>Web Design</span>
-                                <span>Shopify</span>
+                            <div class="post-footer">
+                                <div class="post-details">
+                                    <div class="detail-item">
+                                        <span class="detail-label">Rate</span>
+                                        <span class="detail-value budget-amount">$40/hr</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Success</span>
+                                        <span class="detail-value">90%</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Earnings</span>
+                                        <span class="detail-value">$10K+</span>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="item-description">Turn Your Web App Idea into a Fast, Scalable, and Beautiful
-                                Reality —
-                                Delivered On Time, Every Time! Hi, I’m Junaid — a results-driven Full-Stack Web Application
-                                Developer specializing in React, Next.js, MERN stack, and API integrations. Whether you need
-                            </div>
-                            <div class="bottom-button"><button>View profile</button></div>
                         </div>
-                    <?php } ?>
+                    <?php endfor; ?>
                     <div class="pagination" aria-label="Provider Pagination">
                         <button class="page-btn prev" disabled><i class="fa-solid fa-chevron-left"></i></button>
                         <button class="page-btn active">1</button>
