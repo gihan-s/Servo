@@ -390,6 +390,6 @@
     </div>
 
 </body>
-<script src="<?= BASE_URL ?>/../app/views/client/Providers/js/searchForProviderScript.js"></script>
+<script src="<?= BASE_URL ?>/assets/js/searchForProviderScript.js"></script>
 
 </html>

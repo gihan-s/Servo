@@ -9,24 +9,49 @@
 	<link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/cardList.css" />
 	<link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/serviceProjects.css" />
 	<link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/footer.css" />
+	<style>
+		html,
+		body {
+			height: 100%;
+		}
+
+		body.feed-page {
+			min-height: 100vh;
+			display: flex;
+			flex-direction: column;
+		}
+
+		body.feed-page .main-content {
+			flex: 1 0 auto;
+			width: 100%;
+		}
+
+		body.feed-page footer {
+			margin-top: auto;
+		}
+	</style>
 </head>
 
-<body>
-	<?php require_once __DIR__ . '/../../includes/navbar.php'; ?>
+<body class="feed-page">
+	<?php 
+	require_once __DIR__ . '/../../includes/navbar.php';
+	require_once __DIR__ . '/../../components/SearchHeader.php';
+	require_once __DIR__ . '/../../components/FilterModal.php';
+	?>
 
 	<div class="main-content">
 		<section class="service-requests" style="padding-top: 12px; padding-bottom: 28px;">
-			<div class="header-requests">
-				<h1>Provider Feed</h1>
-				<p class="section-note">Discover matching opportunities and place bids directly from each card.</p>
-				<div class="search-header">
-					<div class="search-button">
-						<input type="text" id="feedSearchInput" placeholder="Search by title, category, or client...">
-						<button type="button" id="feedSearchBtn" aria-label="Search feed"><i class="fa-solid fa-magnifying-glass"></i></button>
-					</div>
-					<button class="filter" id="feedFilterBtn" type="button"><i class="fa-solid fa-filter"></i><span>Filter</span></button>
-				</div>
-			</div>
+			<?php
+			$searchHeader = new SearchHeader([
+				'inputId' => 'feedSearchInput',
+				'placeholder' => 'Search by title, category, or client...',
+				'filterBtnId' => 'feedFilterBtn',
+				'searchBtnId' => 'feedSearchBtn',
+				'title' => 'Feed',
+				'note' => 'Browse the latest project posts and place your bids. Use the filters to find projects that match your skills.',
+			]);
+			$searchHeader->render();
+			?>
 
 			<div class="request-content">
 				<div class="requests-section active" style="display:block;">
@@ -91,27 +116,23 @@
 		</div>
 	</div>
 
-	<div class="pop-up-section filter-pop-up deactive" id="feedFilterRoot">
-		<div class="pop-up deactive" id="feedFilterModal">
-			<div class="pop-up-header">
-				<div class="pop-up-title">Add Filters</div>
-				<i class="fa-solid fa-xmark" id="feedFilterClose"></i>
-			</div>
-			<hr>
-			<div class="pop-up-content">
-				<div class="search-filters">
-					<div class="filter-item">
-						<div class="filter-title"><span>Category</span><i class="fa-solid fa-chevron-down rotated"></i></div>
-						<ul class="filter-options checkboxes active" id="feedCategoryList"></ul>
-					</div>
-				</div>
-			</div>
-			<div class="button-apply" style="display:flex; gap:10px; justify-content:flex-end; margin-top:12px;">
-				<button type="button" class="btn-outline" id="feedFilterClear">Clear</button>
-				<button type="button" class="btn-primary" id="feedFilterApply">Apply filters</button>
-			</div>
-		</div>
-	</div>
+	<?php
+	$filterModal = new FilterModal([
+		'modalRootId' => 'feedFilterRoot',
+		'modalId' => 'feedFilterModal',
+		'closeId' => 'feedFilterClose',
+		'applyId' => 'feedFilterApply',
+		'clearId' => 'feedFilterClear',
+		'filters' => [
+			[
+				'type' => 'checkbox',
+				'label' => 'Category',
+				'id' => 'feedCategoryList'
+			]
+		]
+	]);
+	$filterModal->render();
+	?>
 
 	<div class="pop-up-section request-modal deactive" id="feedViewRoot">
 		<div class="pop-up" id="feedViewModal" style="max-width:680px; border-radius:16px;">
@@ -128,7 +149,7 @@
 		</div>
 	</div>
 
-	<script src="<?= BASE_URL ?>/assets/js/providerFeed.js"></script>
+	<script type="module" src="<?= BASE_URL ?>/assets/js/providerFeed.js"></script>
 </body>
 
 </html>

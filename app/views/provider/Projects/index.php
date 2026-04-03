@@ -33,29 +33,31 @@
     
 </head>
 <body class="projects-page">
-    <?php // Use filesystem path for includes (BASE_URL is for URLs, not filesystem)
-    require_once __DIR__ . '/../../includes/navbar.php'; ?>
+    <?php 
+    require_once __DIR__ . '/../../includes/navbar.php';
+    require_once __DIR__ . '/../../components/SearchHeader.php';
+    require_once __DIR__ . '/../../components/FilterModal.php';
+    ?>
     <div class="main-content">
     <section class="service-requests" style="padding-top: 12px; padding-bottom: 28px;">
-        <div class="header-requests">
-            <h1>My Service Requests & Projects</h1>
-            <p class="section-note">Track incoming requests, ongoing work, reviews, and completed jobs in one place.</p>
-            <div class="search-header">
-                <div class="search-button">
-                    <input type="text" id="projectsSearchInput" placeholder="Search by title, category, or client...">
-                    <button type="button" id="projectsSearchBtn" aria-label="Search projects"><i class="fa-solid fa-magnifying-glass"></i></button>
-                </div>
-                <button class="filter" id="projectsFilterBtn" type="button"><i
-                        class="fa-solid fa-filter"></i><span>Filter</span></button>
-            </div>
-            <div class="container-changer">
-                <!--<div id="new-requests" class="buttons active" data-target="new-requests">New Requests</div>-->
-                <div id="pending-requests" class="buttons active" data-target="pending-requests">Incoming Requests</div>
-                <div id="in-progress-requests" class="buttons" data-target="in-progress-requests">Ongoing</div>
-                <div id="pending-review" class="buttons" data-target="pending-review">Pending Review</div>
-                <div id="completed-jobs" class="buttons" data-target="completed-jobs">Completed</div>
-            </div>
-        </div>
+        <?php
+        $searchHeader = new SearchHeader([
+            'inputId' => 'projectsSearchInput',
+            'placeholder' => 'Search by title, category, or client...',
+            'filterBtnId' => 'projectsFilterBtn',
+            'searchBtnId' => 'projectsSearchBtn',
+            'title' => 'Projects',
+            'note' => 'Track incoming project requests, ongoing projects, and project history',
+            'showTabs' => true,
+            'tabs' => [
+                ['id' => 'pending-requests', 'label' => 'Incoming Requests', 'target' => 'pending-requests', 'active' => true],
+                ['id' => 'in-progress-requests', 'label' => 'Ongoing', 'target' => 'in-progress-requests'],
+                ['id' => 'pending-review', 'label' => 'Pending Review', 'target' => 'pending-review'],
+                ['id' => 'completed-jobs', 'label' => 'Completed', 'target' => 'completed-jobs']
+            ]
+        ]);
+        $searchHeader->render();
+        ?>
         <div class="request-content">
             <!-- New Requests Section -->
              <!--
@@ -116,7 +118,7 @@
                                 <button class="btn-outline btn-view" title="View Proposal"><i
                                         class="fa-solid fa-eye"></i> View</button>
                                 <button class="btn-outline btn-message" title="Message Client"><i
-                                        class="fa-solid fa-messages"></i> Message</button>
+                                        class="fa-solid fa-message"></i> Message</button>
                                 <button class="btn-danger btn-withdraw" title="Withdraw Proposal"><i
                                         class="fa-solid fa-trash"></i> Withdraw</button>
                             </div>
@@ -154,7 +156,7 @@
                             </div>
                             <div class="button">
                                 <button class="btn-outline btn-view" title="View Project"><i class="fa-solid fa-eye"></i> View</button>
-                                <button class="btn-outline btn-message" title="Message Client"><i class="fa-solid fa-messages"></i> Message</button>
+                                <button class="btn-outline btn-message" title="Message Client"><i class="fa-solid fa-message"></i> Message</button>
                                 <button class="btn-primary btn-update" title="Update Progress"><i class="fa-solid fa-arrow-up"></i> Update</button>
                                 <button class="btn-primary btn-submit" title="Submit for Review"><i class="fa-solid fa-paper-plane"></i> Submit</button>
                             </div>
@@ -196,7 +198,7 @@
                             </div>
                             <div class="button">
                                 <button class="btn-outline btn-view" title="View Submission"><i class="fa-solid fa-eye"></i> View</button>
-                                <button class="btn-outline btn-message" title="Message Client"><i class="fa-solid fa-messages"></i> Message</button>
+                                <button class="btn-outline btn-message" title="Message Client"><i class="fa-solid fa-message"></i> Message</button>
                             </div>
                         </div>
                         <div class="item-description">Wrote homepage, about us, and services page content for a digital marketing agency.</div>
@@ -249,27 +251,23 @@
     </section>
 
     <!-- Filter Popup -->
-    <div class="pop-up-section filter-pop-up deactive" id="projectsFilterRoot">
-        <div class="pop-up deactive" id="projectsFilterModal">
-            <div class="pop-up-header">
-                <div class="pop-up-title">Add Filters</div>
-                <i class="fa-solid fa-xmark" id="projectsFilterClose"></i>
-            </div>
-            <hr>
-            <div class="pop-up-content">
-                <div class="search-filters">
-                    <div class="filter-item">
-                        <div class="filter-title"><span>Category</span><i class="fa-solid fa-chevron-down rotated"></i></div>
-                        <ul class="filter-options checkboxes active" id="projectsCategoryList"></ul>
-                    </div>
-                </div>
-            </div>
-            <div class="button-apply" style="display:flex; gap:10px; justify-content:flex-end; margin-top:12px;">
-                <button type="button" class="btn-outline" id="projectsFilterClear">Clear</button>
-                <button type="button" class="btn-primary" id="projectsFilterApply">Apply filters</button>
-            </div>
-        </div>
-    </div>
+    <?php
+    $filterModal = new FilterModal([
+        'modalRootId' => 'projectsFilterRoot',
+        'modalId' => 'projectsFilterModal',
+        'closeId' => 'projectsFilterClose',
+        'applyId' => 'projectsFilterApply',
+        'clearId' => 'projectsFilterClear',
+        'filters' => [
+            [
+                'type' => 'checkbox',
+                'label' => 'Category',
+                'id' => 'projectsCategoryList'
+            ]
+        ]
+    ]);
+    $filterModal->render();
+    ?>
 
     <!-- Request Details Modal -->
     <div class="pop-up-section request-modal deactive" id="requestModalRoot">
@@ -317,7 +315,7 @@
                 <button class="btn-primary" id="btnPropose" style="display:none;"><i class="fa-solid fa-paper-plane"></i> Send Proposal</button>
                 <button class="btn-primary" id="btnSubmit" style="display:none;"><i class="fa-solid fa-paper-plane"></i> Submit for Review</button>
                 <button class="btn-primary" id="btnUpdate" style="display:none;"><i class="fa-solid fa-arrow-up"></i> Update Progress</button>
-                <button class="btn-outline" id="btnMessage"><i class="fa-solid fa-messages"></i> Message Client</button>
+                <button class="btn-outline" id="btnMessage"><i class="fa-solid fa-message"></i> Message Client</button>
                 <button class="btn-danger" id="btnDecline"><i class="fa-solid fa-circle-xmark"></i> Decline</button>
                 <button class="btn-danger" id="btnWithdraw" style="display:none;"><i class="fa-solid fa-trash"></i> Withdraw</button>
             </div>
@@ -460,7 +458,7 @@
 
     <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
 
-    <script src="<?= BASE_URL ?>/assets/js/providerProjects.js"></script>
+    <script type="module" src="<?= BASE_URL ?>/assets/js/providerProjects.js"></script>
 </body>
 </html>
 
