@@ -4,12 +4,103 @@
 	const sections = document.querySelectorAll('.request-content .requests-section');
 	const detailsModalRoot = document.getElementById('bidDetailsModalRoot');
 	const detailsModalClose = document.getElementById('bidDetailsModalClose');
+	const searchInput = document.getElementById('bidsSearchInput');
+	const searchBtn = document.getElementById('bidsSearchBtn');
+	const filterRoot = document.getElementById('bidsFilterRoot');
+	const filterModal = document.getElementById('bidsFilterModal');
+	const filterBtn = document.getElementById('bidsFilterBtn');
+	const filterClose = document.getElementById('bidsFilterClose');
+	const filterApply = document.getElementById('bidsFilterApply');
+	const filterClear = document.getElementById('bidsFilterClear');
+	const categoryList = document.getElementById('bidsCategoryList');
+	const cards = Array.from(document.querySelectorAll('.request-content .search-item[data-title]'));
+	let selectedCategories = new Set();
+	let activeSectionKey = 'active';
 
 	if (!tabContainer || !tabs.length || !sections.length) {
 		return;
 	}
 
+	function applyFilters() {
+		const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
+
+		cards.forEach((card) => {
+			const section = card.closest('.requests-section');
+			const sectionKey = section ? section.dataset.section : '';
+			const title = (card.dataset.title || '').toLowerCase();
+			const category = (card.dataset.category || '').toLowerCase();
+			const client = (card.dataset.client || '').toLowerCase();
+			const matchesQuery = !query || title.includes(query) || category.includes(query) || client.includes(query);
+			const matchesCategory = selectedCategories.size === 0 || selectedCategories.has(category);
+			const matchesSection = sectionKey === activeSectionKey;
+			card.style.display = matchesSection && matchesQuery && matchesCategory ? '' : 'none';
+		});
+	}
+
+	function populateCategoryFilters() {
+		if (!categoryList) {
+			return;
+		}
+
+		const uniqueCategories = Array.from(new Set(cards
+			.map((card) => (card.dataset.category || '').trim())
+			.filter((category) => category.length > 0)))
+			.sort((a, b) => a.localeCompare(b));
+
+		categoryList.innerHTML = '';
+		uniqueCategories.forEach((category, index) => {
+			const listItem = document.createElement('li');
+			const id = 'bidsCategory_' + index;
+			listItem.innerHTML = '<input type="checkbox" id="' + id + '" value="' + category + '"><label for="' + id + '">' + category + '</label>';
+			categoryList.appendChild(listItem);
+		});
+
+		categoryList.querySelectorAll('li').forEach((option) => {
+			option.addEventListener('click', function (event) {
+				if (event.target.tagName === 'INPUT') {
+					return;
+				}
+				const input = this.querySelector('input');
+				if (input) {
+					input.checked = !input.checked;
+				}
+			});
+		});
+	}
+
+	function getSelectedCategoriesFromUI() {
+		if (!categoryList) {
+			return new Set();
+		}
+		const selected = new Set();
+		categoryList.querySelectorAll('input[type="checkbox"]:checked').forEach((input) => {
+			if (input.value) {
+				selected.add(input.value.toLowerCase());
+			}
+		});
+		return selected;
+	}
+
+	function openFilterModal() {
+		if (!filterRoot || !filterModal) {
+			return;
+		}
+		filterRoot.classList.remove('deactive');
+		filterModal.classList.remove('deactive');
+		document.body.style.overflow = 'hidden';
+	}
+
+	function closeFilterModal() {
+		if (!filterRoot || !filterModal) {
+			return;
+		}
+		filterRoot.classList.add('deactive');
+		filterModal.classList.add('deactive');
+		document.body.style.overflow = '';
+	}
+
 	function activateSection(target) {
+		activeSectionKey = target;
 		tabs.forEach((tab) => {
 			tab.classList.toggle('active', tab.dataset.target === target);
 		});
@@ -18,6 +109,8 @@
 			section.classList.toggle('active', section.dataset.section === target);
 			section.style.display = section.dataset.section === target ? 'block' : 'none';
 		});
+
+		applyFilters();
 	}
 
 	tabContainer.addEventListener('click', (event) => {
@@ -98,11 +191,65 @@
 		}
 	});
 
-	window.addEventListener('keydown', (event) => {
-		if (event.key === 'Escape' && detailsModalRoot && detailsModalRoot.classList.contains('active')) {
-			closeDetails();
+	filterBtn && filterBtn.addEventListener('click', openFilterModal);
+	filterClose && filterClose.addEventListener('click', closeFilterModal);
+	filterRoot && filterRoot.addEventListener('click', (event) => {
+		if (event.target === filterRoot) {
+			closeFilterModal();
 		}
 	});
 
+	filterApply && filterApply.addEventListener('click', function () {
+		selectedCategories = getSelectedCategoriesFromUI();
+		applyFilters();
+		closeFilterModal();
+	});
+
+	filterClear && filterClear.addEventListener('click', function () {
+		selectedCategories = new Set();
+		if (categoryList) {
+			categoryList.querySelectorAll('input[type="checkbox"]').forEach((input) => {
+				input.checked = false;
+			});
+		}
+		applyFilters();
+	});
+
+	searchBtn && searchBtn.addEventListener('click', function () {
+		applyFilters();
+	});
+
+	searchInput && searchInput.addEventListener('input', function () {
+		applyFilters();
+	});
+
+	searchInput && searchInput.addEventListener('keydown', function (event) {
+		if (event.key === 'Enter') {
+			event.preventDefault();
+			applyFilters();
+		}
+	});
+
+	searchInput && searchInput.addEventListener('focusin', function () {
+		const searchButtonRoot = this.closest('.search-button');
+		searchButtonRoot && searchButtonRoot.classList.add('focus');
+	});
+
+	searchInput && searchInput.addEventListener('focusout', function () {
+		const searchButtonRoot = this.closest('.search-button');
+		searchButtonRoot && searchButtonRoot.classList.remove('focus');
+	});
+
+	window.addEventListener('keydown', (event) => {
+		if (event.key === 'Escape' && detailsModalRoot && detailsModalRoot.classList.contains('active')) {
+			closeDetails();
+			return;
+		}
+		if (event.key === 'Escape' && filterRoot && !filterRoot.classList.contains('deactive')) {
+			closeFilterModal();
+		}
+	});
+
+	populateCategoryFilters();
 	activateSection('active');
 })();

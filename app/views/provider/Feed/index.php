@@ -19,13 +19,20 @@
 			<div class="header-requests">
 				<h1>Provider Feed</h1>
 				<p class="section-note">Discover matching opportunities and place bids directly from each card.</p>
+				<div class="search-header">
+					<div class="search-button">
+						<input type="text" id="feedSearchInput" placeholder="Search by title, category, or client...">
+						<button type="button" id="feedSearchBtn" aria-label="Search feed"><i class="fa-solid fa-magnifying-glass"></i></button>
+					</div>
+					<button class="filter" id="feedFilterBtn" type="button"><i class="fa-solid fa-filter"></i><span>Filter</span></button>
+				</div>
 			</div>
 
 			<div class="request-content">
 				<div class="requests-section active" style="display:block;">
 					<div class="item-list">
 						<?php foreach ($feedItems as $item): ?>
-							<article class="search-item" data-client="<?= htmlspecialchars($item['client'], ENT_QUOTES, 'UTF-8') ?>" data-title="<?= htmlspecialchars($item['title'], ENT_QUOTES, 'UTF-8') ?>" data-budget="<?= htmlspecialchars($item['budget'], ENT_QUOTES, 'UTF-8') ?>" data-timeline="<?= htmlspecialchars($item['timeline'], ENT_QUOTES, 'UTF-8') ?>">
+							<article class="search-item" data-client="<?= htmlspecialchars($item['client'], ENT_QUOTES, 'UTF-8') ?>" data-title="<?= htmlspecialchars($item['title'], ENT_QUOTES, 'UTF-8') ?>" data-category="<?= htmlspecialchars($item['category'], ENT_QUOTES, 'UTF-8') ?>" data-budget="<?= htmlspecialchars($item['budget'], ENT_QUOTES, 'UTF-8') ?>" data-timeline="<?= htmlspecialchars($item['timeline'], ENT_QUOTES, 'UTF-8') ?>" data-posted="<?= htmlspecialchars($item['posted'], ENT_QUOTES, 'UTF-8') ?>" data-description="<?= htmlspecialchars($item['description'], ENT_QUOTES, 'UTF-8') ?>" data-status-label="<?= htmlspecialchars($item['statusLabel'], ENT_QUOTES, 'UTF-8') ?>">
 								<div class="item-head">
 									<div class="item-main-dets">
 										<div class="item-name"><?= htmlspecialchars($item['client'], ENT_QUOTES, 'UTF-8') ?></div>
@@ -36,10 +43,9 @@
 										</div>
 									</div>
 									<div class="button">
-										<button class="btn-outline btn-like" type="button" title="Like"><i class="fa-regular fa-heart"></i> Like</button>
 										<button class="btn-primary btn-bid" type="button" title="Place Bid"><i class="fa-solid fa-gavel"></i> Bid</button>
 										<button class="btn-outline btn-message" type="button" title="Message"><i class="fa-regular fa-message"></i> Message</button>
-										<button class="btn-outline" type="button" title="View"><i class="fa-regular fa-eye"></i> View</button>
+										<button class="btn-outline btn-view" type="button" title="View"><i class="fa-regular fa-eye"></i> View</button>
 									</div>
 								</div>
 								<div class="item-middle">
@@ -82,6 +88,43 @@
 					<button class="btn-primary" id="submitBidBtn" type="submit"><i class="fa-solid fa-paper-plane"></i> Submit Bid</button>
 				</div>
 			</form>
+		</div>
+	</div>
+
+	<div class="pop-up-section filter-pop-up deactive" id="feedFilterRoot">
+		<div class="pop-up deactive" id="feedFilterModal">
+			<div class="pop-up-header">
+				<div class="pop-up-title">Add Filters</div>
+				<i class="fa-solid fa-xmark" id="feedFilterClose"></i>
+			</div>
+			<hr>
+			<div class="pop-up-content">
+				<div class="search-filters">
+					<div class="filter-item">
+						<div class="filter-title"><span>Category</span><i class="fa-solid fa-chevron-down rotated"></i></div>
+						<ul class="filter-options checkboxes active" id="feedCategoryList"></ul>
+					</div>
+				</div>
+			</div>
+			<div class="button-apply" style="display:flex; gap:10px; justify-content:flex-end; margin-top:12px;">
+				<button type="button" class="btn-outline" id="feedFilterClear">Clear</button>
+				<button type="button" class="btn-primary" id="feedFilterApply">Apply filters</button>
+			</div>
+		</div>
+	</div>
+
+	<div class="pop-up-section request-modal deactive" id="feedViewRoot">
+		<div class="pop-up" id="feedViewModal" style="max-width:680px; border-radius:16px;">
+			<div class="pop-up-header" style="display:flex; align-items:center; justify-content:space-between;">
+				<div class="pop-up-title" id="feedViewTitle">Project</div>
+				<i class="fa-solid fa-xmark" id="feedViewClose" style="cursor:pointer;"></i>
+			</div>
+			<hr>
+			<div class="pop-up-content" style="display:flex; flex-direction:column; gap:12px;">
+				<!-- <div style="font-size:14px; color:#334155;">Project: <strong id="feedViewTitle">-</strong></div> -->
+				<div style="font-size:13px; color:#64748b;">Client: <strong id="feedViewClient">-</strong></div>
+				<div id="feedViewDetails" style="display:grid; gap:10px;"></div>
+			</div>
 		</div>
 	</div>
 

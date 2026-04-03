@@ -6,37 +6,47 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/providerProjects.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/cardList.css" />
-    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/main.css" />
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/serviceProjects.css" />
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/footer.css" />
     <title>Provider Dashboard - Service Requests & Projects</title>
+    <style>
+        html,
+        body {
+            height: 100%;
+        }
+
+        body.projects-page {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        body.projects-page .main-content {
+            flex: 1 0 auto;
+            width: 100%;
+        }
+
+        body.projects-page footer {
+            margin-top: auto;
+        }
+    </style>
     
 </head>
-<body>
+<body class="projects-page">
     <?php // Use filesystem path for includes (BASE_URL is for URLs, not filesystem)
     require_once __DIR__ . '/../../includes/navbar.php'; ?>
     <div class="main-content">
-    <section class="service-requests">
+    <section class="service-requests" style="padding-top: 12px; padding-bottom: 28px;">
         <div class="header-requests">
             <h1>My Service Requests & Projects</h1>
+            <p class="section-note">Track incoming requests, ongoing work, reviews, and completed jobs in one place.</p>
             <div class="search-header">
                 <div class="search-button">
-                    <input type="text" placeholder="Search for Requests...">
-                    <button><i class="fa-solid fa-magnifying-glass"></i></button>
+                    <input type="text" id="projectsSearchInput" placeholder="Search by title, category, or client...">
+                    <button type="button" id="projectsSearchBtn" aria-label="Search projects"><i class="fa-solid fa-magnifying-glass"></i></button>
                 </div>
-                <button class="filter" id="filter-pop-up"><i
+                <button class="filter" id="projectsFilterBtn" type="button"><i
                         class="fa-solid fa-filter"></i><span>Filter</span></button>
-                <div class="advance-search">
-                    <div class="sort-selection">
-                        <div class="selection-input-field">
-                            <input type="selection-input" id="selection-input" name="sort" value="Sort By Relevence"
-                                disabled><i class="fa-solid fa-chevron-down"></i>
-                        </div>
-                        <div class="selection-options" id="selection-options">
-                            <div class="opt">Sort By Relevence</div>
-                            <div class="opt">Sort By Price</div>
-                            <div class="opt">Sort By Rating</div>
-                        </div>
-                    </div>
-                </div>
             </div>
             <div class="container-changer">
                 <!--<div id="new-requests" class="buttons active" data-target="new-requests">New Requests</div>-->
@@ -89,10 +99,10 @@
             </div>
     -->
             <!-- Incoming Requests Section -->
-            <div class="pending-requests active requests-section" id="section-pending">
+            <div class="pending-requests active requests-section" id="section-pending" data-section="pending-requests">
                 <p class="section-note">Incoming service requests from potential clients.</p>
                 <div class="item-list">
-                    <div class="search-item" data-status="pending">
+                    <div class="search-item" data-status="pending" data-client="Michael Chen" data-title="E-commerce Website Development" data-category="Web Development" data-posted="Proposed 12 Jul 2025" data-budget="Proposal: $2,500" data-timeline="4 weeks" data-status-label="Pending Response" data-requirements="Full e-commerce site with product catalog, shopping cart, and payment integration." data-description="Full e-commerce site with product catalog, shopping cart, and payment integration.">
                         <div class="item-head">
                             <div class="item-main-dets">
                                 <div class="item-name">Michael Chen</div>
@@ -129,10 +139,10 @@
             </div>
 
             <!-- Ongoing Section -->
-            <div class="in-progress-requests requests-section" id="section-progress">
+            <div class="in-progress-requests requests-section" id="section-progress" data-section="in-progress-requests">
                 <p class="section-note">Active projects you're currently working on.</p>
                 <div class="item-list">
-                    <div class="search-item" data-status="progress">
+                    <div class="search-item" data-status="progress" data-client="Emma Wilson" data-title="Mobile App UI/UX Design" data-category="UI/UX Design" data-posted="Started 10 Jul 2025" data-budget="Budget: $1,200" data-timeline="ETA 12d" data-status-label="In Progress" data-progress="65" data-progress-detail="32h of 50h" data-logged="32h" data-requirements="Designing user interface and experience for a fitness tracking mobile application." data-description="Designing user interface and experience for a fitness tracking mobile application.">
                         <div class="item-head">
                             <div class="item-main-dets">
                                 <div class="item-name">Emma Wilson</div>
@@ -171,10 +181,10 @@
             </div>
 
             <!-- Pending Review Section -->
-            <div class="pending-review requests-section" id="section-review">
+            <div class="pending-review requests-section" id="section-review" data-section="pending-review">
                 <p class="section-note">Project outputs submitted for review. Awaiting feedback or approval from client.</p>
                 <div class="item-list">
-                    <div class="search-item" data-status="review">
+                    <div class="search-item" data-status="review" data-client="David Rodriguez" data-title="Website Content Writing" data-category="Content Writing" data-posted="Submitted 08 Jul 2025" data-budget="Payment: $600" data-timeline="Not specified" data-status-label="Pending Review" data-requirements="Wrote homepage, about us, and services page content for a digital marketing agency." data-description="Wrote homepage, about us, and services page content for a digital marketing agency.">
                         <div class="item-head">
                             <div class="item-main-dets">
                                 <div class="item-name">David Rodriguez</div>
@@ -204,10 +214,10 @@
             </div>
 
             <!-- Completed Jobs Section -->
-            <div class="completed-jobs requests-section" id="section-completed">
+            <div class="completed-jobs requests-section" id="section-completed" data-section="completed-jobs">
                 <p class="section-note">Successfully completed projects and delivered work.</p>
                 <div class="item-list">
-                    <div class="search-item" data-status="complete">
+                    <div class="search-item" data-status="complete" data-client="Jennifer Lee" data-title="Social Media Marketing Campaign" data-category="Digital Marketing" data-posted="Completed 01 Jul 2025" data-budget="Earned: $1,500" data-timeline="Not specified" data-status-label="Completed" data-requirements="30-day social media campaign with content creation and community management across 3 platforms." data-description="30-day social media campaign with content creation and community management across 3 platforms.">
                         <div class="item-head">
                             <div class="item-main-dets">
                                 <div class="item-name">Jennifer Lee</div>
@@ -239,53 +249,24 @@
     </section>
 
     <!-- Filter Popup -->
-    <div class="pop-up-section filter-pop-up deactive">
-        <div class="pop-up deactive">
+    <div class="pop-up-section filter-pop-up deactive" id="projectsFilterRoot">
+        <div class="pop-up deactive" id="projectsFilterModal">
             <div class="pop-up-header">
                 <div class="pop-up-title">Add Filters</div>
-                <i class="fa-solid fa-xmark" id="filter-pop-up-close"></i>
+                <i class="fa-solid fa-xmark" id="projectsFilterClose"></i>
             </div>
             <hr>
             <div class="pop-up-content">
                 <div class="search-filters">
                     <div class="filter-item">
-                        <div class="filter-title"><span>Project Budget</span><i
-                                class="fa-solid fa-chevron-down rotated"></i>
-                        </div>
-                        <ul class="filter-options active radios">
-                            <li><input type="radio" name="budget" id="budget" checked>Any budget</li>
-                            <li><input type="radio" name="budget" id="budget">Less than $500</li>
-                            <li><input type="radio" name="budget" id="budget">$500 - $1,000</li>
-                            <li><input type="radio" name="budget" id="budget">$1,000 - $2,500</li>
-                            <li><input type="radio" name="budget" id="budget">$2,500 & above</li>
-                        </ul>
-                    </div>
-                    <div class="filter-item">
-                        <div class="filter-title"><span>Project Duration</span><i class="fa-solid fa-chevron-down"></i>
-                        </div>
-                        <ul class="filter-options radios">
-                            <li><input type="radio" name="duration" id="duration" checked>Any duration</li>
-                            <li><input type="radio" name="duration" id="duration">Less than 1 week</li>
-                            <li><input type="radio" name="duration" id="duration">1-2 weeks</li>
-                            <li><input type="radio" name="duration" id="duration">2-4 weeks</li>
-                            <li><input type="radio" name="duration" id="duration">More than 4 weeks</li>
-                        </ul>
-                    </div>
-                    <div class="filter-item">
-                        <div class="filter-title"><span>Project Category</span><i class="fa-solid fa-chevron-down"></i>
-                        </div>
-                        <ul class="filter-options checkboxes">
-                            <li><input type="checkbox" name="category" id="category" checked>Web Development</li>
-                            <li><input type="checkbox" name="category" id="category">Graphic Design</li>
-                            <li><input type="checkbox" name="category" id="category">Content Writing</li>
-                            <li><input type="checkbox" name="category" id="category">Digital Marketing</li>
-                            <li><input type="checkbox" name="category" id="category">Mobile Development</li>
-                        </ul>
+                        <div class="filter-title"><span>Category</span><i class="fa-solid fa-chevron-down rotated"></i></div>
+                        <ul class="filter-options checkboxes active" id="projectsCategoryList"></ul>
                     </div>
                 </div>
             </div>
-            <div class="button-apply">
-                <button>Apply filters</button>
+            <div class="button-apply" style="display:flex; gap:10px; justify-content:flex-end; margin-top:12px;">
+                <button type="button" class="btn-outline" id="projectsFilterClear">Clear</button>
+                <button type="button" class="btn-primary" id="projectsFilterApply">Apply filters</button>
             </div>
         </div>
     </div>
@@ -326,6 +307,10 @@
                 <div id="modalRequirementsSection" class="modal-requirements">
                     <div style="font-weight:700; color:#111827; margin-top:4px;">Client Requirements</div>
                     <div id="reqRequirements" style="font-size:14px; color:#475569; line-height:1.6; margin-top:6px;">—</div>
+                </div>
+                <div id="reqAdditionalSection" class="modal-requirements" style="display:none;">
+                    <div style="font-weight:700; color:#111827; margin-top:4px;">Additional Details</div>
+                    <div id="reqAdditionalDetails" style="display:flex; flex-direction:column; gap:8px; margin-top:6px;"></div>
                 </div>
             </div>
             <div class="modal-actions">
@@ -475,485 +460,7 @@
 
     <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
 
-    <script>
-        // Main functionality for provider interface
-        document.addEventListener('DOMContentLoaded', function() {
-            // Tab navigation
-            const tabButtons = document.querySelectorAll('.container-changer .buttons');
-            const tabSections = document.querySelectorAll('.requests-section');
-            
-            tabButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const targetId = this.getAttribute('data-target');
-                    
-                    // Update active tab
-                    tabButtons.forEach(btn => btn.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    // Show corresponding section
-                    tabSections.forEach(section => {
-                        section.classList.remove('active');
-                        if (section.classList.contains(targetId)) {
-                            section.classList.add('active');
-                        }
-                    });
-                });
-            });
-            
-            // Filter popup functionality
-            const filterButton = document.getElementById('filter-pop-up');
-            const filterPopup = document.querySelector('.filter-pop-up');
-            const filterClose = document.getElementById('filter-pop-up-close');
-            
-            if (filterButton && filterPopup) {
-                filterButton.addEventListener('click', function() {
-                    filterPopup.classList.remove('deactive');
-                });
-                
-                filterClose.addEventListener('click', function() {
-                    filterPopup.classList.add('deactive');
-                });
-                
-                filterPopup.addEventListener('click', function(e) {
-                    if (e.target === filterPopup) {
-                        filterPopup.classList.add('deactive');
-                    }
-                });
-            }
-            
-            // Filter options toggle
-            const filterTitles = document.querySelectorAll('.filter-title');
-            
-            filterTitles.forEach(title => {
-                title.addEventListener('click', function() {
-                    const options = this.nextElementSibling;
-                    const icon = this.querySelector('i');
-                    
-                    options.classList.toggle('active');
-                    icon.classList.toggle('rotated');
-                });
-            });
-            
-            // Sort selection functionality
-            const sortInput = document.getElementById('selection-input');
-            const sortOptions = document.getElementById('selection-options');
-            
-            if (sortInput && sortOptions) {
-                sortInput.addEventListener('click', function() {
-                    sortOptions.style.display = sortOptions.style.display === 'block' ? 'none' : 'block';
-                });
-                
-                sortOptions.querySelectorAll('.opt').forEach(option => {
-                    option.addEventListener('click', function() {
-                        sortInput.value = this.textContent;
-                        sortOptions.style.display = 'none';
-                    });
-                });
-                
-                // Close sort options when clicking outside
-                document.addEventListener('click', function(e) {
-                    if (!sortInput.contains(e.target) && !sortOptions.contains(e.target)) {
-                        sortOptions.style.display = 'none';
-                    }
-                });
-            }
-            
-            // Modal functionality
-            initializeModals();
-        });
-
-        // Modal management
-        function initializeModals() {
-            // Request Details Modal
-            const requestModalRoot = document.getElementById('requestModalRoot');
-            const requestModalClose = document.getElementById('requestModalClose');
-            
-            if (requestModalRoot && requestModalClose) {
-                requestModalClose.addEventListener('click', () => closeModal(requestModalRoot));
-                requestModalRoot.addEventListener('click', (e) => {
-                    if (e.target === requestModalRoot) closeModal(requestModalRoot);
-                });
-            }
-            
-            // Proposal Modal
-            const proposalModalRoot = document.getElementById('proposalModalRoot');
-            const proposalModalClose = document.getElementById('proposalModalClose');
-            
-            if (proposalModalRoot && proposalModalClose) {
-                proposalModalClose.addEventListener('click', () => closeModal(proposalModalRoot));
-                proposalModalRoot.addEventListener('click', (e) => {
-                    if (e.target === proposalModalRoot) closeModal(proposalModalRoot);
-                });
-            }
-            
-            // Progress Modal
-            const progressModalRoot = document.getElementById('progressModalRoot');
-            const progressModalClose = document.getElementById('progressModalClose');
-            
-            if (progressModalRoot && progressModalClose) {
-                progressModalClose.addEventListener('click', () => closeModal(progressModalRoot));
-                progressModalRoot.addEventListener('click', (e) => {
-                    if (e.target === progressModalRoot) closeModal(progressModalRoot);
-                });
-            }
-            
-            // Submit Modal
-            const submitModalRoot = document.getElementById('submitModalRoot');
-            const submitModalClose = document.getElementById('submitModalClose');
-            
-            if (submitModalRoot && submitModalClose) {
-                submitModalClose.addEventListener('click', () => closeModal(submitModalRoot));
-                submitModalRoot.addEventListener('click', (e) => {
-                    if (e.target === submitModalRoot) closeModal(submitModalRoot);
-                });
-            }
-            
-            // Confirm Modal
-            const confirmModalRoot = document.getElementById('confirmModalRoot');
-            const confirmModalClose = document.getElementById('confirmModalClose');
-            
-            if (confirmModalRoot && confirmModalClose) {
-                confirmModalClose.addEventListener('click', () => closeModal(confirmModalRoot));
-                confirmModalRoot.addEventListener('click', (e) => {
-                    if (e.target === confirmModalRoot) closeModal(confirmModalRoot);
-                });
-            }
-            
-            // Button event handlers
-            setupButtonHandlers();
-        }
-
-        function setupButtonHandlers() {
-            // View buttons - open request details modal
-            document.querySelectorAll('.btn-view').forEach(button => {
-                button.addEventListener('click', function() {
-                    const card = this.closest('.search-item');
-                    openRequestDetailsModal(card);
-                });
-            });
-            
-            // Propose buttons - open proposal modal
-            document.querySelectorAll('.btn-propose').forEach(button => {
-                button.addEventListener('click', function() {
-                    const card = this.closest('.search-item');
-                    openProposalModal(card);
-                });
-            });
-            
-            // Update buttons - open progress modal
-            document.querySelectorAll('.btn-update').forEach(button => {
-                button.addEventListener('click', function() {
-                    const card = this.closest('.search-item');
-                    openProgressModal(card);
-                });
-            });
-            
-            // Submit buttons - open submit modal
-            document.querySelectorAll('.btn-submit').forEach(button => {
-                button.addEventListener('click', function() {
-                    const card = this.closest('.search-item');
-                    openSubmitModal(card);
-                });
-            });
-            
-            // Decline buttons - open confirm modal
-            document.querySelectorAll('.btn-decline').forEach(button => {
-                button.addEventListener('click', function() {
-                    const card = this.closest('.search-item');
-                    openConfirmModal(
-                        'Decline Request', 
-                        'Are you sure you want to decline this request? This action cannot be undone.',
-                        () => {
-                            // Action to perform on confirm
-                            card.remove();
-                            alert('Request declined successfully.');
-                        }
-                    );
-                });
-            });
-            
-            // Withdraw buttons - open confirm modal
-            document.querySelectorAll('.btn-withdraw').forEach(button => {
-                button.addEventListener('click', function() {
-                    const card = this.closest('.search-item');
-                    openConfirmModal(
-                        'Withdraw Proposal', 
-                        'Are you sure you want to withdraw your proposal? This action cannot be undone.',
-                        () => {
-                            // Action to perform on confirm
-                            card.remove();
-                            alert('Proposal withdrawn successfully.');
-                        }
-                    );
-                });
-            });
-            
-            // Modal action buttons
-            const btnPropose = document.getElementById('btnPropose');
-            if (btnPropose) {
-                btnPropose.addEventListener('click', function() {
-                    closeModal(document.getElementById('requestModalRoot'));
-                    openProposalModal();
-                });
-            }
-            
-            const btnUpdate = document.getElementById('btnUpdate');
-            if (btnUpdate) {
-                btnUpdate.addEventListener('click', function() {
-                    closeModal(document.getElementById('requestModalRoot'));
-                    openProgressModal();
-                });
-            }
-            
-            const btnSubmit = document.getElementById('btnSubmit');
-            if (btnSubmit) {
-                btnSubmit.addEventListener('click', function() {
-                    closeModal(document.getElementById('requestModalRoot'));
-                    openSubmitModal();
-                });
-            }
-            
-            const btnSendProposal = document.getElementById('btnSendProposal');
-            if (btnSendProposal) {
-                btnSendProposal.addEventListener('click', function() {
-                    // Validate form
-                    const amount = document.getElementById('proposalAmount').value;
-                    const timeline = document.getElementById('proposalTimeline').value;
-                    const description = document.getElementById('proposalDescription').value;
-                    
-                    if (!amount || !timeline || !description) {
-                        alert('Please fill in all required fields.');
-                        return;
-                    }
-                    
-                    // Submit proposal (in a real app, this would be an API call)
-                    alert('Proposal sent successfully!');
-                    closeModal(document.getElementById('proposalModalRoot'));
-                });
-            }
-            
-            const btnUpdateProgress = document.getElementById('btnUpdateProgress');
-            if (btnUpdateProgress) {
-                btnUpdateProgress.addEventListener('click', function() {
-                    // Validate form
-                    const description = document.getElementById('progressDescription').value;
-                    
-                    if (!description) {
-                        alert('Please provide a progress update.');
-                        return;
-                    }
-                    
-                    // Update progress (in a real app, this would be an API call)
-                    alert('Progress updated successfully!');
-                    closeModal(document.getElementById('progressModalRoot'));
-                });
-            }
-            
-            const btnSubmitForReview = document.getElementById('btnSubmitForReview');
-            if (btnSubmitForReview) {
-                btnSubmitForReview.addEventListener('click', function() {
-                    // Validate form
-                    const description = document.getElementById('submitDescription').value;
-                    const files = document.getElementById('submitFiles').files;
-                    
-                    if (!description || files.length === 0) {
-                        alert('Please provide submission notes and attach deliverables.');
-                        return;
-                    }
-                    
-                    // Submit for review (in a real app, this would be an API call)
-                    alert('Project submitted for review successfully!');
-                    closeModal(document.getElementById('submitModalRoot'));
-                });
-            }
-            
-            // Progress percentage slider
-            const progressSlider = document.getElementById('progressPercent');
-            if (progressSlider) {
-                progressSlider.addEventListener('input', function() {
-                    document.getElementById('progressPercentValue').textContent = this.value + '%';
-                });
-            }
-            
-            // Confirm modal actions
-            const btnCancelAction = document.getElementById('btnCancelAction');
-            const btnConfirmAction = document.getElementById('btnConfirmAction');
-            
-            if (btnCancelAction) {
-                btnCancelAction.addEventListener('click', function() {
-                    closeModal(document.getElementById('confirmModalRoot'));
-                });
-            }
-            
-            // Note: btnConfirmAction action is set dynamically in openConfirmModal
-        }
-
-        function openModal(modal) {
-            modal.classList.remove('deactive');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeModal(modal) {
-            modal.classList.add('deactive');
-            document.body.style.overflow = '';
-        }
-
-        function openRequestDetailsModal(card) {
-            const modal = document.getElementById('requestModalRoot');
-            const client = card.querySelector('.item-name').textContent;
-            const title = card.querySelector('.item-title').textContent;
-            const description = card.querySelector('.item-description').textContent;
-            const date = card.querySelector('.item-district span').textContent;
-            
-            // Extract budget and timeline information
-            let budget = 'Budget: Not specified';
-            let timeline = 'Timeline: Not specified';
-            
-            const middleItems = card.querySelectorAll('.item-middle div');
-            middleItems.forEach(item => {
-                const text = item.textContent;
-                if (text.includes('Budget:')) budget = text;
-                if (text.includes('Timeline:')) timeline = text;
-            });
-            
-            // Set modal content
-            document.getElementById('reqClient').textContent = client;
-            document.getElementById('reqTitle').textContent = title;
-            document.getElementById('reqDescription').textContent = description;
-            document.getElementById('reqDate').textContent = date;
-            document.getElementById('reqBudget').textContent = budget;
-            document.getElementById('reqTimeline').textContent = timeline;
-            
-            // Show/hide buttons based on request status
-            const status = card.getAttribute('data-status');
-            const btnPropose = document.getElementById('btnPropose');
-            const btnUpdate = document.getElementById('btnUpdate');
-            const btnSubmit = document.getElementById('btnSubmit');
-            const btnWithdraw = document.getElementById('btnWithdraw');
-            const btnDecline = document.getElementById('btnDecline');
-            
-            // Reset all buttons
-            [btnPropose, btnUpdate, btnSubmit, btnWithdraw, btnDecline].forEach(btn => {
-                if (btn) btn.style.display = 'none';
-            });
-            
-            // Show appropriate buttons based on status
-            switch(status) {
-                case 'new':
-                    if (btnPropose) btnPropose.style.display = '';
-                    if (btnDecline) btnDecline.style.display = '';
-                    break;
-                case 'pending':
-                    if (btnWithdraw) btnWithdraw.style.display = '';
-                    break;
-                case 'progress':
-                    if (btnUpdate) btnUpdate.style.display = '';
-                    if (btnSubmit) btnSubmit.style.display = '';
-                    break;
-            }
-            
-            // Show progress section for in-progress projects
-            const progressSection = document.getElementById('modalProgressSection');
-            if (progressSection) {
-                if (status === 'progress') {
-                    progressSection.style.display = 'block';
-                    // Set progress values (in a real app, these would come from the data)
-                    document.getElementById('modalProgressPercent').textContent = '65%';
-                    document.getElementById('modalProgressDetail').textContent = '(32h of 50h)';
-                    document.getElementById('modalProgressFill').style.width = '65%';
-                } else {
-                    progressSection.style.display = 'none';
-                }
-            }
-            
-            openModal(modal);
-        }
-
-        function openProposalModal(card) {
-            const modal = document.getElementById('proposalModalRoot');
-            
-            if (card) {
-                const client = card.querySelector('.item-name').textContent;
-                const title = card.querySelector('.item-title').textContent;
-                
-                document.getElementById('proposalClient').textContent = client;
-                document.getElementById('proposalTitle').textContent = title;
-            }
-            
-            // Reset form
-            document.getElementById('proposalAmount').value = '';
-            document.getElementById('proposalTimeline').value = '';
-            document.getElementById('proposalDescription').value = '';
-            document.getElementById('proposalFiles').value = '';
-            
-            openModal(modal);
-        }
-
-        function openProgressModal(card) {
-            const modal = document.getElementById('progressModalRoot');
-            
-            if (card) {
-                const client = card.querySelector('.item-name').textContent;
-                const title = card.querySelector('.item-title').textContent;
-                
-                document.getElementById('progressClient').textContent = client;
-                document.getElementById('progressTitle').textContent = title;
-            }
-            
-            // Reset form
-            document.getElementById('progressPercent').value = '65';
-            document.getElementById('progressPercentValue').textContent = '65%';
-            document.getElementById('hoursWorked').value = '32';
-            document.getElementById('progressDescription').value = '';
-            document.getElementById('progressFiles').value = '';
-            
-            openModal(modal);
-        }
-
-        function openSubmitModal(card) {
-            const modal = document.getElementById('submitModalRoot');
-            
-            if (card) {
-                const client = card.querySelector('.item-name').textContent;
-                const title = card.querySelector('.item-title').textContent;
-                
-                document.getElementById('submitClient').textContent = client;
-                document.getElementById('submitTitle').textContent = title;
-            }
-            
-            // Reset form
-            document.getElementById('submitDescription').value = '';
-            document.getElementById('submitFiles').value = '';
-            
-            openModal(modal);
-        }
-
-        function openConfirmModal(title, message, confirmAction) {
-            const modal = document.getElementById('confirmModalRoot');
-            
-            document.getElementById('confirmTitle').textContent = title;
-            document.getElementById('confirmMessage').textContent = message;
-            
-            // Set up confirm action
-            const btnConfirmAction = document.getElementById('btnConfirmAction');
-            btnConfirmAction.onclick = function() {
-                confirmAction();
-                closeModal(modal);
-            };
-            
-            openModal(modal);
-        }
-
-        // Close modals with Escape key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                const openModals = document.querySelectorAll('.pop-up-section:not(.deactive)');
-                openModals.forEach(modal => {
-                    closeModal(modal);
-                });
-            }
-        });
-    </script>
+    <script src="<?= BASE_URL ?>/assets/js/providerProjects.js"></script>
 </body>
 </html>
 

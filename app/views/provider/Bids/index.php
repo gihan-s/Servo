@@ -40,6 +40,13 @@
 			<div class="header-requests">
 				<h1>Placed Bids</h1>
 				<p class="section-note">Posts from the feed that you have already bid on are shown here.</p>
+				<div class="search-header">
+					<div class="search-button">
+						<input type="text" id="bidsSearchInput" placeholder="Search by title, category, or client...">
+						<button type="button" id="bidsSearchBtn" aria-label="Search bids"><i class="fa-solid fa-magnifying-glass"></i></button>
+					</div>
+					<button class="filter" id="bidsFilterBtn" type="button"><i class="fa-solid fa-filter"></i><span>Filter</span></button>
+				</div>
 				<div class="container-changer">
 					<div class="buttons active" id="active" data-target="active">Active Bids</div>
 					<div class="buttons" id="accepted" data-target="accepted">Accepted</div>
@@ -74,6 +81,7 @@
 								<article class="search-item"
 									data-client="<?= htmlspecialchars($bid['client'], ENT_QUOTES, 'UTF-8') ?>"
 									data-title="<?= htmlspecialchars($bid['title'], ENT_QUOTES, 'UTF-8') ?>"
+									data-category="<?= htmlspecialchars($bid['category'], ENT_QUOTES, 'UTF-8') ?>"
 									data-amount="<?= htmlspecialchars($bid['bidAmount'], ENT_QUOTES, 'UTF-8') ?>"
 									data-timeline="<?= htmlspecialchars($bid['timeline'], ENT_QUOTES, 'UTF-8') ?>"
 									data-ref="<?= htmlspecialchars($bid['projectRef'], ENT_QUOTES, 'UTF-8') ?>"
@@ -138,6 +146,28 @@
 						<span>Timeline: <span id="bidDetailTimeline">-</span></span>
 					</span>
 				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="pop-up-section filter-pop-up deactive" id="bidsFilterRoot">
+		<div class="pop-up deactive" id="bidsFilterModal">
+			<div class="pop-up-header">
+				<div class="pop-up-title">Add Filters</div>
+				<i class="fa-solid fa-xmark" id="bidsFilterClose"></i>
+			</div>
+			<hr>
+			<div class="pop-up-content">
+				<div class="search-filters">
+					<div class="filter-item">
+						<div class="filter-title"><span>Category</span><i class="fa-solid fa-chevron-down rotated"></i></div>
+						<ul class="filter-options checkboxes active" id="bidsCategoryList"></ul>
+					</div>
+				</div>
+			</div>
+			<div class="button-apply" style="display:flex; gap:10px; justify-content:flex-end; margin-top:12px;">
+				<button type="button" class="btn-outline" id="bidsFilterClear">Clear</button>
+				<button type="button" class="btn-primary" id="bidsFilterApply">Apply filters</button>
 			</div>
 		</div>
 	</div>
