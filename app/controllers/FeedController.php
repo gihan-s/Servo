@@ -1,6 +1,6 @@
 <?php
 
-class FeedsController extends BaseController
+class FeedController extends BaseController
 {
     public function __construct()
     {

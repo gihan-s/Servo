@@ -7,6 +7,10 @@ require_once __DIR__ . '/ReviewModel.php';
 
 class BidModel extends Database
 {
+    private const STATUS_ACTIVE = 'active';
+    private const STATUS_ACCEPTED = 'accepted';
+    private const STATUS_REJECTED = 'rejected';
+
     private ProviderModel $providerModel;
     private PostModel $postModel;
     private ReviewModel $reviewModel;
@@ -173,12 +177,7 @@ class BidModel extends Database
         }
 
         return $counts;
-
-class BidModel extends Database
-{
-    private const STATUS_ACTIVE = 'active';
-    private const STATUS_ACCEPTED = 'accepted';
-    private const STATUS_REJECTED = 'rejected';
+    }
 
     public function getProviderBidsByStatus($providerId, $status)
     {
