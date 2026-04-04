@@ -17,7 +17,7 @@ class CategoryModel extends Database
 
     public function getCategories()
     {
-        $stmt = $this->conn->prepare("SELECT Category_ID, Name FROM Category");
+        $stmt = $this->conn->prepare("SELECT Category_ID, Name FROM category");
         $stmt->execute();
         $result = $stmt->get_result();
         $stmt->close();
@@ -27,9 +27,9 @@ class CategoryModel extends Database
     public function getByProviderId(int $providerId): array
     {
         $stmt = $this->conn->prepare(
-            "SELECT Provider_Categories.*, Category.Name AS Category_Type
-            FROM Provider_Categories
-            INNER JOIN Category ON Provider_Categories.Category_ID = Category.Category_ID
+            "SELECT provider_categories.*, category.Name AS Category_Type
+            FROM provider_categories
+            INNER JOIN category ON provider_categories.Category_ID = category.Category_ID
             WHERE Provider_ID = ?"
         );
         $stmt->bind_param("i", $providerId);

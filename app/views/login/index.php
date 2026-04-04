@@ -63,6 +63,12 @@ if (session_status() === PHP_SESSION_NONE) {
         </form>
     </div>
     <script src="<?= BASE_URL ?>/assets/js/login.js" defer></script>
+
+    <script>
+        window.addEventListener("load", ()=> {
+            showAlert("Hi");
+        })
+    </script>
 </body>
 
 </html>

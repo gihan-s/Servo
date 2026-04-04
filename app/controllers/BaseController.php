@@ -21,7 +21,6 @@ class BaseController
         $this->clientModel = new ClientModel();
         $this->providerModel = new ProviderModel();
         $this->notificationModel = new NotificationModel();
-
         $this->ensureAuth();
         $this->loadNotifs($_SESSION['user_id'], $_SESSION['role']);
         return;
@@ -49,7 +48,7 @@ class BaseController
             $this->appendNotifications($unprocessedNotifications, $notifications);
         } elseif ($role === 'Provider') {
             $unprocessedNotifications = $this->notificationModel->getNotificationsByProviderId($userId, 10);
-            $unreadNotificationCount = $this->notificationModel->getUnreadNotificationsCountByProviderId($userId);
+            // $unreadNotificationCount = $this->notificationModel->getUnreadNotificationsCountByProviderId($userId);
             $this->appendNotifications($unprocessedNotifications, $notifications);
         }
 

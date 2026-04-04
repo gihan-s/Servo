@@ -1,5 +1,6 @@
 <?php $BaseURL = "." ?>
 
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -93,7 +94,7 @@
                             <input type="text" class="text-field" name="contact_no" value="<?= getFromSession("contact_no") ?>" id="" required>
                         </div>
 
-                        <div class="text-container nic-field-hidden">
+                        <div class="text-container nic-field-hidden" style="display: none;">
                             <div class="label text-label">NIC *</div>
                             <input type="text" class="text-field" name="nic_no" value="<?= getFromSession("nic_no") ?>" id="">
                         </div>

@@ -138,6 +138,7 @@ body {
     overflow: auto;
     padding: 0 10px 12px;
     scrollbar-width: thin;
+    padding-top: 2px;
 }
 
 .conversation {
@@ -167,6 +168,14 @@ body {
     background: #f1fdf5;
     border-color: var(--green);
     box-shadow: 0 0 0 1px var(--green);
+}
+
+.no-conversations {
+    text-align: center;
+    padding: 40px 20px;
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 500;
 }
 
 .avatar {
@@ -207,6 +216,7 @@ body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    width: calc(100% - 30px);
 }
 
 .conv-meta {
@@ -230,6 +240,10 @@ body {
     padding: 4px 8px;
     border-radius: 999px;
     letter-spacing: .5px;
+
+    position: absolute;
+    right: 53px;
+    top: 38px;
 }
 
 .typing {
@@ -302,6 +316,7 @@ body {
     display: flex;
     flex-direction: column;
     min-width: 0;
+    gap: 5px;
 }
 
 .peer-name {
@@ -376,6 +391,7 @@ body {
     gap: 18px;
     background: #f8fafc;
     position: relative;
+    max-height: calc(100vh - 300px);
 }
 
 .day-separator {

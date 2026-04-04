@@ -37,79 +37,362 @@
 
 require_once __DIR__ . '/../core/Database.php';
 
-class MessageModel extends Database {
-    public function getUnreadMessageCountByClientId($clientId) {
-        // $stmt = $this->conn->prepare("SELECT COUNT(*) as count FROM Message WHERE Client_ID = ? AND Is_Read = 0");
-        // $stmt->bind_param("i", $clientId);
-        // $stmt->execute();
-        // $result = $stmt->get_result();
-        // $count = $result->fetch_assoc()['count'];
-        // $stmt->close();
-        // return $count;
-        return 5; // Placeholder
-    } 
+class MessageModel extends Database
+{
+    public function getAllConversations($User_ID, $Role)
+    {
 
-    public function getMessagesByClientId($clientId, $limit = 5, $offset = 0) {
-        // $stmt = $this->conn->prepare("SELECT * FROM Message WHERE Client_ID = ? ORDER BY Sent_At DESC LIMIT ? OFFSET ?");
-        // $stmt->bind_param("iii", $clientId, $limit, $offset);
-        // $stmt->execute();
-        // $result = $stmt->get_result();
-        // $stmt->close();
-        // return $result->fetch_all(MYSQLI_ASSOC);
-        return []; // Placeholder
+        if ($Role === 'Provider') {
+            $sql = "SELECT 
+                c.Client_ID as id,
+                c.First_Name,
+                c.Last_Name,
+                c.Profile_Picture,
+                m.Content AS last_message,
+                COALESCE(u.unread_count, 0) AS unread_count,
+                lm.last_message_time
+            FROM conversation conv
+            INNER JOIN client c
+                ON conv.Client_ID = c.Client_ID
+            INNER JOIN messages m
+                ON m.Conversation_ID = conv.ID
+            INNER JOIN (
+                -- latest message per conversation
+                SELECT Conversation_ID, MAX(Sent_At) AS last_message_time
+                FROM messages
+                GROUP BY Conversation_ID
+            ) lm
+                ON lm.Conversation_ID = m.Conversation_ID
+                AND lm.last_message_time = m.Sent_At
+            LEFT JOIN (
+                -- unread count per conversation
+                SELECT Conversation_ID, COUNT(*) AS unread_count
+                FROM messages
+                WHERE (Status = 'Sent' OR Status = 'Delivered')
+                AND Is_Client_To_Provider = 1
+                GROUP BY Conversation_ID
+            ) u
+                ON u.Conversation_ID = conv.ID
+            WHERE conv.Provider_ID = ?
+            ORDER BY lm.last_message_time DESC;
+            ";
+        } else if ($Role === 'Client') {
+
+            $sql = "SELECT 
+                p.Provider_ID as id,
+                p.First_Name,
+                p.Last_Name,
+                p.Profile_Picture,
+                m.Content AS last_message,
+                COALESCE(u.unread_count, 0) AS unread_count,
+                lm.last_message_time
+            FROM conversation conv
+            INNER JOIN provider p
+                ON conv.Provider_ID = p.Provider_ID
+            INNER JOIN messages m
+                ON m.Conversation_ID = conv.ID
+            INNER JOIN (
+                -- latest message per conversation
+                SELECT Conversation_ID, MAX(Sent_At) AS last_message_time
+                FROM messages
+                GROUP BY Conversation_ID
+            ) lm
+                ON lm.Conversation_ID = m.Conversation_ID
+                AND lm.last_message_time = m.Sent_At
+            LEFT JOIN (
+                -- unread count per conversation
+                SELECT Conversation_ID, COUNT(*) AS unread_count
+                FROM messages
+                WHERE (Status = 'Sent' OR Status = 'Delivered')
+                AND Is_Client_To_Provider = 0
+                GROUP BY Conversation_ID
+            ) u
+                ON u.Conversation_ID = conv.ID
+            WHERE conv.Client_ID = ?
+            ORDER BY lm.last_message_time DESC;
+            ";
+        } else {
+            return;
+        }
+
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $User_ID);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+        return $result->fetch_all(MYSQLI_ASSOC);
     }
 
-    public function getMessagesByProviderId($providerId, $limit = 5, $offset = 0) {
-        // $stmt = $this->conn->prepare("SELECT * FROM Message WHERE Provider_ID = ? ORDER BY Sent_At DESC LIMIT ? OFFSET ?");
-        // $stmt->bind_param("iii", $providerId, $limit, $offset);
-        // $stmt->execute();
-        // $result = $stmt->get_result();
-        // $stmt->close();
-        // return $result->fetch_all(MYSQLI_ASSOC);
-        return []; // Placeholder
+
+    public function getMessagesByID($User_ID, $Role, $OtherUser_ID)
+    {
+        // Determine provider and client based on role
+        if ($Role === 'Provider') {
+            $Provider_ID = $User_ID;
+            $Client_ID = $OtherUser_ID;
+        } else if ($Role === 'Client') {
+            $Provider_ID = $OtherUser_ID;
+            $Client_ID = $User_ID;
+        } else {
+            return [];
+        }
+
+        // 1️⃣ Get the conversation ID
+        $stmt = $this->conn->prepare(
+            "SELECT ID FROM conversation WHERE Provider_ID = ? AND Client_ID = ? LIMIT 1"
+        );
+        $stmt->bind_param("ii", $Provider_ID, $Client_ID);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $conversation = $result->fetch_assoc();
+        $stmt->close();
+
+        if (!$conversation) {
+            // No conversation exists yet
+            return [];
+        }
+
+        $Conversation_ID = $conversation['ID'];
+
+        // 2️⃣ Get all messages for that conversation
+        $sql = "SELECT 
+                m.Message_ID as id, 
+                m.Content as text, 
+                " . ($Role === 'Provider' ? "NOT(m.Is_Client_To_Provider)" : "m.Is_Client_To_Provider") . " AS self, 
+                m.Sent_At, 
+                m.Status
+            FROM messages m
+            WHERE m.Conversation_ID = ?
+            ORDER BY m.Sent_At";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $Conversation_ID);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+
+        return $result->fetch_all(MYSQLI_ASSOC);
     }
 
-    public function getLatestMessagesByClientId($clientId, $sinceTimestamp, $limit = 5) {
-        // $stmt = $this->conn->prepare("SELECT * FROM Message WHERE Client_ID = ? AND Sent_At > ? ORDER BY Sent_At DESC LIMIT ?");
-        // $stmt->bind_param("isi", $clientId, $sinceTimestamp, $limit);
-        // $stmt->execute();
-        // $result = $stmt->get_result();
-        // $stmt->close();
-        // return $result->fetch_all(MYSQLI_ASSOC);
-        return []; // Placeholder
+
+    public function insertMessage($Content, $ClientToProvider, $Provider_ID, $Client_ID)
+    {
+        // 1. Create or get existing conversation (race-condition safe)
+        $stmt = $this->conn->prepare(
+            "INSERT INTO conversation (Provider_ID, Client_ID)
+         VALUES (?, ?)
+         ON DUPLICATE KEY UPDATE ID = LAST_INSERT_ID(ID)"
+        );
+
+        if (!$stmt) {
+            die("Prepare failed (conversation): " . $this->conn->error);
+        }
+
+        $stmt->bind_param("ii", $Provider_ID, $Client_ID);
+        $stmt->execute();
+
+        // This works for BOTH insert and existing row
+        $Conversation_ID = $stmt->insert_id;
+        $stmt->close();
+
+        // 2. Insert message
+        $stmt = $this->conn->prepare(
+            "INSERT INTO messages 
+        (Content, Is_Client_To_Provider, Sent_At, Status, Conversation_ID) 
+        VALUES (?, ?, ?, ?, ?)"
+        );
+
+        if (!$stmt) {
+            die("Prepare failed (message): " . $this->conn->error);
+        }
+
+        $date = date("Y-m-d H:i:s");
+        $Status = "Sent";
+
+        $stmt->bind_param(
+            "sissi",
+            $Content,
+            $ClientToProvider,
+            $date,
+            $Status,
+            $Conversation_ID
+        );
+
+        if ($stmt->execute()) {
+            $message_id = $stmt->insert_id;
+            $stmt->close();
+            return $message_id;
+        } else {
+            die("Insert failed: " . $stmt->error);
+        }
     }
 
-    public function getLatestMessagesByProviderId($providerId, $sinceTimestamp, $limit = 5) {
-        // $stmt = $this->conn->prepare("SELECT * FROM Message WHERE Provider_ID = ? AND Sent_At > ? ORDER BY Sent_At DESC LIMIT ?");
-        // $stmt->bind_param("isi", $providerId, $sinceTimestamp, $limit);
-        // $stmt->execute();
-        // $result = $stmt->get_result();
-        // $stmt->close();
-        // return $result->fetch_all(MYSQLI_ASSOC);
-        return []; // Placeholder
+    public function updateMessageStatus($id, $status)
+    {
+        $stmt = $this->conn->prepare(
+            "UPDATE messages SET Status = ? WHERE Message_ID = ?"
+        );
+
+        if (!$stmt) {
+            die("Prepare failed: " . $this->conn->error);
+        }
+
+        $stmt->bind_param(
+            "si",
+            $status,
+            $id
+        );
+
+        if ($stmt->execute()) {
+            $stmt->close();
+            return true;
+        } else {
+            die("Insert failed: " . $stmt->error);
+        }
     }
 
-    public function markMessageAsRead($messageId) {
-        // $stmt = $this->conn->prepare("UPDATE Message SET Is_Read = 1, Read_At = NOW() WHERE Message_ID = ?");
-        // $stmt->bind_param("i", $messageId);
-        // $stmt->execute();
-        // $stmt->close();
-        return true; // Placeholder
+    public function updateMessageStatusByReceiver($User_ID, $Role, $status)
+    {
+        $UserFilter = '';
+        if ($Role === 'Provider') {
+            $UserFilter = 'AND conv.Provider_ID = ? AND m.Is_Client_To_Provider = 1';
+        } else if ($Role === 'Client') {
+            $UserFilter = 'AND conv.Client_ID = ? AND m.Is_Client_To_Provider = 0';
+        } else {
+            return false;
+        }
+
+        $stmt = $this->conn->prepare(
+            "UPDATE messages m
+            INNER JOIN conversation conv
+                ON m.Conversation_ID = conv.ID
+            SET m.Status = ?
+            WHERE m.Status = 'Sent' {$UserFilter}"
+        );
+
+        if (!$stmt) {
+            die("Prepare failed: " . $this->conn->error);
+        }
+
+        $stmt->bind_param(
+            "si",
+            $status,
+            $User_ID
+        );
+
+        if ($stmt->execute()) {
+            $stmt->close();
+            return true;
+        } else {
+            die("Insert failed: " . $stmt->error);
+        }
     }
 
-    public function markAllMessagesAsReadByClientId($clientId) {
-        // $stmt = $this->conn->prepare("UPDATE Message SET Is_Read = 1, Read_At = NOW() WHERE Client_ID = ?");
-        // $stmt->bind_param("i", $clientId);
-        // $stmt->execute();
-        // $stmt->close();
-        return true; // Placeholder
+
+    public function updateMessageStatusBySenderAndReceiver($Sender_ID, $Receiver_ID, $Role, $status)
+    {
+        $UserFilter = '';
+
+        if ($Role === 'Provider') {
+            // provider is receiver, client is sender
+            $UserFilter = 'AND c.Provider_ID = ? AND c.Client_ID = ? AND m.Is_Client_To_Provider = 1';
+        } else if ($Role === 'Client') {
+            // client is receiver, provider is sender
+            $UserFilter = 'AND c.Client_ID = ? AND c.Provider_ID = ? AND m.Is_Client_To_Provider = 0';
+        } else {
+            return false;
+        }
+
+        $stmt = $this->conn->prepare(
+            "UPDATE messages m
+         INNER JOIN conversation c
+            ON m.Conversation_ID = c.ID
+         SET m.Status = ?
+         WHERE m.Status = 'Delivered' {$UserFilter}"
+        );
+
+        if (!$stmt) {
+            die("Prepare failed: " . $this->conn->error);
+        }
+
+        $stmt->bind_param(
+            "sii",
+            $status,
+            $Receiver_ID,
+            $Sender_ID
+        );
+
+        if ($stmt->execute()) {
+            $stmt->close();
+            return true;
+        } else {
+            die("Update failed: " . $stmt->error);
+        }
     }
 
-    public function markAllMessagesAsReadByProviderId($providerId) {
-        // $stmt = $this->conn->prepare("UPDATE Message SET Is_Read = 1, Read_At = NOW() WHERE Provider_ID = ?");
-        // $stmt->bind_param("i", $providerId);
-        // $stmt->execute();
-        // $stmt->close();
-        return true; // Placeholder
+
+
+
+    public function getConversationUserIds($userId, $role)
+    {
+        if ($role === 'Provider') {
+            $sql = "SELECT Client_ID as user_id FROM conversation WHERE Provider_ID = ?";
+        } else {
+            $sql = "SELECT Provider_ID as user_id FROM conversation WHERE Client_ID = ?";
+        }
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+
+        $result = $stmt->get_result();
+        $stmt->close();
+
+        return array_column($result->fetch_all(MYSQLI_ASSOC), 'user_id');
+    }
+
+
+    public function setUserOnline($userId, $role)
+    {
+        $table = $role === 'Provider' ? 'provider' : 'client';
+        $idField = $role === 'Provider' ? 'Provider_ID' : 'Client_ID';
+
+        $stmt = $this->conn->prepare(
+            "UPDATE {$table} SET Is_Online = 1, Last_Seen = NULL WHERE {$idField} = ?"
+        );
+
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+    }
+
+    public function setUserOffline($userId, $role)
+    {
+        $table = $role === 'Provider' ? 'provider' : 'client';
+        $idField = $role === 'Provider' ? 'Provider_ID' : 'Client_ID';
+
+        $now = date("Y-m-d H:i:s");
+
+        $stmt = $this->conn->prepare(
+            "UPDATE {$table} SET Is_Online = 0, Last_Seen = ? WHERE {$idField} = ?"
+        );
+
+        $stmt->bind_param("si", $now, $userId);
+        $stmt->execute();
+    }
+
+
+    public function createOrGetConversation($Provider_ID, $Client_ID)
+    {
+        $stmt = $this->conn->prepare(
+            "INSERT INTO conversation (Provider_ID, Client_ID)
+         VALUES (?, ?)
+         ON DUPLICATE KEY UPDATE ID = LAST_INSERT_ID(ID)"
+        );
+
+        $stmt->bind_param("ii", $Provider_ID, $Client_ID);
+        $stmt->execute();
+
+        return $stmt->insert_id;
     }
 }

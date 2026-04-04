@@ -1,7 +1,9 @@
 <?php
-class FileController {
+class FileController
+{
 
-    public function showTempImage($filename) {
+    public function showTempImage($filename)
+    {
         $filename = basename($filename); // prevent ../../ attacks
         $path = __DIR__ . '/../../uploads/temp/' . $filename;
 
@@ -17,8 +19,11 @@ class FileController {
         exit;
     }
 
-     public function showUserImage($filename) {
-        $filename = basename($filename); // prevent ../../ attacks
+    public function showUserImage($filename)
+    {
+        $filename = urldecode($filename);   // ⭐ ADD THIS LINE
+        $filename = basename($filename);    // keep security
+
         $path = __DIR__ . '/../../uploads/Users/' . $filename;
 
         if (!file_exists($path)) {

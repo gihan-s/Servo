@@ -17,6 +17,8 @@ require_once '../app/controllers/NotificationController.php';
 require_once '../app/controllers/PaymentController.php';
 require_once '../app/controllers/ProviderController.php';
 require_once '../app/controllers/EarningsController.php';
+require_once '../app/controllers/FeedsController.php';
+require_once '../app/controllers/BidsController.php';
 
 require_once '../app/controllers/admin/AdminLoginController.php';
 require_once '../app/controllers/admin/AdminDashboardController.php';
@@ -257,6 +259,16 @@ switch ($url) {
         $controller->index();
         break;
 
+    case 'feeds':
+        $controller = new FeedsController();
+        $controller->index();
+        break;
+
+    case 'bids':
+        $controller = new BidsController();
+        $controller->index();
+        break;
+
     case 'admin/login':
         $controller = new AdminLoginController();
         $controller->index();
@@ -290,6 +302,25 @@ switch ($url) {
     case 'admin/providers/provider-review':
         $controller = new AdminProviderController();
         $controller->review();
+        break;
+
+    case 'messages/get-messages':
+        $controller = new MessageController();
+        $controller->getMessages();
+        break;
+
+    case 'messages/start-conversation':
+        $controller = new MessageController();
+        $controller->startConversation();
+        break;
+
+    case 'messages/get-user':
+        $controller = new MessageController();
+        $controller->getUser();
+        break;
+
+    case 'test/inputs':
+        include '../inputs.html';
         break;
 
     default:
