@@ -47,7 +47,9 @@ class AdminProviderController
 
 
         $skillModel = new SkillsModel();
-        $skills    = $skillModel->getByProviderCategoryIds($categoryIds);
+        $skills    = $skillModel->getSkillsByProviderID($id);
+        
+        // $skills = [];
 
         $locationModel = new LocationModel();
         $locations = $locationModel->getByProviderCategoryIds($categoryIds);
