@@ -51,13 +51,13 @@ class MessageModel extends Database
                         m.Content AS last_message,
                         COALESCE(u.unread_count, 0) AS unread_count,
                         last_message_time
-                    FROM Client c
-                    INNER JOIN Messages m
+                    FROM client c
+                    INNER JOIN messages m
                         ON m.Client_ID = c.Client_ID
                     INNER JOIN (
                         -- latest message per client
                         SELECT Client_ID, MAX(Sent_At) AS last_message_time
-                        FROM Messages
+                        FROM messages
                         WHERE Provider_ID = ?
                         GROUP BY Client_ID
                     ) lm
@@ -66,7 +66,7 @@ class MessageModel extends Database
                     LEFT JOIN (
                         -- unread count per client
                         SELECT Client_ID, COUNT(*) AS unread_count
-                        FROM Messages
+                        FROM messages
                         WHERE Provider_ID = ?
                         AND (Status = 'Sent' OR Status = 'Delivered')
                         AND Is_Client_To_Provider = 1
@@ -86,13 +86,13 @@ class MessageModel extends Database
                         m.Content AS last_message,
                         COALESCE(u.unread_count, 0) AS unread_count,
                         last_message_time
-                    FROM Provider p
-                    INNER JOIN Messages m
+                    FROM provider p
+                    INNER JOIN messages m
                         ON m.Provider_ID = p.Provider_ID
                     INNER JOIN (
                         -- latest message per client
                         SELECT Provider_ID, MAX(Sent_At) AS last_message_time
-                        FROM Messages
+                        FROM messages
                         WHERE Client_ID = ?
                         GROUP BY Provider_ID
                     ) lm
@@ -101,7 +101,7 @@ class MessageModel extends Database
                     LEFT JOIN (
                         -- unread count per client
                         SELECT Provider_ID, COUNT(*) AS unread_count
-                        FROM Messages
+                        FROM messages
                         WHERE Client_ID = ?
                         AND (Status = 'Sent' OR Status = 'Delivered')
                         AND Is_Client_To_Provider = 0
@@ -132,15 +132,15 @@ class MessageModel extends Database
     {
 
         if ($Role === 'Provider') {
-            $sql = "SELECT Message_ID as id, Content as text, NOT(Is_Client_To_Provider) AS self, Sent_At, Messages.Status
-            FROM Messages
+            $sql = "SELECT Message_ID as id, Content as text, NOT(Is_Client_To_Provider) AS self, Sent_At, messages.Status
+            FROM messages
             WHERE Provider_ID = ?
             AND Client_ID = ?
             ORDER BY Sent_At
             ";
         } else if ($Role === 'Client') {
-            $sql = "SELECT Message_ID as id, Content as text, Is_Client_To_Provider AS self, Sent_At, Messages.Status
-                FROM Messages
+            $sql = "SELECT Message_ID as id, Content as text, Is_Client_To_Provider AS self, Sent_At, messages.Status
+                FROM messages
                 WHERE Client_ID = ?
                 AND Provider_ID = ?
                 ORDER BY Sent_At
@@ -161,7 +161,7 @@ class MessageModel extends Database
     public function insertMessage($Content, $ClientToProvider, $Provider_ID, $Client_ID)
     {
         $stmt = $this->conn->prepare(
-            "INSERT INTO Messages (`Content`, `Is_Client_To_Provider`, `Sent_At`, `Status`, `Provider_ID`, `Client_ID`) 
+            "INSERT INTO messages (`Content`, `Is_Client_To_Provider`, `Sent_At`, `Status`, `Provider_ID`, `Client_ID`) 
                 VALUES (?, ?, ?, ?, ?, ?)"
         );
 
@@ -193,7 +193,7 @@ class MessageModel extends Database
     public function updateMessageStatus($id, $status)
     {
         $stmt = $this->conn->prepare(
-            "UPDATE Messages SET Status = ? WHERE Message_ID = ?"
+            "UPDATE messages SET Status = ? WHERE Message_ID = ?"
         );
 
         if (!$stmt) {
@@ -226,7 +226,7 @@ class MessageModel extends Database
         }
 
         $stmt = $this->conn->prepare(
-            "UPDATE Messages SET Status = ? WHERE Status = 'Sent' {$UserFilter}"
+            "UPDATE messages SET Status = ? WHERE Status = 'Sent' {$UserFilter}"
         );
 
         if (!$stmt) {
@@ -260,7 +260,7 @@ class MessageModel extends Database
         }
 
         $stmt = $this->conn->prepare(
-            "UPDATE Messages SET Status = ? WHERE Status = 'Delivered' {$UserFilter}"
+            "UPDATE messages SET Status = ? WHERE Status = 'Delivered' {$UserFilter}"
         );
 
         if (!$stmt) {

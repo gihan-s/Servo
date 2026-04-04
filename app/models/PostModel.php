@@ -38,7 +38,7 @@ class PostModel extends Database
 
     public function getPostIdsByProviderId(int $providerId): array
     {
-        $stmt = $this->conn->prepare("SELECT Post_ID FROM Post WHERE Provider_ID = ?");
+        $stmt = $this->conn->prepare("SELECT Post_ID FROM post WHERE Provider_ID = ?");
         if (!$stmt) {
             error_log('PostModel::getPostIdsByProviderId prepare: ' . $this->conn->error);
             return [];
@@ -64,7 +64,7 @@ class PostModel extends Database
         error_log("PostModel::getPosts - Client: $clientId, Status: $status, Sort: $sort, Search: '$search'");
         
         $query = "SELECT p.*
-              FROM Post p
+              FROM post p
               WHERE p.Client_ID = ? AND p.Post_Type = 'post'";
         $types = "i";
         $params = [$clientId];
@@ -153,7 +153,7 @@ class PostModel extends Database
     public function createPost($data)
     {
         try {
-            $query = "INSERT INTO Post (Client_ID, Title, Description, Category_ID, Requesting_Price, 
+            $query = "INSERT INTO post (Client_ID, Title, Description, Category_ID, Requesting_Price, 
                 Price_Type, Est_Date, Level, End_At, Post_Status, Created_At, Published_At, Post_Type) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, 'post')";
 
@@ -201,7 +201,7 @@ class PostModel extends Database
         error_log("Publishing draft post ID: $postId");
 
         // First check if the post exists and is a draft
-        $checkSql = "SELECT Post_ID, Post_Status FROM Post WHERE Post_ID = ?";
+        $checkSql = "SELECT Post_ID, Post_Status FROM post WHERE Post_ID = ?";
         $checkStmt = $this->conn->prepare($checkSql);
 
         if (!$checkStmt) {
@@ -230,7 +230,7 @@ class PostModel extends Database
             error_log("ERROR: Post $postId is not a draft. Current status: '" . $post['Post_Status'] . "'");
 
             // Log what statuses exist in the database for debugging
-            $statusCheckSql = "SELECT DISTINCT Post_Status FROM Post";
+            $statusCheckSql = "SELECT DISTINCT Post_Status FROM post";
             $statusResult = $this->conn->query($statusCheckSql);
             if ($statusResult) {
                 $statuses = [];
@@ -244,7 +244,7 @@ class PostModel extends Database
         }
 
         // Update to active status
-        $sql = "UPDATE Post SET Post_Status = 'active', Published_At = NOW() WHERE Post_ID = ?";
+        $sql = "UPDATE post SET Post_Status = 'active', Published_At = NOW() WHERE Post_ID = ?";
         error_log("Executing SQL: $sql with Post_ID = $postId");
 
         $stmt = $this->conn->prepare($sql);
@@ -295,9 +295,9 @@ class PostModel extends Database
                 p.Provider_ID,
                 p.Post_Type,
                 c.Name AS CategoryName
-            FROM Post p
-            LEFT JOIN Category c ON c.Category_ID = p.Category_ID
-            LEFT JOIN Post_Need_Skills sk ON sk.Post_ID = p.Post_ID
+            FROM post p
+            LEFT JOIN category c ON c.Category_ID = p.Category_ID
+            LEFT JOIN post_need_skills sk ON sk.Post_ID = p.Post_ID
             WHERE p.Post_ID = ?
             LIMIT 1";
 
@@ -336,7 +336,7 @@ class PostModel extends Database
             return ['success' => false, 'message' => 'Selected provider has not bid on this post'];
         }
 
-        $checkSql = "SELECT Post_ID, Client_ID, Post_Status, Request_Status FROM Post WHERE Post_ID = ? LIMIT 1";
+        $checkSql = "SELECT Post_ID, Client_ID, Post_Status, Request_Status FROM post WHERE Post_ID = ? LIMIT 1";
         $checkStmt = $this->conn->prepare($checkSql);
         if (!$checkStmt) {
             return ['success' => false, 'message' => 'Failed to prepare status check'];
@@ -365,7 +365,7 @@ class PostModel extends Database
             return ['success' => false, 'message' => 'Cannot send request when status is ongoing or accepted'];
         }
 
-        $updateSql = "UPDATE Post
+        $updateSql = "UPDATE post
             SET Provider_ID = ?, Request_Status = 'ongoing'
             WHERE Post_ID = ?
               AND Client_ID = ?
@@ -553,7 +553,7 @@ class PostModel extends Database
 
     public function deletePost(int $postId): bool
     {
-        $sql = "UPDATE Post SET Post_Status = 'deleted' WHERE Post_ID = ?";
+        $sql = "UPDATE post SET Post_Status = 'deleted' WHERE Post_ID = ?";
 
         $stmt = $this->conn->prepare($sql);
         if (!$stmt) {
@@ -574,7 +574,7 @@ class PostModel extends Database
 
     public function updatePost(int $postId, array $data): bool
     {
-        $sql = "UPDATE Post SET Title = ?, Description = ?, Category_ID = ?, Requesting_Price = ?, 
+        $sql = "UPDATE post SET Title = ?, Description = ?, Category_ID = ?, Requesting_Price = ?, 
             Price_Type = ?, Est_Date = ?, Level = ?, End_At = ?
                 WHERE Post_ID = ?";
 
@@ -610,7 +610,7 @@ class PostModel extends Database
 
     public function markPostAsExpired(int $postId): bool
     {
-        $sql = "UPDATE Post SET Post_Status = 'expired' WHERE Post_ID = ?";
+        $sql = "UPDATE post SET Post_Status = 'expired' WHERE Post_ID = ?";
 
         $stmt = $this->conn->prepare($sql);
         if (!$stmt) {

@@ -7,7 +7,7 @@ class SkillsModel extends Database
 
     public function getSkillsByPostId($postId)
     {
-        $stmt = $this->conn->prepare("SELECT * FROM Post_Need_Skills WHERE Post_ID = ?");
+        $stmt = $this->conn->prepare("SELECT * FROM post_need_skills WHERE Post_ID = ?");
         $stmt->bind_param("i", $postId);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -18,8 +18,8 @@ class SkillsModel extends Database
     public function getByCategoryId(int $categoryId): array
     {
         $sql = "SELECT s.Skill_ID, s.Skill
-                FROM Skills s
-                INNER JOIN Category c ON c.Category_ID = s.Category_ID
+                FROM skills s
+                INNER JOIN category c ON c.Category_ID = s.Category_ID
                 WHERE c.Category_ID = ?
                 ORDER BY s.Skill";
         $stmt = $this->conn->prepare($sql);
@@ -31,7 +31,7 @@ class SkillsModel extends Database
 
     public function getAllSkills($SkillID)
     {
-        $stmt = $this->conn->prepare("SELECT * FROM Skills WHERE Skill_ID = ?");
+        $stmt = $this->conn->prepare("SELECT * FROM skills WHERE Skill_ID = ?");
         $stmt->bind_param("i", $SkillID);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -41,7 +41,7 @@ class SkillsModel extends Database
 
     public function getIdBySkill(string $skill): ?int
     {
-        $stmt = $this->conn->prepare("SELECT Skill_ID FROM Skills WHERE Skill = ? LIMIT 1");
+        $stmt = $this->conn->prepare("SELECT Skill_ID FROM skills WHERE Skill = ? LIMIT 1");
         if (!$stmt)
             return null;
         $stmt->bind_param("s", $skill);
@@ -64,7 +64,7 @@ class SkillsModel extends Database
             return 0;
 
         $stmt = $this->conn->prepare(
-            "INSERT INTO Post_Need_Skills (Post_ID, Skill_ID) VALUES (?, ?)"
+            "INSERT INTO post_need_skills (Post_ID, Skill_ID) VALUES (?, ?)"
         );
         if (!$stmt) {
             throw new RuntimeException("Prepare failed: " . $this->conn->error);
