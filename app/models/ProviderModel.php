@@ -8,7 +8,7 @@ class ProviderModel extends Database
     public function getByEmail($email)
     {
         $email = strtolower($email);
-        $stmt = $this->conn->prepare("SELECT * FROM Provider WHERE Email = ?");
+        $stmt = $this->conn->prepare("SELECT * FROM provider WHERE Email = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -20,7 +20,7 @@ class ProviderModel extends Database
     {
         // Prepare SQL with placeholders
         $stmt = $this->conn->prepare(
-            "INSERT INTO Provider (`Email`, `Contact_No`, `NIC_No`, `Password`, `Created_At`, `First_Name`, `Last_Name`, `Gender`, `Profile_Picture`, `Bio`, `NIC_Front`, `NIC_Back`, `Resume`, `Website`, `Status`) 
+            "INSERT INTO provider (`Email`, `Contact_No`, `NIC_No`, `Password`, `Created_At`, `First_Name`, `Last_Name`, `Gender`, `Profile_Picture`, `Bio`, `NIC_Front`, `NIC_Back`, `Resume`, `Website`, `Status`) 
              VALUES (?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         );
 
@@ -75,7 +75,7 @@ class ProviderModel extends Database
     public function insertProviderCategory($Provider_ID, $data, $key)
     {
         $stmt = $this->conn->prepare(
-            "INSERT INTO Provider_Categories (`Category_ID`, `Provider_ID`, `Title`, `Description`, `Default_Price`, `Price_Type`, `Portfolio_Link`, `Price_Negotiability`) 
+            "INSERT INTO provider_categories (`Category_ID`, `Provider_ID`, `Title`, `Description`, `Default_Price`, `Price_Type`, `Portfolio_Link`, `Price_Negotiability`) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
         );
 
@@ -132,7 +132,7 @@ class ProviderModel extends Database
     public function insertSkill($Category_ID, $Skill)
     {
         $stmt = $this->conn->prepare(
-            "INSERT INTO Skills (`Skill`, `Category_ID`) 
+            "INSERT INTO skills (`Skill`, `Category_ID`) 
             VALUES (?, ?)
             ON DUPLICATE KEY UPDATE 
             Skill_ID = LAST_INSERT_ID(Skill_ID)"
@@ -189,7 +189,7 @@ class ProviderModel extends Database
             $CityFilter = "AND City = '{$City}'";
         }
 
-        $stmt = $this->conn->prepare("SELECT Location_ID FROM Location WHERE 1 {$DistrictFilter} {$CityFilter}");
+        $stmt = $this->conn->prepare("SELECT Location_ID FROM location WHERE 1 {$DistrictFilter} {$CityFilter}");
         $stmt->execute();
         $result = $stmt->get_result();
         $stmt->close();
@@ -200,7 +200,7 @@ class ProviderModel extends Database
     public function insertLocation($Provider_Category_ID, $Location_ID)
     {
         $stmt = $this->conn->prepare(
-            "INSERT INTO Provider_Categories_has_Location (`Provider_Categories_ID`, `Location_Location_ID`) 
+            "INSERT INTO provider_categories_has_location (`Provider_Categories_ID`, `Location_Location_ID`) 
                 VALUES (?, ?)"
         );
 
@@ -226,9 +226,9 @@ class ProviderModel extends Database
     public function getAllSkills($Category_ID)
     {
         $stmt = $this->conn->prepare(
-            "SELECT DISTINCT Skill FROM Skills, Provider_Categories
-            WHERE Skills.Provider_Categories_ID = Provider_Categories.ID 
-            AND Provider_Categories.Category_ID = '{$Category_ID}'
+            "SELECT DISTINCT Skill FROM skills, provider_categories
+            WHERE skills.Provider_Categories_ID = provider_categories.ID 
+            AND provider_categories.Category_ID = '{$Category_ID}'
             "
         );
         $stmt->execute();
@@ -242,7 +242,7 @@ class ProviderModel extends Database
     public function getProviderById(int $id): ?array
     {
         $stmt = $this->conn->prepare(
-            "SELECT * FROM Provider WHERE Provider_ID = ?"
+            "SELECT * FROM provider WHERE Provider_ID = ?"
         );
         $stmt->bind_param("i", $id);
         $stmt->execute();
@@ -262,7 +262,7 @@ class ProviderModel extends Database
         $website = $this->conn->real_escape_string($website);
         $bio = $this->conn->real_escape_string($bio);
 
-        $sql = "UPDATE Provider 
+        $sql = "UPDATE provider 
                 SET first_name='$firstName', last_name='$lastName', contact='$contact', gender='$gender', website='$website', bio='$bio' 
                 WHERE id=$id";
 
@@ -281,7 +281,7 @@ class ProviderModel extends Database
 
     public function nicExists($nic_no)
     {
-        $stmt = $this->conn->prepare("SELECT Provider_ID FROM Provider WHERE NIC_No = ?");
+        $stmt = $this->conn->prepare("SELECT Provider_ID FROM provider WHERE NIC_No = ?");
         $stmt->bind_param("s", $nic_no);
         $stmt->execute();
         $stmt->store_result(); // store result to get num_rows
@@ -291,7 +291,7 @@ class ProviderModel extends Database
     public function deleteProvider($id)
     {
         // mark status as 'Deleted' instead of hard-deleting the row
-        $stmt = $this->conn->prepare("UPDATE Provider SET Status = ? WHERE Provider_ID = ?");
+        $stmt = $this->conn->prepare("UPDATE provider SET Status = ? WHERE Provider_ID = ?");
         if (!$stmt) return false;
         $status = 'Deleted';
         $stmt->bind_param("si", $status, $id);
@@ -301,7 +301,7 @@ class ProviderModel extends Database
 
     public function getAllProviders($limit, $offset)
     {
-        $stmt = $this->conn->prepare("SELECT Provider_ID, First_Name, Last_Name, Contact_No, Email, NIC_No, Status FROM Provider WHERE Status <> 'Deleted' ORDER BY Provider_ID DESC LIMIT ? OFFSET ?");
+        $stmt = $this->conn->prepare("SELECT Provider_ID, First_Name, Last_Name, Contact_No, Email, NIC_No, Status FROM provider WHERE Status <> 'Deleted' ORDER BY Provider_ID DESC LIMIT ? OFFSET ?");
         $stmt->bind_param("ii", $limit, $offset);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -394,7 +394,7 @@ class ProviderModel extends Database
 
     public function getUserCount()
     {
-        $result = $this->conn->query("SELECT COUNT(Provider_ID) AS Total_Providers FROM Provider WHERE Status <> 'Deleted'");
+        $result = $this->conn->query("SELECT COUNT(Provider_ID) AS Total_Providers FROM provider WHERE Status <> 'Deleted'");
         return $result->fetch_assoc()['Total_Providers'];
     }
 
@@ -402,7 +402,7 @@ class ProviderModel extends Database
     public function updateProviderStatus($provider_id, $status, $reason_for_rejection = null)
     {
         // mark status as 'Deleted' instead of hard-deleting the row
-        $stmt = $this->conn->prepare("UPDATE Provider SET Status = ?, Reason_For_Rejection  = ? WHERE Provider_ID = ?");
+        $stmt = $this->conn->prepare("UPDATE provider SET Status = ?, Reason_For_Rejection  = ? WHERE Provider_ID = ?");
         if (!$stmt) return false;
         $stmt->bind_param("ssi", $status, $reason_for_rejection, $provider_id);
         return $stmt->execute();

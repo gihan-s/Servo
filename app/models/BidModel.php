@@ -30,7 +30,7 @@ class BidModel extends Database
                     Status,
                     Post_ID,
                     Provider_ID
-                FROM Bids
+                FROM bids
                 WHERE Post_ID = ?
                 ORDER BY Created_At DESC";
 
@@ -90,7 +90,7 @@ class BidModel extends Database
 
     public function providerHasBidForPost(int $postId, int $providerId): bool
     {
-        $sql = "SELECT 1 FROM Bids WHERE Post_ID = ? AND Provider_ID = ? LIMIT 1";
+        $sql = "SELECT 1 FROM bids WHERE Post_ID = ? AND Provider_ID = ? LIMIT 1";
 
         $stmt = $this->conn->prepare($sql);
         if (!$stmt) {
@@ -112,7 +112,7 @@ class BidModel extends Database
 
     public function countByPostId(int $postId): int
     {
-        $sql = "SELECT COUNT(*) AS bid_count FROM Bids WHERE Post_ID = ?";
+        $sql = "SELECT COUNT(*) AS bid_count FROM bids WHERE Post_ID = ?";
 
         $stmt = $this->conn->prepare($sql);
         if (!$stmt) {
@@ -149,7 +149,7 @@ class BidModel extends Database
 
         $placeholders = implode(',', array_fill(0, count($postIds), '?'));
         $types = str_repeat('i', count($postIds));
-        $sql = "SELECT Post_ID, COUNT(*) AS bid_count FROM Bids WHERE Post_ID IN ($placeholders) GROUP BY Post_ID";
+        $sql = "SELECT Post_ID, COUNT(*) AS bid_count FROM bids WHERE Post_ID IN ($placeholders) GROUP BY Post_ID";
 
         $stmt = $this->conn->prepare($sql);
         if (!$stmt) {

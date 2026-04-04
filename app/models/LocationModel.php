@@ -6,7 +6,7 @@ class LocationModel extends Database
 {
     public function getDistricts()
     {
-        $stmt = $this->conn->prepare("SELECT DISTINCT District FROM Location");
+        $stmt = $this->conn->prepare("SELECT DISTINCT District FROM location");
         $stmt->execute();
         $result = $stmt->get_result();
         $stmt->close();
@@ -15,7 +15,7 @@ class LocationModel extends Database
 
     public function getCities($District)
     {
-        $stmt = $this->conn->prepare("SELECT City FROM Location WHERE District = ?");
+        $stmt = $this->conn->prepare("SELECT City FROM location WHERE District = ?");
         $stmt->bind_param("s", $District);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -34,9 +34,9 @@ class LocationModel extends Database
         $types = str_repeat('i', count($categoryIds));
 
         $stmt = $this->conn->prepare(
-            "SELECT `Provider_Categories_has_Location`.Provider_Categories_ID, District, City
-            FROM `Provider_Categories_has_Location`
-            INNER JOIN `Location` ON  `Provider_Categories_has_Location`.Location_Location_ID = `Location`.Location_ID
+            "SELECT `provider_categories_has_location`.Provider_Categories_ID, District, City
+            FROM `provider_categories_has_location`
+            INNER JOIN `location` ON  `provider_categories_has_location`.Location_Location_ID = `location`.Location_ID
             WHERE Provider_Categories_ID IN ($placeholders)"
         );
 
