@@ -258,6 +258,90 @@ class ProviderModel extends Database
         return $result->fetch_all(MYSQLI_ASSOC);
     }
 
+
+    public function getActiveProvidersForSearch($limit, $offset)
+    {
+        $providers = $this->fetchProvidersForSearchByStatus('active', $limit, $offset);
+        if (!empty($providers)) {
+            return $providers;
+        }
+
+        return $this->fetchProvidersForSearchByStatus('fallback', $limit, $offset);
+    }
+
+
+    public function getActiveProviderCount()
+    {
+        $result = $this->conn->query("SELECT COUNT(*) AS total FROM provider WHERE Status = 'active'");
+        $row = $result ? $result->fetch_assoc() : ['total' => 0];
+        $activeCount = (int)($row['total'] ?? 0);
+
+        if ($activeCount > 0) {
+            return $activeCount;
+        }
+
+        $fallbackResult = $this->conn->query("SELECT COUNT(*) AS total FROM provider WHERE Status <> 'Deleted'");
+        $fallbackRow = $fallbackResult ? $fallbackResult->fetch_assoc() : ['total' => 0];
+        return (int)($fallbackRow['total'] ?? 0);
+    }
+
+
+    public function getSkillsByProviderId($providerId)
+    {
+        $stmt = $this->conn->prepare(
+            "SELECT DISTINCT s.Skill FROM provider_categories_has_skills pcs
+             JOIN skills s ON pcs.Skills_Skill_ID = s.Skill_ID
+             JOIN provider_categories pc ON pcs.Provider_Categories_ID = pc.ID
+             WHERE pc.Provider_ID = ?
+             LIMIT 3"
+        );
+
+        if (!$stmt) {
+            return [];
+        }
+
+        $stmt->bind_param("i", $providerId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $skills = [];
+        while ($row = $result->fetch_assoc()) {
+            $skills[] = $row['Skill'];
+        }
+        $stmt->close();
+
+        return $skills;
+    }
+
+
+    private function fetchProvidersForSearchByStatus($statusMode, $limit, $offset)
+    {
+        $whereClause = $statusMode === 'active' ? "WHERE p.Status = 'active'" : "WHERE p.Status <> 'Deleted'";
+
+        $stmt = $this->conn->prepare(
+            "SELECT p.*, 
+                    COUNT(DISTINCT pc.ID) as category_count,
+                    p.Rating as avg_rating
+             FROM provider p
+             LEFT JOIN provider_categories pc ON p.Provider_ID = pc.Provider_ID
+             $whereClause
+             GROUP BY p.Provider_ID
+             ORDER BY p.Provider_ID DESC
+             LIMIT ? OFFSET ?"
+        );
+
+        if (!$stmt) {
+            return [];
+        }
+
+        $stmt->bind_param("ii", $limit, $offset);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $providers = $result->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+
+        return $providers;
+    }
+
     public function getUserCount()
     {
         $result = $this->conn->query("SELECT COUNT(Provider_ID) AS Total_Providers FROM Provider WHERE Status <> 'Deleted'");
@@ -265,12 +349,72 @@ class ProviderModel extends Database
     }
 
 
-    public function updateProviderStatus($provider_id, $status)
+    public function updateProviderStatus($provider_id, $status, $reason_for_rejection = null)
     {
         // mark status as 'Deleted' instead of hard-deleting the row
-        $stmt = $this->conn->prepare("UPDATE Provider SET Status = ? WHERE Provider_ID = ?");
+        $stmt = $this->conn->prepare("UPDATE Provider SET Status = ?, Reason_For_Rejection  = ? WHERE Provider_ID = ?");
         if (!$stmt) return false;
-        $stmt->bind_param("si", $status, $provider_id);
+        $stmt->bind_param("ssi", $status, $reason_for_rejection, $provider_id);
         return $stmt->execute();
+    }
+
+    /**
+     * Get services (posts) for a provider
+     * These are posts where the provider is assigned (Provider_ID is set)
+     * Primarily completed/accepted projects
+     */
+    public function getProviderServices($providerId, $limit = 10, $offset = 0)
+    {
+        $stmt = $this->conn->prepare(
+            "SELECT p.Post_ID, p.Title, p.Description, p.Requesting_Price, 
+                    p.Price_Type, p.Category_ID, c.Name as CategoryName,
+                    p.Created_At
+             FROM post p
+             LEFT JOIN category c ON p.Category_ID = c.Category_ID
+             WHERE p.Provider_ID = ? AND p.Post_Status IN ('active', 'completed')
+             ORDER BY p.Created_At DESC
+             LIMIT ? OFFSET ?"
+        );
+
+        if (!$stmt) {
+            error_log('getProviderServices prepare error: ' . $this->conn->error);
+            return [];
+        }
+
+        $stmt->bind_param("iii", $providerId, $limit, $offset);
+        if (!$stmt->execute()) {
+            error_log('getProviderServices execute error: ' . $stmt->error);
+            $stmt->close();
+            return [];
+        }
+
+        $result = $stmt->get_result();
+        $services = $result->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+
+        return $services;
+    }
+
+    /**
+     * Get total count of provider services
+     */
+    public function getProviderServiceCount($providerId)
+    {
+        $stmt = $this->conn->prepare(
+            "SELECT COUNT(*) as total FROM post 
+             WHERE Provider_ID = ? AND Post_Status IN ('active', 'completed')"
+        );
+
+        if (!$stmt) {
+            return 0;
+        }
+
+        $stmt->bind_param("i", $providerId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        $stmt->close();
+
+        return (int)($row['total'] ?? 0);
     }
 }

@@ -43,6 +43,7 @@ body {
 .request-content {
   width: 100%;
   padding: 10px;
+  min-height: 50vh;
 }
 
 .request-content .requests-section {

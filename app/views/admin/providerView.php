@@ -11,7 +11,7 @@
 
         <div class="table-layout">
 
-         <span class="key">Provider ID</span>
+            <span class="key">Provider ID</span>
             <span>:</span>
             <span class="value"><?= htmlspecialchars($user["Provider_ID"]) ?></span>
 
@@ -100,67 +100,68 @@ if ($user["Resume"] != '') {
 
 <?php foreach ($user['Categories'] as $Category): ?>
 
-<div id="service-card-wrapper">
+    <div id="service-card-wrapper">
 
-    <div class="search-item">
-        <div class="status-badge status-active"><?= htmlspecialchars($Category['Category_Type']) ?></div>
+        <div class="search-item">
+            <div class="status-badge status-active"><?= htmlspecialchars($Category['Category_Type']) ?></div>
 
-        <div class="post-header">
-            <div class="post-meta">
+            <div class="post-header">
+                <div class="post-meta">
 
-            </div>
-            <div class="post-actions">
+                </div>
+                <div class="post-actions">
 
-            </div>
-        </div>
-
-        <h3 class="post-title"><?= htmlspecialchars($Category['Title']) ?></h3>
-
-        <div class="post-description">
-            <?= htmlspecialchars($Category['Description']) ?>
-        </div>
-
-        <div class="post-skills">
-            <span class="skills-label">Skills:</span>
-            <div class="skills-tags">
-                <?php foreach ($Category['Skills'] as $Skill): ?>
-                <span class="skill-tag"><?= $Skill ?></span>
-                <?php endforeach; ?>
-            </div>
-        </div>
-
-        <div class="post-footer">
-            <div class="post-details">
-                <div class="detail-item">
-                    <span class="detail-label">
-                        <i class="fa-solid fa-circle-dollar"></i>
-                        Rs. <?= number_format($Category['Default_Price'], 2) ?> / hr
-                    </span>
                 </div>
             </div>
-        </div>
 
-        <div class="engagement-stats">
-            <div class="stat-item">
-                <i class="fas fa-location-pin"></i>
-                <?= formatLocations($Category['Locations']) ?>
+            <h3 class="post-title"><?= htmlspecialchars($Category['Title']) ?></h3>
+
+            <div class="post-description">
+                <?= htmlspecialchars($Category['Description']) ?>
             </div>
+
+            <div class="post-skills">
+                <span class="skills-label">Skills:</span>
+                <div class="skills-tags">
+                    <?php foreach ($Category['Skills'] as $Skill): ?>
+                        <span class="skill-tag"><?= $Skill ?></span>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+
+            <div class="post-footer">
+                <div class="post-details">
+                    <div class="detail-item">
+                        <span class="detail-label">
+                            <i class="fa-solid fa-circle-dollar"></i>
+                            Rs. <?= number_format($Category['Default_Price'], 2) ?> / hr
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="engagement-stats">
+                <div class="stat-item">
+                    <i class="fas fa-location-pin"></i>
+                    <?= formatLocations($Category['Locations']) ?>
+                </div>
+            </div>
+
         </div>
 
     </div>
 
-</div>
-
 <?php endforeach; ?>
 
+<?php if($user["Status"] === 'Pending'): ?>
 
 <form action="./Providers/provider-review" method="post">
 
-<input type="hidden" name="provider_id" value="<?= htmlspecialchars($user["Provider_ID"]) ?>">
+    <input type="hidden" name="provider_id" value="<?= htmlspecialchars($user["Provider_ID"]) ?>">
 
     <div style="display: flex; justify-content: space-between;">
 
-        <button name="reject" class="button" style="background-color: #dc2626;">
+        <button name="reject" class="button" style="background-color: #dc2626;" type="button" onclick="viewDialogBox('RejectProviderDialog')">
             <i class="fa-solid fa-circle-xmark" style="margin-right: 10px;"></i>
             Reject Provider
         </button>
@@ -174,4 +175,5 @@ if ($user["Resume"] != '') {
 
 </form>
 
+<?php endif; ?>
 
