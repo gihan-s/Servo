@@ -83,7 +83,7 @@ if ($user["Resume"] != '') {
     <div class="container" style="margin-bottom: 25px;">
         <h4 class="provider-subtitle">Resume</h4>
 
-        <iframe src="<?= BASE_URL ?>/file/user-files/<?= rawurlencode($user["Resume"]) ?>"
+        <iframe src="<?= BASE_URL ?>/file/user-files/<?= urlencode($user["Resume"]) ?>"
             width="100%"
             height="600px"
             style="border:none;">
