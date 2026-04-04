@@ -183,10 +183,6 @@ class BidModel extends Database
     {
         $bids = $this->getProviderBids($providerId);
 
-            public function getProviderBidsByStatus($providerId, $status)
-            {
-                $bids = $this->getProviderBids($providerId);
-
                 return array_values(array_filter($bids, function ($bid) use ($status) {
                     return $bid['statusKey'] === $status;
                 }));
@@ -306,6 +302,4 @@ class BidModel extends Database
                     ],
                 ];
             }
-        }
     }
-}
