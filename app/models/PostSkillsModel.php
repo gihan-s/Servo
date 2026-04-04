@@ -7,8 +7,8 @@ class PostSkillsModel extends Database
     public function getPostSkills($postId)
     {
         $query = "SELECT s.Skill_ID, s.Skill
-                      FROM Post_Need_Skills pns 
-                      JOIN Skills s ON pns.Skill_ID = s.Skill_ID 
+                      FROM post_need_skills pns 
+                      JOIN skills s ON pns.Skill_ID = s.Skill_ID 
                       WHERE pns.Post_ID = ?";
 
         $stmt = $this->conn->prepare($query);
@@ -22,7 +22,7 @@ class PostSkillsModel extends Database
     public function addPostSkill($postId, $skillId)
     {
         try {
-            $query = "INSERT INTO Post_Need_skills (Post_ID, Skill_ID) VALUES (?, ?)";
+            $query = "INSERT INTO post_need_skills (Post_ID, Skill_ID) VALUES (?, ?)";
             $stmt = $this->conn->prepare($query);
             $stmt->bind_param('ii', $postId, $skillId);
             return $stmt->execute();
@@ -34,7 +34,7 @@ class PostSkillsModel extends Database
 
     public function deletePostSkills($postId): bool
     {
-        $sql = "DELETE FROM Post_Need_Skills WHERE Post_ID = ?";
+        $sql = "DELETE FROM post_need_skills WHERE Post_ID = ?";
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param('i', $postId);
         return $stmt->execute();
