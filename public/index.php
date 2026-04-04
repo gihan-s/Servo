@@ -297,6 +297,16 @@ switch ($url) {
         $controller->getMessages();
         break;
 
+    case 'messages/start-conversation':
+        $controller = new MessageController();
+        $controller->startConversation();
+        break;
+
+    case 'messages/get-user':
+        $controller = new MessageController();
+        $controller->getUser();
+        break;
+
     case 'test/inputs':
         include '../inputs.html';
         break;

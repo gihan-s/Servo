@@ -24,14 +24,14 @@
                 <h1>Messages</h1>
             </div>
             <div class="sidebar-search" style="position:relative;">
-                <i class="fa-regular fa-magnifying-glass icon"></i>
+                <i class="fa-solid fa-magnifying-glass icon"></i>
                 <input type="text" id="convSearch" placeholder="Search conversations" />
             </div>
             <div class="chat-filters">
-                <div class="filter-chip active" data-filter="all"><i class="fa-regular fa-inbox"></i> All</div>
-                <div class="filter-chip" data-filter="unread"><i class="fa-regular fa-envelope"></i> Unread</div>
-                <div class="filter-chip" data-filter="starred"><i class="fa-regular fa-star"></i> Starred</div>
-                <div class="filter-chip" data-filter="archived"><i class="fa-regular fa-box-archive"></i> Archived</div>
+                <div class="filter-chip active" data-filter="all"><i class="fa-solid fa-inbox"></i> All</div>
+                <div class="filter-chip" data-filter="unread"><i class="fa-solid fa-envelope"></i> Unread</div>
+                <div class="filter-chip" data-filter="starred"><i class="fa-solid fa-star"></i> Starred</div>
+                <div class="filter-chip" data-filter="archived"><i class="fa-solid fa-box-archive"></i> Archived</div>
             </div>
             <div class="divider-label">Recent</div>
             <div class="conversation-list" id="conversationList" role="list">
@@ -52,11 +52,11 @@
                     </div>
                 </div>
                 <div class="header-actions">
-                    <button class="toggle-sidebar" onclick="toggleSidebar()"><i class="fa-regular fa-bars"></i></button>
-                    <button class="h-btn" id="starBtn" disabled><i class="fa-regular fa-star"></i> Star</button>
-                    <button class="h-btn" id="archiveBtn" disabled><i class="fa-regular fa-box-archive"></i>
+                    <button class="toggle-sidebar" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+                    <button class="h-btn" id="starBtn" disabled><i class="fa-solid fa-star"></i> Star</button>
+                    <button class="h-btn" id="archiveBtn" disabled><i class="fa-solid fa-box-archive"></i>
                         Archive</button>
-                    <button class="h-btn" id="moreBtn" disabled><i class="fa-regular fa-ellipsis"></i> More</button>
+                    <button class="h-btn" id="moreBtn" disabled><i class="fa-solid fa-ellipsis"></i> More</button>
                 </div>
             </div>
             <div class="messages-scroll" id="messagesScroll">
@@ -71,18 +71,18 @@
                         <textarea id="messageInput" rows="1" placeholder="Type a message"
                             oninput="autoGrow(this)"></textarea>
                         <button class="attach-btn" title="Attach" onclick="attachFile()"><i
-                                class="fa-regular fa-paperclip"></i></button>
+                                class="fa-solid fa-paperclip"></i></button>
                     </div>
-                    <button class="send-btn" onclick="sendMessage()"><i class="fa-regular fa-paper-plane"></i>
+                    <button class="send-btn" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i>
                         Send</button>
                 </div>
                 <div class="toolbar">
                     <button class="t-btn" onclick="insertTemplate('Thanks for the update!')"><i
-                            class="fa-regular fa-message-smile"></i> Quick Reply</button>
+                            class="fa-solid fa-message-smile"></i> Quick Reply</button>
                     <button class="t-btn" onclick="insertTemplate('Can you clarify the timeline?')"><i
-                            class="fa-regular fa-clock"></i> Timeline</button>
+                            class="fa-solid fa-clock"></i> Timeline</button>
                     <button class="t-btn" onclick="insertTemplate('Let\'s schedule a call to discuss further.')"><i
-                            class="fa-regular fa-phone"></i> Call</button>
+                            class="fa-solid fa-phone"></i> Call</button>
                 </div>
             </div>
         </section>
@@ -112,7 +112,7 @@
         //     },
         // ];
 
-        const conversations = JSON.parse(`<?= json_encode($Conversations) ?>`);
+        const conversations = <?= json_encode($Conversations, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
 
         let activeConv = null;
         const listEl = document.getElementById('conversationList');
@@ -120,7 +120,15 @@
         const emptyEl = document.getElementById('emptyState');
         const composerEl = document.getElementById('composer');
 
+        const pendingConversations = new Set();
+
+
         function renderConversations(filter = 'all') {
+
+            conversations.sort((a, b) => {
+                return new Date(b.last_message_time) - new Date(a.last_message_time);
+            });
+
             listEl.innerHTML = '';
             let filtered = conversations.filter(c => {
                 if (filter === 'unread') return c.unread_count > 0;
@@ -128,6 +136,10 @@
                 if (filter === 'archived') return c.archived;
                 return true;
             });
+            if (filtered.length === 0) {
+                listEl.innerHTML = '<div class="no-conversations">Nothing to show here</div>';
+                return;
+            }
             filtered.forEach(c => {
                 const div = document.createElement('div');
                 div.id = `Conversation_ID_${c.id}`;
@@ -144,7 +156,7 @@
                        </div>
                    </div>
                    <div class="conv-snippet">${c.last_message}</div>
-                   ${c.online ? '<div class="typing">Online</div>' : ''}
+                   
                 </div>
                 <button class="pin-btn" title="Star" onclick="toggleStar(event,${c.id})"><i class="fa-${c.starred ? 'solid' : 'regular'} fa-star"></i></button>
             `;
@@ -158,13 +170,19 @@
 
         function openConversation(id) {
             activeConv = conversations.find(c => c.id === id);
+
+
+            // ✅ Reset unread count correctly
+            activeConv.unread_count = 0;
+
+            // ✅ Re-render sidebar to remove badge
+            renderConversations(document.querySelector('.filter-chip.active').dataset.filter);
+
+
             renderConversations(document.querySelector('.filter-chip.active').dataset.filter);
             document.getElementById('peerName').textContent = activeConv.First_Name + " " + activeConv.Last_Name;
             document.getElementById("peerAvatar").src = `/file/user-files/${activeConv.Profile_Picture}`;
-            const statusEl = document.getElementById('peerStatus');
-            statusEl.style.display = 'flex';
-            statusEl.classList.toggle('offline', !activeConv.online);
-            statusEl.innerHTML = `<span class="dot" style="width:8px; height:8px; background:${activeConv.online ? '#008500' : '#64748b'}; border-radius:50%; display:inline-block;"></span> ${activeConv.online ? 'Online' : 'Offline'}`;
+
             document.getElementById('starBtn').disabled = false;
             document.getElementById('archiveBtn').disabled = false;
             document.getElementById('moreBtn').disabled = false;
@@ -172,9 +190,29 @@
             composerEl.style.display = 'flex';
             scrollEl.innerHTML = '';
 
+            console.log(id);
+
             activeConv.unread = 0; // mark as read
             fetchMessagesById(id);
+            toggleOnlineOfflineConversation(id);
+
+            ws.send(JSON.stringify({
+                Type: 'Seen',
+                From: activeConv.id
+            }));
         }
+
+
+        function toggleOnlineOfflineConversation(id) {
+            if (activeConv && activeConv.id === id) {
+                const statusEl = document.getElementById('peerStatus');
+                statusEl.style.display = 'flex';
+                statusEl.classList.toggle('offline', !activeConv.online);
+                statusEl.innerHTML = `<span class="dot" style="width:8px; height:8px; background:${activeConv.online ? '#008500' : '#64748b'}; border-radius:50%; display:inline-block;"></span> ${activeConv.online ? 'Online' : 'Offline'}`;
+            }
+        }
+
+
 
         function insertDaySeparator(label) {
 
@@ -214,9 +252,9 @@
             <div class="bubble">
                 <div class="text">${escapeHTML(msg.text)}</div>
                 <div class="msg-actions">
-                    <button class="icon-btn" title="Reply" onclick="quoteMessage(event,'${escapeQuotes(msg.text)}')"><i class="fa-regular fa-reply"></i></button>
-                    <button class="icon-btn" title="Copy" onclick="copyMessage(event,'${escapeQuotes(msg.text)}')"><i class="fa-regular fa-copy"></i></button>
-                    <button class="icon-btn" title="More"><i class="fa-regular fa-ellipsis"></i></button>
+                    <button class="icon-btn" title="Reply" onclick="quoteMessage(event,'${escapeQuotes(msg.text)}')"><i class="fa-solid fa-reply"></i></button>
+                    <button class="icon-btn" title="Copy" onclick="copyMessage(event,'${escapeQuotes(msg.text)}')"><i class="fa-solid fa-copy"></i></button>
+                    <button class="icon-btn" title="More"><i class="fa-solid fa-ellipsis"></i></button>
                 </div>
                 <div class="meta"><span>${msg.Time}</span>${messageStatus}</div>
             </div>`;
@@ -420,9 +458,22 @@
                 console.log(msgBubble);
             }
 
+            if (data.Type === 'Presence') {
+                var conversation = conversations.find(c => c.id === data.User_ID);
+                conversation.online = (data.Status === 'Online') ? true : false;
+                toggleOnlineOfflineConversation(data.User_ID);
+            }
+
             if (data.Type && data.Type === 'New Message') {
 
                 if (activeConv && activeConv.id === data.From) {
+
+                    // send seen immediately
+                    ws.send(JSON.stringify({
+                        Type: 'Seen',
+                        From: data.From
+                    }));
+
                     const msg = {
                         id: crypto.randomUUID(),
                         self: false,
@@ -436,20 +487,153 @@
                     addMessageBubble(msg);
                     scrollToBottom();
 
-                    document.querySelector(".conversation.active .conv-snippet").innerText = data.Content;
-                    document.querySelector(".conversation.active .time").innerText = 'Now';
-                    
+
+                    const conv = conversations.find(c => c.id === data.From);
+
+                    if (conv) {
+                        conv.last_message = data.Content;
+                        conv.last_message_time = new Date().toISOString();
+                    }
+                    renderConversations(document.querySelector('.filter-chip.active').dataset.filter);
 
                     return;
                 }
 
-                const conversation = document.getElementById(`Conversation_ID_${data.From}`);
-                if (conversation) {
-                    conversation.querySelector(".conv-snippet").innerText = data.Content;
+                const conv = conversations.find(c => c.id === data.From);
+
+                console.log(conversations);
+
+                if (conv) {
+                    conv.last_message = data.Content;
+                    conv.last_message_time = new Date().toISOString();
+                    conv.unread_count = (conv.unread_count || 0) + 1;
+                } else {
+
+                    // 🔥 Prevent duplicate fetch
+                    if (pendingConversations.has(data.From)) {
+                        return;
+                    }
+
+                    pendingConversations.add(data.From);
+
+
+                    fetch(`/messages/get-user?id=${data.From}`)
+                        .then(res => res.json())
+                        .then(user => {
+
+                            // ✅ Double-check again (IMPORTANT)
+                            let existing = conversations.find(c => c.id === user.id);
+                            if (existing) {
+                                existing.last_message = data.Content;
+                                existing.last_message_time = new Date().toISOString();
+                                existing.unread_count = (existing.unread_count || 0) + 1;
+                                return;
+                            }
+
+                            const newConv = {
+                                id: parseInt(user.id),
+                                First_Name: user.first_name,
+                                Last_Name: user.last_name,
+                                Profile_Picture: user.profile_picture,
+                                last_message: data.Content,
+                                last_message_time: new Date().toISOString(),
+                                unread_count: 1,
+                                online: false
+                            };
+
+                            conversations.unshift(newConv);
+
+                            renderConversations(document.querySelector('.filter-chip.active').dataset.filter);
+                        })
+                        .finally(() => {
+                            pendingConversations.delete(data.From);
+                            console.log(data.From + " Removed");
+                            console.log(pendingConversations);
+                        });
+
+                    return;
+
+
+                }
+
+                // ✅ Re-render sidebar
+                renderConversations(document.querySelector('.filter-chip.active').dataset.filter);
+            }
+
+
+            if (data.Type === 'Seen') {
+
+                // Only update if active conversation
+                if (activeConv && activeConv.id === data.From) {
+
+                    const messages = document.querySelectorAll('.msg-row.self');
+
+                    messages.forEach(msg => {
+                        const statusEl = msg.querySelector(".meta span:nth-child(2)");
+                        if (statusEl) {
+                            statusEl.innerText = 'Read';
+                        }
+                    });
                 }
             }
         };
+
+
+        function startNewChat(userId) {
+
+            const CURRENT_USER_ID = '<?= $_SESSION['user_id'] ?>';
+            const CURRENT_USER_ROLE = '<?= $_SESSION['role'] ?>';
+
+            const exists = conversations.find(c => c.id === userId);
+            if (exists) {
+                openConversation(userId);
+                return;
+            }
+
+            const formData = new FormData();
+
+            // ✅ Determine roles dynamically
+            if (CURRENT_USER_ROLE === 'Client') {
+                formData.append('Client_ID', CURRENT_USER_ID);
+                formData.append('Provider_ID', userId);
+            } else {
+                formData.append('Client_ID', userId);
+                formData.append('Provider_ID', CURRENT_USER_ID);
+            }
+
+            fetch('/messages/start-conversation', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+
+                    const newConv = {
+                        id: userId,
+                        First_Name: data.first_name,
+                        Last_Name: data.last_name,
+                        Profile_Picture: data.profile_picture,
+                        last_message: '',
+                        last_message_time: new Date().toISOString(),
+                        unread_count: 0,
+                        online: false
+                    };
+
+                    conversations.unshift(newConv);
+                    renderConversations('all');
+                    openConversation(userId);
+                });
+        }
     </script>
 </body>
 
 </html>
+
+
+<script>
+    <?php if (isset($_GET['new']) && is_numeric($_GET['new'])): ?>
+        window.addEventListener('load', () => {
+            startNewChat(<?= intval($_GET['new']) ?>);
+        });
+    <?php endif; ?>
+</script>
