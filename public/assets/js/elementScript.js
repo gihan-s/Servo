@@ -214,14 +214,18 @@ for (let i = 0; i < SearchDropDownArray.length; i++) {
                     multipleDropdownFiller(SearchDropDownArray[i]);
                 } else {
                     SearchDropDowntextfieldArray[i].value = element.innerText;
-                    if (element.dataset.id) {
-                        SearchDropDowntextfieldArray[i].dataset.id = element.dataset.id;
+                    // if (element.dataset.id) {
+                    //     SearchDropDowntextfieldArray[i].dataset.id = element.dataset.id;
+                    // }
+                    if (parentSelect.dataset.idinput != undefined) {
+                        document.getElementById(parentSelect.dataset.idinput).value = element.dataset.id;
                     }
                 }
                 searchDropdownFocus(i);
                 SearchDropdownLabelArray[i].style.color = "var(--textFieldLabelColor)";
                 searchDropdownBlur(i);
                 SearchDropDownArray[i].classList.remove("dropdown-view");
+                
             },
             false
         );

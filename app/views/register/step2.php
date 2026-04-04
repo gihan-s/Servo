@@ -18,7 +18,7 @@ $BaseURL = "..";
     >
     <link rel="stylesheet" href="<?= $BaseURL ?>/assets/css/elementStyles.css">
     <link rel="stylesheet" href="<?= $BaseURL ?>/assets/css/gridTemplates.css">
-    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <script src="<?= $BaseURL ?>/assets/js/elementScript.js" defer></script>
     <script src="<?= $BaseURL ?>/assets/js/registerScript.js" defer></script>
@@ -73,8 +73,7 @@ $BaseURL = "..";
                                 <div class="label text-label">Bio</div>
                                 <textarea class="text-field" name="bio" spellcheck="false"><?= getFromSession('bio') ?></textarea>
                             </div>
-                        </div>
-                        <div class="input-grid-1">
+
                             <div class="text-container">
                                 <div class="label text-label">Website</div>
                                 <input type="text" class="text-field" name="website" value="<?= getFromSession('website') ?>" id="">
@@ -82,14 +81,64 @@ $BaseURL = "..";
                         </div>
                     </div>
 
+                    <div class="hr-title-container" style="margin-top: 25px;">
+                        <span class="hr-title">Social Media Links</span>
+                        <hr class="hr-line">
+                    </div>
+
+                    <div class="social-media-link-wrapper">
+                         <div>
+                            <span>
+                                <i class="fa-brands fa-linkedin"></i>
+                                Linked In
+                            </span>
+                            <input type="text" name="social_media_linkedin" value="<?= getFromSession('linkedin') ?>">
+                        </div>
+                        <div>
+                            <span>
+                                <i class="fa-brands fa-facebook"></i>
+                                Facebook
+                            </span>
+                            <input type="text" name="social_media_facebook" value="<?= getFromSession('facebook') ?>">
+                        </div>
+                        <div>
+                            <span>
+                                <i class="fa-brands fa-instagram"></i>
+                                Instagram
+                            </span>
+                            <input type="text" name="social_media_instagram" value="<?= getFromSession('instagram') ?>">
+                        </div>
+                        <div>
+                            <span>
+                                <i class="fa-brands fa-tiktok"></i>
+                                Tiktok
+                            </span>
+                            <input type="text" name="social_media_tiktok" value="<?= getFromSession('tiktok') ?>">
+                        </div>
+                        <div>
+                            <span>
+                                <i class="fa-brands fa-youtube"></i>
+                                Youtube
+                            </span>
+                            <input type="text" name="social_media_youtube" value="<?= getFromSession('youtube') ?>">
+                        </div>
+                        <div>
+                            <span>
+                                <i class="fa-brands fa-github"></i>
+                                Github
+                            </span>
+                            <input type="text" name="social_media_github" value="<?= getFromSession('github') ?>">
+                        </div>
+                    </div>
+
                     <div class="button-section">
 
                         <button type="button" onclick="window.location = `../register`" class="button outline">Back
-                            <i class="fa-regular fa-arrow-left" style="padding-left: 5px"></i>
+                            <i class="fa-solid fa-arrow-left" style="padding-left: 5px"></i>
                         </button>
 
                         <button type="submit" class="button" id="nextBtn">Next
-                            <i class="fa-regular fa-arrow-right" style="padding-left: 5px"></i>
+                            <i class="fa-solid fa-arrow-right" style="padding-left: 5px"></i>
                         </button>
                     </div>
                 </div>

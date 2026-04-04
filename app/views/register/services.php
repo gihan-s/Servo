@@ -17,7 +17,7 @@ $BaseURL = "..";
         rel="stylesheet">
     <link rel="stylesheet" href="<?= $BaseURL ?>/assets/css/elementStyles.css">
     <link rel="stylesheet" href="<?= $BaseURL ?>/assets/css/gridTemplates.css">
-    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="<?= $BaseURL ?>/assets/css/registerServices.css">
 
     <script src="<?= $BaseURL ?>/assets/js/elementScript.js" defer></script>
@@ -94,7 +94,7 @@ $BaseURL = "..";
                                             <div class="detail-item">
                                                 <span class="detail-label">
                                                     <i class="fa-solid fa-circle-dollar"></i>
-                                                    Rs. <?= number_format($_SESSION["register"]["default_price"][$key], 2) ?> / hr
+                                                    Rs. <?= number_format($_SESSION["register"]["default_price"][$key], 2) ?> / <?= $_SESSION["register"]["price_type"][$key] ?>
                                                 </span>
                                             </div>
                                         </div>
@@ -115,6 +115,10 @@ $BaseURL = "..";
                                         <input type='hidden' name='default_price[]' value='<?= $_SESSION["register"]["default_price"][$key] ?>'>
                                         <input type='hidden' name='skills[]' value='<?= $_SESSION["register"]["skills"][$key] ?>'>
                                         <input type='hidden' name='locations[]' value='<?= $_SESSION["register"]["locations"][$key] ?>'>
+
+                                        <input type='hidden' name='portfolio_link[]' value='<?= $_SESSION["register"]["portfolio_link"][$key] ?>'>
+                                        <input type='hidden' name='price_type[]' value='<?= $_SESSION["register"]["price_type"][$key] ?>'>
+                                        <input type='hidden' name='price_negotiability[]' value='<?= $_SESSION["register"]["price_negotiability"][$key] ?>'>
                                     </div>
                                 </div>
 
@@ -129,7 +133,7 @@ $BaseURL = "..";
 
                     <div class="top-button-wrapper">
                         <button type="button" class="button" id="nextBtn" onclick="viewDialogBox('AddServiceDialog')">
-                            <i class="fa-regular fa-plus" style="padding-right: 5px"></i>
+                            <i class="fa-solid fa-plus" style="padding-right: 5px"></i>
                             Add Service
                         </button>
                     </div>
@@ -137,11 +141,11 @@ $BaseURL = "..";
                     <div class="button-section">
 
                         <button type="button" onclick="window.location = `../register/documents`" class="button outline">Back
-                            <i class="fa-regular fa-arrow-left" style="padding-left: 5px"></i>
+                            <i class="fa-solid fa-arrow-left" style="padding-left: 5px"></i>
                         </button>
 
                         <button type="submit" class="button" id="nextBtn">Next
-                            <i class="fa-regular fa-arrow-right" style="padding-left: 5px"></i>
+                            <i class="fa-solid fa-arrow-right" style="padding-left: 5px"></i>
                         </button>
                     </div>
                 </div>
@@ -190,18 +194,41 @@ $BaseURL = "..";
                     <input type="text" class="text-field" id="Title">
                 </div>
 
-
                 <div class="text-container">
                     <div class="label text-label">Description</div>
                     <textarea class="text-field" spellcheck="false" id="Description"></textarea>
                 </div>
 
-
                 <div class="text-container">
-                    <div class="label text-label">Hourly Rate (Rs.)</div>
-                    <input type="number" step="any" class="text-field" id="Default_Price">
+                    <div class="label text-label">Portfolio Link</div>
+                    <input type="text" class="text-field" id="Portfolio_Link">
                 </div>
 
+                <div class="input-grid-2" style="margin-bottom: 0px;">
+
+                    <div class="select-container">
+                        <div class="text-container">
+                            <div class="label dropdown-label label-float notreset">Price Type</div>
+                            <input type="text" class="text-field-dropdown" value="Hourly" readonly id="Price_Type">
+                        </div>
+                        <div class="options">
+                            <div>Hourly</div>
+                            <div>Daily</div>
+                            <div>Fixed</div>
+                        </div>
+                    </div>
+
+                    <div class="text-container">
+                        <div class="label text-label">Rate (Rs.)</div>
+                        <input type="number" step="any" class="text-field" id="Default_Price">
+                    </div>
+                </div>
+
+                <label class="checkbox-container">
+                    <input type="checkbox" id="Price_Negotiability">
+                    <span class="checkmark"></span>
+                    <label for=""> Price is negotiable</label>
+                </label>
             </div>
 
             <div style="display: none;" id="SkillArea">
@@ -337,6 +364,7 @@ $BaseURL = "..";
         var Title = document.getElementById("Title").value;
         var Description = document.getElementById("Description").value;
         var Default_Price = document.getElementById("Default_Price").value;
+        var Price_Type = document.getElementById("Price_Type").value;
 
         if (Category == '') {
             document.getElementById("Category").focus();
@@ -350,10 +378,18 @@ $BaseURL = "..";
             document.getElementById("Description").focus();
             return;
         }
+
+        if (Price_Type == '') {
+            document.getElementById("Price_Type").focus();
+            return;
+        }
+
         if (Default_Price == '') {
             document.getElementById("Default_Price").focus();
             return;
         }
+
+
 
         var Skills = document.querySelector("#Skills").value == '' ? [] : JSON.parse(document.querySelector("#Skills").value);
         if (Skills.length == 0) {
@@ -379,6 +415,9 @@ $BaseURL = "..";
         var Default_Price = document.getElementById("Default_Price").value;
         var Skills = document.querySelector("#Skills").value == '' ? [] : JSON.parse(document.querySelector("#Skills").value);
         var Locations = document.querySelector("#Locations").value == '' ? [] : JSON.parse(document.querySelector("#Locations").value);
+
+        Skills = Skills.map(item => item.value);
+        Locations = Locations.map(item => item.value);
 
 
         const newService = document.createElement("div");
@@ -419,7 +458,7 @@ $BaseURL = "..";
                     <div class="detail-item">
                         <span class="detail-label">
                             <i class="fa-solid fa-circle-dollar"></i>
-                            Rs. ${Number(Default_Price).toFixed(2)} / hr
+                            Rs. ${Number(Default_Price).toFixed(2)} / ${document.getElementById("Price_Type").value}
                         </span>
                     </div>
                 </div>
@@ -440,8 +479,15 @@ $BaseURL = "..";
                 <input type='hidden' name='default_price[]' value='${Default_Price}'>
                 <input type='hidden' name='skills[]' value='${JSON.stringify(Skills)}'>
                 <input type='hidden' name='locations[]' value='${JSON.stringify(Locations)}'>
+
+                <input type='hidden' name='portfolio_link[]' value='${document.getElementById("Portfolio_Link").value}'>
+                <input type='hidden' name='price_type[]' value='${document.getElementById("Price_Type").value}'>
+                <input type='hidden' name='price_negotiability[]' value='${document.getElementById("Price_Negotiability").checked}'>
             </div>
         `;
+
+        console.log(document.getElementById("Price_Negotiability").checked);
+        
 
         if (document.getElementById("service-card-wrapper").querySelector("p")) {
             document.getElementById("service-card-wrapper").querySelector("p").remove();
@@ -464,8 +510,9 @@ $BaseURL = "..";
             document.getElementById("SkillArea").style.display = 'block';
         }
 
-
         CategoryID = document.getElementById("Category_ID").value;
+        console.log(CategoryID);
+
         document.getElementById("SkillAddInput").value = "";
         document.getElementById("SkillsOptionList").innerHTML = "";
         document.getElementById("SkillAddInput").parentElement.querySelector(".label").classList.remove("label-float");
@@ -607,5 +654,3 @@ $BaseURL = "..";
     </div>
 
 </div>
-
-

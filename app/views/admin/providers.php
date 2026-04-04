@@ -7,7 +7,24 @@ $TopBarHeader = "Providers";
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Providers</title>
 
-    <?php include 'includes/links.php' ?>
+    <!-- Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- css -->
+    <link rel="stylesheet" href="/assets/css/elementStyles.css">
+    <link rel="stylesheet" href="/assets/css/gridTemplates.css">
+
+    <link rel="stylesheet" href="/assets/css/admin-main.css">
+    <link rel="stylesheet" href="/assets/css/admin-sidebar.css">
+
+    <!-- Javascript -->
+    <script src="/assets/js/elementScript.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script src="/assets/js/admin-script.js" defer></script>
 
 </head>
 
@@ -145,13 +162,13 @@ $TopBarHeader = "Providers";
 
 
         <div class="pagination" aria-label="Approved Requests Pagination">
-            <button class="page-btn prev" onclick="previosPagination(this)"><i class="fa-regular fa-chevron-left"></i></button>
+            <button class="page-btn prev" onclick="previosPagination(this)"><i class="fa-solid fa-chevron-left"></i></button>
 
             <?php for ($i = 1; $i <= $totalPages; $i++): ?>
                 <button onclick="window.location=`?page=<?= $i ?>`" class="page-btn <?= $i == $page ? 'active' : '' ?>"><?= $i ?></button>
             <?php endfor; ?>
 
-            <button class="page-btn next" onclick="nextPagination(this)"><i class="fa-regular fa-chevron-right"></i></button>
+            <button class="page-btn next" onclick="nextPagination(this)"><i class="fa-solid fa-chevron-right"></i></button>
         </div>
 
 
@@ -171,7 +188,7 @@ $TopBarHeader = "Providers";
 
             <div id="ViewProviderContent">
 
-                
+
 
             </div>
 
@@ -193,12 +210,70 @@ $TopBarHeader = "Providers";
         const modalBody = document.getElementById("ViewProviderContent");
         showLoadingOn("ViewProviderContent");
 
+
         fetch(`./providers/view/${Provider_ID}`)
             .then(res => res.text())
             .then(data => {
                 modalBody.innerHTML = data;
-
-                
+                document.getElementsByName("provider_id")[1].value = Provider_ID;
             });
     }
 </script>
+
+
+<div class="dialog-box-2" id="RejectProviderDialog">
+    <div class="dialog-content" style="width: 600px; overflow: unset;">
+        <div class="dialog-title">
+            <div class="title">Reject Service Provider</div>
+            <div>
+                <i class="fa-solid fa-xmark dialog-close-button-2"
+                    onclick="closeDialogBox('RejectProviderDialog')"></i>
+            </div>
+        </div>
+
+        <form action="./Providers/provider-review" method="post">
+
+            <div class="input-grid-1">
+
+                <div class="search-select-container add-option">
+
+                    <div class="text-container">
+                        <div class="label search-dropdown-label">Reason for Rejection</div>
+                        <input type="text" class="text-field-search-dropdown" name="reason_for_rejection" autocomplete="off" onkeydown="return false" required>
+                    </div>
+
+                    <div class="options">
+
+                        <span class="text-container">
+                            <input type="text" class="text-field-search">
+                        </span>
+
+                        <div class="option-list">
+                            <div> The information provided is incomplete or incorrect </div>
+                            <div> Submitted documents are unclear or unreadable </div>
+                            <div> The profile picture does not meet our requirements </div>
+                            <div> The registration appears suspicious or automated </div>
+                            <div> The selected service category is invalid </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <input type="text" name="provider_id">
+
+            <div style="display: flex; justify-content: end;">
+                <button name="reject" class="button" style="background-color: #dc2626;" type="submit">
+                    <i class="fa-solid fa-circle-xmark" style="margin-right: 10px;"></i>
+                    Reject Provider
+                </button>
+            </div>
+
+        </form>
+
+
+    </div>
+
+</div>

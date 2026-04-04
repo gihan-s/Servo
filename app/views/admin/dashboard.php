@@ -7,9 +7,25 @@ $TopBarHeader = "Dashboard";
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
 
-    <?php include 'includes/links.php' ?>
-    
-    <script src="<?= BASE_URL ?>/assets/js/admin-dashboardCharts.js" defer></script>
+    <!-- Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- css -->
+    <link rel="stylesheet" href="/assets/css/elementStyles.css">
+    <link rel="stylesheet" href="/assets/css/gridTemplates.css">
+
+    <link rel="stylesheet" href="/assets/css/admin-main.css">
+    <link rel="stylesheet" href="/assets/css/admin-sidebar.css">
+
+    <!-- Javascript -->
+    <script src="/assets/js/elementScript.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script src="/assets/js/admin-script.js" defer></script>
+    <script src="/assets/js/admin-dashboardCharts.js" defer></script>
 
 </head>
 

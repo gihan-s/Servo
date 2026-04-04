@@ -1,3 +1,70 @@
+<?php
+if (!empty($cardsOnly)) {
+?>
+    <div class="item-list">
+        <?php for ($i = 0; $i < 2; $i++): ?>
+            <div class="search-item">
+                <div class="post-header">
+                    <div class="post-meta">
+                        <div class="provider-info">
+                            <div class="provider-image"><img src="sampleImg.jpg" alt="Provider"></div>
+                            <div class="provider-details">
+                                <div class="provider-name">Chethiya Bandara</div>
+                                <div class="provider-location">Gampaha</div>
+                                <div class="provider-meta-row">
+                                    <span class="provider-rating"><i class="fa-solid fa-star"></i>4.9</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="post-actions">
+                        <button class="action-btn btn-view" title="Message Provider"><i class="fa-solid fa-messages"></i> Message</button>
+                        <button class="action-btn btn-view" title="View Profile"><i class="fa-solid fa-user"></i> View Profile</button>
+                        <button class="action-btn btn-edit" title="Hire"><i class="fa-solid fa-briefcase"></i> Hire</button>
+                    </div>
+                </div>
+                <h3 class="post-title">Full Stack Web Developer - Expert in PHP, Laravel, and WordPress</h3>
+                <div class="post-description">Turn Your Web App Idea into a Fast, Scalable, and Beautiful Reality - Delivered On Time, Every Time! Hi, I'm Junaid - a results-driven Full-Stack Web Application Developer specializing in React, Next.js, MERN stack, and API integrations. Whether you need</div>
+                <div class="post-skills">
+                    <span class="skills-label">Skills:</span>
+                    <div class="skills-tags">
+                        <span class="skill-tag">Content SEO</span>
+                        <span class="skill-tag">Adobe XD</span>
+                        <span class="skill-tag">Web Design</span>
+                        <span class="skill-tag">Shopify</span>
+                    </div>
+                </div>
+                <div class="post-footer">
+                    <div class="post-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Rate</span>
+                            <span class="detail-value budget-amount">$40/hr</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Success</span>
+                            <span class="detail-value">90%</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Earnings</span>
+                            <span class="detail-value">$10K+</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <?php endfor; ?>
+        <div class="pagination" aria-label="Service pagination">
+            <button class="page-btn prev" disabled><i class="fa-solid fa-chevron-left"></i></button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn next"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+    </div>
+<?php
+    return;
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -6,8 +73,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Link to external CSS files -->
+    <link rel="stylesheet" href="assets/css/cardList.css">
+    <link rel="stylesheet" href="assets/css/clientPosts.css">
     <link rel="stylesheet" href="assets/css/searchResultsStyle.css">
-    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <title>Search for services..</title>
 </head>
@@ -19,9 +88,9 @@
         <div class="search-header">
             <div class="search-button">
                 <input type="text" placeholder="Search for services">
-                <button><i class="fa-light fa-magnifying-glass"></i></button>
+                <button><i class="fa-solid fa-magnifying-glass"></i></button>
             </div>
-            <button class="filter"><i class="fa-light fa-filter-list"></i></button>
+            <button class="filter"><i class="fa-solid fa-filter"></i></button>
         </div>  -->
         <div class="search-bottom">
             <!-- Search Filters -->
@@ -31,7 +100,7 @@
                     <hr>
                 </div>
                 <div class="filter-item">
-                    <div class="filter-title"><span>Hourly rate</span><i class="fa-light fa-chevron-down rotated"></i>
+                    <div class="filter-title"><span>Hourly rate</span><i class="fa-solid fa-chevron-down rotated"></i>
                     </div>
                     <ul class="filter-options active radios">
                         <li><input type="radio" name="rate" id="rate" checked>Any hourly rate</li>
@@ -42,7 +111,7 @@
                     </ul>
                 </div>
                 <div class="filter-item">
-                    <div class="filter-title"><span>Project success</span><i class="fa-light fa-chevron-down"></i></div>
+                    <div class="filter-title"><span>Project success</span><i class="fa-solid fa-chevron-down"></i></div>
                     <ul class="filter-options radios">
                         <li><input type="radio" name="success" id="success" checked>Any success rate</li>
                         <li><input type="radio" name="success" id="success">90% & up</li>
@@ -52,7 +121,7 @@
                     </ul>
                 </div>
                 <div class="filter-item">
-                    <div class="filter-title"><span>Total Earnings</span><i class="fa-light fa-chevron-down"></i></div>
+                    <div class="filter-title"><span>Total Earnings</span><i class="fa-solid fa-chevron-down"></i></div>
                     <ul class="filter-options radios">
                         <li><input type="radio" name="earnings" id="earnings" checked>Any amount earned</li>
                         <li><input type="radio" name="earnings" id="earnings">$1+ earned</li>
@@ -63,7 +132,7 @@
                     </ul>
                 </div>
                 <div class="filter-item">
-                    <div class="filter-title"><span>Language</span><i class="fa-light fa-chevron-down"></i></div>
+                    <div class="filter-title"><span>Language</span><i class="fa-solid fa-chevron-down"></i></div>
                     <ul class="filter-options checkboxes">
                         <li><input type="checkbox" name="language" id="language" checked>English</li>
                         <li><input type="checkbox" name="language" id="language">Sinhala</li>
@@ -94,7 +163,7 @@
                     <div class="sort-selection">
                         <div class="selection-input-field">
                             <input type="selection-input" id="selection-input" name="sort" value="Sort By Relevence"
-                                disabled><i class="fa-light fa-chevron-down"></i>
+                                disabled><i class="fa-solid fa-chevron-down"></i>
                         </div>
                         <div class="selection-options" id="selection-options">
                             <div class="opt">Sort By Relevence</div>
@@ -106,50 +175,62 @@
                 <!-- Search Results -->
 
                 <div class="item-list">
-                    <?php
-                    // Sample data for demonstration
-                    $len = 2; // Replace with the actual number of providers
-                    for ($i = 0; $i < $len; $i++) { ?>
+                    <?php for ($i = 0; $i < 2; $i++): ?>
                         <div class="search-item">
-                            <div class="item-head">
-                                <div class="item-img"><img src="sampleImg.jpg" alt=""></div>
-                                <div class="item-main-dets">
-                                    <div class="item-name">Chethiya Bandara</div>
-                                    <div class="item-title">Full Stack Web Developer - Expert in PHP, Laravel, and WordPress
+                            <div class="post-header">
+                                <div class="post-meta">
+                                    <div class="provider-info">
+                                        <div class="provider-image"><img src="sampleImg.jpg" alt="Provider"></div>
+                                        <div class="provider-details">
+                                            <div class="provider-name">Chethiya Bandara</div>
+                                            <div class="provider-location">Gampaha</div>
+                                            <div class="provider-meta-row">
+                                                <span class="provider-rating"><i class="fa-solid fa-star"></i>4.9</span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="item-district">Gampaha</div>
                                 </div>
-                                <div class="button">
-                                    <button class="message-btn" title="Message Provider"><i class="fa-regular fa-messages"></i></button>
-                                    <button class="view-profile"><i class="fa-regular fa-user"></i> View Profile</button>
-                                    <button class="hire-btn"><i class="fa-regular fa-briefcase"></i> Hire</button>
+                                <div class="post-actions">
+                                    <button class="action-btn btn-view" title="Message Provider"><i class="fa-solid fa-messages"></i> Message</button>
+                                    <button class="action-btn btn-view" title="View Profile"><i class="fa-solid fa-user"></i> View Profile</button>
+                                    <button class="action-btn btn-edit" title="Hire"><i class="fa-solid fa-briefcase"></i> Hire</button>
                                 </div>
                             </div>
-                            <div class="item-middle">
-                                <div class="rate">$40/hr</div>
-                                <div class="success"><i class="fa-solid fa-shield-check"></i>90% Project Success</div>
-                                <div class="total-earn">$10K+ earned</div>
+                            <h3 class="post-title">Full Stack Web Developer - Expert in PHP, Laravel, and WordPress</h3>
+                            <div class="post-description">Turn Your Web App Idea into a Fast, Scalable, and Beautiful Reality - Delivered On Time, Every Time! Hi, I'm Junaid - a results-driven Full-Stack Web Application Developer specializing in React, Next.js, MERN stack, and API integrations. Whether you need</div>
+                            <div class="post-skills">
+                                <span class="skills-label">Skills:</span>
+                                <div class="skills-tags">
+                                    <span class="skill-tag">Content SEO</span>
+                                    <span class="skill-tag">Adobe XD</span>
+                                    <span class="skill-tag">Web Design</span>
+                                    <span class="skill-tag">Shopify</span>
+                                </div>
                             </div>
-                            <div class="item-tags">
-                                <span>Conten SEO</span>
-                                <span>Adobe XD</span>
-                                <span>Web Design</span>
-                                <span>Shopify</span>
+                            <div class="post-footer">
+                                <div class="post-details">
+                                    <div class="detail-item">
+                                        <span class="detail-label">Rate</span>
+                                        <span class="detail-value budget-amount">$40/hr</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Success</span>
+                                        <span class="detail-value">90%</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Earnings</span>
+                                        <span class="detail-value">$10K+</span>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="item-description">Turn Your Web App Idea into a Fast, Scalable, and Beautiful
-                                Reality —
-                                Delivered On Time, Every Time! Hi, I’m Junaid — a results-driven Full-Stack Web Application
-                                Developer specializing in React, Next.js, MERN stack, and API integrations. Whether you need
-                            </div>
-                            <div class="bottom-button"><button>View profile</button></div>
                         </div>
-                    <?php } ?>
+                    <?php endfor; ?>
                     <div class="pagination" aria-label="Provider Pagination">
-                        <button class="page-btn prev" disabled><i class="fa-regular fa-chevron-left"></i></button>
+                        <button class="page-btn prev" disabled><i class="fa-solid fa-chevron-left"></i></button>
                         <button class="page-btn active">1</button>
                         <button class="page-btn">2</button>
                         <button class="page-btn">3</button>
-                        <button class="page-btn next"><i class="fa-regular fa-chevron-right"></i></button>
+                        <button class="page-btn next"><i class="fa-solid fa-chevron-right"></i></button>
                     </div>
                 </div>
             </div>
@@ -162,11 +243,11 @@
         <div class="pop-up deactive">
             <div class="pop-up-header">
                 <div class="pop-up-title">Select Category</div>
-                <i class="fa-light fa-xmark" id="category-pop-up"></i>
+                <i class="fa-solid fa-xmark" id="category-pop-up"></i>
             </div>
             <hr>
             <div class="pop-search-button">
-                <i class="fa-light fa-magnifying-glass"></i><input type="text" placeholder="Search categories....">
+                <i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Search categories....">
             </div>
             <div class="pop-up-content">
                 <div class="pop-up-item">
@@ -255,18 +336,18 @@
         <div class="pop-up deactive">
             <div class="pop-up-header">
                 <div class="pop-up-title">Select Location</div>
-                <i class="fa-light fa-xmark" id="location-pop-up"></i>
+                <i class="fa-solid fa-xmark" id="location-pop-up"></i>
             </div>
             <hr>
             <div class="pop-search-button">
-                <i class="fa-light fa-magnifying-glass"></i><input type="text" placeholder="Search location....">
+                <i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Search location....">
             </div>
             <div class="pop-up-content">
                 <div class="pop-up-item">
                     <div class="pop-up-item-name">All in SriLanka</div>
                 </div>
                 <div class="filter-item">
-                    <div class="filter-title"><span>Colombo</span><i class="fa-light fa-chevron-down rotated"></i>
+                    <div class="filter-title"><span>Colombo</span><i class="fa-solid fa-chevron-down rotated"></i>
                     </div>
                     <ul class="filter-options radios">
                         <li>
@@ -287,7 +368,7 @@
                     </ul>
                 </div>
                 <div class="filter-item">
-                    <div class="filter-title"><span>Gampaha</span><i class="fa-light fa-chevron-down rotated"></i>
+                    <div class="filter-title"><span>Gampaha</span><i class="fa-solid fa-chevron-down rotated"></i>
                     </div>
                     <ul class="filter-options radios">
                         <li>
@@ -308,7 +389,7 @@
                     </ul>
                 </div>
                 <div class="filter-item">
-                    <div class="filter-title"><span>Kandy</span><i class="fa-light fa-chevron-down rotated"></i>
+                    <div class="filter-title"><span>Kandy</span><i class="fa-solid fa-chevron-down rotated"></i>
                     </div>
                     <ul class="filter-options radios">
                         <li>

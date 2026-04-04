@@ -14,7 +14,7 @@ if (session_status() === PHP_SESSION_NONE) {
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/gridTemplates.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/login.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/login-inline.css">
-    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
 <body>
@@ -63,6 +63,12 @@ if (session_status() === PHP_SESSION_NONE) {
         </form>
     </div>
     <script src="<?= BASE_URL ?>/assets/js/login.js" defer></script>
+
+    <script>
+        window.addEventListener("load", ()=> {
+            showAlert("Hi");
+        })
+    </script>
 </body>
 
 </html>

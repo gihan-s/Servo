@@ -193,6 +193,11 @@ switch ($url) {
         $controller->create();
         break;
 
+    case 'requests/direct-request':
+        $controller = new PostController();
+        $controller->createDirectRequest();
+        break;
+
     case (preg_match('#^requests/view/(\d+)$#', $url, $m) ? true : false):
         (new PostController())->viewPost((int)$m[1]);
         break;
@@ -207,6 +212,10 @@ switch ($url) {
 
     case (preg_match('#^requests/publish/(\d+)$#', $url, $m) ? true : false):
         (new PostController())->publishById((int)$m[1]);
+        break;
+
+    case (preg_match('#^requests/send-request/(\d+)$#', $url, $m) ? true : false):
+        (new PostController())->sendRequestToProvider((int)$m[1]);
         break;
 
     case (preg_match('#^requests/update-expired/(\d+)$#', $url, $m) ? true : false):
@@ -231,6 +240,16 @@ switch ($url) {
     case 'providers':
         $controller = new ProviderController();
         $controller->index();
+        break;
+
+    case 'providers/search':
+        $controller = new ProviderController();
+        $controller->search();
+        break;
+
+    case 'providers/services':
+        $controller = new ProviderController();
+        $controller->getServices();
         break;
 
     case 'earnings':
@@ -271,6 +290,15 @@ switch ($url) {
     case 'admin/providers/provider-review':
         $controller = new AdminProviderController();
         $controller->review();
+        break;
+
+    case 'messages/get-messages':
+        $controller = new MessageController();
+        $controller->getMessages();
+        break;
+
+    case 'test/inputs':
+        include '../inputs.html';
         break;
 
     default:
