@@ -170,6 +170,14 @@ body {
     box-shadow: 0 0 0 1px var(--green);
 }
 
+.no-conversations {
+    text-align: center;
+    padding: 40px 20px;
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 500;
+}
+
 .avatar {
     width: 50px;
     height: 50px;
