@@ -23,8 +23,7 @@ class SkillsModel extends Database
                 WHERE c.Category_ID = ?
                 ORDER BY s.Skill";
         $stmt = $this->conn->prepare($sql);
-        if (!$stmt)
-            return [];
+        if (!$stmt) return [];
         $stmt->bind_param('i', $categoryId);
         $stmt->execute();
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC) ?: [];
@@ -88,26 +87,46 @@ class SkillsModel extends Database
     }
 
 
-    public function getByProviderCategoryIds(array $categoryIds): array
+    public function getSkillsByProviderID(int $Provider_ID): array
     {
-        if (empty($categoryIds)) {
+
+        if (empty($Provider_ID)) {
             return [];
         }
 
-        $placeholders = implode(',', array_fill(0, count($categoryIds), '?'));
-        $types = str_repeat('i', count($categoryIds));
-
         $stmt = $this->conn->prepare(
-            "SELECT Provider_Categories_ID, Skill FROM Skills WHERE Provider_Categories_ID IN ($placeholders)"
+            "SELECT 
+                pc.ID,
+                s.Skill
+            FROM provider_categories pc
+            JOIN provider_categories_has_skills pchs 
+                ON pchs.Provider_Categories_ID = pc.ID
+            JOIN skills s 
+                ON s.Skill_ID = pchs.Skills_Skill_ID
+            WHERE pc.Provider_ID = ?
+            ORDER BY pc.ID"
         );
-        $stmt->bind_param($types, ...$categoryIds);
+
+        $stmt->bind_param("i", $Provider_ID);
         $stmt->execute();
 
-        $skills = [];
-        foreach ($stmt->get_result()->fetch_all(MYSQLI_ASSOC) as $row) {
-            $skills[$row['Provider_Categories_ID']][] = $row["Skill"];
+        $result = $stmt->get_result();
+
+        $data = [];
+
+        while ($row = $result->fetch_assoc()) {
+            $provcategoryId = $row['ID'];
+            $skill = $row['Skill'];
+
+            if (!isset($data[$provcategoryId])) {
+                $data[$provcategoryId] = [];
+            }
+
+            $data[$provcategoryId][] = $skill;
         }
 
-        return $skills;
+        $stmt->close();
+
+        return $data;
     }
 }

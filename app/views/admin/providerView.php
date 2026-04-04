@@ -134,7 +134,8 @@ if ($user["Resume"] != '') {
                     <div class="detail-item">
                         <span class="detail-label">
                             <i class="fa-solid fa-circle-dollar"></i>
-                            Rs. <?= number_format($Category['Default_Price'], 2) ?> / hr
+                            Rs. <?= number_format($Category['Default_Price'], 2) ?> / <?= htmlspecialchars($Category['Price_Type']) ?>
+                            <?= ($Category['Price_Negotiability'] == 1 ? "(Negotiable)" : "") ?>
                         </span>
                     </div>
                 </div>

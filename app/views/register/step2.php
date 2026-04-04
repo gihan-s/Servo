@@ -73,12 +73,61 @@ $BaseURL = "..";
                                 <div class="label text-label">Bio</div>
                                 <textarea class="text-field" name="bio" spellcheck="false"><?= getFromSession('bio') ?></textarea>
                             </div>
-                        </div>
-                        <div class="input-grid-1">
+
                             <div class="text-container">
                                 <div class="label text-label">Website</div>
                                 <input type="text" class="text-field" name="website" value="<?= getFromSession('website') ?>" id="">
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="hr-title-container" style="margin-top: 25px;">
+                        <span class="hr-title">Social Media Links</span>
+                        <hr class="hr-line">
+                    </div>
+
+                    <div class="social-media-link-wrapper">
+                         <div>
+                            <span>
+                                <i class="fa-brands fa-linkedin"></i>
+                                Linked In
+                            </span>
+                            <input type="text" name="social_media_linkedin" value="<?= getFromSession('linkedin') ?>">
+                        </div>
+                        <div>
+                            <span>
+                                <i class="fa-brands fa-facebook"></i>
+                                Facebook
+                            </span>
+                            <input type="text" name="social_media_facebook" value="<?= getFromSession('facebook') ?>">
+                        </div>
+                        <div>
+                            <span>
+                                <i class="fa-brands fa-instagram"></i>
+                                Instagram
+                            </span>
+                            <input type="text" name="social_media_instagram" value="<?= getFromSession('instagram') ?>">
+                        </div>
+                        <div>
+                            <span>
+                                <i class="fa-brands fa-tiktok"></i>
+                                Tiktok
+                            </span>
+                            <input type="text" name="social_media_tiktok" value="<?= getFromSession('tiktok') ?>">
+                        </div>
+                        <div>
+                            <span>
+                                <i class="fa-brands fa-youtube"></i>
+                                Youtube
+                            </span>
+                            <input type="text" name="social_media_youtube" value="<?= getFromSession('youtube') ?>">
+                        </div>
+                        <div>
+                            <span>
+                                <i class="fa-brands fa-github"></i>
+                                Github
+                            </span>
+                            <input type="text" name="social_media_github" value="<?= getFromSession('github') ?>">
                         </div>
                     </div>
 

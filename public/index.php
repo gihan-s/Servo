@@ -297,6 +297,10 @@ switch ($url) {
         $controller->getMessages();
         break;
 
+    case 'test/inputs':
+        include '../inputs.html';
+        break;
+
     default:
         $controller = new NotFoundController();
         $controller->index();

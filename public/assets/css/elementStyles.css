@@ -288,6 +288,10 @@
 .checkbox-container label {
   height: 29px;
   line-height: 29px;
+  padding: 2px;
+  margin-left: 5px;
+  display: inline-block;
+  pointer-events: none;
 }
 
 .checkbox-container input {
@@ -562,6 +566,7 @@
 
   box-shadow: 1px 1px 5px 0px rgba(0, 0, 0, 0.08);
   padding: 0 20px;
+  padding-bottom: 20px;
   background-color: white;
 
   animation: modelPopupAnimation 0.15s linear alternate;
@@ -702,7 +707,7 @@
   gap: 10px;
 }
 
-.chip-wrapper p{
+.chip-wrapper p {
   font-size: 0.8em;
   opacity: 0.7;
   margin: 0;
@@ -734,7 +739,7 @@
 /* Option Menu */
 
 
-.option-menu{
+.option-menu {
   position: relative;
   display: inline-block;
 }
@@ -790,7 +795,7 @@
 }
 
 .option-menu-content.active {
-  
+
 
   transform: scale(1);
 }
@@ -824,33 +829,38 @@
 
 
 
-.chip-blue, .chip-yellow, .chip-green, .chip-purple, .chip-orange, .chip-red{
+.chip-blue,
+.chip-yellow,
+.chip-green,
+.chip-purple,
+.chip-orange,
+.chip-red {
   padding: 5px;
   border-radius: 5px;
   color: white;
 }
 
-.chip-blue{
+.chip-blue {
   background-color: #007bff;
 }
 
-.chip-yellow{
+.chip-yellow {
   background-color: #ffc107;
 }
 
-.chip-green{
+.chip-green {
   background-color: #28a745;
 }
 
-.chip-purple{
+.chip-purple {
   background-color: #6610f2;
 }
 
-.chip-orange{
+.chip-orange {
   background-color: #f76f00;
 }
 
-.chip-red{
+.chip-red {
   background-color: red;
 }
 
@@ -858,202 +868,202 @@
 
 /* Validation tooltip styles */
 .validation-tooltip {
-    position: absolute;
-    bottom: -30px;
-    left: 0;
-    background-color: #ff4444;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 4px;
-    font-size: 12px;
-    white-space: nowrap;
-    z-index: 1000;
-    opacity: 0;
-    transform: translateY(-5px);
-    transition: all 0.3s ease;
-    pointer-events: none;
+  position: absolute;
+  bottom: -30px;
+  left: 0;
+  background-color: #ff4444;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 1000;
+  opacity: 0;
+  transform: translateY(-5px);
+  transition: all 0.3s ease;
+  pointer-events: none;
 }
 
 .validation-tooltip::before {
-    content: '';
-    position: absolute;
-    top: -5px;
-    left: 15px;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-bottom: 5px solid #ff4444;
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: 15px;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 5px solid #ff4444;
 }
 
 .validation-tooltip.show {
-    opacity: 1;
-    transform: translateY(0);
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .text-field.error {
-    border-color: #ff4444 !important;
-    box-shadow: 0 0 5px rgba(255, 68, 68, 0.3);
+  border-color: #ff4444 !important;
+  box-shadow: 0 0 5px rgba(255, 68, 68, 0.3);
 }
 
 
 
 /* Toast Container */
 .toast-container {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 9999;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    pointer-events: none;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
 }
 
 /* Toast Item */
 .toast {
-    background-color: var(--containerColor, #ffffff);
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    padding: 16px 20px;
-    min-width: 400px;
-    max-width: 600px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    pointer-events: all;
-    transform: translateY(-120%);
-    opacity: 0;
-    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  background-color: var(--containerColor, #ffffff);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  padding: 16px 20px;
+  min-width: 400px;
+  max-width: 600px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  pointer-events: all;
+  transform: translateY(-120%);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
 .toast.show {
-    transform: translateY(0);
-    opacity: 1;
+  transform: translateY(0);
+  opacity: 1;
 }
 
 .toast.hide {
-    transform: translateY(-120%);
-    opacity: 0;
+  transform: translateY(-120%);
+  opacity: 0;
 }
 
 /* Toast Icon */
 .toast-icon {
-    flex-shrink: 0;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
 }
 
 /* Toast Content */
 .toast-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .toast-title {
-    font-weight: 600;
-    font-size: 14px;
-    color: var(--textColor, #333);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--textColor, #333);
 }
 
 .toast-message {
-    font-size: 13px;
-    color: var(--textColorGray, #666);
-    line-height: 1.4;
+  font-size: 13px;
+  color: var(--textColorGray, #666);
+  line-height: 1.4;
 }
 
 /* Toast Close Button */
 .toast-close {
-    flex-shrink: 0;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: background-color 0.2s;
-    color: var(--textColorGray, #666);
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  color: var(--textColorGray, #666);
 }
 
 .toast-close:hover {
-    background-color: rgba(0, 0, 0, 0.05);
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 /* Toast Types */
 .toast.success {
-    border-left: 4px solid #10b981;
+  border-left: 4px solid #10b981;
 }
 
 .toast.success .toast-icon {
-    color: #10b981;
+  color: #10b981;
 }
 
 .toast.error {
-    border-left: 4px solid #ef4444;
+  border-left: 4px solid #ef4444;
 }
 
 .toast.error .toast-icon {
-    color: #ef4444;
+  color: #ef4444;
 }
 
 .toast.warning {
-    border-left: 4px solid #f59e0b;
+  border-left: 4px solid #f59e0b;
 }
 
 .toast.warning .toast-icon {
-    color: #f59e0b;
+  color: #f59e0b;
 }
 
 .toast.info {
-    border-left: 4px solid #3b82f6;
+  border-left: 4px solid #3b82f6;
 }
 
 .toast.info .toast-icon {
-    color: #3b82f6;
+  color: #3b82f6;
 }
 
 /* Progress Bar */
 .toast-progress {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    height: 3px;
-    background-color: currentColor;
-    opacity: 0.3;
-    transition: width linear;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background-color: currentColor;
+  opacity: 0.3;
+  transition: width linear;
 }
 
 .toast.success .toast-progress {
-    color: #10b981;
+  color: #10b981;
 }
 
 .toast.error .toast-progress {
-    color: #ef4444;
+  color: #ef4444;
 }
 
 .toast.warning .toast-progress {
-    color: #f59e0b;
+  color: #f59e0b;
 }
 
 .toast.info .toast-progress {
-    color: #3b82f6;
+  color: #3b82f6;
 }
 
 /* Responsive */
 @media (max-width: 480px) {
-    .toast-container {
-        top: 10px;
-        right: 10px;
-        left: 10px;
-    }
+  .toast-container {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+  }
 
-    .toast {
-        min-width: auto;
-        max-width: 100%;
-    }
+  .toast {
+    min-width: auto;
+    max-width: 100%;
+  }
 }

@@ -75,20 +75,25 @@ class ProviderModel extends Database
     public function insertProviderCategory($Provider_ID, $data, $key)
     {
         $stmt = $this->conn->prepare(
-            "INSERT INTO Provider_Categories (`Category_ID`, `Provider_ID`, `Title`, `Description`, `Default_Price`) 
-                VALUES (?, ?, ?, ?, ?)"
+            "INSERT INTO Provider_Categories (`Category_ID`, `Provider_ID`, `Title`, `Description`, `Default_Price`, `Price_Type`, `Portfolio_Link`, `Price_Negotiability`) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
         );
+
+        $PriceNegotiability = $data['price_negotiability'][$key] == 'true' ? 1 : 0;
 
         if (!$stmt) {
             die("Prepare failed: " . $this->conn->error);
         }
         $stmt->bind_param(
-            "sssss",
+            "sssssssi",
             $data['category_id'][$key],
             $Provider_ID,
             $data['title'][$key],
             $data['description'][$key],
-            $data['default_price'][$key]
+            $data['default_price'][$key],
+            $data['price_type'][$key],
+            $data['portfolio_link'][$key],
+            $PriceNegotiability
         );
 
         if ($stmt->execute()) {
@@ -101,20 +106,65 @@ class ProviderModel extends Database
     }
 
 
-    public function insertSkill($Provider_Category_ID, $Skill)
+    public function insertProviderSocialLinks($Provider_ID, $SocialType, $SocialLink)
     {
         $stmt = $this->conn->prepare(
-            "INSERT INTO Skills (`Skill`, `Provider_Categories_ID`) 
-                VALUES (?, ?)"
+            "INSERT INTO provider_social (`Social_Type`, `Social_Link`, `Provider_ID`) 
+                VALUES (?, ?, ?)"
+        );
+        $stmt->bind_param(
+            "ssi",
+            $SocialType,
+            $SocialLink,
+            $Provider_ID,
+        );
+
+        if ($stmt->execute()) {
+            $id = $stmt->insert_id;
+            $stmt->close();
+            return $id;
+        } else {
+            die("Insert failed: " . $stmt->error);
+        }
+    }
+
+
+    public function insertSkill($Category_ID, $Skill)
+    {
+        $stmt = $this->conn->prepare(
+            "INSERT INTO Skills (`Skill`, `Category_ID`) 
+            VALUES (?, ?)
+            ON DUPLICATE KEY UPDATE 
+            Skill_ID = LAST_INSERT_ID(Skill_ID)"
         );
 
         if (!$stmt) {
             die("Prepare failed: " . $this->conn->error);
         }
+
+        $stmt->bind_param("si", $Skill, $Category_ID);
+
+        if ($stmt->execute()) {
+            $id = $this->conn->insert_id; // <-- THIS is the key
+            $stmt->close();
+            return $id;
+        } else {
+            die("Insert failed: " . $stmt->error);
+        }
+    }
+
+
+        public function insertProviderSkills($ProviderCategoryID, $SkillID)
+    {
+        $stmt = $this->conn->prepare(
+            "INSERT INTO provider_categories_has_skills (`Provider_Categories_ID`, `Skills_Skill_ID`) 
+                VALUES (?, ?)"
+        );
+
         $stmt->bind_param(
-            "ss",
-            $Skill,
-            $Provider_Category_ID
+            "ii",
+            $ProviderCategoryID,
+            $SkillID
         );
 
         if ($stmt->execute()) {

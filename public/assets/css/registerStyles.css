@@ -542,3 +542,38 @@ input:-webkit-autofill:active {
     font-weight: 400;
     color: #00000090;
 }
+
+.social-media-link-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+.social-media-link-wrapper div{
+    display: grid;
+    grid-template-columns: 120px auto;
+    text-align: left;
+}
+
+.social-media-link-wrapper div span{
+    color: white;
+    background-color: var(--primary-color);
+    padding: 5px 10px;
+    border-radius: 10px 0px 0px 10px;
+    font-size: 0.9em;
+}
+
+.social-media-link-wrapper div span i{
+    margin-right: 5px;
+}
+
+.social-media-link-wrapper div input{
+    outline: none;
+    border: 1px solid rgb(224, 224, 224);
+    border-radius: 0px 10px 10px 0px;
+}
+
+.social-media-link-wrapper div input:focus{
+    border: 2px solid var(--primary-color);
+}
