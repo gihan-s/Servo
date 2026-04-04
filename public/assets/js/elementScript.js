@@ -283,6 +283,10 @@ for (let i = 0; i < searchDropdowns.length; i++) {
 
     let textField = element.querySelector(".options input");
 
+    if (!textField) {
+        continue;
+    }
+
     textField.addEventListener("keyup", (event) => {
 
         newAllOptions = event.target.parentElement.parentElement.querySelectorAll(".option-list div");

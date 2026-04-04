@@ -26,7 +26,7 @@ $uriNoBase  = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '/';
 if ($_SESSION['role'] === 'Provider') {
     $navLinks = [
         ['label' => 'Dashboard', 'href' => BASE_URL . '/dashboard', 'class' => '"fas fa-gauge"'],
-        ['label' => 'Feeds', 'href' => BASE_URL . '/feeds', 'class' => '"fas fa-briefcase"'],
+        ['label' => 'Feed', 'href' => BASE_URL . '/feeds', 'class' => '"fas fa-briefcase"'],
         ['label' => 'Bids', 'href' => BASE_URL . '/bids', 'class' => '"fas fa-coins"'],
         ['label' => 'Projects', 'href' => BASE_URL . '/projects', 'class' => '"fas fa-layer-group"'],
         ['label' => 'Earnings', 'href' => BASE_URL . '/earnings', 'class' => '"fas fa-money-bill-wave"'],
@@ -257,6 +257,7 @@ $navRight = [
     renderNotifications(); updateBadge();
 
     function distribute() {
+        if (!overflowWrap || !overflowMenu || !trigger) return; // skip if overflow elements don't exist
         if (window.innerWidth > 1150) { // reset
             overflowWrap.hidden = true; overflowMenu.innerHTML = '';
             [...linksContainer.querySelectorAll('.overflow-clone')].forEach(el => { el.classList.remove('overflow-clone'); });
@@ -284,23 +285,24 @@ $navRight = [
     }
 
     function toggleOverflow() {
+        if (!overflowMenu || !trigger) return;
         const open = overflowMenu.style.display === 'flex';
         if (open) { overflowMenu.style.display = 'none'; trigger.setAttribute('aria-expanded', 'false'); }
         else { overflowMenu.style.display = 'flex'; }
     }
     trigger && trigger.addEventListener('click', toggleOverflow);
-    window.addEventListener('resize', () => { distribute(); if (window.innerWidth > 760 && drawer.classList.contains('open')) closeDrawer(); });
-    window.addEventListener('click', e => { if (trigger && !trigger.contains(e.target) && !overflowMenu.contains(e.target)) { overflowMenu.style.display = 'none'; trigger.setAttribute('aria-expanded', 'false'); } });
+    window.addEventListener('resize', () => { distribute(); if (drawer && window.innerWidth > 760 && drawer.classList.contains('open')) closeDrawer(); });
+    window.addEventListener('click', e => { if (trigger && overflowMenu && !trigger.contains(e.target) && !overflowMenu.contains(e.target)) { overflowMenu.style.display = 'none'; trigger.setAttribute('aria-expanded', 'false'); } });
 
     // Drawer
-    function openDrawer() { drawer.classList.add('open'); drawerOverlay.classList.add('show'); hamburger.setAttribute('aria-expanded', 'true'); document.body.style.overflow = 'hidden'; cloneLinksToDrawer(); }
-    function closeDrawer() { drawer.classList.remove('open'); drawerOverlay.classList.remove('show'); hamburger.setAttribute('aria-expanded', 'false'); document.body.style.overflow = ''; }
-    function cloneLinksToDrawer() { drawerLinks.innerHTML = '';[...linksContainer.querySelectorAll('a')].forEach(a => { const c = a.cloneNode(true); c.classList.remove('overflow-item'); c.classList.add('drawer-link'); drawerLinks.appendChild(c); }); }
-    hamburger && hamburger.addEventListener('click', () => { drawer.classList.contains('open') ? closeDrawer() : openDrawer(); });
+    function openDrawer() { if (!drawer || !drawerOverlay || !hamburger) return; drawer.classList.add('open'); drawerOverlay.classList.add('show'); hamburger.setAttribute('aria-expanded', 'true'); document.body.style.overflow = 'hidden'; cloneLinksToDrawer(); }
+    function closeDrawer() { if (!drawer || !drawerOverlay || !hamburger) return; drawer.classList.remove('open'); drawerOverlay.classList.remove('show'); hamburger.setAttribute('aria-expanded', 'false'); document.body.style.overflow = ''; }
+    function cloneLinksToDrawer() { if (!drawerLinks) return; drawerLinks.innerHTML = '';[...linksContainer.querySelectorAll('a')].forEach(a => { const c = a.cloneNode(true); c.classList.remove('overflow-item'); c.classList.add('drawer-link'); drawerLinks.appendChild(c); }); }
+    hamburger && hamburger.addEventListener('click', () => { if (drawer) { drawer.classList.contains('open') ? closeDrawer() : openDrawer(); } });
     drawerClose && drawerClose.addEventListener('click', closeDrawer);
     drawerOverlay && drawerOverlay.addEventListener('click', closeDrawer);
-    window.addEventListener('keydown', e => { if (e.key === 'Escape' && drawer.classList.contains('open')) closeDrawer(); });
-    drawer.addEventListener('click', e => { if (e.target.matches('a')) closeDrawer(); });
+    window.addEventListener('keydown', e => { if (drawer && e.key === 'Escape' && drawer.classList.contains('open')) closeDrawer(); });
+    drawer && drawer.addEventListener('click', e => { if (e.target.matches('a')) closeDrawer(); });
 
     // Initialize after load to ensure widths measurable
     window.addEventListener('load', () => { distribute(); positionNotif(); });
