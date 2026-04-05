@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/elementStyles.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/gridTemplates.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="<?= BASE_URL ?>/assets/js/elementScript.js" defer></script>
     <title>Find Services and Providers</title>
     <style>
         .results-layout {
@@ -470,32 +471,15 @@
         const providerTab = document.getElementById('providers');
         const serviceSection = document.querySelector('.services.requests-section');
         const providerSection = document.querySelector('.providers.requests-section');
-        const providerInitialMarkup = providerSection ? providerSection.innerHTML : '';
-        let providerLoadTimeout = null;
 
         function showProvidersWithLoading() {
             if (!providerSection) {
                 return;
             }
 
-            if (providerLoadTimeout) {
-                clearTimeout(providerLoadTimeout);
+            if (typeof window.loadProviders === 'function') {
+                window.loadProviders(1);
             }
-
-            providerSection.innerHTML = `
-                <div class="loading-state">
-                    <i class="fas fa-spinner fa-spin"></i>
-                    <p>Loading providers...</p>
-                </div>
-            `;
-
-            providerLoadTimeout = setTimeout(function () {
-                providerSection.innerHTML = providerInitialMarkup;
-
-                if (typeof window.loadProviders === 'function') {
-                    window.loadProviders(1);
-                }
-            }, 300);
         }
 
         serviceTab.addEventListener('click', function () {
@@ -503,19 +487,6 @@
             providerTab.classList.remove('active');
             serviceSection.classList.add('active');
             providerSection.classList.remove('active');
-
-            if (providerLoadTimeout) {
-                clearTimeout(providerLoadTimeout);
-                providerLoadTimeout = null;
-            }
-
-            if (providerSection && providerSection.innerHTML !== providerInitialMarkup) {
-                providerSection.innerHTML = providerInitialMarkup;
-
-                if (typeof window.loadProviders === 'function') {
-                    window.loadProviders(1);
-                }
-            }
         });
 
         providerTab.addEventListener('click', function () {

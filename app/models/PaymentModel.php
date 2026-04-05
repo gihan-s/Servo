@@ -17,7 +17,7 @@ require_once __DIR__ . '/../core/Database.php';
 
 class PaymentModel extends Database {
     public function getPaymentsByClientId($clientId) {
-        // $stmt = $this->conn->prepare("SELECT * FROM Payment WHERE Client_ID = ?");
+        // $stmt = $this->conn->prepare("SELECT * FROM payment WHERE Client_ID = ?");
         // $stmt->bind_param("i", $clientId);
         // $stmt->execute();
         // $result = $stmt->get_result();
@@ -27,7 +27,7 @@ class PaymentModel extends Database {
     }
 
     public function getPaymentsCountByClientId($clientId, $status = null) {
-        // $query = "SELECT COUNT(*) as count FROM Payment WHERE Client_ID = ?";
+        // $query = "SELECT COUNT(*) as count FROM payment WHERE Client_ID = ?";
         // if ($status) {
         //     $query .= " AND Status = ?";
         // }
@@ -46,7 +46,7 @@ class PaymentModel extends Database {
     } 
 
     public function getTotalSpentByClientId($clientId) {
-        // $stmt = $this->conn->prepare("SELECT SUM(Amount) as total FROM Payment WHERE Client_ID = ? AND Status = 'Paid'");
+        // $stmt = $this->conn->prepare("SELECT SUM(Amount) as total FROM payment WHERE Client_ID = ? AND Status = 'Paid'");
         // $stmt->bind_param("i", $clientId);
         // $stmt->execute();
         // $result = $stmt->get_result();
@@ -57,7 +57,7 @@ class PaymentModel extends Database {
     }
 
     public function getRecentPaymentsByClientId($clientId, $limit = 3) {
-        // $stmt = $this->conn->prepare("SELECT * FROM Payment WHERE Client_ID = ? ORDER BY Date DESC LIMIT ?");
+        // $stmt = $this->conn->prepare("SELECT * FROM payment WHERE Client_ID = ? ORDER BY Date DESC LIMIT ?");
         // $stmt->bind_param("ii", $clientId, $limit);
         // $stmt->execute();
         // $result = $stmt->get_result();

@@ -7,7 +7,7 @@ class AdminUserModel extends Database
 
     public function getByUsername($username)
     {
-        $stmt = $this->conn->prepare("SELECT * FROM Admin WHERE Username = ? AND Status = 'Active'");
+        $stmt = $this->conn->prepare("SELECT * FROM admin WHERE Username = ? AND Status = 'Active'");
         $stmt->bind_param("s", $username);
         $stmt->execute();
         $result = $stmt->get_result();

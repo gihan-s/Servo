@@ -20,7 +20,7 @@
 			<ul class="footer-links">
 				<li><a href="#features"><i class="fa-solid fa-gauge-high"></i> Features</a></li>
 				<li><a href="#boosted"><i class="fa-solid fa-rocket"></i> Boosted Posts</a></li>
-				<li><a href="#categories"><i class="fa-solid fa-grid"></i> Categories</a></li>
+				<li><a href="#categories"><i class="fa-solid fa-list"></i> Categories</a></li>
 				<li><a href="#workflow"><i class="fa-solid fa-diagram-project"></i> How it Works</a></li>
 				<li><a href="#feedback"><i class="fa-solid fa-comments"></i> Success Stories</a></li>
 			</ul>

@@ -1,6 +1,8 @@
 <?php
 
 require_once __DIR__ . '/../models/MessageModel.php';
+require_once __DIR__ . '/../models/ClientModel.php';
+require_once __DIR__ . '/../models/ProviderModel.php';
 
 class MessageController extends BaseController
 {
@@ -53,5 +55,62 @@ class MessageController extends BaseController
         }
 
         echo json_encode($Messages);
+    }
+
+    public function startConversation()
+    {
+        $Client_ID = $_POST['Client_ID'];
+        $Provider_ID = $_POST['Provider_ID'];
+
+        $Model = new MessageModel;
+        $ProviderModel = new ProviderModel;
+        $ClientModel = new ClientModel;
+
+        $Conversation_ID = $Model->createOrGetConversation($Provider_ID, $Client_ID);
+
+        if ($_SESSION['role'] === 'Client') {
+            $otherUser = $ProviderModel->getProviderById($Provider_ID);
+        } else {
+            $otherUser = $ClientModel->getClientById($Client_ID);
+        }
+
+        echo json_encode([
+            'Conversation_ID' => $Conversation_ID,
+            'first_name' => $otherUser["First_Name"],
+            'last_name' => $otherUser["Last_Name"],
+            'profile_picture' => $otherUser["Profile_Picture"],
+        ]);
+    }
+
+
+    public function getUser()
+    {
+        // 🔒 Basic validation
+        if (!isset($_GET['id'])) {
+            echo json_encode(['error' => 'Missing user id']);
+            return;
+        }
+
+        $id = (int) $_GET['id'];
+
+        $ProviderModel = new ProviderModel;
+        $ClientModel = new ClientModel;
+        if ($_SESSION['role'] === 'Client') {
+            $user = $ProviderModel->getProviderById($id);
+        } else {
+            $user = $ClientModel->getClientById($id);
+        }
+
+        if (!$user) {
+            echo json_encode(['error' => 'User not found']);
+            return;
+        }
+
+         echo json_encode([
+            'id' => (isset($user["Provider_ID"])) ? $user["Provider_ID"] : $user["Client_ID"],
+            'first_name' => $user["First_Name"],
+            'last_name' => $user["Last_Name"],
+            'profile_picture' => $user["Profile_Picture"],
+        ]);
     }
 }

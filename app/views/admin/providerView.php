@@ -83,7 +83,7 @@ if ($user["Resume"] != '') {
     <div class="container" style="margin-bottom: 25px;">
         <h4 class="provider-subtitle">Resume</h4>
 
-        <iframe src="<?= BASE_URL ?>/file/user-files/<?= rawurlencode($user["Resume"]) ?>"
+        <iframe src="<?= BASE_URL ?>/file/user-files/<?= urlencode($user["Resume"]) ?>"
             width="100%"
             height="600px"
             style="border:none;">
@@ -134,7 +134,8 @@ if ($user["Resume"] != '') {
                     <div class="detail-item">
                         <span class="detail-label">
                             <i class="fa-solid fa-circle-dollar"></i>
-                            Rs. <?= number_format($Category['Default_Price'], 2) ?> / hr
+                            Rs. <?= number_format($Category['Default_Price'], 2) ?> / <?= htmlspecialchars($Category['Price_Type']) ?>
+                            <?= ($Category['Price_Negotiability'] == 1 ? "(Negotiable)" : "") ?>
                         </span>
                     </div>
                 </div>
