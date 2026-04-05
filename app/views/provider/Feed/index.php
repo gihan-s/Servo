@@ -57,14 +57,14 @@
 				<div class="requests-section active" style="display:block;">
 					<div class="item-list">
 						<?php foreach ($feedItems as $item): ?>
-							<article class="search-item" data-client="<?= htmlspecialchars($item['client'], ENT_QUOTES, 'UTF-8') ?>" data-title="<?= htmlspecialchars($item['title'], ENT_QUOTES, 'UTF-8') ?>" data-category="<?= htmlspecialchars($item['category'], ENT_QUOTES, 'UTF-8') ?>" data-budget="<?= htmlspecialchars($item['budget'], ENT_QUOTES, 'UTF-8') ?>" data-timeline="<?= htmlspecialchars($item['timeline'], ENT_QUOTES, 'UTF-8') ?>" data-posted="<?= htmlspecialchars($item['posted'], ENT_QUOTES, 'UTF-8') ?>" data-description="<?= htmlspecialchars($item['description'], ENT_QUOTES, 'UTF-8') ?>" data-status-label="<?= htmlspecialchars($item['statusLabel'], ENT_QUOTES, 'UTF-8') ?>">
+							<article class="search-item" data-client="<?= htmlspecialchars($item['Client_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-title="<?= htmlspecialchars($item['Title'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-category="<?= htmlspecialchars($item['Category_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-budget="<?= htmlspecialchars($item['Budget'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-timeline="<?= htmlspecialchars($item['Timeline'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-posted="<?= htmlspecialchars($item['Posted'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-description="<?= htmlspecialchars($item['Description'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-status="<?= htmlspecialchars($item['Post_Status'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
 								<div class="item-head">
 									<div class="item-main-dets">
-										<div class="item-name"><?= htmlspecialchars($item['client'], ENT_QUOTES, 'UTF-8') ?></div>
-										<div class="item-title"><?= htmlspecialchars($item['title'], ENT_QUOTES, 'UTF-8') ?></div>
+										<div class="item-name"><?= htmlspecialchars($item['Client_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
+										<div class="item-title"><?= htmlspecialchars($item['Title'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
 										<div class="item-district">
-											<span><i class="fa-solid fa-clock"></i> Posted <?= htmlspecialchars($item['posted'], ENT_QUOTES, 'UTF-8') ?></span>
-											<span><i class="fa-solid fa-tag"></i> Budget: <?= htmlspecialchars($item['budget'], ENT_QUOTES, 'UTF-8') ?></span>
+											<span><i class="fa-solid fa-clock"></i> Posted <?= htmlspecialchars($item['Posted'] ?? '', ENT_QUOTES, 'UTF-8') ?></span>
+											<span><i class="fa-solid fa-tag"></i> Budget: <?= htmlspecialchars($item['Budget'] ?? '', ENT_QUOTES, 'UTF-8') ?></span>
 										</div>
 									</div>
 									<div class="button">
@@ -74,11 +74,11 @@
 									</div>
 								</div>
 								<div class="item-middle">
-									<div><i class="fa-solid fa-calendar-days"></i> Timeline: <?= htmlspecialchars($item['timeline'], ENT_QUOTES, 'UTF-8') ?></div>
-									<div><i class="fa-solid fa-layer-group"></i> Category: <?= htmlspecialchars($item['category'], ENT_QUOTES, 'UTF-8') ?></div>
+									<div><i class="fa-solid fa-calendar-days"></i> Timeline: <?= htmlspecialchars($item['Timeline'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
+									<div><i class="fa-solid fa-layer-group"></i> Category: <?= htmlspecialchars($item['Category_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
 								</div>
-								<div class="item-description"><?= htmlspecialchars($item['description'], ENT_QUOTES, 'UTF-8') ?></div>
-								<div class="status-bottom"><span class="status-chip <?= htmlspecialchars($item['statusClass'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($item['statusLabel'], ENT_QUOTES, 'UTF-8') ?></span></div>
+								<div class="item-description"><?= htmlspecialchars($item['Description'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
+								<div class="status-bottom"><span class="status-chip status-<?= htmlspecialchars(strtolower($item['Post_Status'] ?? 'open'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($item['Post_Status'] ?? 'Open', ENT_QUOTES, 'UTF-8') ?></span></div>
 							</article>
 						<?php endforeach; ?>
 					</div>

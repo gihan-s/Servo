@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../core/Database.php';
+require_once __DIR__ . '/../core/helpers.php';
 require_once __DIR__ . '/ProviderModel.php';
 require_once __DIR__ . '/PostModel.php';
 require_once __DIR__ . '/ReviewModel.php';
@@ -184,7 +185,7 @@ class BidModel extends Database
         $bids = $this->getProviderBids($providerId);
 
         return array_values(array_filter($bids, function ($bid) use ($status) {
-            return $bid['statusKey'] === $status;
+            return $bid['Status_Key'] === $status;
         }));
     }
 
@@ -199,7 +200,7 @@ class BidModel extends Database
         ];
 
         foreach ($all as $bid) {
-            $key = $bid['statusKey'];
+            $key = $bid['Status_Key'];
             if (array_key_exists($key, $grouped)) {
                 $grouped[$key][] = $bid;
             }
@@ -210,12 +211,12 @@ class BidModel extends Database
 
     public function canEditBid(array $bid)
     {
-        return ($bid['statusKey'] ?? '') === self::STATUS_ACTIVE;
+        return ($bid['Status_Key'] ?? '') === self::STATUS_ACTIVE;
     }
 
     public function canWithdrawBid(array $bid)
     {
-        return ($bid['statusKey'] ?? '') === self::STATUS_ACTIVE;
+        return ($bid['Status_Key'] ?? '') === self::STATUS_ACTIVE;
     }
 
     public function editBidForProvider($providerId, $bidRef, array $newBidData)
@@ -243,62 +244,160 @@ class BidModel extends Database
 
     private function getProviderBids($providerId)
     {
+        // TODO: Uncomment when ready to use actual database
+        /*
+        $sql = "SELECT 
+                    b.Bid_ID,
+                    b.Provider_ID,
+                    b.Amount,
+                    b.Created_At,
+                    b.Est_Date,
+                    b.Status,
+                    b.Comment,
+                    b.Post_ID,
+                    p.Title,
+                    p.Description AS Post_Description,
+                    p.Category_ID,
+                    c.First_Name AS Client_First_Name,
+                    c.Last_Name AS Client_Last_Name,
+                    cat.Name AS Category_Name
+                FROM bids b
+                INNER JOIN post p ON b.Post_ID = p.Post_ID
+                INNER JOIN client c ON p.Client_ID = c.Client_ID
+                INNER JOIN category cat ON p.Category_ID = cat.Category_ID
+                WHERE b.Provider_ID = ?
+                ORDER BY b.Created_At DESC";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('BidModel::getProviderBids prepare: ' . $this->conn->error);
+            return [];
+        }
+
+        $stmt->bind_param('i', $providerId);
+        if (!$stmt->execute()) {
+            error_log('BidModel::getProviderBids exec: ' . $stmt->error);
+            $stmt->close();
+            return [];
+        }
+
+        $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+
+        // Format data with helper functions
+        foreach ($rows as &$row) {
+            $row['Client_Name'] = formatFullName($row['Client_First_Name'], $row['Client_Last_Name']);
+            $row['Bid_Amount'] = formatCurrency($row['Amount']);
+            $row['Timeline'] = formatDuration($row['Est_Date']);
+            $row['Bid_Date'] = timeAgo($row['Created_At']);
+            $row['Bid_Ref'] = 'BID-' . str_pad($row['Bid_ID'], 6, '0', STR_PAD_LEFT);
+            
+            // Normalize status for filtering (lowercase for consistency)
+            $statusLower = strtolower($row['Status'] ?? '');
+            if (in_array($statusLower, ['active', 'pending', 'open'])) {
+                $row['Status_Key'] = self::STATUS_ACTIVE;
+            } elseif (in_array($statusLower, ['accepted', 'approved'])) {
+                $row['Status_Key'] = self::STATUS_ACCEPTED;
+            } elseif (in_array($statusLower, ['rejected', 'declined'])) {
+                $row['Status_Key'] = self::STATUS_REJECTED;
+            } else {
+                $row['Status_Key'] = $statusLower;
+            }
+        }
+        unset($row);
+
+        return $rows;
+        */
+
+        // Dummy data for testing
         return [
             [
-                'providerId' => $providerId, // Provider_ID in bids
-                'client' => 'Nadia Perera', // First_Name + Last_Name from client <- Client_ID in post <- Post_ID in bids
-                'title' => 'Portfolio Website + CMS', // Title in post
-                'bidAmount' => '$550', // Amount in bids
-                'timeline' => '8 days', // change to appropriate metric
-                'bidDate' => '2h ago', // Created_At from bids
-                'category' => 'Web Development', // Name from category table based on Category_ID in post
-                'description' => 'Custom responsive portfolio with blog/case-study CMS and deployment support.',
-                'statusKey' => self::STATUS_ACTIVE,
-                'statusClass' => 'status-pending',
-                'statusLabel' => 'Active (Pending Client Decision)',
-                'projectRef' => 'BID-2026-001',
+                'Bid_ID' => 1,
+                'Provider_ID' => $providerId,
+                'Amount' => 550,
+                'Created_At' => date('Y-m-d H:i:s', strtotime('-2 hours')),
+                'Est_Date' => date('Y-m-d', strtotime('+8 days')),
+                'Status' => 'Active',
+                'Comment' => 'Custom responsive portfolio with blog/case-study CMS and deployment support.',
+                'Post_ID' => 1,
+                'Title' => 'Portfolio Website + CMS',
+                'Post_Description' => 'Need a professional portfolio website with CMS capabilities.',
+                'Category_ID' => 1,
+                'Client_First_Name' => 'Nadia',
+                'Client_Last_Name' => 'Perera',
+                'Category_Name' => 'Web Development',
+                'Client_Name' => 'Nadia Perera',
+                'Bid_Amount' => '$550',
+                'Timeline' => '8 days',
+                'Bid_Date' => '2 hours ago',
+                'Bid_Ref' => 'BID-000001',
+                'Status_Key' => self::STATUS_ACTIVE
             ],
             [
-                'providerId' => $providerId,
-                'client' => 'Tharushi De Silva',
-                'title' => 'WordPress SEO Optimization',
-                'bidAmount' => '$460',
-                'timeline' => '12 days',
-                'bidDate' => '1d ago',
-                'category' => 'SEO',
-                'description' => 'Technical audit, on-page optimization and speed improvements for better rankings.',
-                'statusKey' => self::STATUS_ACTIVE,
-                'statusClass' => 'status-pending',
-                'statusLabel' => 'Active (Pending Client Decision)',
-                'projectRef' => 'BID-2026-004',
+                'Bid_ID' => 2,
+                'Provider_ID' => $providerId,
+                'Amount' => 460,
+                'Created_At' => date('Y-m-d H:i:s', strtotime('-1 day')),
+                'Est_Date' => date('Y-m-d', strtotime('+12 days')),
+                'Status' => 'Active',
+                'Comment' => 'Technical audit, on-page optimization and speed improvements for better rankings.',
+                'Post_ID' => 2,
+                'Title' => 'WordPress SEO Optimization',
+                'Post_Description' => 'Need SEO expert to optimize WordPress site.',
+                'Category_ID' => 2,
+                'Client_First_Name' => 'Tharushi',
+                'Client_Last_Name' => 'De Silva',
+                'Category_Name' => 'SEO',
+                'Client_Name' => 'Tharushi De Silva',
+                'Bid_Amount' => '$460',
+                'Timeline' => '12 days',
+                'Bid_Date' => '1 day ago',
+                'Bid_Ref' => 'BID-000002',
+                'Status_Key' => self::STATUS_ACTIVE
             ],
             [
-                'providerId' => $providerId,
-                'client' => 'Isuru Fernando',
-                'title' => 'Brand Kit for Startup Launch',
-                'bidAmount' => '$340',
-                'timeline' => '5 days',
-                'bidDate' => '3d ago',
-                'category' => 'Graphic Design',
-                'description' => 'Logo, color system and typography package prepared for social and print use.',
-                'statusKey' => self::STATUS_ACCEPTED,
-                'statusClass' => 'status-progress',
-                'statusLabel' => 'Accepted',
-                'projectRef' => 'BID-2026-009',
+                'Bid_ID' => 3,
+                'Provider_ID' => $providerId,
+                'Amount' => 340,
+                'Created_At' => date('Y-m-d H:i:s', strtotime('-3 days')),
+                'Est_Date' => date('Y-m-d', strtotime('+5 days')),
+                'Status' => 'Accepted',
+                'Comment' => 'Logo, color system and typography package prepared for social and print use.',
+                'Post_ID' => 3,
+                'Title' => 'Brand Kit for Startup Launch',
+                'Post_Description' => 'Creating brand identity for new startup.',
+                'Category_ID' => 3,
+                'Client_First_Name' => 'Isuru',
+                'Client_Last_Name' => 'Fernando',
+                'Category_Name' => 'Graphic Design',
+                'Client_Name' => 'Isuru Fernando',
+                'Bid_Amount' => '$340',
+                'Timeline' => '5 days',
+                'Bid_Date' => '3 days ago',
+                'Bid_Ref' => 'BID-000003',
+                'Status_Key' => self::STATUS_ACCEPTED
             ],
             [
-                'providerId' => $providerId,
-                'client' => 'Kavindu Jayasekara',
-                'title' => 'Landing Page Copy Refresh',
-                'bidAmount' => '$190',
-                'timeline' => '4 days',
-                'bidDate' => '4d ago',
-                'category' => 'Content Writing',
-                'description' => 'Conversion-focused rewrite for hero, services and CTA blocks.',
-                'statusKey' => self::STATUS_REJECTED,
-                'statusClass' => 'status-complete',
-                'statusLabel' => 'Rejected',
-                'projectRef' => 'BID-2026-012',
+                'Bid_ID' => 4,
+                'Provider_ID' => $providerId,
+                'Amount' => 190,
+                'Created_At' => date('Y-m-d H:i:s', strtotime('-4 days')),
+                'Est_Date' => date('Y-m-d', strtotime('+4 days')),
+                'Status' => 'Rejected',
+                'Comment' => 'Conversion-focused rewrite for hero, services and CTA blocks.',
+                'Post_ID' => 4,
+                'Title' => 'Landing Page Copy Refresh',
+                'Post_Description' => 'Need compelling copy for landing page.',
+                'Category_ID' => 4,
+                'Client_First_Name' => 'Kavindu',
+                'Client_Last_Name' => 'Jayasekara',
+                'Category_Name' => 'Content Writing',
+                'Client_Name' => 'Kavindu Jayasekara',
+                'Bid_Amount' => '$190',
+                'Timeline' => '4 days',
+                'Bid_Date' => '4 days ago',
+                'Bid_Ref' => 'BID-000004',
+                'Status_Key' => self::STATUS_REJECTED
             ],
         ];
     }
