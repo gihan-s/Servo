@@ -32,8 +32,8 @@ class FeedModel extends Database
                 FROM post p
                 INNER JOIN client c ON p.Client_ID = c.Client_ID
                 INNER JOIN category cat ON p.Category_ID = cat.Category_ID
-                WHERE p.Post_Status = 'Open' 
-                AND p.Post_Type = 'Bid'
+                WHERE p.Post_Status = 'active' 
+                AND p.Post_Type = 'post'
                 ORDER BY p.Created_At DESC";
         
         if ($limit !== null) {
@@ -82,14 +82,10 @@ class FeedModel extends Database
                 'Est_Date' => date('Y-m-d', strtotime('+10 days')),
                 'Post_Status' => 'Open',
                 'Client_ID' => 1,
-                'Client_First_Name' => 'Nadia',
-                'Client_Last_Name' => 'Perera',
-                'Category_Name' => 'Web Development',
+                'Client_First_Name' => 'Nadia', // from database join with client table
+                'Client_Last_Name' => 'Perera', // from database join with client table
                 'Category_ID' => 1,
-                'Client_Name' => 'Nadia Perera',
-                'Budget' => '$600',
-                'Timeline' => '10 days',
-                'Posted' => '2 hours ago'
+                'Category_Name' => 'Web Development', // from database join with category table
             ],
             [
                 'Post_ID' => 2,
@@ -104,10 +100,6 @@ class FeedModel extends Database
                 'Client_Last_Name' => 'Fernando',
                 'Category_Name' => 'Graphic Design',
                 'Category_ID' => 2,
-                'Client_Name' => 'Isuru Fernando',
-                'Budget' => '$350',
-                'Timeline' => '5 days',
-                'Posted' => '5 hours ago'
             ],
             [
                 'Post_ID' => 3,
@@ -122,10 +114,6 @@ class FeedModel extends Database
                 'Client_Last_Name' => 'De Silva',
                 'Category_Name' => 'SEO',
                 'Category_ID' => 3,
-                'Client_Name' => 'Tharushi De Silva',
-                'Budget' => '$480',
-                'Timeline' => '14 days',
-                'Posted' => '1 day ago'
             ],
         ];
     }
@@ -178,4 +166,26 @@ class FeedModel extends Database
 
         return $row;
     }
+
+    public function submitBid($providerId, $postId, $amount, $comment, $estDate)
+    {
+        // add entry to database, bids table with status 'Active' and current timestamp for created_at
+        $sql = "INSERT INTO bids (Provider_ID, Post_ID, Amount, Comment, Est_Date, Status, Created_At) VALUES (?, ?, ?, ?, ?, 'Active', NOW())";
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('BidModel::submitBid prepare: ' . $this->conn->error);
+            return ['success' => false, 'error' => 'Database error'];
+        }
+        $stmt->bind_param('iiiis', $providerId, $postId, $amount, $comment, $estDate);
+        if (!$stmt->execute()) {
+            error_log('BidModel::submitBid exec: ' . $stmt->error);
+            $stmt->close();
+            return ['success' => false, 'error' => 'Database error'];
+        }
+        $newBidId = $stmt->insert_id;
+        $stmt->close();
+        // return success response with new bid details (including generated bid ID and reference)
+        return ['success' => true, 'bidId' => $newBidId];
+    }
+
 }

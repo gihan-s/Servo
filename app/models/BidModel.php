@@ -219,6 +219,27 @@ class BidModel extends Database
         return ($bid['Status_Key'] ?? '') === self::STATUS_ACTIVE;
     }
 
+    public function submitBid($providerId, $postId, $amount, $comment, $estDate)
+    {
+        // add entry to database, bids table with status 'Active' and current timestamp for created_at
+        $sql = "INSERT INTO bids (Provider_ID, Post_ID, Amount, Comment, Est_Date, Status, Created_At) VALUES (?, ?, ?, ?, ?, 'Active', NOW())";
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('BidModel::submitBid prepare: ' . $this->conn->error);
+            return ['success' => false, 'error' => 'Database error'];
+        }
+        $stmt->bind_param('iiiis', $providerId, $postId, $amount, $comment, $estDate);
+        if (!$stmt->execute()) {
+            error_log('BidModel::submitBid exec: ' . $stmt->error);
+            $stmt->close();
+            return ['success' => false, 'error' => 'Database error'];
+        }
+        $newBidId = $stmt->insert_id;
+        $stmt->close();
+        // return success response with new bid details (including generated bid ID and reference)
+        return ['success' => true, 'bidId' => $newBidId];
+    }
+
     public function editBidForProvider($providerId, $bidRef, array $newBidData)
     {
         // Business rule: edit is implemented as withdraw + create under the hood.
