@@ -84,20 +84,20 @@
 
 							<?php foreach ($section['items'] as $bid): ?>
 								<article class="search-item"
-									data-client="<?= htmlspecialchars($bid['client'], ENT_QUOTES, 'UTF-8') ?>"
-									data-title="<?= htmlspecialchars($bid['title'], ENT_QUOTES, 'UTF-8') ?>"
-									data-category="<?= htmlspecialchars($bid['category'], ENT_QUOTES, 'UTF-8') ?>"
-									data-amount="<?= htmlspecialchars($bid['bidAmount'], ENT_QUOTES, 'UTF-8') ?>"
-									data-timeline="<?= htmlspecialchars($bid['timeline'], ENT_QUOTES, 'UTF-8') ?>"
-									data-ref="<?= htmlspecialchars($bid['projectRef'], ENT_QUOTES, 'UTF-8') ?>"
-									data-description="<?= htmlspecialchars($bid['description'], ENT_QUOTES, 'UTF-8') ?>">
+									data-client="<?= htmlspecialchars($bid['Client_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+									data-title="<?= htmlspecialchars($bid['Title'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+									data-category="<?= htmlspecialchars($bid['Category_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+									data-amount="<?= htmlspecialchars($bid['Bid_Amount'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+									data-timeline="<?= htmlspecialchars($bid['Timeline'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+									data-ref="<?= htmlspecialchars($bid['Bid_Ref'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+									data-description="<?= htmlspecialchars($bid['Comment'] ?? $bid['Post_Description'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
 									<div class="item-head">
 										<div class="item-main-dets">
-											<div class="item-name"><?= htmlspecialchars($bid['client'], ENT_QUOTES, 'UTF-8') ?></div>
-											<div class="item-title"><?= htmlspecialchars($bid['title'], ENT_QUOTES, 'UTF-8') ?></div>
+											<div class="item-name"><?= htmlspecialchars($bid['Client_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
+											<div class="item-title"><?= htmlspecialchars($bid['Title'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
 											<div class="item-district">
-												<span><i class="fa-solid fa-clock"></i> Bid placed <?= htmlspecialchars($bid['bidDate'], ENT_QUOTES, 'UTF-8') ?></span>
-												<span><i class="fa-solid fa-tag"></i> Your bid: <?= htmlspecialchars($bid['bidAmount'], ENT_QUOTES, 'UTF-8') ?></span>
+												<span><i class="fa-solid fa-clock"></i> Bid placed <?= htmlspecialchars($bid['Bid_Date'] ?? '', ENT_QUOTES, 'UTF-8') ?></span>
+												<span><i class="fa-solid fa-tag"></i> Your bid: <?= htmlspecialchars($bid['Bid_Amount'] ?? '', ENT_QUOTES, 'UTF-8') ?></span>
 											</div>
 										</div>
 										<div class="button">
@@ -110,11 +110,11 @@
 										</div>
 									</div>
 									<div class="item-middle">
-										<div><i class="fa-solid fa-calendar-days"></i> Timeline: <?= htmlspecialchars($bid['timeline'], ENT_QUOTES, 'UTF-8') ?></div>
-										<div><i class="fa-solid fa-layer-group"></i> Category: <?= htmlspecialchars($bid['category'], ENT_QUOTES, 'UTF-8') ?></div>
+										<div><i class="fa-solid fa-calendar-days"></i> Timeline: <?= htmlspecialchars($bid['Timeline'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
+										<div><i class="fa-solid fa-layer-group"></i> Category: <?= htmlspecialchars($bid['Category_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
 									</div>
-									<div class="item-description"><?= htmlspecialchars($bid['description'], ENT_QUOTES, 'UTF-8') ?></div>
-									<div class="status-bottom"><span class="status-chip <?= htmlspecialchars($bid['statusClass'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($bid['statusLabel'], ENT_QUOTES, 'UTF-8') ?></span></div>
+									<div class="item-description"><?= htmlspecialchars($bid['Comment'] ?? $bid['Post_Description'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
+									<div class="status-bottom"><span class="status-chip status-<?= htmlspecialchars(strtolower($bid['Status'] ?? 'pending'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($bid['Status'] ?? 'Pending', ENT_QUOTES, 'UTF-8') ?></span></div>
 								</article>
 							<?php endforeach; ?>
 						</div>

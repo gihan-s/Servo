@@ -17,8 +17,8 @@ require_once '../app/controllers/NotificationController.php';
 require_once '../app/controllers/PaymentController.php';
 require_once '../app/controllers/ProviderController.php';
 require_once '../app/controllers/EarningsController.php';
-require_once '../app/controllers/FeedsController.php';
-require_once '../app/controllers/BidsController.php';
+require_once '../app/controllers/FeedController.php';
+require_once '../app/controllers/BidController.php';
 
 require_once '../app/controllers/admin/AdminLoginController.php';
 require_once '../app/controllers/admin/AdminDashboardController.php';
@@ -259,9 +259,14 @@ switch ($url) {
         $controller->index();
         break;
 
-    case 'feeds':
-        $controller = new FeedsController();
+    case 'feed':
+        $controller = new FeedController();
         $controller->index();
+        break;
+
+    case 'feed/submit-bid':
+        $controller = new FeedController();
+        $controller->submitBid();
         break;
 
     case 'bids':
