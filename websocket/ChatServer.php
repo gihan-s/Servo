@@ -6,6 +6,8 @@ ini_set('display_errors', 0);
 
 require_once __DIR__ . '/../app/controllers/LoginController.php';
 require_once __DIR__ . '/../app/models/MessageModel.php';
+require_once __DIR__ . '/../app/models/ClientModel.php';
+require_once __DIR__ . '/../app/models/ProviderModel.php';
 
 use Ratchet\MessageComponentInterface;
 use Ratchet\ConnectionInterface;
@@ -30,6 +32,19 @@ class ChatServer implements MessageComponentInterface
     private function getOppositeRole($role)
     {
         return $role === 'Provider' ? 'Client' : 'Provider';
+    }
+
+    private function getUserFirstName($userId, $role)
+    {
+        if ($role === 'Provider') {
+            $model = new ProviderModel();
+            $user = $model->getProviderById($userId);
+        } else {
+            $model = new ClientModel();
+            $user = $model->getClientById($userId);
+        }
+
+        return $user['First_Name'] ?? null;
     }
 
     public function onOpen(ConnectionInterface $conn)
@@ -174,11 +189,13 @@ class ChatServer implements MessageComponentInterface
         $receiverKey = $this->getUserKey($receiverId, $receiverRole);
 
         if (isset($this->userConnections[$receiverKey])) {
+            $senderFirstName = $this->getUserFirstName($senderId, $senderRole);
             foreach ($this->userConnections[$receiverKey] as $client) {
                 if ($client !== $from) {
                     $client->send(json_encode([
                         'Type' => 'New Message',
                         'From' => $senderId,
+                        'From_Name' => $senderFirstName,
                         'Content' => $messageContent
                     ]));
                 }

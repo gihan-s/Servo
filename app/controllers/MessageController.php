@@ -115,4 +115,15 @@ class MessageController extends BaseController
             'online' => !empty($user["Is_Online"])
         ]);
     }
+
+    public function getUnreadCount()
+    {
+        $userId = $_SESSION['user_id'];
+        $role = $_SESSION['role'];
+
+        $Model = new MessageModel;
+        $count = $Model->getUnreadMessageCount($userId, $role);
+
+        echo json_encode(['unread_count' => $count]);
+    }
 }

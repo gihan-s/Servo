@@ -20,7 +20,6 @@ $BaseURL = "..";
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="<?= $BaseURL ?>/assets/css/registerServices.css">
 
-    <script src="<?= $BaseURL ?>/assets/js/elementScript.js" defer></script>
     <script src="<?= $BaseURL ?>/assets/js/registerScript.js" defer></script>
     <script src="<?= $BaseURL ?>/assets/js/addServiceScript.js" defer></script>
 

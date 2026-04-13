@@ -3,6 +3,7 @@
     </div>
 
     <script src="<?= BASE_URL ?>/assets/js/script.js" defer></script>
+    <script src="<?= BASE_URL ?>/assets/js/elementScript.js" defer></script>
 
     <header class="header">
         <a href="/">

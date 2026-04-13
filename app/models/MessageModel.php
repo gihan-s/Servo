@@ -395,4 +395,38 @@ class MessageModel extends Database
 
         return $stmt->insert_id;
     }
+
+    public function getUnreadMessageCount($User_ID, $Role)
+    {
+        if ($Role === 'Provider') {
+
+            $sql = "SELECT COUNT(*) AS count 
+            FROM messages m
+            INNER JOIN conversation conv
+                ON m.Conversation_ID = conv.ID
+            WHERE (Status = 'Sent' OR Status = 'Delivered') 
+            AND m.Is_Client_To_Provider = 1 AND conv.Provider_ID = ?";
+
+        } else if ($Role === 'Client') {
+
+            $sql = "SELECT COUNT(*) AS count 
+            FROM messages m
+            INNER JOIN conversation conv
+                ON m.Conversation_ID = conv.ID  
+            WHERE (Status = 'Sent' OR Status = 'Delivered') 
+            AND m.Is_Client_To_Provider = 0 AND conv.Client_ID = ?";
+
+        } else {
+            return 0;
+        }
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $User_ID);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        $stmt->close();
+
+        return (int) ($row['count'] ?? 0);
+    }
 }

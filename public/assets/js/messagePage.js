@@ -8,6 +8,7 @@ const emptyEl = document.getElementById('emptyState');
 const composerEl = document.getElementById('composer');
 
 const pendingConversations = new Set();
+window.INITIAL_MESSAGE_BADGE = Array.isArray(conversations) ? conversations.reduce((sum, c) => sum + (c.unread_count || 0), 0) : 0;
 
 
 function renderConversations(filter = 'all') {
@@ -58,6 +59,13 @@ function renderConversations(filter = 'all') {
 function openConversation(id) {
     activeConv = conversations.find(c => c.id === id);
 
+    if (!activeConv) return;
+
+    window.MESSAGE_PAGE_ACTIVE_CONV = id;
+
+    if (activeConv.unread_count > 0) {
+        window.MessageSocket?.decrementBadge(activeConv.unread_count);
+    }
 
     // ✅ Reset unread count correctly
     activeConv.unread_count = 0;
@@ -65,8 +73,6 @@ function openConversation(id) {
     // ✅ Re-render sidebar to remove badge
     renderConversations(document.querySelector('.filter-chip.active').dataset.filter);
 
-
-    renderConversations(document.querySelector('.filter-chip.active').dataset.filter);
     document.getElementById('peerName').textContent = activeConv.First_Name + " " + activeConv.Last_Name;
     document.getElementById("peerAvatar").src = `/file/user-files/${activeConv.Profile_Picture}`;
 
@@ -83,11 +89,11 @@ function openConversation(id) {
     fetchMessagesById(id);
     toggleOnlineOfflineConversation(id);
 
-    if (!ws.CONNECTING) {
-        ws.send(JSON.stringify({
+    if (window.MessageSocket?.isConnected()) {
+        window.MessageSocket.send({
             Type: 'Seen',
             From: activeConv.id
-        }));
+        });
     }
 
 }
@@ -119,6 +125,11 @@ function insertDaySeparator(label) {
     scrollEl.appendChild(wrap);
 }
 
+function formatMessageText(text) {
+    const safeText = escapeHTML(text || '');
+    return safeText.replace(/\r\n|\r|\n/g, '<br>');
+}
+
 function addMessageBubble(msg) {
     const row = document.createElement('div');
     row.className = 'msg-row' + (msg.self ? ' self' : '');
@@ -140,7 +151,7 @@ function addMessageBubble(msg) {
     row.innerHTML = `
             <img src="${user_image}" class="avatar-sm" alt="user">
             <div class="bubble">
-                <div class="text">${escapeHTML(msg.text)}</div>
+                <div class="text">${formatMessageText(msg.text)}</div>
                 <div class="msg-actions">
                     <button class="icon-btn" title="Reply" onclick="quoteMessage(event,'${escapeQuotes(msg.text)}')"><i class="fa-solid fa-reply"></i></button>
                     <button class="icon-btn" title="Copy" onclick="copyMessage(event,'${escapeQuotes(msg.text)}')"><i class="fa-solid fa-copy"></i></button>
@@ -182,7 +193,7 @@ function sendMessage() {
     }
 
     document.querySelector(".conversation.active .conv-snippet").innerText = text;
-    ws.send(JSON.stringify(data));
+    window.MessageSocket?.send(data);
 }
 
 function autoGrow(el) {
@@ -300,7 +311,7 @@ function fetchMessagesById(id) {
     const formData = new FormData();
     formData.append('User_ID', id);
 
-    fetch('/messages/get-messages', {
+    fetch((window.BASE_URL || '') + '/messages/get-messages', {
         method: 'POST',
         body: formData
     })
@@ -327,199 +338,119 @@ function fetchMessagesById(id) {
 // Init
 renderConversations();
 
-
-const ws = new WebSocket(WEBSOCKET_URL);
-
-let heartbeatInterval = null;
-let heartbeatTimeout = null;
-const HEARTBEAT_INTERVAL = 25000; // send a ping every 25s
-const HEARTBEAT_TIMEOUT = 10000; // wait 10s for pong
-
-function startHeartbeat() {
-    stopHeartbeat();
-
-    heartbeatInterval = setInterval(() => {
-        if (ws.readyState !== WebSocket.OPEN) return;
-
-        ws.send(JSON.stringify({
-            Type: 'Ping',
-            Timestamp: Date.now()
-        }));
-
-        heartbeatTimeout = setTimeout(() => {
-            console.warn('WebSocket heartbeat timed out. Closing socket.');
-            ws.close();
-        }, HEARTBEAT_TIMEOUT);
-    }, HEARTBEAT_INTERVAL);
-}
-
-function stopHeartbeat() {
-    if (heartbeatInterval) {
-        clearInterval(heartbeatInterval);
-        heartbeatInterval = null;
-    }
-    if (heartbeatTimeout) {
-        clearTimeout(heartbeatTimeout);
-        heartbeatTimeout = null;
+function handleSocketAck(data) {
+    const msgBubble = document.getElementById(data.Message_ID);
+    if (!msgBubble) return;
+    const statusEl = msgBubble.querySelector(".meta span:nth-child(2)");
+    if (statusEl) {
+        statusEl.innerText = data.Status;
     }
 }
 
-ws.onopen = () => {
-    console.log("Connected");
-    startHeartbeat();
-};
-
-ws.onclose = () => {
-    stopHeartbeat();
-    alert("Something went wrong with the connection! Please log in again to continue.");
+function handleSocketPresence(data) {
+    const conversation = conversations.find(c => c.id === data.User_ID);
+    if (!conversation) return;
+    conversation.online = data.Status === 'Online';
+    toggleOnlineOfflineConversation(data.User_ID);
 }
 
-ws.onmessage = (e) => {
-    const data = JSON.parse(e.data);
-    console.log(data);
+function handleSocketNewMessage(data) {
+    if (activeConv && activeConv.id === data.From) {
+        window.MessageSocket?.send({
+            Type: 'Seen',
+            From: data.From
+        });
 
-    if (data.Type === 'Pong') {
-        if (heartbeatTimeout) {
-            clearTimeout(heartbeatTimeout);
-            heartbeatTimeout = null;
-        }
-        return;
-    }
-
-    if (data.Type === 'Ping') {
-        ws.send(JSON.stringify({
-            Type: 'Pong',
-            Timestamp: Date.now()
-        }));
-        return;
-    }
-
-    if (data.Type && data.Type === 'Ack') {
-        const msgBubble = document.getElementById(data.Message_ID);
-        msgBubble.querySelector(".meta span:nth-child(2)").innerText = data.Status;
-        console.log(msgBubble);
-    }
-
-    if (data.Type === 'Presence') {
-        var conversation = conversations.find(c => c.id === data.User_ID);
-        conversation.online = (data.Status === 'Online') ? true : false;
-        toggleOnlineOfflineConversation(data.User_ID);
-    }
-
-    if (data.Type && data.Type === 'New Message') {
-
-        if (activeConv && activeConv.id === data.From) {
-
-            // send seen immediately
-            ws.send(JSON.stringify({
-                Type: 'Seen',
-                From: data.From
-            }));
-
-            const msg = {
-                id: crypto.randomUUID(),
-                self: false,
-                text: data.Content,
-                Time: new Date().toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                }),
-                Status: 'Seen'
-            };
-            addMessageBubble(msg);
-            scrollToBottom();
-
-
-            const conv = conversations.find(c => c.id === data.From);
-
-            if (conv) {
-                conv.last_message = data.Content;
-                conv.last_message_time = new Date().toISOString();
-            }
-            renderConversations(document.querySelector('.filter-chip.active').dataset.filter);
-
-            return;
-        }
+        const msg = {
+            id: crypto.randomUUID(),
+            self: false,
+            text: data.Content,
+            Time: new Date().toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit'
+            }),
+            Status: 'Seen'
+        };
+        addMessageBubble(msg);
+        scrollToBottom();
 
         const conv = conversations.find(c => c.id === data.From);
-
-        console.log(conversations);
-
         if (conv) {
             conv.last_message = data.Content;
             conv.last_message_time = new Date().toISOString();
-            conv.unread_count = (conv.unread_count || 0) + 1;
-        } else {
-
-            // 🔥 Prevent duplicate fetch
-            if (pendingConversations.has(data.From)) {
-                return;
-            }
-
-            pendingConversations.add(data.From);
-
-
-            fetch(`/messages/get-user?id=${data.From}`)
-                .then(res => res.json())
-                .then(user => {
-
-                    // ✅ Double-check again (IMPORTANT)
-                    let existing = conversations.find(c => c.id === user.id);
-                    if (existing) {
-                        existing.last_message = data.Content;
-                        existing.last_message_time = new Date().toISOString();
-                        existing.unread_count = (existing.unread_count || 0) + 1;
-                        return;
-                    }
-
-                    const newConv = {
-                        id: parseInt(user.id),
-                        First_Name: user.first_name,
-                        Last_Name: user.last_name,
-                        Profile_Picture: user.profile_picture,
-                        last_message: data.Content,
-                        last_message_time: new Date().toISOString(),
-                        unread_count: 1,
-                        online: user.online === true
-                    };
-
-                    conversations.unshift(newConv);
-
-                    renderConversations(document.querySelector('.filter-chip.active').dataset.filter);
-                })
-                .finally(() => {
-                    pendingConversations.delete(data.From);
-                    console.log(data.From + " Removed");
-                    console.log(pendingConversations);
-                });
-
-            return;
-
-
         }
-
-        // ✅ Re-render sidebar
         renderConversations(document.querySelector('.filter-chip.active').dataset.filter);
+        return;
     }
 
-
-    if (data.Type === 'Seen') {
-
-        // Only update if active conversation
-        if (activeConv && activeConv.id === data.From) {
-
-            const messages = document.querySelectorAll('.msg-row.self');
-
-            messages.forEach(msg => {
-                const statusEl = msg.querySelector(".meta span:nth-child(2)");
-                if (statusEl) {
-                    statusEl.innerText = 'Read';
-                }
-            });
+    const conv = conversations.find(c => c.id === data.From);
+    if (conv) {
+        conv.last_message = data.Content;
+        conv.last_message_time = new Date().toISOString();
+        conv.unread_count = (conv.unread_count || 0) + 1;
+    } else {
+        if (pendingConversations.has(data.From)) {
+            return;
         }
-    }
-};
+        pendingConversations.add(data.From);
+        fetch(`/messages/get-user?id=${data.From}`)
+            .then(res => res.json())
+            .then(user => {
+                let existing = conversations.find(c => c.id === user.id);
+                if (existing) {
+                    existing.last_message = data.Content;
+                    existing.last_message_time = new Date().toISOString();
+                    existing.unread_count = (existing.unread_count || 0) + 1;
+                    return;
+                }
 
+                const newConv = {
+                    id: parseInt(user.id),
+                    First_Name: user.first_name,
+                    Last_Name: user.last_name,
+                    Profile_Picture: user.profile_picture,
+                    last_message: data.Content,
+                    last_message_time: new Date().toISOString(),
+                    unread_count: 1,
+                    online: user.online === true
+                };
+                conversations.unshift(newConv);
+                renderConversations(document.querySelector('.filter-chip.active').dataset.filter);
+            })
+            .finally(() => {
+                pendingConversations.delete(data.From);
+            });
+        return;
+    }
+
+    renderConversations(document.querySelector('.filter-chip.active').dataset.filter);
+}
+
+function handleSocketSeen(data) {
+    if (!activeConv || activeConv.id !== data.From) return;
+    const messages = document.querySelectorAll('.msg-row.self');
+    messages.forEach(msg => {
+        const statusEl = msg.querySelector(".meta span:nth-child(2)");
+        if (statusEl) {
+            statusEl.innerText = 'Read';
+        }
+    });
+}
+
+function registerSocketEvents() {
+    if (!window.MessageSocket) return;
+
+    window.MessageSocket.on('open', () => {
+        console.log('Connected');
+    });
+
+    window.MessageSocket.on('ack', handleSocketAck);
+    window.MessageSocket.on('presence', handleSocketPresence);
+    window.MessageSocket.on('new-message', handleSocketNewMessage);
+    window.MessageSocket.on('seen', handleSocketSeen);
+}
+
+document.addEventListener('DOMContentLoaded', registerSocketEvents);
 
 function startNewChat(userId) {
 
@@ -541,7 +472,7 @@ function startNewChat(userId) {
         formData.append('Provider_ID', CURRENT_USER_ID);
     }
 
-    fetch('/messages/start-conversation', {
+    fetch((window.BASE_URL || '') + '/messages/start-conversation', {
         method: 'POST',
         body: formData
     })
