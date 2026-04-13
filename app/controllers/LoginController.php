@@ -43,7 +43,7 @@ class LoginController
                     $_SESSION['user_id'] = $user['Client_ID'] ?? $user['Provider_ID'];
                     $_SESSION['role'] = $type;
                     $_SESSION['user_name'] = $user['First_Name'] . ' ' . $user['Last_Name'];
-                    $_SESSION['user_image'] = $user['Profile_Picture'] ?? null;
+                    $_SESSION['user_image'] = $user['Profile_Picture'] ?? "profile-picture-placeholder.png";
 
 
                     $token = LoginController::createAuthToken($_SESSION['user_id'], $type);

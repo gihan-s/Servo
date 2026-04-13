@@ -28,7 +28,14 @@ function renderConversations(filter = 'all') {
         listEl.innerHTML = '<div class="no-conversations">Nothing to show here</div>';
         return;
     }
+
+
     filtered.forEach(c => {
+
+        if (!c.Profile_Picture) {
+            c.Profile_Picture = "profile-picture-placeholder.png";
+        }
+
         const div = document.createElement('div');
         div.id = `Conversation_ID_${c.id}`;
         div.className = 'conversation' + (activeConv && activeConv.id === c.id ? ' active' : '');
