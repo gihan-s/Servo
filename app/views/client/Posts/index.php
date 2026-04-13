@@ -6,7 +6,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Servo | My Service Requests</title>
-  <!-- <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/elementStyles.css"> -->
+  <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/elementStyles.css">
   <!-- <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/clientPosts.css"> -->
 </head>
 

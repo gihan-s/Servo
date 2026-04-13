@@ -349,6 +349,11 @@ switch ($url) {
         $controller->getUser();
         break;
 
+    case 'messages/unread-count':
+        $controller = new MessageController();
+        $controller->getUnreadCount();
+        break;
+
     case 'test/inputs':
         include '../inputs.html';
         break;
