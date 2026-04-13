@@ -56,6 +56,14 @@ function renderConversations(filter = 'all') {
     });
 }
 
+function moveConversationToTop(conversationId) {
+    const index = conversations.findIndex(c => c.id === conversationId);
+    if (index > 0) {
+        const [conversation] = conversations.splice(index, 1);
+        conversations.unshift(conversation);
+    }
+}
+
 function openConversation(id) {
     activeConv = conversations.find(c => c.id === id);
 
@@ -378,6 +386,7 @@ function handleSocketNewMessage(data) {
         if (conv) {
             conv.last_message = data.Content;
             conv.last_message_time = new Date().toISOString();
+            moveConversationToTop(data.From);
         }
         renderConversations(document.querySelector('.filter-chip.active').dataset.filter);
         return;
@@ -388,12 +397,13 @@ function handleSocketNewMessage(data) {
         conv.last_message = data.Content;
         conv.last_message_time = new Date().toISOString();
         conv.unread_count = (conv.unread_count || 0) + 1;
+        moveConversationToTop(data.From);
     } else {
         if (pendingConversations.has(data.From)) {
             return;
         }
         pendingConversations.add(data.From);
-        fetch(`/messages/get-user?id=${data.From}`)
+        fetch((window.BASE_URL || '') + `/messages/get-user?id=${data.From}`)
             .then(res => res.json())
             .then(user => {
                 let existing = conversations.find(c => c.id === user.id);
@@ -401,6 +411,8 @@ function handleSocketNewMessage(data) {
                     existing.last_message = data.Content;
                     existing.last_message_time = new Date().toISOString();
                     existing.unread_count = (existing.unread_count || 0) + 1;
+                    moveConversationToTop(user.id);
+                    renderConversations(document.querySelector('.filter-chip.active').dataset.filter);
                     return;
                 }
 
@@ -423,6 +435,7 @@ function handleSocketNewMessage(data) {
         return;
     }
 
+    moveConversationToTop(data.From);
     renderConversations(document.querySelector('.filter-chip.active').dataset.filter);
 }
 
