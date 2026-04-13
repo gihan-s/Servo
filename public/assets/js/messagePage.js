@@ -111,6 +111,11 @@ function openConversation(id) {
         });
     }
 
+    if (isNarrowMessageLayout()) {
+        document.getElementById('sidebar')?.classList.add('hide');
+    }
+    syncSidebarBackdrop();
+
 }
 
 
@@ -271,8 +276,47 @@ function escapeQuotes(s) {
     return s.replace(/['"`]/g, '\"');
 }
 
+function isNarrowMessageLayout() {
+    return window.matchMedia('(max-width: 880px)').matches;
+}
+
+function syncMessageNavbarVisibility() {
+    if (!document.body.classList.contains('messages-page')) return;
+    if (!isNarrowMessageLayout()) {
+        document.body.classList.remove('message-immersive-chat');
+        return;
+    }
+    const sidebar = document.getElementById('sidebar');
+    const immersive = activeConv != null && sidebar?.classList.contains('hide');
+    document.body.classList.toggle('message-immersive-chat', immersive);
+}
+
+function syncSidebarBackdrop() {
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    if (!sidebar || !backdrop) {
+        syncMessageNavbarVisibility();
+        return;
+    }
+
+    if (!isNarrowMessageLayout()) {
+        backdrop.classList.remove('is-visible');
+        backdrop.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('message-sidebar-open');
+    } else {
+        const open = !sidebar.classList.contains('hide');
+        backdrop.classList.toggle('is-visible', open);
+        backdrop.setAttribute('aria-hidden', open ? 'false' : 'true');
+        document.body.classList.toggle('message-sidebar-open', open);
+    }
+    syncMessageNavbarVisibility();
+}
+
 function toggleSidebar() {
-    document.getElementById('sidebar').classList.toggle('hide');
+    const sidebar = document.getElementById('sidebar');
+    if (!sidebar) return;
+    sidebar.classList.toggle('hide');
+    syncSidebarBackdrop();
 }
 
 // Filters
@@ -472,7 +516,35 @@ function registerSocketEvents() {
     window.MessageSocket.on('seen', handleSocketSeen);
 }
 
-document.addEventListener('DOMContentLoaded', registerSocketEvents);
+function initMessagePageResponsive() {
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    if (isNarrowMessageLayout() && sidebar) {
+        sidebar.classList.add('hide');
+    }
+    syncSidebarBackdrop();
+
+    backdrop?.addEventListener('click', () => {
+        sidebar?.classList.add('hide');
+        syncSidebarBackdrop();
+    });
+
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            if (!isNarrowMessageLayout()) {
+                sidebar?.classList.remove('hide');
+            }
+            syncSidebarBackdrop();
+        }, 120);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    registerSocketEvents();
+    initMessagePageResponsive();
+});
 
 function startNewChat(userId) {
 
