@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Servo | Messages</title>
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/cardList.css" />
     <!-- <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css" /> -->
@@ -23,10 +23,10 @@
 
 </head>
 
-<body>
+<body class="messages-page">
     <?php include_once __DIR__ . '/../includes/navbar.php'; ?>
 
-    <div class="chat-layout">
+    <div class="chat-layout" id="chatLayout">
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
@@ -48,6 +48,8 @@
             </div>
         </aside>
 
+        <div class="sidebar-backdrop" id="sidebarBackdrop" aria-hidden="true"></div>
+
         <!-- Chat Column -->
         <section class="chat-area">
             <div class="chat-header" id="chatHeader">
@@ -61,17 +63,17 @@
                     </div>
                 </div>
                 <div class="header-actions">
-                    <button class="toggle-sidebar" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
-                    <button class="h-btn" id="starBtn" disabled><i class="fa-solid fa-star"></i> Star</button>
-                    <button class="h-btn" id="archiveBtn" disabled><i class="fa-solid fa-box-archive"></i>
-                        Archive</button>
-                    <button class="h-btn" id="moreBtn" disabled><i class="fa-solid fa-ellipsis"></i> More</button>
+                    <button type="button" class="toggle-sidebar" onclick="toggleSidebar()" aria-label="Open conversation list"><i class="fa-solid fa-bars"></i></button>
+                    <button type="button" class="h-btn" id="starBtn" disabled aria-label="Star conversation"><i class="fa-solid fa-star"></i> <span class="h-btn-label">Star</span></button>
+                    <button type="button" class="h-btn" id="archiveBtn" disabled aria-label="Archive conversation"><i class="fa-solid fa-box-archive"></i>
+                        <span class="h-btn-label">Archive</span></button>
+                    <button type="button" class="h-btn" id="moreBtn" disabled aria-label="More options"><i class="fa-solid fa-ellipsis"></i> <span class="h-btn-label">More</span></button>
                 </div>
             </div>
             <div class="messages-scroll" id="messagesScroll">
                 <div class="empty" id="emptyState">
                     <h2>No Conversation Selected</h2>
-                    <p>Choose a conversation on the left or start a new one with a provider.</p>
+                    <p>Choose a conversation from the list or start a new one with a provider.</p>
                 </div>
             </div>
             <div class="composer" id="composer" style="display:none;">
@@ -87,7 +89,7 @@
                 </div>
                 <div class="toolbar">
                     <button class="t-btn" onclick="insertTemplate('Thanks for the update!')"><i
-                            class="fa-solid fa-message-smile"></i> Quick Reply</button>
+                            class="fa-solid fa-clock"></i> Quick Reply</button>
                     <button class="t-btn" onclick="insertTemplate('Can you clarify the timeline?')"><i
                             class="fa-solid fa-clock"></i> Timeline</button>
                     <button class="t-btn" onclick="insertTemplate('Let\'s schedule a call to discuss further.')"><i
@@ -96,9 +98,6 @@
             </div>
         </section>
     </div>
-
-    <?php include_once __DIR__ . '/../includes/footer.php'; ?>
-
 
 </body>
 
