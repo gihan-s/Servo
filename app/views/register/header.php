@@ -13,3 +13,5 @@
             <div style="padding-left: 5px;">Log In</div>
         </a>
     </header>
+
+    <script src="<?= $BaseURL ?>/assets/js/elementScript.js" defer></script>
