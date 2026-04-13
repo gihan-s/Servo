@@ -200,6 +200,8 @@ function sendMessage() {
         'Message_ID': Message_ID
     }
 
+    activeConv.last_message = text;
+    activeConv.last_message_time = new Date().toISOString();
     document.querySelector(".conversation.active .conv-snippet").innerText = text;
     window.MessageSocket?.send(data);
 }
