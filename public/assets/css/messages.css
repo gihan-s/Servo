@@ -388,7 +388,7 @@ body {
     padding: 28px 34px 24px;
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 5px;
     background: #f8fafc;
     position: relative;
     max-height: calc(100vh - 300px);

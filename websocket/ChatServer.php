@@ -1,5 +1,9 @@
 <?php
 
+error_reporting(E_ALL & ~E_DEPRECATED);
+ini_set('display_errors', 0);
+
+
 require_once __DIR__ . '/../app/controllers/LoginController.php';
 require_once __DIR__ . '/../app/models/MessageModel.php';
 
@@ -99,6 +103,14 @@ class ChatServer implements MessageComponentInterface
         if (!$data) return;
 
 
+
+        if (isset($data['Type']) && $data['Type'] === 'Ping') {
+            $from->send(json_encode([
+                'Type' => 'Pong',
+                'Timestamp' => time()
+            ]));
+            return;
+        }
 
         if (isset($data['Type']) && $data['Type'] === 'Seen') {
 
@@ -200,15 +212,13 @@ class ChatServer implements MessageComponentInterface
                     fn($c) => $c->resourceId !== $conn->resourceId
                 ));
 
-                // 🔥 FORCE offline broadcast (your requirement)
-                $this->broadcastPresenceToRelevant($userId, $role, 'Offline');
-
-                // ✅ If no more connections → update DB
+                // ✅ If no more connections → update DB and broadcast offline
                 if (empty($this->userConnections[$userKey])) {
                     unset($this->userConnections[$userKey]);
 
                     $Model = new MessageModel;
                     $Model->setUserOffline($userId, $role);
+                    $this->broadcastPresenceToRelevant($userId, $role, 'Offline');
 
                     echo "User $userId ($role) OFFLINE\n";
                 }
