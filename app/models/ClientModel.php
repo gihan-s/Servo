@@ -67,12 +67,35 @@ class ClientModel extends Database
 
     }
 
+
+    public function updateProfilePicture($id, $profilePic)
+    {
+        $stmt = $this->conn->prepare("UPDATE client SET Profile_Picture = ? WHERE Client_ID = ?");
+        if (!$stmt)
+            return false;
+        $stmt->bind_param("si", $profilePic, $id);
+        return $stmt->execute();
+    }
+
+
+    public function getCurrentPassword($id)
+    {
+        $stmt = $this->conn->prepare("SELECT Password FROM client WHERE Client_ID = ?");
+        if (!$stmt) return false;
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result->fetch_assoc()['Password'] ?? false;
+    }
+
+
     public function updatePassword($id, $hashed)
     {
         $stmt = $this->conn->prepare("UPDATE client SET Password = ? WHERE Client_ID = ?");
         if (!$stmt)
             return false;
         $stmt->bind_param("si", $hashed, $id);
+
         return $stmt->execute();
     }
 

@@ -103,26 +103,47 @@ function resetAccount() {
     });
     showToast("Account reset");
 }
+
 function saveAccount(e) {
     e.preventDefault();
     const fd = new FormData(accountForm);
+    const op = (fd.get("Old_Password") || "").trim();
     const np = (fd.get("New_Password") || "").trim();
-    const cp = (fd.get("Confirm_Password") || "").trim();
 
-    if (np || cp) {
-        if (np !== cp) {
-            showToast("Passwords do not match", "error");
-            return;
-        }
-        if (!fd.get("reset_code")) {
-            showToast("Enter the reset code sent to your email", "error");
-            return;
-        }
+    if (op === '') {
+        document.getElementsByName("Old_Password")[0].focus();
+        return;
     }
 
-    accountForm.action = "profile/account";
-    accountForm.method = "POST";
-    accountForm.submit();
+    if (np === '') {
+        document.getElementsByName("New_Password")[0].focus();
+        return;
+    }
+
+    fetch('profile/update-password', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            Old_Password: op,
+            New_Password: np
+        })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.ok) {
+                showToast(data.message, "success");
+                document.getElementsByName("Old_Password")[0].value = "";
+                document.getElementsByName("New_Password")[0].value = "";
+            } else {
+                showToast(data.message, "error");
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+
 }
 
 // Avatar preview (both)
@@ -155,19 +176,27 @@ function saveAvatar() {
         return;
     }
     const fd = new FormData();
-    fd.append("avatar", file);
-    // TODO: replace '#' with backend endpoint, e.g., `${BASE_URL}/provider/profile/avatar`
-    fetch("#", { method: "POST", body: fd })
-        .then(() => {
-            document.getElementById("avatarSaveBtn").style.display = "none";
-            pendingAvatarFile = null;
-            // Optionally clear input to reset state
-            try {
-                input.value = "";
-            } catch { }
-            showToast("Photo saved");
+    fd.append("profile_pic", file);
+    fetch("/profile/change-profile-pic", { method: "POST", body: fd })
+        .then((data) => data.json())
+        .then((data) => {
+
+            if (data.type === 'success') {
+
+                document.getElementById("avatarSaveBtn").style.display = "none";
+                pendingAvatarFile = null;
+                document.querySelector(".navbar .user-menu .user-avatar img").src = data.Profile_Picture;
+                try {
+                    input.value = "";
+                } catch { }
+                showToast("Photo saved");
+
+            } else {
+                throw new Error(data.message || "Failed to save photo");
+            }
         })
-        .catch(() => {
+        .catch((err) => {
+            console.log(err);
             showToast("Failed to save photo");
         });
 }
@@ -175,81 +204,46 @@ bindAvatar("avatarPublicInput", "avatarPublicPreview");
 bindAvatar("avatarAccountInput", "avatarAccountPreview");
 
 // --- Work Information (frontend only) ---
-const mockCategories = [
-    { id: 1, name: "Graphic Design" },
-    { id: 2, name: "Web Development" },
-    { id: 3, name: "Mobile Apps" },
-    { id: 4, name: "Content Writing" },
-    { id: 5, name: "Photography" },
-];
-const mockLocations = [
-    { id: 1, name: "Colombo" },
-    { id: 2, name: "Kandy" },
-    { id: 3, name: "Galle" },
-    { id: 4, name: "Jaffna" },
-];
-const mockSkills = [
-    { id: 1, name: "Photoshop" },
-    { id: 2, name: "Illustrator" },
-    { id: 3, name: "React" },
-    { id: 4, name: "Node.js" },
-    { id: 5, name: "SEO" },
-];
+// const mockCategories = [
+//     { id: 1, name: "Graphic Design" },
+//     { id: 2, name: "Web Development" },
+//     { id: 3, name: "Mobile Apps" },
+//     { id: 4, name: "Content Writing" },
+//     { id: 5, name: "Photography" },
+// ];
+// const mockLocations = [
+//     { id: 1, name: "Colombo" },
+//     { id: 2, name: "Kandy" },
+//     { id: 3, name: "Galle" },
+//     { id: 4, name: "Jaffna" },
+// ];
+// const mockSkills = [
+//     { id: 1, name: "Photoshop" },
+//     { id: 2, name: "Illustrator" },
+//     { id: 3, name: "React" },
+//     { id: 4, name: "Node.js" },
+//     { id: 5, name: "SEO" },
+// ];
+
 
 // populate selects (modal)
-const mCatSelect = document.getElementById("m_cat_select");
-function refreshCategoryOptions() {
-    if (!mCatSelect) return;
-    mCatSelect.innerHTML = "";
-    mockCategories.forEach((c) => {
-        const opt = document.createElement("option");
-        opt.value = String(c.id);
-        opt.textContent = c.name;
-        mCatSelect.appendChild(opt);
-    });
-}
-refreshCategoryOptions();
+// const mCatSelect = document.getElementById("m_cat_select");
+// function refreshCategoryOptions() {
+//     if (!mCatSelect) return;
+//     mCatSelect.innerHTML = "";
+//     mockCategories.forEach((c) => {
+//         const opt = document.createElement("option");
+//         opt.value = String(c.id);
+//         opt.textContent = c.name;
+//         mCatSelect.appendChild(opt);
+//     });
+// }
 
-let providerCats = [
-    {
-        category_id: 2,
-        title: "Website Development",
-        description:
-            "Modern, responsive websites with basic SEO and performance best practices.",
-        default_price: "150000",
-        locations: [mockLocations[0], mockLocations[1]],
-        skills: [mockSkills[2], mockSkills[4]],
-    },
-    {
-        category_id: 1,
-        title: "Logo & Brand Kit",
-        description:
-            "Professional logo, color palette, and typography starter kit.",
-        default_price: "45000",
-        locations: [mockLocations[0]],
-        skills: [mockSkills[0], mockSkills[1]],
-    },
-    {
-        category_id: 5,
-        title: "Event Photography",
-        description:
-            "Candid and portrait coverage for corporate and private events.",
-        default_price: "80000",
-        locations: [mockLocations[2], mockLocations[3]],
-        skills: [mockSkills[0]],
-    },
-    {
-        category_id: 4,
-        title: "Blog & SEO Articles",
-        description:
-            "Well‑researched, SEO‑friendly long‑form articles and blog posts.",
-        default_price: "12000",
-        locations: [mockLocations[0], mockLocations[2]],
-        skills: [mockSkills[4]],
-    },
-];
+// refreshCategoryOptions();
 
-const categoryList = document.getElementById("categoryList");
+let providerCats = [];
+
+const categoryList = document.getElementById("service-card-wrapper");
 const catSearch = document.getElementById("cat_search");
 const catOverlay = document.getElementById("catOverlay");
 const catViewOverlay = document.getElementById("catViewOverlay");
@@ -275,49 +269,53 @@ function renderChips(container, items) {
 
 let catFilter = "";
 function renderCategoryList() {
+
+
     if (!categoryList) return;
-    const filtered = providerCats.filter((pc) => {
-        if (!catFilter) return true;
-        const cat = mockCategories.find((c) => c.id === pc.category_id);
-        const hay = [pc.title || "", pc.description || "", cat ? cat.name : ""]
-            .join(" ")
-            .toLowerCase();
-        return hay.includes(catFilter);
-    });
+
+    const term = document.getElementById("cat_search").value.toLowerCase();
+
+    const filtered = providerCats.filter(service => 
+        service.Title.toLowerCase().includes(term) ||
+        service.Category_Name.toLowerCase().includes(term) ||
+        service.Description.toLowerCase().includes(term)
+    );;
+    
+
     categoryList.innerHTML = filtered.length
         ? ""
         : '<div class="small">No categories found.</div>';
+
     filtered.forEach((pc) => {
+
         const card = document.createElement("div");
         card.className = "req-card";
-        const cat = mockCategories.find((c) => c.id === pc.category_id);
-        const title = pc.title || (cat ? cat.name : "Category");
-        const name = cat ? cat.name : "Category";
-        const locations = (pc.locations || []).map((l) => l.name).join(", ") || "—";
-        const skills = pc.skills || [];
+
+        var skills = pc.skills || [];
+
         card.innerHTML = `
                     <div class="req-head">
-                        <img class="req-avatar" src="<?= BASE_URL ?>/public/assets/img/default-category.png" alt="" onerror="this.style.visibility='hidden'"/>
+                        <img class="req-avatar" src="/file/category-icons/${pc.Category_Icon || 'default-category.png'}" alt="" onerror="this.style.visibility='hidden'"/>
                         <div class="req-main">
-                            <span class="req-name">${name}</span>
-                            <span class="req-title">${title}</span>
-                            <span class="req-time">${locations}</span>
+                            <span class="req-name">${pc.Category_Name}</span>
+                            <span class="req-title">${pc.Title}</span>
+                            <span class="req-time">${pc.Formatted_Location_String}</span>
                         </div>
                         <div class="req-actions">
-                            <button class="btn-outline-blue" data-action="view"><i class="fa-regular fa-eye"></i> View</button>
-                            <button class="btn-outline-blue" data-action="edit"><i class="fa-regular fa-pen"></i> Edit</button>
-                            <button class="btn-outline-rose" data-action="remove"><i class="fa-regular fa-xmark"></i> Delete</button>
+                            <button style='display:none;' class="btn-outline-blue" data-action="view"><i class="fa-solid fa-eye"></i> View</button>
+                            <button style='display:none;' class="btn-outline-blue" data-action="edit"><i class="fa-solid fa-pen"></i> Edit</button>
+                            <button class="btn-outline-rose" data-action="remove"><i class="fa-solid fa-xmark"></i> Delete</button>
                         </div>
                     </div>
                     <div class="req-tags">
-                        <span class="tag"><i class="fa-regular fa-tag"></i> Default: <strong>${pc.default_price || "—"
-            }</strong></span>
-                        ${skills
-                .map((s) => `<span class=\"tag\">${s.name}</span>`)
-                .join("")}
+                        <span class="tag">
+                            <i class="fa-solid fa-tag"></i> ${pc.Price_Type}: <strong>${Number(pc.Default_Price).toFixed(2)}</strong></span>
+                            ${skills.map((s) => `<span class=\"tag\">${s}</span>`).join("")}
                     </div>
-                    <div class="req-desc">${pc.description || "—"}</div>
+                    <div class="req-desc">${pc.Description || "—"}</div>
                 `;
+
+
         const originalIndex = providerCats.indexOf(pc);
         card
             .querySelector('[data-action="view"]')
@@ -346,10 +344,29 @@ if (catSearch) {
 
 function removeCategory(idx) {
     if (!confirm("Remove this category?")) return;
-    providerCats.splice(idx, 1);
-    renderCategoryList();
-    updateCounts();
-    showToast("Category removed");
+
+    const formData = new FormData();
+    formData.append("provider_category_id", providerCats[idx].Provider_Categories_ID);
+    fetch("/profile/remove-service", {
+        method: "POST",
+        body: formData,
+        credentials: "same-origin",
+    })
+        .then((r) => r.json())
+        .then((data) => {
+            if (data.success) {
+                providerCats.splice(idx, 1);
+                renderCategoryList();
+                updateCounts();
+                showToast("Category removed", "success");
+            } else {
+                showToast(data.message || "Failed to remove category", "error");
+            }
+        })
+        .catch(() => {
+            showToast("Failed to remove category", "error");
+        });
+    
 }
 
 function openCategoryModal(mode = "add", idx = -1) {
@@ -477,7 +494,32 @@ function pickSkills(isModal = false) {
 }
 
 // initial render
-renderCategoryList();
+// renderCategoryList();
+window.addEventListener("DOMContentLoaded", () => {
+
+    var url = "/providers/services";
+
+    const providerId = document.getElementById("providerId").value;
+    url += `?provider_id=${providerId}`;
+    url += `&limit=1000`;
+
+    fetch(url, { method: "GET", credentials: "same-origin" })
+        .then((r) => r.json())
+        .then((data) => {
+            console.log(data);
+
+            if (data.success && Array.isArray(data.services)) {
+                providerCats = data.services;
+                renderCategoryList();
+                updateCounts();
+            }
+        })
+        .catch((err) => {
+            console.error(err);
+            showToast("Failed to load categories", "error");
+        });
+});
+
 function updateCounts() {
     const el = document.getElementById("countCategories");
     if (el) el.textContent = String(providerCats.length);
@@ -495,7 +537,7 @@ function deleteAccount() {
 
     const tmp = document.createElement("form");
     tmp.method = "POST";
-    tmp.action = "profile/delete-account"; 
+    tmp.action = "profile/delete-account";
     tmp.style.display = "none";
     document.body.appendChild(tmp);
     tmp.submit();

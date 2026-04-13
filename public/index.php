@@ -108,9 +108,24 @@ switch ($url) {
         $controller->showUserImage($matches[1]);
         break;
 
+    case (preg_match('#^file/category-icons/(.+)$#', $url, $matches) ? true : false):
+        $controller = new FileController();
+        $controller->getCategoryIcons($matches[1]);
+        break;
+
     case 'profile':
         $controller = new ProfileController();
         $controller->view();
+        break;
+
+    case 'profile/add-service':
+        $controller = new ProfileController();
+        $controller->addService();
+        break;
+
+    case 'profile/remove-service':
+        $controller = new ProfileController();
+        $controller->removeService();
         break;
 
     case 'register/documents':
@@ -161,6 +176,16 @@ switch ($url) {
     case 'profile/send-reset-code':
         $controller = new ProfileController();
         $controller->sendResetCode();
+        break;
+
+    case 'profile/change-profile-pic':
+        $controller = new ProfileController();
+        $controller->changeProfilePicture();
+        break;
+
+    case 'profile/update-password':
+        $controller = new ProfileController();
+        $controller->changePassword();
         break;
 
     case 'dashboard':

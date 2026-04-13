@@ -37,4 +37,23 @@ class FileController
         readfile($path);
         exit;
     }
+
+    public function getCategoryIcons($filename)
+    {
+        $filename = urldecode($filename);   // ⭐ ADD THIS LINE
+        $filename = basename($filename);    // keep security
+
+        $path = __DIR__ . '/../../uploads/Categories/' . $filename;
+
+        if (!file_exists($path)) {
+            http_response_code(404);
+            exit('File not found');
+        }
+
+        $mime = mime_content_type($path);
+        header('Content-Type: ' . $mime);
+        header('Content-Length: ' . filesize($path));
+        readfile($path);
+        exit;
+    }
 }
