@@ -28,7 +28,14 @@ function renderConversations(filter = 'all') {
         listEl.innerHTML = '<div class="no-conversations">Nothing to show here</div>';
         return;
     }
+
+
     filtered.forEach(c => {
+
+        if (!c.Profile_Picture) {
+            c.Profile_Picture = "profile-picture-placeholder.png";
+        }
+
         const div = document.createElement('div');
         div.id = `Conversation_ID_${c.id}`;
         div.className = 'conversation' + (activeConv && activeConv.id === c.id ? ' active' : '');
@@ -54,6 +61,14 @@ function renderConversations(filter = 'all') {
         };
         listEl.appendChild(div);
     });
+}
+
+function moveConversationToTop(conversationId) {
+    const index = conversations.findIndex(c => c.id === conversationId);
+    if (index > 0) {
+        const [conversation] = conversations.splice(index, 1);
+        conversations.unshift(conversation);
+    }
 }
 
 function openConversation(id) {
@@ -192,6 +207,8 @@ function sendMessage() {
         'Message_ID': Message_ID
     }
 
+    activeConv.last_message = text;
+    activeConv.last_message_time = new Date().toISOString();
     document.querySelector(".conversation.active .conv-snippet").innerText = text;
     window.MessageSocket?.send(data);
 }
@@ -378,6 +395,7 @@ function handleSocketNewMessage(data) {
         if (conv) {
             conv.last_message = data.Content;
             conv.last_message_time = new Date().toISOString();
+            moveConversationToTop(data.From);
         }
         renderConversations(document.querySelector('.filter-chip.active').dataset.filter);
         return;
@@ -388,12 +406,13 @@ function handleSocketNewMessage(data) {
         conv.last_message = data.Content;
         conv.last_message_time = new Date().toISOString();
         conv.unread_count = (conv.unread_count || 0) + 1;
+        moveConversationToTop(data.From);
     } else {
         if (pendingConversations.has(data.From)) {
             return;
         }
         pendingConversations.add(data.From);
-        fetch(`/messages/get-user?id=${data.From}`)
+        fetch((window.BASE_URL || '') + `/messages/get-user?id=${data.From}`)
             .then(res => res.json())
             .then(user => {
                 let existing = conversations.find(c => c.id === user.id);
@@ -401,6 +420,8 @@ function handleSocketNewMessage(data) {
                     existing.last_message = data.Content;
                     existing.last_message_time = new Date().toISOString();
                     existing.unread_count = (existing.unread_count || 0) + 1;
+                    moveConversationToTop(user.id);
+                    renderConversations(document.querySelector('.filter-chip.active').dataset.filter);
                     return;
                 }
 
@@ -423,6 +444,7 @@ function handleSocketNewMessage(data) {
         return;
     }
 
+    moveConversationToTop(data.From);
     renderConversations(document.querySelector('.filter-chip.active').dataset.filter);
 }
 
