@@ -15,10 +15,12 @@ class ProviderCategoriesModel extends Database
                     pc.Default_Price,
                     pc.Price_Type,
                     pc.Portfolio_Link,
-                    c.Name AS Category_Name
+                    c.Name AS Category_Name,
+                    c.Icon AS Category_Icon
              FROM provider_categories pc
              LEFT JOIN category c ON c.Category_ID = pc.Category_ID
              WHERE pc.Provider_ID = ?
+             AND pc.Status = 'Active'
              ORDER BY pc.ID DESC
              LIMIT ? OFFSET ?"
         );
@@ -47,7 +49,9 @@ class ProviderCategoriesModel extends Database
         $stmt = $this->conn->prepare(
             "SELECT COUNT(*) AS total
              FROM provider_categories
-             WHERE Provider_ID = ?"
+             WHERE Provider_ID = ?
+             AND Status = 'Active'
+             "
         );
 
         if (!$stmt) {
@@ -83,6 +87,7 @@ class ProviderCategoriesModel extends Database
              FROM provider_categories_has_skills pcs
              INNER JOIN skills s ON s.Skill_ID = pcs.Skills_Skill_ID
              WHERE pcs.Provider_Categories_ID IN ($placeholders)
+             
              ORDER BY s.Skill"
         );
 

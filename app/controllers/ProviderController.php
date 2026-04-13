@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/../../helpers/locations.php';
+
 class ProviderController extends BaseController
 {
 
@@ -162,6 +164,9 @@ class ProviderController extends BaseController
                     'url' => $service['portfolio_link']
                 ]] : [];
                 $service['request_status'] = in_array($serviceId, $ongoingServiceIds, true) ? 'ongoing' : '';
+
+                $service['Formatted_Location_String'] = formatLocations($service['locations']);
+                
             }
 
             $totalCount = $providerCategoriesModel->getCountByProviderId($providerId);

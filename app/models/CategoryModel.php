@@ -17,7 +17,7 @@ class CategoryModel extends Database
 
     public function getCategories()
     {
-        $stmt = $this->conn->prepare("SELECT Category_ID, Name FROM category");
+        $stmt = $this->conn->prepare("SELECT Category_ID, Name, Icon FROM category");
         $stmt->execute();
         $result = $stmt->get_result();
         $stmt->close();

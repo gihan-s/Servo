@@ -229,6 +229,7 @@ class ProviderModel extends Database
             "SELECT DISTINCT Skill FROM skills, provider_categories
             WHERE skills.Provider_Categories_ID = provider_categories.ID 
             AND provider_categories.Category_ID = '{$Category_ID}'
+            AND provider_categories.Status = 'Active'
             "
         );
         $stmt->execute();
@@ -252,7 +253,7 @@ class ProviderModel extends Database
 
 
     // Update provider profile (example)
-    public function updateProfile($id, $firstName, $lastName, $contact, $gender, $website, $bio)
+    public function updateProfile($id, $firstName, $lastName, $contact, $gender, $website, $bio, $Resume = null)
     {
         $id = $this->conn->real_escape_string($id);
         $firstName = $this->conn->real_escape_string($firstName);
@@ -262,11 +263,18 @@ class ProviderModel extends Database
         $website = $this->conn->real_escape_string($website);
         $bio = $this->conn->real_escape_string($bio);
 
-        $sql = "UPDATE provider 
-                SET first_name='$firstName', last_name='$lastName', contact='$contact', gender='$gender', website='$website', bio='$bio' 
-                WHERE id=$id";
+        $ResumeUpdate = "";
+        if ($Resume) {
+            $ResumeUpdate = ", Resume = '". $this->conn->real_escape_string($Resume) ."'";
+        }
 
-        return $this->conn->query($sql);
+        $sql = "UPDATE provider 
+                SET First_Name='$firstName', Last_Name='$lastName', Contact_No='$contact', Gender='$gender', Website='$website', Bio='$bio' $ResumeUpdate
+                WHERE Provider_ID=$id";
+
+        $this->conn->query($sql);
+
+        header('Location: ' . BASE_URL . '/profile');
     }
 
     public function updatePassword($id, $hashed)
@@ -274,6 +282,26 @@ class ProviderModel extends Database
         $stmt = $this->conn->prepare("UPDATE provider SET Password = ? WHERE Provider_ID = ?");
         if (!$stmt) return false;
         $stmt->bind_param("si", $hashed, $id);
+        return $stmt->execute();
+    }
+
+    public function getCurrentPassword($id)
+    {
+        $stmt = $this->conn->prepare("SELECT Password FROM provider WHERE Provider_ID = ?");
+        if (!$stmt) return false;
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result->fetch_assoc()['Password'] ?? false;
+    }
+
+
+     public function updateProfilePicture($id, $profilePic)
+    {
+        $stmt = $this->conn->prepare("UPDATE provider SET Profile_Picture = ? WHERE Provider_ID = ?");
+        if (!$stmt)
+            return false;
+        $stmt->bind_param("si", $profilePic, $id);
         return $stmt->execute();
     }
 
@@ -343,6 +371,7 @@ class ProviderModel extends Database
              JOIN skills s ON pcs.Skills_Skill_ID = s.Skill_ID
              JOIN provider_categories pc ON pcs.Provider_Categories_ID = pc.ID
              WHERE pc.Provider_ID = ?
+             AND pc.Status = 'Active'
              LIMIT 3"
         );
 
@@ -374,6 +403,7 @@ class ProviderModel extends Database
              FROM provider p
              LEFT JOIN provider_categories pc ON p.Provider_ID = pc.Provider_ID
              $whereClause
+             AND pc.Status = 'Active'
              GROUP BY p.Provider_ID
              ORDER BY p.Provider_ID DESC
              LIMIT ? OFFSET ?"
@@ -466,5 +496,17 @@ class ProviderModel extends Database
         $stmt->close();
 
         return (int)($row['total'] ?? 0);
+    }
+
+    public function removeService($serviceId)
+    {
+        $stmt = $this->conn->prepare("UPDATE provider_categories SET Status = 'Removed' WHERE ID = ?");
+
+        if (!$stmt) {
+            return false;
+        }
+
+        $stmt->bind_param("i", $serviceId);
+        return $stmt->execute();
     }
 }
