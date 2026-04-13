@@ -77,10 +77,12 @@ $navRight = [
 
         <div class="user-menu" id="userMenu">
             <!-- messages section -->
-            <a href="<?= $navRight[0]['href'] ?>" class="<?= ('./' . basename($_SERVER['REQUEST_URI'])) === $navRight[0]['href'] ? 'active' : '' ?>"
+            <a style="position: relative; padding: 5px;" href="<?= $navRight[0]['href'] ?>" class="<?= ('./' . basename($_SERVER['REQUEST_URI'])) === $navRight[0]['href'] ? 'active' : '' ?>"
                 aria-label="Messages">
                 <i class="fas fa-comments"></i>
+                <span class="notification-badge message-badge" id="msgBadge" style="display:none;"></span>
             </a>
+
             <!-- notifications section -->
             <button class="notification-icon <?= ('./' . basename($_SERVER['REQUEST_URI'])) === $navRight[1]['href'] ? 'active' : '' ?>" id="notifToggle" aria-label="Notifications" aria-haspopup="true"
                 aria-expanded="false">
@@ -136,6 +138,15 @@ $navRight = [
         </div>
         <div class="drawer-overlay" id="drawerOverlay" tabindex="-1" aria-hidden="true"></div>
     </nav>
+
+    <script src="<?= BASE_URL ?>/assets/js/elementScript.js" defer></script>
+    <script>
+        window.WEBSOCKET_URL = window.WEBSOCKET_URL || <?= json_encode(WEBSOCKET_URL . "?token=" . $_SESSION['authorize_token']) ?>;
+        window.CURRENT_USER_ID = window.CURRENT_USER_ID || <?= json_encode($_SESSION['user_id']) ?>;
+        window.CURRENT_USER_ROLE = window.CURRENT_USER_ROLE || <?= json_encode($_SESSION['role']) ?>;
+        window.BASE_URL = window.BASE_URL || <?= json_encode(BASE_URL) ?>;
+    </script>
+    <script src="<?= BASE_URL ?>/assets/js/websocketCommon.js" defer></script>
 </header>
 
 <script>
