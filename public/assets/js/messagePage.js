@@ -151,9 +151,12 @@ function formatMessageText(text) {
 }
 
 function addMessageBubble(msg) {
+
+    console.log(msg);
+
     const row = document.createElement('div');
     row.className = 'msg-row' + (msg.self ? ' self' : '');
-    row.id = msg.id;
+    row.id = "msg-bubble-" + msg.id;
 
     var user_image = '';
     var messageStatus = "";
@@ -164,22 +167,49 @@ function addMessageBubble(msg) {
         user_image = `/file/user-files/${activeConv.Profile_Picture}`;
     }
 
+    var repliedElement = "";
+    if (msg.Replied_To_Message) {
+        const repliedMsgElement = document.getElementById("msg-bubble-" + msg.Replied_To_Message);
+        if (repliedMsgElement) {
+            var repliedText = repliedMsgElement.querySelector('.bubble .text')?.innerText || "Message not found";
+            var replyUser = repliedMsgElement.classList.contains('self') ? "You" : activeConv.First_Name + " " + activeConv.Last_Name;
+            
+            repliedElement = `
+            <div class="replied-to-message-wrapper" onclick="focusAndHighlightMessage('msg-bubble-${msg.Replied_To_Message}')">
+                <div>
+                    <span class="reply-user">${replyUser}</span>
+                    <span class="reply-text">${repliedText}</span>
+                </div>
+            </div>
+            `;
 
-    // 
-
+        }
+    }
 
     row.innerHTML = `
             <img src="${user_image}" class="avatar-sm" alt="user">
             <div class="bubble">
+                ${repliedElement}
                 <div class="text">${formatMessageText(msg.text)}</div>
                 <div class="msg-actions">
-                    <button class="icon-btn" title="Reply" onclick="quoteMessage(event,'${escapeQuotes(msg.text)}')"><i class="fa-solid fa-reply"></i></button>
                     <button class="icon-btn" title="Copy" onclick="copyMessage(event,'${escapeQuotes(msg.text)}')"><i class="fa-solid fa-copy"></i></button>
-                    <button class="icon-btn" title="More"><i class="fa-solid fa-ellipsis"></i></button>
                 </div>
                 <div class="meta"><span>${msg.Time}</span>${messageStatus}</div>
             </div>`;
+
     scrollEl.appendChild(row);
+
+    row.addEventListener('dblclick', () => {
+        replyToMessage(row, msg.text, msg.self);
+    });
+
+    addSwipeRightAction(row, {
+        onSwipeRight: () => {
+            replyToMessage(row, msg.text, msg.self);
+        }
+    });
+
+  
 }
 
 function sendMessage() {
@@ -196,7 +226,8 @@ function sendMessage() {
             hour: '2-digit',
             minute: '2-digit'
         }),
-        Status: 'Sending'
+        Status: 'Sending',
+        Replied_To_Message: Number(document.getElementById("replyToMessageId").value) || null
     };
     // activeConv.messages.push(msg);
     addMessageBubble(msg);
@@ -209,13 +240,16 @@ function sendMessage() {
         'Type': 'Message',
         'Content': text,
         'To': activeConv.id,
-        'Message_ID': Message_ID
+        'Message_ID': Message_ID,
+        'Reply_To': document.getElementById("replyToMessageId").value || null
     }
 
     activeConv.last_message = text;
     activeConv.last_message_time = new Date().toISOString();
     document.querySelector(".conversation.active .conv-snippet").innerText = text;
     window.MessageSocket?.send(data);
+
+    cancelReply();
 }
 
 function autoGrow(el) {
@@ -400,7 +434,10 @@ function fetchMessagesById(id) {
 renderConversations();
 
 function handleSocketAck(data) {
-    const msgBubble = document.getElementById(data.Message_ID);
+    const msgBubble = document.getElementById(`msg-bubble-${data.Message_ID}`);
+
+    msgBubble.id = `msg-bubble-${data.DB_ID}`;
+
     if (!msgBubble) return;
     const statusEl = msgBubble.querySelector(".meta span:nth-child(2)");
     if (statusEl) {
@@ -422,15 +459,19 @@ function handleSocketNewMessage(data) {
             From: data.From
         });
 
+        console.log(data);
+        
+
         const msg = {
-            id: crypto.randomUUID(),
+            id: data.DB_ID || crypto.randomUUID(),
             self: false,
             text: data.Content,
             Time: new Date().toLocaleTimeString([], {
                 hour: '2-digit',
                 minute: '2-digit'
             }),
-            Status: 'Seen'
+            Status: 'Seen',
+            Replied_To_Message: data.Reply_To
         };
         addMessageBubble(msg);
         scrollToBottom();
@@ -592,8 +633,98 @@ function startNewChat(userId) {
 
 const messageInput = document.getElementById('messageInput');
 messageInput.addEventListener("keydown", function (event) {
-  if (event.key === "Enter" && !event.shiftKey) {
-    event.preventDefault();
-    sendMessage();
-  }
+    if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
+    }
 });
+
+
+function replyToMessage(row, messageText, isSelf) {
+    document.querySelector("#PendingReplyMessage").style.display = 'flex';
+    document.querySelector("#PendingReplyMessage .reply-text").innerText = messageText;
+    document.querySelector("#PendingReplyMessage .reply-user").innerText = isSelf ? "You" : activeConv.First_Name + " " + activeConv.Last_Name;
+    document.getElementById("replyToMessageId").value = row.id.replace('msg-bubble-', '');
+    document.getElementById('messageInput').focus();
+}
+
+function cancelReply() {
+    document.querySelector("#PendingReplyMessage").style.display = 'none';
+    document.getElementById("replyToMessageId").value = '';
+}
+
+
+function addSwipeRightAction(element, options = {}) {
+    const config = {
+        threshold: 70,          // distance to trigger action
+        maxTranslate: 100,      // max drag distance (rubber band feel)
+        onSwipeRight: () => { },
+        ...options
+    };
+
+    let startX = 0;
+    let currentX = 0;
+    let isDragging = false;
+
+    element.style.touchAction = "pan-y";
+    element.style.userSelect = "none";
+    element.style.transition = "all 0.25s ease";
+
+    element.addEventListener("pointerdown", (e) => {
+        startX = e.clientX;
+        isDragging = true;
+        element.style.transition = "none";
+    });
+
+    element.addEventListener("pointermove", (e) => {
+        if (!isDragging) return;
+
+        currentX = e.clientX;
+        let deltaX = currentX - startX;
+
+        // Only allow swipe RIGHT
+        if (deltaX < 0) deltaX = 0;
+
+        // Limit movement (rubber band effect)
+        if (deltaX > config.maxTranslate) {
+            deltaX = config.maxTranslate;
+        }
+
+        element.style.transform = `translateX(${deltaX}px)`;
+    });
+
+    element.addEventListener("pointerup", () => {
+        if (!isDragging) return;
+        isDragging = false;
+
+        const deltaX = currentX - startX;
+
+        // Trigger action if threshold passed
+        if (deltaX > config.threshold) {
+            config.onSwipeRight(element);
+        }
+
+        // Always snap back
+        element.style.transition = "all 0.25s ease";
+        element.style.transform = `translateX(0)`;
+    });
+
+    element.addEventListener("pointerleave", () => {
+        if (isDragging) element.dispatchEvent(new Event("pointerup"));
+    });
+}
+
+
+function focusAndHighlightMessage(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+
+  el.scrollIntoView({ behavior: "smooth", block: "center" });
+
+  el.classList.add("highlight-msg-row");
+
+  el.tabIndex = -1;
+  el.focus({ preventScroll: true });
+
+  setTimeout(() => el.classList.remove("highlight-msg-row"), 1000);
+}
