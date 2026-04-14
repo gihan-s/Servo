@@ -70,13 +70,28 @@
                     <button type="button" class="h-btn" id="moreBtn" disabled aria-label="More options"><i class="fa-solid fa-ellipsis"></i> <span class="h-btn-label">More</span></button>
                 </div>
             </div>
+
             <div class="messages-scroll" id="messagesScroll">
                 <div class="empty" id="emptyState">
                     <h2>No Conversation Selected</h2>
                     <p>Choose a conversation from the list or start a new one with a provider.</p>
                 </div>
             </div>
+
             <div class="composer" id="composer" style="display:none;">
+
+                <div class="replied-to-message-wrapper" id="PendingReplyMessage">
+                    <div>
+                        <span class="reply-user"></span>
+                        <span class="reply-text"></span>
+                    </div>
+                    <button class="cancel-reply" onclick="cancelReply()">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+
+                    <input type="hidden" id="replyToMessageId" value="">
+                </div>
+
                 <div class="composer-row">
                     <div class="composer-text-wrap">
                         <textarea id="messageInput" rows="1" placeholder="Type a message"

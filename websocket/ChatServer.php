@@ -180,9 +180,10 @@ class ChatServer implements MessageComponentInterface
         }
 
         $messageContent = $data['Content'];
+        $ReplyTo = isset($data['Reply_To']) ? (int)$data['Reply_To'] : null;
 
         $Model = new MessageModel;
-        $MessageID = $Model->insertMessage($messageContent, $ClientToProvider, $ProviderID, $ClientID);
+        $MessageID = $Model->insertMessage($messageContent, $ClientToProvider, $ProviderID, $ClientID, $ReplyTo);
 
         $Status = 'Sent';
 
@@ -196,7 +197,9 @@ class ChatServer implements MessageComponentInterface
                         'Type' => 'New Message',
                         'From' => $senderId,
                         'From_Name' => $senderFirstName,
-                        'Content' => $messageContent
+                        'Content' => $messageContent,
+                        'Reply_To' => $ReplyTo,
+                        'DB_ID' => $MessageID
                     ]));
                 }
             }
@@ -208,8 +211,10 @@ class ChatServer implements MessageComponentInterface
         $from->send(json_encode([
             'Type' => 'Ack',
             'Message_ID' => $data["Message_ID"],
-            'Status' => $Status
+            'Status' => $Status,
+            'DB_ID' => $MessageID
         ]));
+
     }
 
     public function onClose(ConnectionInterface $conn)

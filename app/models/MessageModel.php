@@ -161,7 +161,8 @@ class MessageModel extends Database
                 m.Content as text, 
                 " . ($Role === 'Provider' ? "NOT(m.Is_Client_To_Provider)" : "m.Is_Client_To_Provider") . " AS self, 
                 m.Sent_At, 
-                m.Status
+                m.Status,
+                m.Replied_To_Message
             FROM messages m
             WHERE m.Conversation_ID = ?
             ORDER BY m.Sent_At";
@@ -176,7 +177,7 @@ class MessageModel extends Database
     }
 
 
-    public function insertMessage($Content, $ClientToProvider, $Provider_ID, $Client_ID)
+    public function insertMessage($Content, $ClientToProvider, $Provider_ID, $Client_ID, $ReplyTo = null)
     {
         // 1. Create or get existing conversation (race-condition safe)
         $stmt = $this->conn->prepare(
@@ -199,8 +200,8 @@ class MessageModel extends Database
         // 2. Insert message
         $stmt = $this->conn->prepare(
             "INSERT INTO messages 
-        (Content, Is_Client_To_Provider, Sent_At, Status, Conversation_ID) 
-        VALUES (?, ?, ?, ?, ?)"
+        (Content, Is_Client_To_Provider, Sent_At, Status, Conversation_ID, Replied_To_Message) 
+        VALUES (?, ?, ?, ?, ?, ?)"
         );
 
         if (!$stmt) {
@@ -211,12 +212,13 @@ class MessageModel extends Database
         $Status = "Sent";
 
         $stmt->bind_param(
-            "sissi",
+            "sissii",
             $Content,
             $ClientToProvider,
             $date,
             $Status,
-            $Conversation_ID
+            $Conversation_ID,
+            $ReplyTo
         );
 
         if ($stmt->execute()) {
