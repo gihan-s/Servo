@@ -27,8 +27,8 @@
                 <div id="pending" class="buttons active" data-target="pending">Pending Requests</div>
                 <div id="accepted" class="buttons" data-target="accepted">Approved Requests</div>
                 <div id="ongoing" class="buttons" data-target="ongoing">Ongoing Projects</div>
+                <div id="completed" class="buttons" data-target="completed">Completed Projects</div>
                 <div id="pending-review" class="buttons" data-target="pending-review">Pending Review</div>
-                <div id="completed-jobs" class="buttons" data-target="completed-jobs">Completed</div>
             </div>
         </div>
         <div class="request-content">
@@ -81,17 +81,17 @@
                 </div>
             </div>
 
+             <!-- COMPLETED JOBS SECTION -->
+             <div class="completed requests-section" style="display: none;">
+                <div class="item-list">
+                </div>
+             </div>
+
              <!-- PENDING REVIEW SECTION -->
              <div class="pending-review requests-section" style="display: none;">
                 <div class="item-list">
                 </div>
             </div>
-
-             <!-- COMPLETED JOBS SECTION -->
-             <div class="completed-jobs requests-section" style="display: none;">
-                <div class="item-list">
-                </div>
-             </div>
             
 
         </div>   
@@ -159,6 +159,100 @@
 
 </div>
 
+<div class="dialog-box-2" id="cancel-ongoing-project">
+    <div class="dialog-content" style="width: 400px;">
+        <div class="dialog-title">
+            <div class="title">Confirm Cancel</div>
+
+            <div>
+                <i class="fa-solid fa-xmark dialog-close-button-2" onclick="closeDialogBox('cancel-ongoing-project')"></i>
+            </div>
+        </div>
+        <div class="pop-up-content">
+            Send Cancelling request to the provider. If project get cancelled you will charge additional amount and other amount will refunded to your account
+        </div>
+        <div class="modal-actions">
+            <button class="action-btn btn-view" id="confirmKeep"
+                onclick="closeDialogBox('cancel-ongoing-project')">Keep</button>
+            <button class="action-btn btn-delete" id="confirmCancelBtn"><i class="fa-solid fa-circle-xmark"></i> Yes,
+                Cancel</button>
+        </div>
+
+    </div>
+
+</div>
+
+<div class="dialog-box-2" id="create-post-popup">
+    <div class="dialog-content">
+        <div class="dialog-title">
+            <div class="title">Create A New Service Request</div>
+
+            <div>
+                <i class="fa-solid fa-xmark dialog-close-button-2" onclick="closeDialogBox('create-post-popup')"></i>
+            </div>
+        </div>
+        <form id="create-post-form" class="create-post-form" onsubmit="return false;">
+            
+            <div class="input-grid-1">
+                <div style="display: flex; gap: 15px; margin-bottom: 5px;">
+
+                    <div class="search-select-container add-option" style="width: 100%;">
+
+                        <div class="text-container">
+                            <div class="label search-dropdown-label" id="field-skill-label">Skill</div>
+                            <input type="text" class="text-field-search-dropdown" id="SkillAddInput" autocomplete="off"
+                                onkeydown="return false">
+                        </div>
+
+                        <div class="options">
+
+                            <span class="text-container">
+                                <input type="text" class="text-field-search" placeholder="Enter new skill to add">
+                            </span>
+
+                            <div class="option-list" id="SkillsOptionList">
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="button" style="white-space: nowrap;" onclick="addSkill();">
+                        <i class="fa-solid fa-plus" style="margin-right: 10px;"></i>Add
+                    </button>
+
+                </div>
+            </div>
+            <div class="chip-wrapper" id="SkillsChips" style="margin-bottom:20px">
+                <input type="hidden" id="Skills" name="skills">
+
+                <p>No skill selected</p>
+            </div>
+            
+
+            <div class="modal-actions">
+                <button type="reset" class="action-btn btn-delete" id="create-post-pop-up" data-role="cancel"
+                    onclick="inputReset('create-post-form')">Reset</button>
+                <button type="button" class="action-btn btn-view" onclick="submitPost('draft')" id="create-post-pop-up"
+                    data-role="save-draft">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    Save Draft
+                </button>
+                <button type="button" class="action-btn btn-edit" onclick="viewDialogBox('confirm-publish')"
+                    id="create-post-pop-up" data-role="publish">
+                    <i class="fa-solid fa-rocket"></i>
+                    Publish Request
+                </button>
+                <button type="button" class="action-btn btn-edit" onclick="saveEditedPost()" data-role="save-post"
+                    style="display:none;">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    Save Request
+                </button>
+            </div>
+        </form>
+    </div>
+
+</div>
+
 <script>
     let currentSort = 'date_desc';
     let currentSearch = '';
@@ -169,7 +263,7 @@
         accepted: { posts: [], visibleCount: 0 },
         ongoing: { posts: [], visibleCount: 0 },
         'pending-review': { posts: [], visibleCount: 0 },
-        'completed-jobs': { posts: [], visibleCount: 0 }
+        'completed': { posts: [], visibleCount: 0 }
     }
 
     function getListContainer(status) {
@@ -310,8 +404,19 @@
             `;
         } else if (status === 'ongoing') {
             message = `
-                <h2>No ongoing requests</h2>
-                <p>Your ongoing requests will appear here.</p>
+                <h2>No ongoing projects right now</h2>
+                <p>Your ongoing projects will appear here.</p>
+            `;
+        }
+        else if (status === 'pending-review') {
+            message = `
+                <h2>No pending reviews right now</h2>
+                <p>Your pending reviews will appear here.</p>
+            `;
+        } else if (status === 'completed') {
+            message = `
+                <h2>No completed projects right now</h2>
+                <p>Your completed projects will appear here.</p>
             `;
         }
 
@@ -324,9 +429,9 @@
     }
 
     function createPostCard(post, skills, status = 'pending') {
-        const skillsHTML = skills && skills.length > 0
-            ? skills.map(skill => `<span class="skill-tag">${escapeHtml(skill)}</span>`).join('')
-            : '<span class="no-skills">---No skills specified---</span>';
+        //const skillsHTML = skills && skills.length > 0
+        //    ? skills.map(skill => `<span class="skill-tag">${escapeHtml(skill)}</span>`).join('')
+        //    : '<span class="no-skills">---No skills specified---</span>';
 
         const description = post.Description || '';
         const snippet = description.length > 300
@@ -335,11 +440,11 @@
 
         const providerName = post.Provider_Name || 'Unassigned provider';
 
-        const publishedDate = formatDate(post.Published_At || post.Created_At);
-        const daysLeft = calculateDaysLeft(post.End_At);
-        if (daysLeft == 'Expired') {
-            updateAsExpired(post.Post_ID);
-        }
+        //const publishedDate = formatDate(post.Published_At || post.Created_At);
+        //const daysLeft = calculateDaysLeft(post.End_At);
+        //if (daysLeft == 'Expired') {
+        //    updateAsExpired(post.Post_ID);
+        //}
 
         // Different buttons based on status
         let actionsHTML = '';
@@ -374,30 +479,55 @@
             `;
         } else if (status === 'ongoing') {
             actionsHTML = `
+                <button class="action-btn btn-edit" onclick="updateRequest(${post.Post_ID})">
+                    <i class="fas fa-redo"></i> Update
+                </button>
                 <button class="action-btn btn-view" onclick="viewPost(${post.Post_ID})">
                     <i class="fas fa-eye"></i> View
                 </button>
-                <button class="action-btn btn-edit" onclick="repostExpired(${post.Post_ID})">
-                    <i class="fas fa-redo"></i> Repost
-                </button>
-                <button class="action-btn btn-delete" onclick="cancelRequest(${post.Post_ID})">
+                <button class="action-btn btn-delete" onclick="cancelOngoingProject(${post.Post_ID})">
                     <i class="fas fa-trash"></i> Cancel
                 </button>
             `;
         }
-
-        // Different date label based on status
-        let dateLabel = '';
-        if (status === 'draft') {
-            dateLabel = `Created ${publishedDate}`;
-        } else if (status === 'expired') {
-            dateLabel = `Expired ${publishedDate}`;
-        } else {
-            dateLabel = `Published ${publishedDate}`;
+        else if (status === 'pending-review') {
+            actionsHTML = `
+                <button class="action-btn btn-edit" onclick="submitReview(${post.Post_ID})">
+                    <i class="fas fa-star"></i> Submit Review
+                </button>
+                <button class="action-btn btn-view" onclick="viewPost(${post.Post_ID})">
+                    <i class="fas fa-eye"></i> View
+                </button>
+            `;
+        }
+        else if (status === 'completed') {
+            actionsHTML = `
+                <a href="<?= $navRight[0]['href'] ?>" class="action-btn btn-edit <?= ('./' . basename( $_SERVER['REQUEST_URI'])) === $navRight[0]['href'] ? 'active' : '' ?>"
+                aria-label="Messages">
+                    <i class="fas fa-comments"></i>Messages
+                </a>
+                <button class="action-btn btn-edit" onclick="updateRequest(${post.Post_ID})">
+                    <i class="fas fa-redo"></i> Change Requirements
+                </button>
+                <button class="action-btn btn-view" onclick="viewPost(${post.Post_ID})">
+                    <i class="fas fa-eye"></i> View
+                </button>
+            `;
         }
 
+
+        // Different date label based on status
+        //let dateLabel = '';
+        //if (status === 'draft') {
+        //    dateLabel = `Created ${publishedDate}`;
+        //} else if (status === 'expired') {
+        //    dateLabel = `Expired ${publishedDate}`;
+        //} else {
+        //    dateLabel = `Published ${publishedDate}`;
+        //}
+
         // Different footer based on status
-        let footerHTML = '';
+        /*let footerHTML = '';
         if (status === 'expired') {
             footerHTML = `
                 <div class="post-footer">
@@ -472,37 +602,73 @@
                     </div>
                 </div>
             `;
+        }*/
+
+        // Post type badge
+        const postTypeLabel = post.post_type === 'direct' ? 'Direct Request' : 'Bid Request';
+        const postTypeHTML = `
+            <div class="post-type-badge">
+                <span class="badge-label ${post.post_type === 'direct' ? 'direct' : 'bid'}">${postTypeLabel}</span>
+            </div>
+            
+        `;
+
+        let progressHTML = '';
+        if (status === 'ongoing') {
+            const progress = post.Progress || 0;
+            const hoursWorked = Math.round((progress / 100) * 80);
+            progressHTML = `<div class="progress-container" aria-label="Project progress">
+                <div class="progress-label">Progress: <span class="progress-percent">${progress}%</span> <span class="progress-detail" style="color:#64748b;">(${hoursWorked}h of 80h)</span></div>
+                <div class="progress-track"><div class="progress-fill" style="width: ${progress}%;"></div></div>
+            </div>`;
         }
 
         return `
             <div class="search-item">
                 <input type="hidden" class="post-id" value="${post.Post_ID}">
-                <div class="post-header">
-                    <div class="post-meta">
-                        <div class="post-date">
-                            <i class="fas fa-calendar"></i>
-                            <span>${dateLabel}</span>
+                <div class="item-head">
+                    <div class="item-main-dets">
+                        <div class="item-name"><i class="fas fa-user"></i><span>${escapeHtml(providerName)}</span></div>
+                        <div class="item-title">${escapeHtml(post.Title)}</div>
+                        <div class="item-description">
+                            ${snippet}
                         </div>
                     </div>
                     <div class="post-actions">
-                        ${actionsHTML}
-                    </div>
+                         ${actionsHTML}
+                     </div>
                 </div>
-                <h3 class="post-title">${escapeHtml(post.Title)}</h3>
-                <div class="post-description">${snippet}</div>
-                <div class="post-provider">
-                    <i class="fas fa-user"></i>
-                    <span>${escapeHtml(providerName)}</span>
+                <div class="item-middle">
+                    <div><i class="fa-solid fa-tag"></i> Proposed: LKR ${post.Requesting_Price || 0}/= (${post.Price_Type || 'Fixed'})</div>
                 </div>
-
-                <div class="post-skills">
-                    <span class="skills-label">Required Skills:</span>
-                    <div class="skills-tags">${skillsHTML}</div>
-                </div>
-                ${footerHTML}
-                ${engagementHTML}
+                ${progressHTML}
+                ${postTypeHTML}
+                
+                
             </div>
         `;
+        
+
+            
+                    
+        
+    }
+
+    function updateAsExpired(id) {
+        fetch(`<?= BASE_URL ?>/requests/update-expired/${id}`, {
+            method: 'POST'
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Post marked as expired successfully');
+                } else {
+                    console.log('Error', data.message || 'Failed to mark post as expired');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
     }
 
     function escapeHtml(text) {
@@ -567,7 +733,7 @@
             'accepted': document.getElementById('accepted'),
             'ongoing': document.getElementById('ongoing'),
             'pending-review': document.getElementById('pending-review'),
-            'completed-jobs': document.getElementById('completed-jobs')
+            'completed': document.getElementById('completed')
         };
 
         const sections = {
@@ -575,7 +741,7 @@
             'accepted': document.querySelector('.accepted'),
             'ongoing': document.querySelector('.ongoing'),
             'pending-review': document.querySelector('.pending-review'),
-            'completed-jobs': document.querySelector('.completed-jobs')     
+            'completed': document.querySelector('.completed')     
         };
 
         /*Object.keys(tabButtons).forEach(key => {
@@ -860,6 +1026,182 @@
                 `;
             });
     }
+
+    function updateRequest(id, mode = 'edit') {
+        viewDialogBox('create-post-popup');
+
+        fetch("<?= BASE_URL ?>/requests/view/" + id)
+            .then(response => response.json())
+            .then(post => {
+                if (post.error) {
+                    console.error('Error fetching post:', post.error);
+                    return;
+                }
+
+                const root = document.getElementById("create-post-popup");
+                root.querySelector(".title").innerText = "Update Request";
+                root.querySelectorAll(".label").forEach(label => {
+                    label.classList.add("label-float");
+                });
+                root.querySelector("#field-skill-label").classList.remove("label-float");
+
+                //root.querySelector("input[name='title']").value = post.Title || '';
+                //root.querySelector("textarea[name='description']").value = post.Description || '';
+                //root.querySelector("input[name='category']").value = post.Category_Name || '';
+                //document.getElementById("Category_ID").value = post.Category_ID || '';
+
+                //root.querySelector("input[name='price']").value = post.Requesting_Price || '';
+                //root.querySelector("input[name='pricetype']").value = post.Price_Type || '';
+                //root.querySelector("input[name='duration']").value = post.Duration || '';
+                //root.querySelector("input[name='durationtype']").value = post.Duration_Type || '';
+                //root.querySelector("input[name='level']").value = post.Level || '';
+
+                const endAtInput = root.querySelector("input[name='endat']");
+                if (post.End_At) {
+                    // End_At might be "2025-12-31 00:00:00" or "2025-12-31"
+                    let dateValue = post.End_At.split(' ')[0]; // Get just the date part "2025-12-31"
+
+                    // Verify it's a valid date and format is correct
+                    const dateObj = new Date(dateValue);
+                    if (!isNaN(dateObj.getTime())) {
+                        // Format as YYYY-MM-DD
+                        const year = dateObj.getFullYear();
+                        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                        const day = String(dateObj.getDate()).padStart(2, '0');
+                        dateValue = `${year}-${month}-${day}`;
+
+                        console.log("Setting end date to:", dateValue);
+                        endAtInput.value = dateValue;
+                    } else {
+                        console.error("Invalid date:", post.End_At);
+                        endAtInput.value = '';
+                    }
+                } else {
+                    endAtInput.value = '';
+                }
+
+                // Use selectCategory to load skills for the category
+                if (post.Category_ID) {
+                    const categoryOption = document.querySelector(`.search-select-container [data-id="${post.Category_ID}"]`);
+                    if (categoryOption) {
+                        // Call selectCategory with skipReset = true to not clear existing chips yet
+                        selectCategory({ target: categoryOption }, true);
+                    }
+                }
+
+                // Add skills after loading category skills
+                setTimeout(() => {
+                    const skillsChips = root.querySelector("#SkillsChips");
+                    skillsChips.innerHTML = '<input type="hidden" id="Skills" name="skills"><p>No skill selected</p>';
+
+                    if (post.skills && post.skills.length > 0) {
+                        post.skills.forEach(skill => {
+                            const skillOptions = document.getElementById("SkillsOptionList").querySelectorAll('[data-id]');
+                            const matchingOption = Array.from(skillOptions).find(opt => opt.textContent.trim() === skill);
+
+                            if (matchingOption) {
+                                addChip('SkillsChips', skill, matchingOption.dataset.id);
+                            }
+                        });
+                    }
+                }, 500);
+
+                // Change buttons
+                const saveDraftBtn = root.querySelector('[data-role="save-draft"]');
+                const publishBtn = root.querySelector('[data-role="publish"]');
+                const savePostBtn = root.querySelector('[data-role="save-post"]');
+
+                if (mode === 'repost') {
+                    // Repost flow: force date to today and use confirmation before publishing.
+                    root.querySelector("input[name='endat']").value = getTodayDateString();
+
+                    if (saveDraftBtn) saveDraftBtn.style.display = 'none';
+                    if (publishBtn) publishBtn.style.display = 'none';
+                    if (savePostBtn) {
+                        savePostBtn.style.display = '';
+                        savePostBtn.removeAttribute('data-post-id');
+                        savePostBtn.innerHTML = '<i class="fa-solid fa-rocket"></i> Repost Request';
+
+                        const newSaveBtn = savePostBtn.cloneNode(true);
+                        savePostBtn.parentNode.replaceChild(newSaveBtn, savePostBtn);
+                        newSaveBtn.onclick = function () {
+                            openPublishConfirmWithAction(function () {
+                                submitPost('publish');
+                            });
+                        };
+                    }
+                } else {
+                    if (saveDraftBtn) saveDraftBtn.style.display = 'none';
+                    if (publishBtn) publishBtn.style.display = 'none';
+                    if (savePostBtn) {
+                        savePostBtn.style.display = '';
+                        savePostBtn.setAttribute('data-post-id', post.Post_ID);
+                        savePostBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Request';
+
+                        // Remove old event listeners and add new one
+                        const newSaveBtn = savePostBtn.cloneNode(true);
+                        savePostBtn.parentNode.replaceChild(newSaveBtn, savePostBtn);
+                        newSaveBtn.onclick = saveEditedPost;
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching post:', error);
+                alert('Failed to load post details. Please try again.');
+            });
+    }
+
+    function cancelOngoingProject(id) {
+    viewDialogBox('cancel-ongoing-project');
+    const confirmCancelBtn = document.getElementById('cancel-ongoing-project');
+
+    // Remove previous event listeners
+    const newConfirmCancelBtn = confirmCancelBtn.cloneNode(true);
+    confirmCancelBtn.parentNode.replaceChild(newConfirmCancelBtn, confirmCancelBtn);
+
+    newConfirmCancelBtn.addEventListener('click', function () {
+        fetch("<?= BASE_URL ?>/project/cancel/" + id, {
+            method: 'POST'
+        })
+        /*.then(res => res.text()) // 👈 temporarily change
+        .then(data => {
+            console.log(data); // 🔥 see actual response
+        })*/
+        .then(response => response.json())
+        .then(data => {
+            console.log('cancelProject response:', data);
+            if (data.success) {
+                closeDialogBox('cancel-ongoing-project');
+                window.showSuccessToast("Success!", "Cancellation request sent to provider.");
+
+                // Remove from DOM
+                const projectElement = document.querySelector(`.search-item input[value="${id}"]`)?.closest('.search-item');
+                if (projectElement) {
+                    projectElement.style.transition = 'all 0.3s ease';
+                    projectElement.style.opacity = '0';
+                    projectElement.style.transform = 'translateX(-20px)';
+
+                    setTimeout(() => {
+                        projectElement.remove();
+                        const activeSection = document.querySelector('.ongoing');
+                        const itemList = activeSection?.querySelector('.item-list');
+                        const remainingProjects = itemList?.querySelectorAll('.search-item');
+
+                        if (remainingProjects && remainingProjects.length === 0) {
+                            showEmptyState('ongoing', itemList);
+                        }
+                    }, 300);
+                }
+            } else {
+                window.showErrorToast("Error", data.error || 'Failed to send cancellation request');
+            }
+        })
+        .catch(error => {
+            console.log('cancelOngoingProject error:', error);
+            window.showErrorToast("Error", 'An error occurred while sending the cancellation request.');
+        });
+    });
+}
 
     /*document.addEventListener('DOMContentLoaded', function () {
         // Setup search input handler with debouncing

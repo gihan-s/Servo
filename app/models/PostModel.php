@@ -108,7 +108,12 @@ class PostModel extends Database
     {
         error_log("PostModel::getPosts - Client: $clientId, Status: $status, Sort: $sort, Search: '$search'");
         
-        $query = "SELECT p.*, CONCAT(pr.First_Name, ' ', pr.Last_Name) AS Provider_Name  FROM Post p  LEFT JOIN Provider pr ON p.Provider_ID = pr.Provider_ID  WHERE p.Client_ID = ? AND p.Post_Type = 'post'";
+        $query = "SELECT p.*, CONCAT(pr.First_Name, ' ', pr.Last_Name) AS Provider_Name, 
+                         COALESCE(proj.Progress, 0) AS Progress, proj.Started_At, proj.Ended_At
+                  FROM Post p  
+                  LEFT JOIN Provider pr ON p.Provider_ID = pr.Provider_ID
+                  LEFT JOIN project proj ON p.Post_ID = proj.Post_ID
+                  WHERE p.Client_ID = ? AND p.Post_Type = 'post'";
         $types = "i";
         $params = [$clientId];
 

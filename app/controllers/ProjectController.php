@@ -127,6 +127,59 @@ class ProjectController extends BaseController
         }
     }
 
+    public function cancelProject($id): void
+    {
+        header('Content-Type: application/json');
+        $id = (int) $id;
+        if ($id <= 0) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid post id']);
+            return;
+        }
+
+        $success = $this->projectModel->cancelProject($id);
+
+        if ($success) {
+            echo json_encode(['success' => true, 'message' => 'Project canceled successfully']);
+        } else {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => 'Failed to cancel project']);
+        }
+    }
+
+    public function updateProgress($postId): void
+    {
+        header('Content-Type: application/json');
+        $this->ensureAuth();
+
+        $postId = (int) $postId;
+        if ($postId <= 0) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid post id']);
+            return;
+        }
+
+        // Get JSON data from request body
+        $input = json_decode(file_get_contents('php://input'), true);
+        $progress = (int) ($input['progress'] ?? 0);
+
+        // Validate progress value
+        if ($progress < 0 || $progress > 100) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Progress must be between 0 and 100']);
+            return;
+        }
+
+        $success = $this->projectModel->updateProjectProgress($postId, $progress);
+
+        if ($success) {
+            echo json_encode(['success' => true, 'message' => 'Project progress updated successfully']);
+        } else {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => 'Failed to update project progress']);
+        }
+    }
+
     // GET /dashboard
     public function index()
     {

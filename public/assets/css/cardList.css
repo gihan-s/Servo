@@ -99,7 +99,7 @@ body {
 
 .search-item .item-head {
   display: flex;
-  gap: 1.2rem;
+  gap: 2rem;
   align-items: center;
 }
 
@@ -116,13 +116,18 @@ body {
   flex-grow: 1;
 }
 
+.search-item .item-head .post-actions {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
 .search-item .item-head .item-name {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #333;
-  line-height: 1.8rem;
+  color: #16ba00;
+  line-height: 2rem;
 }
-
 .search-item .item-head .item-name:hover {
   color: #28a745;
   text-decoration: underline;
@@ -131,13 +136,13 @@ body {
 .search-item .item-head .item-title {
   font-size: 1.4rem;
   font-weight: 600;
-  line-height: 1.5rem;
+  line-height: 2rem;
 }
 
 .search-item .item-head .item-district {
   font-size: 1rem;
   color: #75706c;
-  line-height: 1.5rem;
+  line-height: 2rem;
 }
 
 .button {

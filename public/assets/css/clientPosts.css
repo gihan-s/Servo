@@ -352,6 +352,33 @@
   gap: 4px;
 }
 
+.post-type-badge {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.badge-label {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge-label.bid {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.badge-label.direct {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
 /* Section-specific styling */
 .draft-section .search-item::before,
 .expired-section .search-item::before {

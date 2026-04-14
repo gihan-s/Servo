@@ -210,6 +210,14 @@ switch ($url) {
         (new ProjectController())->cancelRequest((int)$m[1]);
         break;
 
+    case (preg_match('#^project/cancel/(\d+)$#', $url, $m) ? true : false):
+        (new ProjectController())->cancelProject((int)$m[1]);
+        break;
+
+    case (preg_match('#^project/update-progress/(\d+)$#', $url, $m) ? true : false):
+        (new ProjectController())->updateProgress((int)$m[1]);
+        break;
+
     case (preg_match('#^requests/update/(\d+)$#', $url, $m) ? true : false):
         (new PostController())->updatePost((int)$m[1]);
         break;
