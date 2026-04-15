@@ -182,7 +182,6 @@ class ProjectModel extends Database {
 
         if (!$stmt->execute()) {
             error_log('updateProjectProgress exec: ' . $stmt->error);
-            $stmt->close();
             return false;
         }
 
@@ -190,4 +189,32 @@ class ProjectModel extends Database {
         return true;
     }
 
+    /**
+     * Get Project ID by Post ID
+     * @param int $postId - The Post ID
+     * @return int|null - The Project ID or null if not found
+     */
+    public function getProjectIdByPostId(int $postId): ?int
+    {
+        try {
+            $sql = "SELECT Project_ID FROM project WHERE Post_ID = ?";
+            $stmt = $this->conn->prepare($sql);
+
+            if (!$stmt) {
+                throw new Exception("Prepare failed: " . $this->conn->error);
+            }
+
+            $stmt->bind_param("i", $postId);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $row = $result->fetch_assoc();
+            $stmt->close();
+
+            return $row ? (int)$row['Project_ID'] : null;
+        } catch (Exception $e) {
+            error_log("Error getting project ID: " . $e->getMessage());
+            return null;
+        }
+    }
 }
+       

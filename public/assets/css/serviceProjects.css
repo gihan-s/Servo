@@ -7,7 +7,7 @@
     position: relative;
 }
 
-.service-requests .search-item {
+/*.service-requests .search-item {
     background: #fff;
     border-radius: 16px;
     padding: 26px 26px 22px;
@@ -45,7 +45,7 @@
     box-shadow: none;
 }
 
-/* Head section refinements */
+Head section refinements
 .service-requests .item-head {
     display: flex;
     gap: 1.2rem;
@@ -122,9 +122,9 @@
     background: transparent;
 }
 
-/* Light themed status variants (only green tone derives from #008500) */
-/* Status base styling with colored dot indicators */
-/* Align with payment status color system */
+Light themed status variants (only green tone derives from #008500) 
+Status base styling with colored dot indicators 
+Align with payment status color system
 .service-requests .status-chip.status-awaiting,
 .service-requests .status-chip.status-progress,
 .service-requests .status-chip.status-review,
@@ -132,7 +132,7 @@
     border: 1px solid;
 }
 
-/* Awaiting Acceptance -> pending style */
+Awaiting Acceptance -> pending style 
 .service-requests .status-chip.status-awaiting {
     background: #fef3c7;
     color: #d97706;
@@ -141,29 +141,29 @@
 
 /* draft style */
 /* In Progress -> active style */
-/* In Progress now violet */
+/* In Progress now violet 
 .service-requests .status-chip.status-progress {
     background: #f2effd;
     color: #4c1d95;
     border-color: #d7ccfa;
 }
 
-/* Pending Review -> refunded color family (blue) repurposed */
+/* Pending Review -> refunded color family (blue) repurposed 
 .service-requests .status-chip.status-review {
     background: #f2f7fd;
     color: #0369a1;
     border-color: #d4e6f6;
 }
 
-/* Completed -> custom violet aligned to theme but distinct */
-/* Completed now green */
+/* Completed -> custom violet aligned to theme but distinct 
+/* Completed now green 
 .service-requests .status-chip.status-complete {
     background: #dcfce7;
     color: #047857;
     border-color: #bbf7d0;
 }
 
-/* Middle row */
+ Middle row 
 .service-requests .item-middle {
     display: flex;
     gap: 2.2rem;
@@ -177,7 +177,7 @@
     color: #008500;
 }
 
-/* Description */
+ Description 
 .service-requests .item-description {
     font-size: 14px;
     line-height: 1.6;
@@ -185,7 +185,7 @@
     margin-top: .35rem;
 }
 
-/* Action buttons inside .button container */
+ Action buttons inside .button container 
 .service-requests .search-item .button {
     display: flex;
     gap: .5rem;
@@ -193,7 +193,7 @@
     margin-left: auto;
 }
 
-/* Base icon/utility buttons */
+ Base icon/utility buttons 
 .service-requests .search-item .button button {
     background: #f1f5f9;
     border: 1px solid #e2e8f0;
@@ -213,7 +213,7 @@
     background: #e2e8f0;
     color: #111827;
     transform: translateY(-2px);
-}
+} */
 
 .btn-primary {
     background: #008500 !important;
@@ -546,4 +546,249 @@
     width : 0%;
     background: #008500;
     transition: width .4s ease;
+}
+
+/* Update Requirements Dialog Styles */
+.update-requirements-container {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    max-height: 70vh;
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+.update-requirements-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.update-requirements-container::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 10px;
+}
+
+.update-requirements-container::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+.update-requirements-container::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+.requirements-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.requirements-section .section-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #111827;
+    padding-bottom: 8px;
+}
+
+.post-details-view {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.post-details-view {
+    width: 100%;
+}
+
+.project-requirements-view {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.requirements-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.requirement-item {
+    display: flex;
+    gap: 12px;
+    padding: 12px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border-left: 3px solid #008500;
+}
+
+.requirement-number {
+    font-weight: 700;
+    color: #008500;
+    font-size: 14px;
+    min-width: 24px;
+}
+
+.requirement-content {
+    flex: 1;
+}
+
+.requirement-text {
+    font-size: 14px;
+    color: #374151;
+    line-height: 1.5;
+}
+
+.no-requirements {
+    padding: 20px;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 13px;
+    background: #f8fafc;
+    border-radius: 8px;
+}
+
+.update-requirements-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.form-textarea {
+    padding: 12px;
+    font-family: inherit;
+    font-size: 14px;
+    color: #1f2937;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #ffffff;
+    resize: vertical;
+    transition: all 0.3s ease;
+    line-height: 1.5;
+}
+
+.form-textarea:focus {
+    outline: none;
+    border-color: #008500;
+    box-shadow: 0 0 0 3px rgba(0, 133, 0, 0.1);
+}
+
+.form-textarea::placeholder {
+    color: #94a3b8;
+}
+
+.char-count {
+    font-size: 12px;
+    color: #64748b;
+    text-align: right;
+}
+
+/* Modal actions at the bottom of dialog */
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+}
+
+/* .action-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.3s ease;
+}
+
+.action-btn i {
+    font-size: 14px;
+}
+
+.action-btn.btn-delete {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+
+.action-btn.btn-delete:hover {
+    background: #fecaca;
+    color: #991b1b;
+}
+
+.action-btn.btn-edit {
+    background: #008500;
+    color: #ffffff;
+    border: 1px solid #008500;
+}
+
+.action-btn.btn-edit:hover {
+    background: #006b00;
+    border-color: #006b00;
+    transform: translateY(-2px);
+}
+
+.action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+} */
+
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 40px 20px;
+    color: #64748b;
+}
+
+.loading-state i {
+    font-size: 32px;
+    color: #008500;
+}
+
+.error-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 40px 20px;
+    color: #dc2626;
+}
+
+.error-state i {
+    font-size: 32px;
+}
+
+/* Responsive adjustments for small screens */
+@media (max-width: 768px) {
+    .post-details-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .update-requirements-container {
+        max-height: 60vh;
+    }
+    
+    .action-btn {
+        font-size: 13px;
+        padding: 8px 14px;
+    }
 }

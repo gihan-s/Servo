@@ -9,10 +9,13 @@
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/clientPosts.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/elementStyles.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/gridTemplates.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/serviceProjects.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <script src="<?= BASE_URL ?>/assets/js/elementScript.js" defer></script>
     <script src="<?= BASE_URL ?>/assets/js/cardList.js" defer></script>
+    <!-- <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/projectRequirements.css"> -->
+    <script src="<?= BASE_URL ?>/assets/js/projectRequirements.js" defer></script>
 </head>
 
 <body>
@@ -178,6 +181,59 @@
                 Cancel</button>
         </div>
 
+    </div>
+
+</div>
+
+<div class="dialog-box-2" id="update-ongoing-requirements">
+    <div class="dialog-content" style="width: 700px;">
+        <div class="dialog-title">
+            <div class="title">Update Project Requirements</div>
+
+            <div>
+                <i class="fa-solid fa-xmark dialog-close-button-2" onclick="closeDialogBox('update-ongoing-requirements')"></i>
+            </div>
+        </div>
+        <div class="dialog-body">
+            <div class="update-requirements-container">
+                <!-- Post Details Section -->
+                <div class="requirements-section">
+                    <div class="section-title">Post Details :</div>
+                    <div class="post-details-view" id="postDetailsView"></div>
+                </div>
+
+                <!-- Project Requirements Section -->
+                <div class="requirements-section">
+                    <div class="section-title">Current Project Requirements :</div>
+                    <div class="project-requirements-view" id="projectRequirementsView"></div>
+                </div>
+
+                <!-- Update Requirements Form Section -->
+                <div class="requirements-section">
+                    <div class="section-title">Add New Requirements or Changes :</div>
+                    <form id="update-requirements-form" class="update-requirements-form">
+                        <div class="form-group">
+                            <label for="changedRequirements">Describe the changes you need :</label>
+                            <textarea 
+                                id="changedRequirements" 
+                                name="changed_requirements" 
+                                class="form-textarea" 
+                                placeholder="Enter any changes, new requirements, or updates needed for this project..."
+                                rows="5"
+                            ></textarea>
+                            <small class="char-count"><span id="charCount">0</span>/500 characters</small>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="modal-actions">
+                    <button class="action-btn btn-delete" onclick="closeDialogBox('update-ongoing-requirements')">Cancel</button>
+                    <button class="action-btn btn-edit" id="submitRequirementsBtn">
+                        <i class="fa-solid fa-paper-plane"></i> Send to Provider
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
 </div>
@@ -479,7 +535,7 @@
             `;
         } else if (status === 'ongoing') {
             actionsHTML = `
-                <button class="action-btn btn-edit" onclick="updateRequest(${post.Post_ID})">
+                <button class="action-btn btn-edit" onclick="updateOngoingProject(${post.Post_ID})">
                     <i class="fas fa-redo"></i> Update
                 </button>
                 <button class="action-btn btn-view" onclick="viewPost(${post.Post_ID})">
@@ -1027,7 +1083,7 @@
             });
     }
 
-    function updateRequest(id, mode = 'edit') {
+    /*function updateRequest(id, mode = 'edit') {
         viewDialogBox('create-post-popup');
 
         fetch("<?= BASE_URL ?>/requests/view/" + id)
@@ -1149,7 +1205,7 @@
                 console.error('Error fetching post:', error);
                 alert('Failed to load post details. Please try again.');
             });
-    }
+    }*/
 
     function cancelOngoingProject(id) {
     viewDialogBox('cancel-ongoing-project');
@@ -1202,6 +1258,190 @@
         });
     });
 }
+
+    function updateOngoingProject(postId) {
+        viewDialogBox('update-ongoing-requirements');
+
+        // Show loading state
+        const postDetailsView = document.querySelector("#postDetailsView");
+        const projectReqView = document.querySelector("#projectRequirementsView");
+        
+        postDetailsView.innerHTML = `
+            <div class="loading-state">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading project details...</p>
+            </div>
+        `;
+        projectReqView.innerHTML = `
+            <div class="loading-state">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading requirements...</p>
+            </div>
+        `;
+
+        // First, fetch the Project ID from Post ID
+        fetch("<?= BASE_URL ?>/project/getProjectIdByPostId?post_id=" + postId)
+            .then(response => response.json())
+            .then(projectData => {
+                if (!projectData.success) {
+                    console.warn('Could not get project ID:', projectData.message);
+                    return { projectId: null };
+                }
+                console.log('Got projectId:', projectData.project_id);
+                return { projectId: projectData.project_id };
+            })
+            .then(({ projectId }) => {
+                // Then fetch post details
+                return fetch("<?= BASE_URL ?>/requests/view/" + postId)
+                    .then(response => response.json())
+                    .then(post => {
+                        if (post.error) {
+                            postDetailsView.innerHTML = `
+                                <div class="error-state">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    <p>Failed to load post details</p>
+                                </div>
+                            `;
+                            return { post: null, projectId: null };
+                        }
+
+                        // Display post details
+                        const publishDate = post.Published_At ?
+                            new Date(post.Published_At).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                            }) : 'N/A';
+
+                        const skillsHTML = post.skills && post.skills.length > 0
+                            ? post.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')
+                            : '<span>No skills specified</span>';
+
+                        const providerName = post.Provider_Name || 'Unassigned provider';
+
+                        postDetailsView.innerHTML = `
+                            <div class="post-view">
+                                <div class="post-view-title">${post.Title || 'Untitled'}</div>
+                                <div class="post-view-meta">
+                                    <span class="chip"><i class="fa-solid fa-calendar"></i><span>${publishDate}</span></span>
+                                </div>
+                                <div class="post-view-section">
+                                    <div class="section-title">Description</div>
+                                    <div class="section-body">${post.Description || 'No description provided'}</div>
+                                </div>
+                                <div class="post-view-section">
+                                    <div class="section-title">Provider</div>
+                                    <div class="post-provider">${providerName}</div>
+                                </div> 
+                                
+                            </div>
+                        `;
+
+                        return { post: post, projectId: projectId };
+                    });
+            })
+            .then(({ post, projectId }) => {
+                // Now fetch requirements if we have projectId
+                if (projectId && projectId > 0) {
+                    console.log('Fetching requirements for projectId:', projectId);
+                    return projectRequirementsManager.getRequirements(projectId);
+                } else {
+                    console.warn('No projectId available');
+                    return Promise.resolve({
+                        success: false,
+                        requirements: [],
+                        message: 'No project found'
+                    });
+                }
+            })
+            .then(result => {
+                console.log('Requirements result:', result);
+                if (result.success && result.requirements && result.requirements.length > 0) {
+                    const requirementsHTML = result.requirements
+                        .map((req, index) => `
+                            <div class="requirement-item" style="padding: 12px; background-color: #f5f5f5; margin-bottom: 10px; border-radius: 4px; border-left: 4px solid #4caf50;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span style="display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; background-color: #4caf50; color: white; border-radius: 50%; font-size: 12px; font-weight: bold;">${index + 1}</span>
+                                    <div class="requirement-text" style="flex: 1;">${escapeHtml(req.Requirement_Text)}</div>
+                                </div>
+                            </div>
+                        `).join('');
+
+                    projectReqView.innerHTML = `<div class="requirements-list">${requirementsHTML}</div>`;
+                } else {
+                    projectReqView.innerHTML = '<div class="no-requirements" style="text-align: center; padding: 20px; color: #999; background-color: #f9f9f9; border-radius: 4px;">No requirements recorded yet</div>';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading project details or requirements:', error);
+                projectReqView.innerHTML = '<div class="no-requirements" style="text-align: center; padding: 20px; color: #f44336; background-color: #ffebee; border-radius: 4px;">Unable to load requirements</div>';
+            });
+
+        // Setup form handlers
+        const form = document.getElementById('update-requirements-form');
+        const charCount = document.getElementById('charCount');
+        const textarea = document.getElementById('changedRequirements');
+        const submitBtn = document.getElementById('submitRequirementsBtn');
+
+        // Character count handler
+        textarea.addEventListener('input', function() {
+            charCount.textContent = this.value.length;
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+
+        // Submit handler
+        submitBtn.onclick = function() {
+            const changedReqs = textarea.value.trim();
+            
+            if (!changedReqs) {
+                window.showErrorToast("Validation Error", "Please enter the changes or new requirements");
+                return;
+            }
+
+            if (changedReqs.length > 500) {
+                window.showErrorToast("Validation Error", "Requirements cannot exceed 500 characters");
+                return;
+            }
+
+            // Submit to server
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+            fetch("<?= BASE_URL ?>/project/update-requirements/" + postId, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    changed_requirements: changedReqs,
+                    post_id: postId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send to Provider';
+
+                if (data.success) {
+                    window.showSuccessToast("Success!", "Requirements update sent to provider");
+                    closeDialogBox('update-ongoing-requirements');
+                    textarea.value = '';
+                    charCount.textContent = '0';
+                    // Refresh the projects list
+                    loadPosts('ongoing');
+                } else {
+                    window.showErrorToast("Error", data.error || 'Failed to send requirements update');
+                }
+            })
+            .catch(error => {
+                console.error('Error submitting requirements:', error);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send to Provider';
+                window.showErrorToast("Error", 'An error occurred while sending the update');
+            });
+        };
+    }
 
     /*document.addEventListener('DOMContentLoaded', function () {
         // Setup search input handler with debouncing

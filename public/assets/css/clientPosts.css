@@ -515,7 +515,7 @@
   letter-spacing: 0.6px;
   color: #000000;
   font-weight: 800;
-  margin-bottom: 6px;
+  margin-bottom: 1px;
 }
 
 .post-view-section .section-body {
@@ -572,6 +572,12 @@
   font-size: 15px;
   font-weight: 800;
   color: #111827;
+}
+
+.post-view .kv-item .kv-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
 }
 
 .post-view .engagement-row {

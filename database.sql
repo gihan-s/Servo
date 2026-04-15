@@ -351,6 +351,20 @@ CREATE TABLE `project_update_log` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `project_requirements`
+--
+
+CREATE TABLE `project_requirements` (
+  `Requirement_ID` int(11) NOT NULL AUTO_INCREMENT,
+  `Project_ID` int(11) NOT NULL,
+  `Requirement_Text` varchar(512) NOT NULL,
+  PRIMARY KEY (`Requirement_ID`),
+  FOREIGN KEY (`Project_ID`) REFERENCES `project`(`Project_ID`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `provider`
 --
 

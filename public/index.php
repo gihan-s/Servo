@@ -218,6 +218,26 @@ switch ($url) {
         (new ProjectController())->updateProgress((int)$m[1]);
         break;
 
+    case 'project/addRequirement':
+        (new ProjectController())->addRequirement();
+        break;
+
+    case 'project/getRequirements':
+        (new ProjectController())->getRequirements();
+        break;
+
+    case 'project/updateRequirement':
+        (new ProjectController())->updateRequirement();
+        break;
+
+    case 'project/deleteRequirement':
+        (new ProjectController())->deleteRequirement();
+        break;
+
+    case 'project/getProjectIdByPostId':
+        (new ProjectController())->getProjectIdByPostId();
+        break;
+
     case (preg_match('#^requests/update/(\d+)$#', $url, $m) ? true : false):
         (new PostController())->updatePost((int)$m[1]);
         break;
