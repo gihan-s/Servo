@@ -198,6 +198,11 @@ switch ($url) {
         $controller->index();
         break;
 
+    case 'projects/list':
+        $controller = new ProjectController();
+        $controller->getPosts();
+        break;
+
     case 'requests':
         $controller = new PostController();
         $controller->index();
@@ -229,6 +234,18 @@ switch ($url) {
 
     case (preg_match('#^requests/delete/(\d+)$#', $url, $m) ? true : false):
         (new PostController())->deletePost((int)$m[1]);
+        break;
+
+    case (preg_match('#^requests/cancel/(\d+)$#', $url, $m) ? true : false):
+        (new ProjectController())->cancelRequest((int)$m[1]);
+        break;
+
+    case (preg_match('#^project/cancel/(\d+)$#', $url, $m) ? true : false):
+        (new ProjectController())->cancelProject((int)$m[1]);
+        break;
+
+    case (preg_match('#^project/update-progress/(\d+)$#', $url, $m) ? true : false):
+        (new ProjectController())->updateProgress((int)$m[1]);
         break;
 
     case (preg_match('#^requests/update/(\d+)$#', $url, $m) ? true : false):

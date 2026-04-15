@@ -186,4 +186,55 @@ class ProjectModel extends Database {
         ],
     ];
   }
+
+  public function cancelProject(int $postId): bool
+    {
+        $sql = "UPDATE Project SET Project_Status = 'canceled' WHERE Post_ID = ?";
+        $sql2 = "UPDATE Post SET Request_Status = 'canceled' WHERE Post_ID = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt2 = $this->conn->prepare($sql2);
+        if (!$stmt || !$stmt2) {
+            error_log('cancelProject prepare: ' . $this->conn->error);
+            return false;
+        }
+
+        $stmt->bind_param('i', $postId);
+        $stmt2->bind_param('i', $postId);
+
+        if (!$stmt->execute()) {
+            error_log('cancelProject exec: ' . $stmt->error);
+            return false;
+        }
+
+        if (!$stmt2->execute()) {
+            error_log('cancelProject exec: ' . $stmt2->error);
+            return false;
+        }
+
+        $stmt->close();
+        $stmt2->close();
+        return true;
+    }
+
+    public function updateProjectProgress(int $postId, int $progress): bool
+    {
+        $sql = "UPDATE Project SET Progress = ? WHERE Post_ID = ?";
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('updateProjectProgress prepare: ' . $this->conn->error);
+            return false;
+        }
+
+        $stmt->bind_param('ii', $progress, $postId);
+
+        if (!$stmt->execute()) {
+            error_log('updateProjectProgress exec: ' . $stmt->error);
+            $stmt->close();
+            return false;
+        }
+
+        $stmt->close();
+        return true;
+    }
+
 }

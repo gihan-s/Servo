@@ -117,12 +117,14 @@
   align-items: center;
   gap: 6px;
   text-transform: none;
+  
 }
 
 .btn-edit {
   color: white;
   background-color: #008500;
   backdrop-filter: blur(10px);
+  text-decoration: none;
 }
 
 .btn-edit:hover {
@@ -175,6 +177,15 @@
   margin-bottom: 20px;
   font-size: 15px;
 }
+
+.post-provider {
+  color: #008500; /* Brand green */
+  line-height: 1.7;
+  margin-bottom: 20px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
 
 .post-skills {
   margin-bottom: 24px;
@@ -339,6 +350,33 @@
   display: flex;
   align-items: center;
   gap: 4px;
+}
+
+.post-type-badge {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.badge-label {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge-label.bid {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.badge-label.direct {
+  background-color: #dbeafe;
+  color: #1e40af;
 }
 
 /* Section-specific styling */

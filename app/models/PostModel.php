@@ -150,6 +150,90 @@ class PostModel extends Database
         return $posts;
     }
 
+    public function getRequestPosts($clientId, $status = null, $sort = 'date_desc', $search = '')
+    {
+        error_log("PostModel::getPosts - Client: $clientId, Status: $status, Sort: $sort, Search: '$search'");
+        
+        $query = "SELECT p.*, CONCAT(pr.First_Name, ' ', pr.Last_Name) AS Provider_Name, 
+                         COALESCE(proj.Progress, 0) AS Progress, proj.Started_At, proj.Ended_At
+                  FROM Post p  
+                  LEFT JOIN Provider pr ON p.Provider_ID = pr.Provider_ID
+                  LEFT JOIN project proj ON p.Post_ID = proj.Post_ID
+                  WHERE p.Client_ID = ? AND p.Post_Type = 'post'";
+        $types = "i";
+        $params = [$clientId];
+
+        if ($status !== null) {
+            $query .= " AND Request_Status = ?";
+            $types .= "s";
+            $params[] = $status;
+        }
+
+        // Add search filter if search term is provided
+        if (!empty($search)) {
+            $query .= " AND (Title LIKE ? OR Description LIKE ? OR Requesting_Price LIKE ? OR Level LIKE ?)";
+            $types .= "ssss";
+            $searchTerm = "%$search%";
+            $params[] = $searchTerm;
+            $params[] = $searchTerm;
+            $params[] = $searchTerm;
+            $params[] = $searchTerm;
+            error_log("Search filter applied with term: '$searchTerm'");
+        }
+
+        // Build ORDER BY clause based on sort parameter and status
+        // Different date fields for different statuses:
+        // - active: Published_At
+        // - draft: Created_At
+        // - expired: End_At
+        $orderBy = 'Created_At DESC'; // Default
+        
+        switch ($sort) {
+            case 'date_asc':
+                if ($status === 'pending') {
+                    $orderBy = 'Published_At ASC';
+                } elseif ($status === 'accepted') {
+                    $orderBy = 'Created_At ASC';
+                } else {
+                    $orderBy = 'End_At ASC'; // For expired posts
+                }
+                break;
+            case 'date_desc':
+                if ($status === 'pending') {
+                    $orderBy = 'Published_At DESC';
+                } elseif ($status === 'accepted') {
+                    $orderBy = 'Created_At DESC';
+                } else {
+                    $orderBy = 'End_At DESC'; // For expired posts
+                }
+                break;
+            case 'price_asc':
+                $orderBy = 'Requesting_Price ASC';
+                break;
+            case 'price_desc':
+                $orderBy = 'Requesting_Price DESC';
+                break;
+            case 'views_asc':
+                $orderBy = 'Views ASC';
+                break;
+            case 'views_desc':
+                $orderBy = 'Views DESC';
+                break;
+        }
+        
+        error_log("Using ORDER BY: $orderBy");
+        $query .= " ORDER BY $orderBy";
+
+        error_log("Final SQL: $query");
+        
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param($types, ...$params);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
     public function createPost($data)
     {
         try {
@@ -565,6 +649,27 @@ class PostModel extends Database
 
         if (!$stmt->execute()) {
             error_log('deletePost exec: ' . $stmt->error);
+            return false;
+        }
+
+        $stmt->close();
+        return true;
+    }
+
+    public function cancelRequest(int $postId): bool
+    {
+        $sql = "UPDATE Post SET Request_Status = 'cancelled' WHERE Post_ID = ?";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('cancelRequest prepare: ' . $this->conn->error);
+            return false;
+        }
+
+        $stmt->bind_param('i', $postId);
+
+        if (!$stmt->execute()) {
+            error_log('cancelRequest exec: ' . $stmt->error);
             return false;
         }
 
