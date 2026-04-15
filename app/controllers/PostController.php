@@ -122,6 +122,7 @@ class PostController extends BaseController
 
             $viewFile = __DIR__ . '/../views/client/Posts/index.php';
         } elseif ($role === 'Provider') {
+            
             $viewFile = __DIR__ . '/../views/provider/Posts/index.php';
         } else {
             http_response_code(403);
