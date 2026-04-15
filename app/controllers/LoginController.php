@@ -50,7 +50,7 @@ class LoginController
                     $_SESSION['authorize_token'] = $token;
 
 
-                    header("Location: " . BASE_URL . "/../dashboard");
+                    header("Location: " . BASE_URL . "/dashboard");
                     return;
 
                 case 'rejected':
