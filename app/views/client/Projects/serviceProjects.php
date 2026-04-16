@@ -5,10 +5,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Global variables for JavaScript -->
+    <script>
+        window.BASE_URL = "<?= BASE_URL ?>";
+        window.currentProjectId = null;
+    </script>
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/cardList.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/clientPosts.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/elementStyles.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/gridTemplates.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/serviceProjects.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <script src="<?= BASE_URL ?>/assets/js/elementScript.js" defer></script>
@@ -182,6 +188,26 @@
 
 </div>
 
+<div class="dialog-box-2" id="update-requirements-popup">
+    <div class="dialog-content">
+        <div class="dialog-title">
+            <div class="title">Update Project Requirements</div>
+        
+            <div>
+                <i class="fa-solid fa-xmark dialog-close-button-2" onclick="closeDialogBox('update-requirements-popup')"></i>
+            </div>
+        </div>
+        <div class="dialog-body"></div>
+
+        <div class="modal-actions">
+            <button class="action-btn btn-delete" onclick="closeDialogBox('update-requirements-popup')">Cancel</button>
+            <button class="action-btn btn-edit" id="saveRequirementBtn">
+                <i class="fa-solid fa-check"></i> Submit
+            </button>
+        </div>
+    </div>
+</div>
+
 <div class="dialog-box-2" id="create-post-popup">
     <div class="dialog-content">
         <div class="dialog-title">
@@ -292,7 +318,7 @@
         console.log('Loading posts for status:', status);
 
         // CHANGE THIS LINE - add /list to the URL
-        fetch(`<?= BASE_URL ?>/projects/list?status=${status}&sort=${currentSort}&search=${encodeURIComponent(currentSearch)}`)
+        fetch(`${window.BASE_URL}/projects/list?status=${status}&sort=${currentSort}&search=${encodeURIComponent(currentSearch)}`)
             //.then(response => response.text())
             .then(response => {
                 console.log('Response status:', response.status);
@@ -1027,129 +1053,254 @@
             });
     }
 
-    function updateRequest(id, mode = 'edit') {
-        viewDialogBox('create-post-popup');
+    function updateRequest(id) {
+        // Store the project ID globally for use in addRequirement
+        window.currentProjectId = id;
+        
+        viewDialogBox('update-requirements-popup');
 
-        fetch("<?= BASE_URL ?>/requests/view/" + id)
-            .then(response => response.json())
-            .then(post => {
+        // Show loading state
+        const formContainer = document.querySelector("#update-requirements-popup .dialog-body");
+        formContainer.innerHTML = `
+            <div class="loading-state">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading post details...</p>
+            </div>
+        `;
+
+        Promise.all([
+            fetch(window.BASE_URL + "/requests/view/" + id)
+                .then(res => {
+                    console.log('view status:', res.status, res.url);
+                    return res.text(); // text first, not json
+                })
+                .then(text => {
+                    console.log('view raw response:', text); // see what's actually returned
+                    return JSON.parse(text); // then parse manually
+                }),
+
+            fetch(window.BASE_URL + "/project/getrequirements/" + id)
+                 .then(res => {
+                     console.log('requirements status:', res.status, res.url);
+                     return res.text();
+                 })
+                 .then(text => {
+                     console.log('requirements raw response:', text);
+                     return JSON.parse(text);
+                 })
+        ])
+            .then(([post, requirements]) => {
+                // Add delay to make loading animation visible
+                return new Promise(resolve => setTimeout(() => resolve({ post, requirements }), 300));
+            })
+            .then(({ post, requirements }) => {
                 if (post.error) {
                     console.error('Error fetching post:', post.error);
+                    formContainer.innerHTML = `
+                        <div class="error-state">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <p>Failed to load post details</p>
+                            <button onclick="viewPost(${id})" class="retry-btn">Retry</button>
+                        </div>
+                    `;
                     return;
                 }
+                window.currentProjectId = requirements[0]?.Project_ID; // Store project ID for later use
+                console.log('currentProjectId set to:', window.currentProjectId);
+                const providerName = post.Provider_Name || 'Unassigned provider';
+                // Format date
+                const publishDate = post.Published_At ?
+                    new Date(post.Published_At).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    }) : 'N/A';
 
-                const root = document.getElementById("create-post-popup");
-                root.querySelector(".title").innerText = "Update Request";
-                root.querySelectorAll(".label").forEach(label => {
-                    label.classList.add("label-float");
-                });
-                root.querySelector("#field-skill-label").classList.remove("label-float");
+                const requirementsHTML = requirements && requirements.length > 0
+                    ? requirements.map(r => `<span class="skill-tag">${r.Requirement_Text}</span>`).join('')
+                    : '<span>No requirements yet</span>';
+                
 
-                //root.querySelector("input[name='title']").value = post.Title || '';
-                //root.querySelector("textarea[name='description']").value = post.Description || '';
-                //root.querySelector("input[name='category']").value = post.Category_Name || '';
-                //document.getElementById("Category_ID").value = post.Category_ID || '';
+                // Replace form content with a div wrapper for proper styling
+                formContainer.innerHTML = `
+                <div class="post-view">
+                    <div class="post-view-title">${post.Title || 'Untitled'}</div>
+                    <div class="post-view-meta">
+                        <span class="chip"><i class="fa-solid fa-calendar"></i><span>${publishDate}</span></span>
+                    </div>
+                    <div class="post-view-section">
+                        <div class="section-title">Description</div>
+                        <div class="section-body">${post.Description || 'No description provided'}</div>
+                    </div>
+                    <div class="post-view-section">
+                        <div class="section-title">Provider</div>
+                        <div class="post-provider">${providerName}</div>
+                    </div> 
+                    <!-- 🔥 NEW SECTION -->
+                    <div class="post-view-section">
+                        <div class="section-title">Project Requirements</div>
+                        <div class="skills-row">${requirementsHTML}</div>
+                    </div>
 
-                //root.querySelector("input[name='price']").value = post.Requesting_Price || '';
-                //root.querySelector("input[name='pricetype']").value = post.Price_Type || '';
-                //root.querySelector("input[name='duration']").value = post.Duration || '';
-                //root.querySelector("input[name='durationtype']").value = post.Duration_Type || '';
-                //root.querySelector("input[name='level']").value = post.Level || '';
-
-                const endAtInput = root.querySelector("input[name='endat']");
-                if (post.End_At) {
-                    // End_At might be "2025-12-31 00:00:00" or "2025-12-31"
-                    let dateValue = post.End_At.split(' ')[0]; // Get just the date part "2025-12-31"
-
-                    // Verify it's a valid date and format is correct
-                    const dateObj = new Date(dateValue);
-                    if (!isNaN(dateObj.getTime())) {
-                        // Format as YYYY-MM-DD
-                        const year = dateObj.getFullYear();
-                        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-                        const day = String(dateObj.getDate()).padStart(2, '0');
-                        dateValue = `${year}-${month}-${day}`;
-
-                        console.log("Setting end date to:", dateValue);
-                        endAtInput.value = dateValue;
-                    } else {
-                        console.error("Invalid date:", post.End_At);
-                        endAtInput.value = '';
-                    }
-                } else {
-                    endAtInput.value = '';
-                }
-
-                // Use selectCategory to load skills for the category
-                if (post.Category_ID) {
-                    const categoryOption = document.querySelector(`.search-select-container [data-id="${post.Category_ID}"]`);
-                    if (categoryOption) {
-                        // Call selectCategory with skipReset = true to not clear existing chips yet
-                        selectCategory({ target: categoryOption }, true);
-                    }
-                }
-
-                // Add skills after loading category skills
-                setTimeout(() => {
-                    const skillsChips = root.querySelector("#SkillsChips");
-                    skillsChips.innerHTML = '<input type="hidden" id="Skills" name="skills"><p>No skill selected</p>';
-
-                    if (post.skills && post.skills.length > 0) {
-                        post.skills.forEach(skill => {
-                            const skillOptions = document.getElementById("SkillsOptionList").querySelectorAll('[data-id]');
-                            const matchingOption = Array.from(skillOptions).find(opt => opt.textContent.trim() === skill);
-
-                            if (matchingOption) {
-                                addChip('SkillsChips', skill, matchingOption.dataset.id);
-                            }
-                        });
-                    }
-                }, 500);
-
-                // Change buttons
-                const saveDraftBtn = root.querySelector('[data-role="save-draft"]');
-                const publishBtn = root.querySelector('[data-role="publish"]');
-                const savePostBtn = root.querySelector('[data-role="save-post"]');
-
-                if (mode === 'repost') {
-                    // Repost flow: force date to today and use confirmation before publishing.
-                    root.querySelector("input[name='endat']").value = getTodayDateString();
-
-                    if (saveDraftBtn) saveDraftBtn.style.display = 'none';
-                    if (publishBtn) publishBtn.style.display = 'none';
-                    if (savePostBtn) {
-                        savePostBtn.style.display = '';
-                        savePostBtn.removeAttribute('data-post-id');
-                        savePostBtn.innerHTML = '<i class="fa-solid fa-rocket"></i> Repost Request';
-
-                        const newSaveBtn = savePostBtn.cloneNode(true);
-                        savePostBtn.parentNode.replaceChild(newSaveBtn, savePostBtn);
-                        newSaveBtn.onclick = function () {
-                            openPublishConfirmWithAction(function () {
-                                submitPost('publish');
-                            });
-                        };
-                    }
-                } else {
-                    if (saveDraftBtn) saveDraftBtn.style.display = 'none';
-                    if (publishBtn) publishBtn.style.display = 'none';
-                    if (savePostBtn) {
-                        savePostBtn.style.display = '';
-                        savePostBtn.setAttribute('data-post-id', post.Post_ID);
-                        savePostBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Request';
-
-                        // Remove old event listeners and add new one
-                        const newSaveBtn = savePostBtn.cloneNode(true);
-                        savePostBtn.parentNode.replaceChild(newSaveBtn, savePostBtn);
-                        newSaveBtn.onclick = saveEditedPost;
-                    }
-                }
+                    <!-- 🔥 INPUT FIELD -->
+                    <div class="post-view-section">
+                        <div class="section-title">Add New Requirement</div>
+                        <textarea class="text-field" id="newRequirement" placeholder="Enter new requirement..."></textarea>
+                    </div>
+                    
+                </div>
+            `;
             })
             .catch(error => {
                 console.error('Error fetching post:', error);
-                alert('Failed to load post details. Please try again.');
+                formContainer.innerHTML = `
+                    <div class="error-state">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <p>Failed to load post details. Please try again.</p>
+                        <button onclick="viewPost(${id})" class="retry-btn">Retry</button>
+                    </div>
+                `;
             });
+
+    //     // 🔥 Fetch BOTH post + requirements
+    //     Promise.all([
+    //         fetch("<?= BASE_URL ?>/requests/view/" + id).then(res => res.json()),
+    //         fetch("<?= BASE_URL ?>/project/requirements/" + id).then(res => res.json())
+    //     ])
+    //     .then(([post, requirements]) => {
+
+    //         const providerName = post.Provider_Name || 'Unassigned provider';
+
+    //         const skillsHTML = post.skills && post.skills.length > 0
+    //             ? post.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')
+    //             : '<span>No skills specified</span>';
+
+    //         // 🔥 Requirements list
+    //         const requirementsHTML = requirements.length > 0
+    //             ? requirements.map(r => `<li>${r.Requirement_Text}</li>`).join('')
+    //             : '<li>No requirements added yet</li>';
+
+    //         container.innerHTML = `
+    //             <div class="post-view">
+    //                 <div class="post-view-title">${post.Title}</div>
+
+    //                 <div class="post-view-section">
+    //                 <div class="section-title">Description</div>
+    //                 <div>${post.Description}</div>
+    //             </div>
+
+    //             <div class="post-view-section">
+    //                 <div class="section-title">Provider</div>
+    //                 <div>${providerName}</div>
+    //             </div>
+
+    //             <div class="post-view-section">
+    //                 <div class="section-title">Skills</div>
+    //                 <div>${skillsHTML}</div>
+    //             </div>
+
+    //             <div class="post-view-section">
+    //                 <div class="section-title">Current Requirements</div>
+    //                 <ul class="requirements-list">
+    //                     ${requirementsHTML}
+    //                 </ul>
+    //             </div>
+    //         </div>
+    //     `;
+
+    //     // 🔥 Submit button action
+    //     const btn = document.getElementById('saveRequirementBtn');
+
+    //     // remove old listeners
+    //     const newBtn = btn.cloneNode(true);
+    //     btn.parentNode.replaceChild(newBtn, btn);
+
+    //     newBtn.addEventListener('click', () => {
+    //         const text = document.getElementById('newRequirement').value.trim();
+
+    //         if (!text) {
+    //             alert('Please enter requirement');
+    //             return;
+    //         }
+
+    //         fetch("<?= BASE_URL ?>/project/add-requirement", {
+    //             method: "POST",
+    //             headers: {
+    //                 "Content-Type": "application/json"
+    //             },
+    //             body: JSON.stringify({
+    //                 Project_ID: id,
+    //                 Requirement_Text: text
+    //             })
+    //         })
+    //         .then(res => res.json())
+    //         .then(data => {
+    //             if (data.success) {
+    //                 alert("Requirement added!");
+    //                 updateRequest(id); // 🔥 reload modal
+    //             } else {
+    //                 alert("Error adding requirement");
+    //             }
+    //         });
+    //     });
+
+    // })
+    // .catch(err => {
+    //     console.error(err);
+    //     container.innerHTML = `<p>Error loading data</p>`;
+    // });
+}
+
+document.addEventListener("click", function (e) {
+    if (e.target.closest("#saveRequirementBtn")) {
+        addRequirement();
     }
+});
+
+function addRequirement() {
+    const text = document.getElementById("newRequirement").value;
+    const projectId = window.currentProjectId;
+    console.log("Adding requirement:", { projectId, text });
+    if (!text.trim()) {
+        alert("Please enter requirement");
+        return;
+    }
+
+    if (!projectId) {
+        alert("No project selected. Please refresh and try again.");
+        return;
+    }
+
+    fetch(window.BASE_URL + "/project/submit-requirements-update", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            project_id: projectId,
+            new_requirement: text
+        })
+    })
+    .then(res => res.text())
+.then(text => {
+    console.log("RAW RESPONSE:", text);
+    return JSON.parse(text);
+})
+    .then(data => {
+        if (data.success) {
+            alert("Requirement added successfully");
+            document.getElementById("newRequirement").value = "";
+            closeDialogBox('update-requirements-popup');
+        } else {
+            alert("Failed to add requirement");
+        }
+    })
+    .catch(err => {
+        console.error("Error:", err);
+        alert("Error adding requirement: " + err.message);
+    });
+}
+
 
     function cancelOngoingProject(id) {
     viewDialogBox('cancel-ongoing-project');
@@ -1160,7 +1311,7 @@
     confirmCancelBtn.parentNode.replaceChild(newConfirmCancelBtn, confirmCancelBtn);
 
     newConfirmCancelBtn.addEventListener('click', function () {
-        fetch("<?= BASE_URL ?>/project/cancel/" + id, {
+        fetch(window.BASE_URL + "/project/cancel/" + id, {
             method: 'POST'
         })
         /*.then(res => res.text()) // 👈 temporarily change

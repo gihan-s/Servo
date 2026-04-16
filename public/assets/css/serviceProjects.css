@@ -7,213 +7,7 @@
     position: relative;
 }
 
-.service-requests .search-item {
-    background: #fff;
-    border-radius: 16px;
-    padding: 26px 26px 22px;
-    box-shadow: 0 0 6px 1px rgba(0, 0, 0, .1);
-    transition: all .3s cubic-bezier(.4, 0, .2, 1);
-    position: relative;
-    overflow: hidden;
-    border: none !important;
-}
 
-.service-requests .search-item::before {
-    content: none;
-}
-
-.service-requests .search-item:hover {
-    box-shadow: 0 3px 10px 2px rgba(0, 0, 0, .1);
-    border: none !important;
-}
-
-.service-requests .search-item:focus-within {
-    border: none !important;
-}
-
-.service-requests .search-item,
-.service-requests .search-item:hover,
-.service-requests .search-item:focus,
-.service-requests .search-item:focus-visible {
-    outline: none !important;
-}
-
-.service-requests .search-item .button button:focus,
-.service-requests .search-item .button button:hover,
-.service-requests .search-item .button button:focus-visible {
-    outline: none !important;
-    box-shadow: none;
-}
-
-/* Head section refinements */
-.service-requests .item-head {
-    display: flex;
-    gap: 1.2rem;
-    align-items: flex-start;
-    margin-bottom: .5rem;
-}
-
-.service-requests .post-actions {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-}
-
-.service-requests .item-head .item-img img {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid #f1f5f9;
-}
-
-.service-requests .item-head .item-name {
-    font-size: 15px;
-    font-weight: 600;
-    color: #008500;
-    line-height: 1.4;
-    letter-spacing: .3px;
-    text-transform: capitalize;
-}
-
-.service-requests .item-head .item-name:hover {
-    text-decoration: underline;
-}
-
-.service-requests .item-head .item-title {
-    font-size: 19px;
-    font-weight: 700;
-    line-height: 1.35;
-    color: #1f2937;
-    margin-top: 2px;
-}
-
-.service-requests .item-head .item-district {
-    font-size: 12px;
-    color: #64748b;
-    margin-top: 6px;
-    letter-spacing: .25px;
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-.service-requests .status-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    font-size: 11px;
-    font-weight: 700;
-    border-radius: 20px;
-    letter-spacing: .5px;
-    text-transform: uppercase;
-    line-height: 1;
-    background: transparent;
-    border: 1px solid transparent;
-}
-
-.service-requests .status-bottom {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 14px;
-    padding: 0;
-    position: relative;
-    background: transparent;
-}
-
-/* Light themed status variants (only green tone derives from #008500) */
-/* Status base styling with colored dot indicators */
-/* Align with payment status color system */
-.service-requests .status-chip.status-awaiting,
-.service-requests .status-chip.status-progress,
-.service-requests .status-chip.status-review,
-.service-requests .status-chip.status-complete {
-    border: 1px solid;
-}
-
-/* Awaiting Acceptance -> pending style */
-.service-requests .status-chip.status-awaiting {
-    background: #fef3c7;
-    color: #d97706;
-    border-color: #fed7aa;
-}
-
-/* draft style */
-/* In Progress -> active style */
-/* In Progress now violet */
-.service-requests .status-chip.status-progress {
-    background: #f2effd;
-    color: #4c1d95;
-    border-color: #d7ccfa;
-}
-
-/* Pending Review -> refunded color family (blue) repurposed */
-.service-requests .status-chip.status-review {
-    background: #f2f7fd;
-    color: #0369a1;
-    border-color: #d4e6f6;
-}
-
-/* Completed -> custom violet aligned to theme but distinct */
-/* Completed now green */
-.service-requests .status-chip.status-complete {
-    background: #dcfce7;
-    color: #047857;
-    border-color: #bbf7d0;
-}
-
-/* Middle row */
-.service-requests .item-middle {
-    display: flex;
-    gap: 2.2rem;
-    margin: .8rem 0 .4rem;
-    color: #64748b;
-    font-size: 12px;
-    flex-wrap: wrap;
-}
-
-.service-requests .item-middle .success i {
-    color: #008500;
-}
-
-/* Description */
-.service-requests .item-description {
-    font-size: 14px;
-    line-height: 1.6;
-    color: #374151;
-    margin-top: .35rem;
-}
-
-/* Action buttons inside .button container */
-.service-requests .search-item .button {
-    display: flex;
-    gap: .5rem;
-    flex-wrap: wrap;
-    margin-left: auto;
-}
-
-/* Base icon/utility buttons */
-.service-requests .search-item .button button {
-    background: #f1f5f9;
-    border: 1px solid #e2e8f0;
-    color: #334155;
-    padding: 6px 12px;
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: all .25s ease;
-}
-
-.service-requests .search-item .button button:hover {
-    background: #e2e8f0;
-    color: #111827;
-    transform: translateY(-2px);
-}
 
 .btn-primary {
     background: #008500 !important;
@@ -546,4 +340,18 @@
     width : 0%;
     background: #008500;
     transition: width .4s ease;
+}
+
+#newRequirement {
+    width: 100%;
+    min-height: 100px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+    outline: none;
+}
+
+#newRequirement:focus {
+    border-color: #4CAF50;
 }
