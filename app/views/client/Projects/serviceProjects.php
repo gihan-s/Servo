@@ -1304,14 +1304,14 @@ function addRequirement() {
 
     function cancelOngoingProject(id) {
     viewDialogBox('cancel-ongoing-project');
-    const confirmCancelBtn = document.getElementById('cancel-ongoing-project');
+    const confirmCancelBtn = document.getElementById('confirmCancelBtn');
 
     // Remove previous event listeners
     const newConfirmCancelBtn = confirmCancelBtn.cloneNode(true);
     confirmCancelBtn.parentNode.replaceChild(newConfirmCancelBtn, confirmCancelBtn);
 
     newConfirmCancelBtn.addEventListener('click', function () {
-        fetch(window.BASE_URL + "/project/cancel/" + id, {
+        fetch("<?= BASE_URL ?>/project/cancel/" + id, {
             method: 'POST'
         })
         /*.then(res => res.text()) // 👈 temporarily change
