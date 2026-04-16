@@ -9,12 +9,11 @@
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/main.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/earnings.css" />
-    
+
 </head>
 
 <body>
-    <?php // Use filesystem path for includes (BASE_URL is for URLs, not filesystem)
-    require_once __DIR__ . '/../../includes/navbar.php'; ?>
+    <?php require_once __DIR__ . '/../../includes/navbar.php'; ?>
     <main class="dashboard-wrapper">
         <header class="dashboard">
             <h1>Earnings</h1>
@@ -28,9 +27,9 @@
                     <i class="fas fa-wallet"></i>
                 </div>
                 <div class="metric-title">Total Earnings</div>
-                <div class="metric-value">$42,850</div>
-                <div class="metric-delta delta-up">
-                    <i class="fa-solid fa-arrow-up"></i> 18% from last month
+                <div class="metric-value">$<?= number_format($totalEarnings, 0) ?></div>
+                <div class="metric-delta <?= $earningsChange >= 0 ? 'delta-up' : 'delta-down' ?>">
+                    <i class="fa-solid fa-arrow-<?= $earningsChange >= 0 ? 'up' : 'down' ?>"></i> <?= abs($earningsChange) ?>% from last month
                 </div>
             </div>
             <div class="metric-card">
@@ -38,9 +37,9 @@
                     <i class="fas fa-clock"></i>
                 </div>
                 <div class="metric-title">Pending Payout</div>
-                <div class="metric-value">$8,250</div>
+                <div class="metric-value">$<?= number_format($pendingPayout, 0) ?></div>
                 <div class="metric-delta" style="color:#b45309;">
-                    <i class="fa-solid fa-hourglass"></i> Next payout: Sep 15
+                    <i class="fa-solid fa-hourglass"></i> Awaiting clearance
                 </div>
             </div>
             <div class="metric-card">
@@ -48,9 +47,9 @@
                     <i class="fas fa-chart-line"></i>
                 </div>
                 <div class="metric-title">Avg. Project Value</div>
-                <div class="metric-value">$3,570</div>
+                <div class="metric-value">$<?= number_format($avgProjectValue, 0) ?></div>
                 <div class="metric-delta delta-up">
-                    <i class="fa-solid fa-arrow-up"></i> 12% increase
+                    <i class="fa-solid fa-arrow-up"></i> Per project
                 </div>
             </div>
             <div class="metric-card">
@@ -58,9 +57,9 @@
                     <i class="fas fa-receipt"></i>
                 </div>
                 <div class="metric-title">Completed Projects</div>
-                <div class="metric-value">12</div>
+                <div class="metric-value"><?= $completedProjects ?></div>
                 <div class="metric-delta delta-up">
-                    <i class="fa-solid fa-arrow-up"></i> 3 this month
+                    <i class="fa-solid fa-arrow-up"></i> <?= $completedThisMonth ?> this month
                 </div>
             </div>
         </section>
@@ -162,91 +161,47 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>
-                                <div class="transaction-project">E-commerce Platform</div>
-                                <div class="transaction-client">Invoice #INV-10452</div>
-                                <span class="payment-type-label label-completed-project"><i class="fa-solid fa-circle-check"></i> Completed Project</span>
-                            </td>
-                            <td>Sep 02, 2025</td>
-                            <td>TechCorp Inc</td>
-                            <td>
-                                <div class="transaction-amount">$4,200.00</div>
-                                <div class="transaction-fee">Fee: $420.00</div>
-                            </td>
-                            <td><span class="transaction-status status-completed">Completed</span></td>
-                            <td style="text-align: right;">
-                                <button class="ghost-btn"><i class="fa-solid fa-receipt"></i> Receipt</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="transaction-project">Analytics Dashboard</div>
-                                <div class="transaction-client">Invoice #INV-10398</div>
-                                <span class="payment-type-label label-completed-project"><i class="fa-solid fa-circle-check"></i> Completed Project</span>
-                            </td>
-                            <td>Aug 28, 2025</td>
-                            <td>DataSolutions LLC</td>
-                            <td>
-                                <div class="transaction-amount">$3,500.00</div>
-                                <div class="transaction-fee">Fee: $350.00</div>
-                            </td>
-                            <td><span class="transaction-status status-completed">Completed</span></td>
-                            <td style="text-align: right;">
-                                <button class="ghost-btn"><i class="fa-solid fa-receipt"></i> Receipt</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="transaction-project">Mobile App UI/UX</div>
-                                <div class="transaction-client">Invoice #INV-10375</div>
-                                <span class="payment-type-label label-cancellation-penalty"><i class="fa-solid fa-triangle-exclamation"></i> Cancellation Penalty</span>
-                            </td>
-                            <td>Aug 22, 2025</td>
-                            <td>FitnessPlus</td>
-                            <td>
-                                <div class="transaction-amount">$2,800.00</div>
-                                <div class="transaction-fee">Fee: $280.00</div>
-                            </td>
-                            <td><span class="transaction-status status-pending">Pending</span></td>
-                            <td style="text-align: right;">
-                                <button class="ghost-btn"><i class="fa-solid fa-eye"></i> View</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="transaction-project">CRM Integration</div>
-                                <div class="transaction-client">Invoice #INV-10321</div>
-                                <span class="payment-type-label label-completed-project"><i class="fa-solid fa-circle-check"></i> Completed Project</span>
-                            </td>
-                            <td>Aug 15, 2025</td>
-                            <td>SalesForce Pro</td>
-                            <td>
-                                <div class="transaction-amount">$5,100.00</div>
-                                <div class="transaction-fee">Fee: $510.00</div>
-                            </td>
-                            <td><span class="transaction-status status-processing">Processing</span></td>
-                            <td style="text-align: right;">
-                                <button class="ghost-btn"><i class="fa-solid fa-eye"></i> View</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="transaction-project">WordPress E-commerce</div>
-                                <div class="transaction-client">Invoice #INV-10294</div>
-                                <span class="payment-type-label label-completed-project"><i class="fa-solid fa-circle-check"></i> Completed Project</span>
-                            </td>
-                            <td>Aug 08, 2025</td>
-                            <td>RetailTech</td>
-                            <td>
-                                <div class="transaction-amount">$2,400.00</div>
-                                <div class="transaction-fee">Fee: $240.00</div>
-                            </td>
-                            <td><span class="transaction-status status-completed">Completed</span></td>
-                            <td style="text-align: right;">
-                                <button class="ghost-btn"><i class="fa-solid fa-receipt"></i> Receipt</button>
-                            </td>
-                        </tr>
+                        <?php if (empty($transactions)): ?>
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 40px; color: #64748b;">
+                                    No transactions found.
+                                </td>
+                            </tr>
+                        <?php else: ?>
+                            <?php foreach ($transactions as $txn):
+                                $date = $txn['Paid_Time'] ?? $txn['Hold_Time'];
+                                $formattedDate = $date ? date('M d, Y', strtotime($date)) : '—';
+                                $invoiceNum = 'INV-' . $txn['Payment_ID'];
+                                $isCancelled = $txn['Project_Status'] === 'Cancelled';
+                                $statusClass = strtolower($txn['Status']);
+                            ?>
+                                <tr>
+                                    <td>
+                                        <div class="transaction-project"><?= htmlspecialchars($txn['Project_Title']) ?></div>
+                                        <div class="transaction-client">Invoice #<?= htmlspecialchars($invoiceNum) ?></div>
+                                        <?php if ($isCancelled): ?>
+                                            <span class="payment-type-label label-cancellation-penalty"><i class="fa-solid fa-triangle-exclamation"></i> Cancellation Penalty</span>
+                                        <?php else: ?>
+                                            <span class="payment-type-label label-completed-project"><i class="fa-solid fa-circle-check"></i> Completed Project</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td><?= $formattedDate ?></td>
+                                    <td><?= htmlspecialchars($txn['Client_Name']) ?></td>
+                                    <td>
+                                        <div class="transaction-amount">$<?= number_format($txn['Amount'], 2) ?></div>
+                                        <div class="transaction-fee">Fee: $<?= number_format($txn['Commission'], 2) ?></div>
+                                    </td>
+                                    <td><span class="transaction-status status-<?= $statusClass ?>"><?= htmlspecialchars($txn['Status']) ?></span></td>
+                                    <td style="text-align: right;">
+                                        <?php if ($txn['Status'] === 'Completed'): ?>
+                                            <button class="ghost-btn"><i class="fa-solid fa-receipt"></i> Receipt</button>
+                                        <?php else: ?>
+                                            <button class="ghost-btn"><i class="fa-solid fa-eye"></i> View</button>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
@@ -316,7 +271,7 @@
                     </div>
                 </div>
                 <div style="font-size: 13px; color: #64748b; text-align: center;">
-                    <i class="fa-solid fa-circle-info"></i> 
+                    <i class="fa-solid fa-circle-info"></i>
                     These are estimates for informational purposes. Consult a tax professional for accurate tax calculations.
                 </div>
             </div>
@@ -371,34 +326,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // --- Chart Data per period ---
-            const chartData = {
-                '1M': {
-                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-                    earnings: [3200, 4800, 2100, 4200],
-                    fees: [320, 480, 210, 420]
-                },
-                '3M': {
-                    labels: ['Jul', 'Aug', 'Sep'],
-                    earnings: [9800, 12400, 14300],
-                    fees: [980, 1240, 1430]
-                },
-                '6M': {
-                    labels: ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
-                    earnings: [6200, 7800, 8500, 9800, 12400, 14300],
-                    fees: [620, 780, 850, 980, 1240, 1430]
-                },
-                '1Y': {
-                    labels: ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
-                    earnings: [3100, 4200, 5500, 4800, 5200, 6100, 6200, 7800, 8500, 9800, 12400, 14300],
-                    fees: [310, 420, 550, 480, 520, 610, 620, 780, 850, 980, 1240, 1430]
-                },
-                'All': {
-                    labels: ['Q1 24', 'Q2 24', 'Q3 24', 'Q4 24', 'Q1 25', 'Q2 25', 'Q3 25'],
-                    earnings: [8200, 11500, 14200, 13700, 16100, 22500, 36500],
-                    fees: [820, 1150, 1420, 1370, 1610, 2250, 3650]
-                }
-            };
+            // --- Chart Data from PHP ---
+            const chartData = <?= json_encode($chartData) ?>;
 
             const ctx = document.getElementById('earningsChart').getContext('2d');
             let earningsChart = new Chart(ctx, {
@@ -510,4 +439,3 @@
 </body>
 
 </html>
-
