@@ -11,32 +11,46 @@ class BidModel extends Database
     private const STATUS_ACCEPTED = 'accepted';
     private const STATUS_REJECTED = 'rejected';
 
-    private ProviderModel $providerModel;
-    private PostModel $postModel;
-    private ReviewModel $reviewModel;
-
     public function __construct()
     {
         parent::__construct();
-        $this->providerModel = new ProviderModel();
-        $this->postModel = new PostModel(false);
-        $this->reviewModel = new ReviewModel();
     }
 
     public function getBidsForPost(int $postId): array
     {
-        $sql = "SELECT
-                    Bid_ID,
-                    Comment,
-                    Amount,
-                    Created_At,
-                    Est_Date,
-                    Status,
-                    Post_ID,
-                    Provider_ID
-                FROM bids
-                WHERE Post_ID = ?
-                ORDER BY Created_At DESC";
+        $sql = "
+            SELECT
+                b.Bid_ID,
+                b.Comment,
+                b.Amount,
+                b.Created_At,
+                b.Est_Date,
+                b.Status,
+                b.Post_ID,
+                b.Provider_ID,
+                p.First_Name,
+                p.Last_Name,
+                p.Profile_Picture,
+                pr.Provider_Rating
+            FROM bids b
+            LEFT JOIN provider p
+                ON p.Provider_ID = b.Provider_ID
+            LEFT JOIN (
+                SELECT
+                    po.Provider_ID,
+                    ROUND(AVG(r.Rating), 1) AS Provider_Rating
+                FROM reviews r
+                INNER JOIN project pj
+                    ON pj.Project_ID = r.Project_ID
+                INNER JOIN post po
+                    ON po.Post_ID = pj.Post_ID
+                WHERE po.Provider_ID IS NOT NULL
+                GROUP BY po.Provider_ID
+            ) pr
+                ON pr.Provider_ID = b.Provider_ID
+            WHERE b.Post_ID = ?
+            ORDER BY b.Created_At DESC
+        ";
 
         $stmt = $this->conn->prepare($sql);
         if (!$stmt) {
@@ -45,6 +59,7 @@ class BidModel extends Database
         }
 
         $stmt->bind_param('i', $postId);
+
         if (!$stmt->execute()) {
             error_log('BidModel::getBidsForPost exec: ' . $stmt->error);
             $stmt->close();
@@ -54,41 +69,6 @@ class BidModel extends Database
         $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         $stmt->close();
 
-        $providerCache = [];
-        $ratingCache = [];
-        $providerPostIdsCache = [];
-
-        foreach ($rows as &$row) {
-            $providerId = (int) ($row['Provider_ID'] ?? 0);
-
-            if ($providerId > 0) {
-                if (!array_key_exists($providerId, $providerCache)) {
-                    $providerCache[$providerId] = $this->providerModel->getProviderById($providerId);
-                }
-
-                $provider = $providerCache[$providerId] ?? null;
-                $row['First_Name'] = $provider['First_Name'] ?? null;
-                $row['Last_Name'] = $provider['Last_Name'] ?? null;
-                $row['Profile_Picture'] = $provider['Profile_Picture'] ?? null;
-
-                if (!array_key_exists($providerId, $ratingCache)) {
-                    if (!array_key_exists($providerId, $providerPostIdsCache)) {
-                        $providerPostIdsCache[$providerId] = $this->postModel->getPostIdsByProviderId($providerId);
-                    }
-
-                    $ratingCache[$providerId] = $this->reviewModel->getAverageRatingByPostIds($providerPostIdsCache[$providerId]);
-                }
-
-                $row['Provider_Rating'] = $ratingCache[$providerId];
-            } else {
-                $row['First_Name'] = null;
-                $row['Last_Name'] = null;
-                $row['Profile_Picture'] = null;
-                $row['Provider_Rating'] = null;
-            }
-        }
-
-        unset($row);
         return $rows;
     }
 
@@ -103,6 +83,7 @@ class BidModel extends Database
         }
 
         $stmt->bind_param('ii', $postId, $providerId);
+
         if (!$stmt->execute()) {
             error_log('BidModel::providerHasBidForPost exec: ' . $stmt->error);
             $stmt->close();
@@ -125,6 +106,7 @@ class BidModel extends Database
         }
 
         $stmt->bind_param('i', $postId);
+
         if (!$stmt->execute()) {
             error_log('BidModel::countByPostId exec: ' . $stmt->error);
             $stmt->close();
@@ -162,6 +144,7 @@ class BidModel extends Database
         }
 
         $stmt->bind_param($types, ...$postIds);
+
         if (!$stmt->execute()) {
             error_log('BidModel::getCountsByPostIds exec: ' . $stmt->error);
             $stmt->close();
