@@ -210,6 +210,26 @@
     </div>
 </div>
 
+<div class="dialog-box-2" id="review-popup">
+    <div class="dialog-content">
+        <div class="dialog-title">
+            <div class="title">Leave a Review</div>
+        
+            <div>
+                <i class="fa-solid fa-xmark dialog-close-button-2" onclick="closeDialogBox('review-popup')"></i>
+            </div>
+        </div>
+        <div class="dialog-body"></div>
+
+        <div class="modal-actions">
+            <button class="action-btn btn-delete" onclick="closeDialogBox('review-popup')">Cancel</button>
+            <button class="action-btn btn-edit" id="saveRequirementBtn">
+                <i class="fa-solid fa-check"></i> Submit
+            </button>
+        </div>
+    </div>
+</div>
+
 <div class="dialog-box-2" id="create-post-popup">
     <div class="dialog-content">
         <div class="dialog-title">
@@ -1039,12 +1059,12 @@
                 </div>
             `;
             })
-            document.getElementById('confirmPaymentBtn').addEventListener('click', function () {
+            // document.getElementById('confirmPaymentBtn').addEventListener('click', function () {
                 
-                closeDialogBox('confirm-payment');
-                window.showSuccessToast("Payment Initiated", "You will be redirected to the payment gateway.");
-                console.log(`Redirecting to payment for Post ID: ${id}`);
-        })
+            //     closeDialogBox('confirm-payment');
+            //     window.showSuccessToast("Payment Initiated", "You will be redirected to the payment gateway.");
+            //     console.log(`Redirecting to payment for Post ID: ${id}`);
+        
             .catch(error => {
                 console.error('Error fetching post:', error);
                 formContainer.innerHTML = `
@@ -1055,6 +1075,55 @@
                     </div>
                 `;
             });
+
+        const confirmPaymentBtn = document.getElementById('confirmPaymentBtn');
+
+        // Remove previous event listeners to avoid multiple triggers
+        const newconfirmPaymentBtn = confirmPaymentBtn.cloneNode(true);
+        confirmPaymentBtn.parentNode.replaceChild(newconfirmPaymentBtn, confirmPaymentBtn);
+
+        newconfirmPaymentBtn.addEventListener('click', function () {
+            fetch("<?= BASE_URL ?>/requests/payment/" + id, {
+                method: 'POST'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        closeDialogBox('confirm-payment');
+                        window.showSuccessToast("Success!", "Payment initiated successfully");
+
+                        // Remove from DOM with animation
+                        const postElement = document.querySelector(`.search-item input[value="${id}"]`)?.closest('.search-item');
+                        if (postElement) {
+                            postElement.style.transition = 'all 0.3s ease';
+                            postElement.style.opacity = '0';
+                            postElement.style.transform = 'translateX(-20px)';
+
+                            setTimeout(() => {
+                                postElement.remove();
+
+                                // Check if section is now empty
+                                const activeSection = document.querySelector('.requests-section:not([style*="display: none"])');
+                                const itemList = activeSection?.querySelector('.item-list');
+                                const remainingPosts = itemList?.querySelectorAll('.search-item');
+
+                                if (remainingPosts && remainingPosts.length === 0) {
+                                    const status = activeSection.classList.contains('pending') ? 'pending' :
+                                        activeSection.classList.contains('accepted') ? 'accepted' : 'ongoing';
+                                    showEmptyState(status, itemList);
+                                }
+                            }, 300);
+                        }
+                    } else {
+                        window.showErrorToast("Error", data.error || 'Failed to initiate payment');
+                    }
+                })
+                .catch(error => {
+                    console.log('cancelRequest error:', error);
+                    console.error('Error:', error);
+                    showErrorToast("Error", 'An error occurred while cancelling the request. Please try again.');
+                });
+        });
     }
 
     function updateRequest(id) {
@@ -1098,6 +1167,9 @@
                 return new Promise(resolve => setTimeout(() => resolve({ post, requirements }), 300));
             })
             .then(({ post, requirements }) => {
+                console.log('Fetched post details:', post);
+                console.log('Fetched requirements:', requirements[0]);
+                console.log('Fetched project ID:', requirements[1]);
                 if (post.error) {
                     console.error('Error fetching post:', post.error);
                     formContainer.innerHTML = `
@@ -1109,7 +1181,7 @@
                     `;
                     return;
                 }
-                window.currentProjectId = requirements[0]?.Project_ID; // Store project ID for later use
+                window.currentProjectId = requirements[1]; // Store project ID for later use
                 console.log('currentProjectId set to:', window.currentProjectId);
                 const providerName = post.Provider_Name || 'Unassigned provider';
                 // Format date
@@ -1120,8 +1192,8 @@
                         day: 'numeric'
                     }) : 'N/A';
 
-                const requirementsHTML = requirements && requirements.length > 0
-                    ? requirements.map(r => `<span class="skill-tag">${r.Requirement_Text}</span>`).join('')
+                const requirementsHTML = requirements[0] && requirements[0].length > 0
+                    ? requirements[0].map(r => `<span class="skill-tag">${r.Requirement_Text}</span>`).join('')
                     : '<span>No requirements yet</span>';
                 // let requirementName = '';
                 // if (post.Request_Status === 'completed') {
@@ -1279,7 +1351,7 @@ function addRequirement() {
         return;
     }
 
-    if (!projectId) {
+    if (projectId < 0) {
         window.showErrorToast("Error", "No project selected. Please refresh and try again.");
         return;
     }
@@ -1365,6 +1437,73 @@ function addRequirement() {
             window.showErrorToast("Error", 'An error occurred while sending the cancellation request.');
         });
     });
+}
+
+function submitReview(id) {
+    //window.currentReviewPostId = postId;
+
+    viewDialogBox('review-popup');
+
+    const container = document.querySelector("#review-popup .dialog-body");
+
+    container.innerHTML = `
+        <div class="loading-state">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Loading project...</p>
+        </div>
+    `;
+
+    fetch(window.BASE_URL + "/requests/view/" + id)
+        .then(res => {
+            console.log('view status:', res.status, res.url);
+            return res.text(); // text first, not json
+        })
+        .then(text => {
+            console.log('view raw response:', text); // see what's actually returned
+            return JSON.parse(text); // then parse manually
+        })
+        .then(post => {
+            const providerName = post.Provider_Name || 'Unassigned provider';
+            container.innerHTML = `
+                <div class="post-view">
+                    <div class="post-view-title">${post.Title || 'Untitled'}</div>
+                    <div class="post-view-section">
+                        <div class="section-title">Description</div>
+                        <div class="section-body">${post.Description || 'No description provided'}</div>
+                    </div>
+                    <div class="post-view-section">
+                        <div class="section-title">Provider</div>
+                        <div class="post-provider">${providerName}</div>
+                    </div>
+                    <div class="post-view-section">
+                        <div class="section-title">Category</div>
+                        <div class="post-category">${post.CategoryName || 'No category specified'}</div>
+                    </div>
+                    <div class="post-view-section">
+                        <div class="section-title">Rating(1-5)</div>
+                        <div class="post-rating"><select id="reviewRating" class="text-field">
+                        <option value="5">5 - Excellent</option>
+                        <option value="4">4 - Good</option>
+                        <option value="3">3 - Average</option>
+                        <option value="2">2 - Poor</option>
+                        <option value="1">1 - Very Bad</option>
+                    </select></div>
+                    </div>
+                    <div class="post-view-section">
+                        <div class="section-title">Add Comments</div>
+                        <div class="post-comments">
+                            <textarea class="text-field" id="reviewComments" placeholder="Enter your comments..."></textarea>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+            `;
+        })
+        .catch(err => {
+            console.error(err);
+            container.innerHTML = `<p>Error loading project</p>`;
+        });
 }
 
     /*document.addEventListener('DOMContentLoaded', function () {

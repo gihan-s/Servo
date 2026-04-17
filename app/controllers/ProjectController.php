@@ -117,13 +117,34 @@ class ProjectController extends BaseController
             return;
         }
 
-        $success = $this->postModel->cancelRequest($id);
+        $success = $this->projectModel->cancelRequest($id);
 
         if ($success) {
             echo json_encode(['success' => true, 'message' => 'Request cancelled successfully']);
         } else {
             http_response_code(500);
             echo json_encode(['success' => false, 'error' => 'Failed to cancel Request']);
+        }
+    }
+
+    public function initiatePayment($id): void
+    {
+        error_log("Initiating payment for Post ID: $id");
+        header('Content-Type: application/json');
+        $id = (int) $id;
+        if ($id <= 0) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid post id']);
+            return;
+        }
+
+        $success = $this->projectModel->initiatePayment($id);
+
+        if ($success) {
+            echo json_encode(['success' => true, 'message' => 'Payment initiated successfully']);
+        } else {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => 'Failed to initiate payment']);
         }
     }
 
@@ -252,7 +273,7 @@ class ProjectController extends BaseController
             $project_id = $data['project_id'] ?? null;
             $new_req = $data['new_requirement'] ?? null;
 
-            if (!$project_id || !$new_req) {
+            if ($project_id <= 0 || !$new_req) {
                 http_response_code(400);
                 echo json_encode(['success' => false, 'error' => 'Missing project_id or new_requirement']);
                 return;
