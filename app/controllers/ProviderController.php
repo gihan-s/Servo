@@ -19,9 +19,13 @@ class ProviderController extends BaseController
 
         $userId = $_SESSION['user_id'];
         $role   = $_SESSION['role'];
+        $categories = [];
 
         // Choose view by role
         if ($role === 'Client') {
+            require_once __DIR__ . '/../models/CategoryModel.php';
+            $categoryModel = new CategoryModel();
+            $categories = $categoryModel->getCategories();
             $viewFile = __DIR__ . '/../views/client/Providers/index.php';
         }
         // elseif ($role === 'Provider') {
@@ -147,6 +151,7 @@ class ProviderController extends BaseController
                 'price_range' => trim((string) ($_GET['price_range'] ?? '')),
                 'completion_range' => trim((string) ($_GET['completion_range'] ?? '')),
                 'price_types' => trim((string) ($_GET['price_types'] ?? '')),
+                'category_ids' => trim((string) ($_GET['category_ids'] ?? '')),
             ];
 
             $services = $providerCategoriesModel->getServicesForListing($providerId, $limit, $offset, $filters);

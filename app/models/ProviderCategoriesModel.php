@@ -317,6 +317,31 @@ class ProviderCategoriesModel extends Database
             }
         }
 
+        $categoryIds = $filters['category_ids'] ?? [];
+        if (is_string($categoryIds)) {
+            $categoryIds = array_filter(array_map('trim', explode(',', $categoryIds)), static function ($value) {
+                return $value !== '';
+            });
+        }
+
+        $normalizedCategoryIds = [];
+        foreach ((array) $categoryIds as $categoryId) {
+            $id = (int) $categoryId;
+            if ($id > 0) {
+                $normalizedCategoryIds[] = $id;
+            }
+        }
+        $normalizedCategoryIds = array_values(array_unique($normalizedCategoryIds));
+
+        if (!empty($normalizedCategoryIds)) {
+            $in = implode(',', array_fill(0, count($normalizedCategoryIds), '?'));
+            $where[] = "pc.Category_ID IN ($in)";
+            $types .= str_repeat('i', count($normalizedCategoryIds));
+            foreach ($normalizedCategoryIds as $categoryId) {
+                $params[] = $categoryId;
+            }
+        }
+
         return ['WHERE ' . implode(' AND ', $where), $types, $params];
     }
 
