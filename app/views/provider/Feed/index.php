@@ -57,14 +57,14 @@
 				<div class="requests-section active" style="display:block;">
 					<div class="item-list">
 						<?php foreach ($feedItems as $item): ?>
-							<article class="search-item" data-client="<?= htmlspecialchars($item['client'], ENT_QUOTES, 'UTF-8') ?>" data-title="<?= htmlspecialchars($item['title'], ENT_QUOTES, 'UTF-8') ?>" data-category="<?= htmlspecialchars($item['category'], ENT_QUOTES, 'UTF-8') ?>" data-budget="<?= htmlspecialchars($item['budget'], ENT_QUOTES, 'UTF-8') ?>" data-timeline="<?= htmlspecialchars($item['timeline'], ENT_QUOTES, 'UTF-8') ?>" data-posted="<?= htmlspecialchars($item['posted'], ENT_QUOTES, 'UTF-8') ?>" data-description="<?= htmlspecialchars($item['description'], ENT_QUOTES, 'UTF-8') ?>" data-status-label="<?= htmlspecialchars($item['statusLabel'], ENT_QUOTES, 'UTF-8') ?>">
+							<article class="search-item" data-postid="<?= htmlspecialchars($item['Post_ID'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-client="<?= htmlspecialchars($item['Client_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-title="<?= htmlspecialchars($item['Title'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-category="<?= htmlspecialchars($item['Category_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-budget="<?= htmlspecialchars($item['Requesting_Price'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-timeline="<?= htmlspecialchars($item['Timeline'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-posted="<?= htmlspecialchars($item['Posted'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-description="<?= htmlspecialchars($item['Description'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-status="<?= htmlspecialchars($item['Post_Status'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
 								<div class="item-head">
 									<div class="item-main-dets">
-										<div class="item-name"><?= htmlspecialchars($item['client'], ENT_QUOTES, 'UTF-8') ?></div>
-										<div class="item-title"><?= htmlspecialchars($item['title'], ENT_QUOTES, 'UTF-8') ?></div>
+										<div class="item-name"><?= htmlspecialchars($item['Client_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
+										<div class="item-title"><?= htmlspecialchars($item['Title'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
 										<div class="item-district">
-											<span><i class="fa-solid fa-clock"></i> Posted <?= htmlspecialchars($item['posted'], ENT_QUOTES, 'UTF-8') ?></span>
-											<span><i class="fa-solid fa-tag"></i> Budget: <?= htmlspecialchars($item['budget'], ENT_QUOTES, 'UTF-8') ?></span>
+											<span><i class="fa-solid fa-clock"></i> Posted <?= htmlspecialchars($item['Posted'] ?? '', ENT_QUOTES, 'UTF-8') ?></span>
+											<span><i class="fa-solid fa-tag"></i> Requesting Price: <?= htmlspecialchars($item['Requesting_Price'] ?? '', ENT_QUOTES, 'UTF-8') ?></span>
 										</div>
 									</div>
 									<div class="button">
@@ -74,11 +74,11 @@
 									</div>
 								</div>
 								<div class="item-middle">
-									<div><i class="fa-solid fa-calendar-days"></i> Timeline: <?= htmlspecialchars($item['timeline'], ENT_QUOTES, 'UTF-8') ?></div>
-									<div><i class="fa-solid fa-layer-group"></i> Category: <?= htmlspecialchars($item['category'], ENT_QUOTES, 'UTF-8') ?></div>
+									<div><i class="fa-solid fa-calendar-days"></i> Timeline: <?= htmlspecialchars($item['Timeline'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
+									<div><i class="fa-solid fa-layer-group"></i> Category: <?= htmlspecialchars($item['Category_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
 								</div>
-								<div class="item-description"><?= htmlspecialchars($item['description'], ENT_QUOTES, 'UTF-8') ?></div>
-								<div class="status-bottom"><span class="status-chip <?= htmlspecialchars($item['statusClass'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($item['statusLabel'], ENT_QUOTES, 'UTF-8') ?></span></div>
+								<div class="item-description"><?= htmlspecialchars($item['Description'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
+								<div class="status-bottom"><span class="status-chip status-<?= htmlspecialchars(strtolower($item['Post_Status'] ?? 'active'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($item['Post_Status'] ?? 'Active', ENT_QUOTES, 'UTF-8') ?></span></div>
 							</article>
 						<?php endforeach; ?>
 					</div>
@@ -96,18 +96,19 @@
 				<i class="fa-solid fa-xmark" id="bidModalClose" style="cursor:pointer;"></i>
 			</div>
 			<hr>
-			<form id="bidForm" class="pop-up-content" style="display:flex; flex-direction:column; gap:12px;">
+			<form id="bidForm" class="pop-up-content" style="display:flex; flex-direction:column; gap:12px;" method="POST" action="<?= BASE_URL ?>/feed/submit-bid">
+				<input type="hidden" id="bidPostId" name="post_id" value="">
 				<div style="font-size:14px; color:#334155;">You are bidding on: <strong id="bidProjectTitle">Project</strong></div>
 				<div style="font-size:13px; color:#64748b;">Client: <span id="bidClientName">Client Name</span></div>
 
 				<label for="bidAmount" style="font-weight:700; color:#111827;">Bid Amount</label>
-				<input id="bidAmount" name="bidAmount" type="number" min="1" step="1" placeholder="Enter your amount" style="width:100%; border:1px solid #e5e7eb; border-radius:10px; padding:10px; font-size:14px;" required>
+				<input id="bidAmount" name="bid_amount" type="number" min="1" step="1" placeholder="Enter your amount" style="width:100%; border:1px solid #e5e7eb; border-radius:10px; padding:10px; font-size:14px;" required>
 
 				<label for="bidTimeline" style="font-weight:700; color:#111827;">Delivery Timeline</label>
-				<input id="bidTimeline" name="bidTimeline" type="text" placeholder="e.g. 7 days" style="width:100%; border:1px solid #e5e7eb; border-radius:10px; padding:10px; font-size:14px;" required>
+				<input id="bidTimeline" name="bid_timeline" type="text" placeholder="e.g. 7 days" style="width:100%; border:1px solid #e5e7eb; border-radius:10px; padding:10px; font-size:14px;" required>
 
 				<label for="bidCover" style="font-weight:700; color:#111827;">Proposal Note</label>
-				<textarea id="bidCover" name="bidCover" rows="5" placeholder="Write a short proposal..." style="width:100%; border:1px solid #e5e7eb; border-radius:10px; padding:10px; font-size:14px; resize:vertical;" required></textarea>
+				<textarea id="bidCover" name="bid_message" rows="5" placeholder="Write a short proposal..." style="width:100%; border:1px solid #e5e7eb; border-radius:10px; padding:10px; font-size:14px; resize:vertical;" required></textarea>
 
 				<div class="modal-actions" style="margin-top:6px;">
 					<button class="btn-primary" id="submitBidBtn" type="submit"><i class="fa-solid fa-paper-plane"></i> Submit Bid</button>

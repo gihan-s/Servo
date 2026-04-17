@@ -32,4 +32,5 @@ class BidsController extends BaseController
 
         include __DIR__ . '/../views/provider/Bids/index.php';
     }
+
 }

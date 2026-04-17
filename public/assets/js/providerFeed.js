@@ -12,6 +12,7 @@ import {
 const bidModalRoot = document.getElementById('bidModalRoot');
 const bidModalClose = document.getElementById('bidModalClose');
 const bidForm = document.getElementById('bidForm');
+const bidPostId = document.getElementById('bidPostId');
 const bidProjectTitle = document.getElementById('bidProjectTitle');
 const bidClientName = document.getElementById('bidClientName');
 const bidAmount = document.getElementById('bidAmount');
@@ -43,8 +44,10 @@ const viewFieldMap = [
 ];
 
 function openBidModal(card) {
+	const postId = card.dataset.postid || '';
 	bidProjectTitle.textContent = card.dataset.title || 'Project';
 	bidClientName.textContent = card.dataset.client || 'Client';
+	if (bidPostId) bidPostId.value = postId;
 	bidAmount.value = '';
 	bidTimeline.value = card.dataset.timeline || '';
 	openModal(bidModalRoot);
@@ -127,9 +130,11 @@ bidModalRoot && bidModalRoot.addEventListener('click', (e) => {
 });
 
 bidForm && bidForm.addEventListener('submit', function (e) {
-	e.preventDefault();
-	alert('Bid submitted (placeholder)');
-	closeBidModal();
+	if (!bidPostId || !bidPostId.value) {
+		e.preventDefault();
+		alert('Missing project ID for this bid.');
+		return;
+	}
 });
 
 // View modal handlers

@@ -29,8 +29,11 @@ class ProjectController extends BaseController
             $ongoingProjects = $this->projectModel->getOngoingProjectsByClientId($userId);
             $viewFile = __DIR__ . '/../views/client/Projects/index.php';
 
-
         } elseif ($role === 'Provider') {
+            $incomingRequests = $this->projectModel->getIncomingRequestsByProviderId($userId);
+            $ongoingProjects = $this->projectModel->getOngoingProjectsByProviderId($userId);
+            $pendingReviewProjects = $this->projectModel->getPendingReviewProjectsByProviderId($userId);
+            $completedJobs = $this->projectModel->getCompletedJobsByProviderId($userId);
             $viewFile = __DIR__ . '/../views/provider/Projects/index.php';
         } else {
             http_response_code(403);
