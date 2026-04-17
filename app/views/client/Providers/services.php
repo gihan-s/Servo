@@ -58,6 +58,21 @@
                 <aside class="filters-panel" id="services-filters-panel">
                     <h3>Filters</h3>
                     <div class="filter-item">
+                        <div class="filter-title"><span>Categories</span><i class="fa-solid fa-chevron-down rotated"></i></div>
+                        <ul class="filter-options active checkboxes">
+                            <?php if (!empty($categories) && is_array($categories)): ?>
+                                <?php foreach ($categories as $category): ?>
+                                    <li>
+                                        <input type="checkbox" name="category_ids[]" value="<?= (int) ($category['Category_ID'] ?? 0) ?>">
+                                        <?= htmlspecialchars((string) ($category['Name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>
+                                    </li>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <li style="color:#6b7280;">No categories available</li>
+                            <?php endif; ?>
+                        </ul>
+                    </div>
+                    <div class="filter-item">
                         <div class="filter-title"><span>Pricing Type</span><i class="fa-solid fa-chevron-down rotated"></i></div>
                         <ul class="filter-options active checkboxes">
                             <li><input type="checkbox" name="pricing_type" value="Hourly">Hourly</li>
@@ -237,6 +252,7 @@
             priceRange: '',
             completionRange: '',
             pricingTypes: [],
+            categoryIds: [],
         };
 
         const providerState = {
@@ -267,12 +283,17 @@
             return Array.from(document.querySelectorAll('input[name="pricing_type"]:checked')).map(input => input.value);
         }
 
+        function getServiceCategoryIdsFromFilters() {
+            return Array.from(document.querySelectorAll('input[name="category_ids[]"]:checked')).map(input => input.value);
+        }
+
         function applyServiceFiltersFromUI() {
             const priceRange = document.querySelector('input[name="price_range"]:checked');
             const completionRange = document.querySelector('input[name="completion_range"]:checked');
             serviceState.priceRange = priceRange ? priceRange.value : '';
             serviceState.completionRange = completionRange ? completionRange.value : '';
             serviceState.pricingTypes = getServicePriceTypesFromFilters();
+            serviceState.categoryIds = getServiceCategoryIdsFromFilters();
         }
 
         function renderSortOptions(config, selectedValue) {
@@ -536,6 +557,7 @@
             if (serviceState.priceRange) params.set('price_range', serviceState.priceRange);
             if (serviceState.completionRange) params.set('completion_range', serviceState.completionRange);
             if (serviceState.pricingTypes.length) params.set('price_types', serviceState.pricingTypes.join(','));
+            if (serviceState.categoryIds.length) params.set('category_ids', serviceState.categoryIds.join(','));
 
             return params.toString();
         }
@@ -1164,7 +1186,7 @@
             });
         }
 
-        document.querySelectorAll('input[name="price_range"], input[name="completion_range"], input[name="pricing_type"]').forEach(function (input) {
+        document.querySelectorAll('input[name="price_range"], input[name="completion_range"], input[name="pricing_type"], input[name="category_ids[]"]').forEach(function (input) {
             input.addEventListener('change', function () {
                 applyServiceFiltersFromUI();
                 loadServiceCards(1);
