@@ -663,26 +663,7 @@ class PostModel extends Database
         return true;
     }
 
-    public function cancelRequest(int $postId): bool
-    {
-        $sql = "UPDATE Post SET Request_Status = 'cancelled' WHERE Post_ID = ?";
-
-        $stmt = $this->conn->prepare($sql);
-        if (!$stmt) {
-            error_log('cancelRequest prepare: ' . $this->conn->error);
-            return false;
-        }
-
-        $stmt->bind_param('i', $postId);
-
-        if (!$stmt->execute()) {
-            error_log('cancelRequest exec: ' . $stmt->error);
-            return false;
-        }
-
-        $stmt->close();
-        return true;
-    }
+    
 
     public function updatePost(int $postId, array $data): bool
     {

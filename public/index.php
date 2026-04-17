@@ -247,6 +247,9 @@ switch ($url) {
     case (preg_match('#^requests/cancel/(\d+)$#', $url, $m) ? true : false):
         (new ProjectController())->cancelRequest((int)$m[1]);
         break;
+    case (preg_match('#^requests/payment/(\d+)$#', $url, $m) ? true : false):
+        (new ProjectController())->initiatePayment((int)$m[1]);
+        break;
 
     case (preg_match('#^project/cancel/(\d+)$#', $url, $m) ? true : false):
         (new ProjectController())->cancelProject((int)$m[1]);

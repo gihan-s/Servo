@@ -241,14 +241,16 @@ class ProjectModel extends Database {
     public function getRequirementsByPostId(int $postId): array
     {
         $sql = "SELECT 
-                pr.Requirement_Text, pr .Project_ID
+                pr.Requirement_Text, p.Project_ID
             FROM project_requirements pr
-            JOIN Project p ON p.Project_ID = pr.Project_ID
+            LEFT JOIN Project p ON p.Project_ID = pr.Project_ID
             WHERE p.Post_ID = ? AND (pr.Status = 'accepted' OR pr.Status = 'completed')
         ";
+        $sql2 = "SELECT pr.Project_ID FROM project pr LEFT JOIN Post p ON p.Post_ID = pr.Post_ID WHERE p.Post_ID = ?";
 
         $stmt = $this->conn->prepare($sql);
-        if (!$stmt) {
+        $stmt2 = $this->conn->prepare($sql2);
+        if (!$stmt || !$stmt2) {
             error_log('getProjectRequirementsById prepare: ' . $this->conn->error);
             return null;
         }
@@ -265,23 +267,54 @@ class ProjectModel extends Database {
         while ($row = $result->fetch_assoc()) {
             $requirements[] = $row;
         }
-
+        $result->free();
         $stmt->close();
 
-        return $requirements;
+        $stmt2->bind_param('i', $postId);
+
+        if (!$stmt2->execute()) {
+            error_log('getProjectRequirementsById exec: ' . $stmt2->error);
+            return null;
+        }
+        
+        $result2 = $stmt2->get_result();
+        $projectID = $result2->fetch_assoc()['Project_ID'] ?? null;
+        $result2->free();
+        $stmt2->close();
+
+        
+
+        return [$requirements, $projectID];
     }
 
     public function addRequirement($project_id, $text)
     {
         $sql = "INSERT INTO project_requirements (Project_ID, Requirement_Text, Status)
                 VALUES (?, ?, 'pending')";
+        $sql2 = "UPDATE project SET Project_Status = 'ongoing' WHERE Project_ID = ?";
+        $sql3 = "UPDATE post SET Request_Status = 'ongoing' WHERE Post_ID = (SELECT Post_ID FROM project WHERE Project_ID = ?)";
 
         $stmt = $this->conn->prepare($sql);
         if (!$stmt) return false;
 
         $stmt->bind_param("is", $project_id, $text);
 
-        return $stmt->execute();
+        $result = $stmt->execute();
+
+        if ($result) {
+            $stmt2 = $this->conn->prepare($sql2);
+            $stmt2->bind_param("i", $project_id);
+            $stmt2->execute();
+            $stmt2->close();
+
+            $stmt3 = $this->conn->prepare($sql3);
+            $stmt3->bind_param("i", $project_id);
+            $stmt3->execute();
+            $stmt3->close();
+        }
+
+        $stmt->close();
+        return $result;
     }
 
     public function getProviderByProject($project_id)
@@ -296,6 +329,57 @@ class ProjectModel extends Database {
         $stmt->execute();
 
         return $stmt->get_result()->fetch_assoc();
+    }
+
+    public function cancelRequest(int $postId): bool
+    {
+        $sql = "UPDATE Post SET Request_Status = 'cancelled' WHERE Post_ID = ?";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('cancelRequest prepare: ' . $this->conn->error);
+            return false;
+        }
+
+        $stmt->bind_param('i', $postId);
+
+        if (!$stmt->execute()) {
+            error_log('cancelRequest exec: ' . $stmt->error);
+            return false;
+        }
+
+        $stmt->close();
+        return true;
+    }
+
+    public function initiatePayment(int $postId): bool
+    {
+        $sql = "UPDATE Post SET Request_Status = 'ongoing' WHERE Post_ID = ?";
+        $sql2 = "INSERT INTO project (Post_ID, Project_Status, Started_At) VALUES (?, 'ongoing', NOW())";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt2 = $this->conn->prepare($sql2);
+        if (!$stmt || !$stmt2) {
+            error_log('initiatePayment prepare: ' . $this->conn->error);
+            return false;
+        }
+
+        $stmt->bind_param('i', $postId);
+        $stmt2->bind_param('i', $postId);
+
+        if (!$stmt->execute()) {
+            error_log('initiatePayment exec: ' . $stmt->error);
+            return false;
+        }
+
+        if (!$stmt2->execute()) {
+            error_log('initiatePayment exec: ' . $stmt2->error);
+            return false;
+        }
+
+        $stmt->close();
+        $stmt2->close();
+        return true;
     }
 
 }
