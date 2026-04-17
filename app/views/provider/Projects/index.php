@@ -309,8 +309,11 @@
                 <button class="btn-primary" id="btnPropose" style="display:none;"><i class="fa-solid fa-paper-plane"></i> Send Proposal</button>
                 <button class="btn-primary" id="btnSubmit" style="display:none;"><i class="fa-solid fa-paper-plane"></i> Submit for Review</button>
                 <button class="btn-primary" id="btnUpdate" style="display:none;"><i class="fa-solid fa-arrow-up"></i> Update Progress</button>
+
+                
                 <button class="btn-outline" id="btnMessage"><i class="fa-solid fa-comments"></i> Message Client</button>
-                <button class="btn-danger" id="btnDecline"><i class="fa-solid fa-circle-xmark"></i> Decline</button>
+                <button class="btn-danger" id="btnDecline"><i class="fa-solid fa-circle-xmark"></i> Reject</button>
+                <button class="btn-primary" id="btnAccept"><i class="fa-solid fa-circle-check"></i> Accept</button>
                 <button class="btn-danger" id="btnWithdraw" style="display:none;"><i class="fa-solid fa-trash"></i> Withdraw</button>
             </div>
         </div>
@@ -469,6 +472,26 @@
             <div class="modal-actions">
                 <button class="btn-secondary" id="btnCancelRejection">Cancel</button>
                 <button class="btn-danger" id="btnConfirmRejection"><i class="fa-solid fa-circle-xmark"></i> Reject Request</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Accept Confirmation Modal -->
+    <div class="pop-up-section confirm-modal deactive" id="acceptModalRoot">
+        <div class="pop-up" id="acceptModal" style="max-width:500px;">
+            <div class="pop-up-header" style="display:flex; align-items:center; justify-content:space-between;">
+                <div class="pop-up-title">Accept Request</div>
+                <i class="fa-solid fa-xmark" id="acceptModalClose" style="cursor:pointer;"></i>
+            </div>
+            <hr>
+            <div class="pop-up-content" style="display:flex; flex-direction:column; gap:12px;">
+                <div style="font-size:14px; color:#475569;">
+                    Are you sure you want to accept this request? You can start working on this project right away.
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-secondary" id="btnCancelAccept">Cancel</button>
+                <button class="btn-primary" id="btnConfirmAccept"><i class="fa-solid fa-circle-check"></i> Accept Request</button>
             </div>
         </div>
     </div>

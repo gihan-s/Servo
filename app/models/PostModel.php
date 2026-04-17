@@ -857,4 +857,36 @@ class PostModel extends Database
 
         return $affected > 0;
     }
+
+    /**
+     * Accept an incoming request
+     * 
+     * @param int $postId Post ID
+     * @return bool Success status
+     */
+    public function acceptRequest(int $postId): bool
+    {
+        $sql = "UPDATE post 
+                SET Request_Status = 'accepted' 
+                WHERE Post_ID = ?";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('acceptRequest prepare: ' . $this->conn->error);
+            return false;
+        }
+
+        $stmt->bind_param('i', $postId);
+
+        if (!$stmt->execute()) {
+            error_log('acceptRequest exec: ' . $stmt->error);
+            $stmt->close();
+            return false;
+        }
+
+        $affected = $stmt->affected_rows;
+        $stmt->close();
+
+        return $affected > 0;
+    }
 }

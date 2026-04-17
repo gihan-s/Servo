@@ -312,6 +312,11 @@ switch ($url) {
         $controller->rejectRequest();
         break;
 
+    case 'provider/accept-request':
+        $controller = new ProviderController();
+        $controller->acceptRequest();
+        break;
+
     case 'earnings':
         $controller = new EarningsController();
         $controller->index();

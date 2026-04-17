@@ -325,4 +325,46 @@ class ProviderController extends BaseController
             ]);
         }
     }
+
+    // POST /provider/accept-request - Accept an incoming request
+    public function acceptRequest()
+    {
+        header('Content-Type: application/json');
+
+        try {
+            $this->ensureAuth();
+
+            $postId = isset($_POST['post_id']) ? (int)$_POST['post_id'] : 0;
+
+            if ($postId <= 0) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'message' => 'Invalid post ID']);
+                return;
+            }
+
+            require_once __DIR__ . '/../models/PostModel.php';
+
+            $postModel = new PostModel();
+            $success = $postModel->acceptRequest($postId);
+
+            if ($success) {
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Request accepted successfully'
+                ]);
+            } else {
+                http_response_code(500);
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Failed to accept request'
+                ]);
+            }
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
 }
