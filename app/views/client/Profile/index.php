@@ -20,7 +20,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
     <!--scripts-->
-    <script src="<?= BASE_URL ?>/assets/js/elementScript.js" defer></script>
     <script src="<?= BASE_URL ?>/assets/js/profile.js" defer></script>
 </head>
 
@@ -28,26 +27,31 @@
     <?php include_once __DIR__ . '/../../includes/navbar.php'; ?>
     <main>
         <section class="profile-hero">
-            <div class="hero-inner">
-                <div class="hero-avatar-wrap">
-                    <img class="hero-avatar" id="avatarPublicPreview"
-                        src="<?= BASE_URL . "/../uploads/Users/" . htmlspecialchars($user['Profile_Picture']) ?? '' ?>" />
-                    <button id="avatarSaveBtn" class="avatar-save-btn" style="display:none;" onclick="saveAvatar()"><i
-                            class="fa-solid fa-floppy-disk"></i> Save</button>
+            <div class="hero-container">
+                <div class="hero-avatar-section">
+                    <div class="hero-avatar-wrap">
+                        <img class="hero-avatar" id="avatarPublicPreview"
+                            src="<?= BASE_URL . '/file/user-files/' . $_SESSION['user_image'] ?>" />
+                        <button id="avatarSaveBtn" class="avatar-save-btn" style="display:none;" onclick="saveAvatar()"><i
+                                class="fa-solid fa-floppy-disk"></i> Save</button>
+                    </div>
+                    <div class="hero-actions">
+                        <button class="btn btn-primary" onclick="document.getElementById('avatarPublicInput').click()"><i
+                                class="fa-solid fa-camera"></i> Edit Photo</button>
+                        <input type="file" id="avatarPublicInput" accept="image/*" style="display:none" />
+                    </div>
                 </div>
-                <div class="hero-text">
+                <div class="hero-details">
                     <h1 id="publicSummaryName"><?= htmlspecialchars($user['First_Name']) ?>
                         <?= htmlspecialchars($user['Last_Name']) ?>
                     </h1>
                     <div class="muted"><i class="fa-solid fa-envelope"></i> <span
                             id="publicSummaryEmail"><?= htmlspecialchars($user['Email']) ?></span>
-
                     </div>
-                </div>
-                <div class="hero-actions">
-                    <button class="btn btn-primary" onclick="document.getElementById('avatarPublicInput').click()"><i
-                            class="fa-solid fa-camera"></i> Edit Photo</button>
-                    <input type="file" id="avatarPublicInput" accept="image/*" style="display:none" />
+                
+                    <p class="hero-bio">
+                        <?= htmlspecialchars($user['Bio']) ?: 'No bio available.' ?>
+                    </p>
                 </div>
             </div>
         </section>
@@ -137,48 +141,26 @@
                     <div class="card">
                         <h2 class="section-title"><i class="fa-solid fa-shield-keyhole"></i> Account & Security</h2>
                         <form id="accountForm" onsubmit="saveAccount(event)">
-                            <div class="input-grid-2">
-                                <div class="text-container">
-                                    <div class="label text-label label-float">Email</div>
-                                    <input type="text" class="text-field" name="email"
-                                        value="<?= htmlspecialchars($user['Email']) ?>" required readonly>
-                                </div>
-                                <div class="select-container">
-                                    <div class="text-container">
-                                        <div class="label dropdown-label label-float">Status</div>
-                                        <input type="text" class="text-field-dropdown" readonly name="status"
-                                            value="<?= htmlspecialchars($user['Status']) ?>" id="statusInput">
-                                    </div>
-
-
-                                    <div class="options">
-                                        <div>Available</div>
-                                        <div>Busy</div>
-                                    </div>
-                                </div>
-                            </div>
+                           
                             <div class="password-box">
-                                <h4><i class="fa-solid fa-lock"></i> Password & Recovery</h4>
+
+                                <h4>
+                                    <i class="fa-solid fa-lock"></i> Password & Recovery
+                                </h4>
+
                                 <div class="field-row">
+                                    <div class="field">
+                                        <label for="acc_old_pass">Old Password</label>
+                                        <input type="password" id="acc_old_pass" name="Old_Password"
+                                            placeholder="••••••••" />
+                                    </div>
                                     <div class="field">
                                         <label for="acc_new_pass">New Password</label>
                                         <input type="password" id="acc_new_pass" name="New_Password"
-                                            placeholder="••••••••" />
-                                    </div>
-                                    <div class="field">
-                                        <label for="acc_confirm_pass">Confirm Password</label>
-                                        <input type="password" id="acc_confirm_pass" name="Confirm_Password"
-                                            placeholder="••••••••" />
-                                    </div>
-                                    <div class="field">
-                                        <label for="reset_code">Reset Code</label>
-                                        <input type="text" id="reset_code" name="reset_code"
-                                            placeholder="Enter reset code" />
+                                            placeholder="••••••••"  autocomplete="new-password"/>
                                     </div>
                                 </div>
-                                <div class="small">Leave password fields empty if you don't want to change it.</div>
-                                <button type="button" class="link-inline" onclick="forgotPassword()"><i
-                                        class="fa-solid fa-envelope"></i> Send Reset Password Code</button>
+
                             </div>
                             <div class="actions">
                                 <button class="btn btn-primary" type="submit"><i class="fa-solid fa-floppy-disk"></i>

@@ -14,13 +14,11 @@ $BaseURL = "..";
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap"
-        rel="stylesheet"
-    >
+        rel="stylesheet">
     <link rel="stylesheet" href="<?= $BaseURL ?>/assets/css/elementStyles.css">
     <link rel="stylesheet" href="<?= $BaseURL ?>/assets/css/gridTemplates.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <script src="<?= $BaseURL ?>/assets/js/elementScript.js" defer></script>
     <script src="<?= $BaseURL ?>/assets/js/registerScript.js" defer></script>
 
 
@@ -45,7 +43,8 @@ $BaseURL = "..";
 
                     <?php
 
-                    function getFromSession($name) {
+                    function getFromSession($name)
+                    {
                         return isset($_SESSION["register"][$name]) ? $_SESSION["register"][$name] : "";
                     }
 
@@ -73,13 +72,66 @@ $BaseURL = "..";
                                 <div class="label text-label">Bio</div>
                                 <textarea class="text-field" name="bio" spellcheck="false"><?= getFromSession('bio') ?></textarea>
                             </div>
-                        </div>
-                        <div class="input-grid-1">
+
                             <div class="text-container">
                                 <div class="label text-label">Website</div>
                                 <input type="text" class="text-field" name="website" value="<?= getFromSession('website') ?>" id="">
                             </div>
                         </div>
+                    </div>
+
+                    <div style="<?= getFromSession("user_type") == 'provider' ? "" : "display: none;" ?>">
+
+                        <div class="hr-title-container" style="margin-top: 25px;">
+                            <span class="hr-title">Social Media Links</span>
+                            <hr class="hr-line">
+                        </div>
+
+                        <div class="social-media-link-wrapper">
+                            <div>
+                                <span>
+                                    <i class="fa-brands fa-linkedin"></i>
+                                    Linked In
+                                </span>
+                                <input type="text" name="social_media_linkedin" value="<?= getFromSession('linkedin') ?>">
+                            </div>
+                            <div>
+                                <span>
+                                    <i class="fa-brands fa-facebook"></i>
+                                    Facebook
+                                </span>
+                                <input type="text" name="social_media_facebook" value="<?= getFromSession('facebook') ?>">
+                            </div>
+                            <div>
+                                <span>
+                                    <i class="fa-brands fa-instagram"></i>
+                                    Instagram
+                                </span>
+                                <input type="text" name="social_media_instagram" value="<?= getFromSession('instagram') ?>">
+                            </div>
+                            <div>
+                                <span>
+                                    <i class="fa-brands fa-tiktok"></i>
+                                    Tiktok
+                                </span>
+                                <input type="text" name="social_media_tiktok" value="<?= getFromSession('tiktok') ?>">
+                            </div>
+                            <div>
+                                <span>
+                                    <i class="fa-brands fa-youtube"></i>
+                                    Youtube
+                                </span>
+                                <input type="text" name="social_media_youtube" value="<?= getFromSession('youtube') ?>">
+                            </div>
+                            <div>
+                                <span>
+                                    <i class="fa-brands fa-github"></i>
+                                    Github
+                                </span>
+                                <input type="text" name="social_media_github" value="<?= getFromSession('github') ?>">
+                            </div>
+                        </div>
+
                     </div>
 
                     <div class="button-section">

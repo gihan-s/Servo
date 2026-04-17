@@ -99,7 +99,7 @@
 			</div>
 			<div class="features-grid">
 				<div class="feature-card reveal">
-					<div class="feature-icon"><i class="fa-solid fa-shield-check"></i></div>
+					<div class="feature-icon"><i class="fa-solid fa-shield"></i></div>
 					<h3>Verified Talent</h3>
 					<p>Identity + profile checks, skill tagging and review system for confident hiring decisions.</p>
 				</div>

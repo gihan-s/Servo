@@ -43,6 +43,7 @@ body {
 .request-content {
   width: 100%;
   padding: 10px;
+  min-height: 50vh;
 }
 
 .request-content .requests-section {
@@ -538,6 +539,46 @@ body {
   width: 1.5rem;
   color: #fff;
   text-align: center;
+}
+
+/* Alternative pagination component with .page-btn class */
+.pagination .page-btn {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  color: #374151;
+  min-width: 40px;
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all .25s ease;
+}
+.pagination .page-btn:hover {
+  border-color: #008500;
+  color: #008500;
+  transform: translateY(-2px);
+}
+.pagination .page-btn.active {
+  background: linear-gradient(135deg,#008500,#006600);
+  color: #ffffff;
+  border: 1px solid #008500;
+  box-shadow: 0 4px 12px rgba(0,133,0,0.25);
+}
+.pagination .page-btn.prev, 
+.pagination .page-btn.next { 
+  padding: 0 18px; 
+}
+@media (max-width:600px){
+  .pagination .page-btn { 
+    min-width: 36px; 
+    height: 36px; 
+    font-size: 13px; 
+  }
 }
 
 .pop-up-section {

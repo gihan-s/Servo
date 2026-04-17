@@ -36,9 +36,9 @@ function uploadFile(
     }
 
     // Clean filename
-    $cleanName = preg_replace('/[^a-zA-Z0-9._-]/', '_', pathinfo($originalName, PATHINFO_FILENAME));
-    $cleanName = trim($cleanName, '_') ?: 'file';
-    $filename = uniqid('', true) . '_' . $cleanName . '.' . $ext;
+    // $cleanName = preg_replace('/[^a-zA-Z0-9._-]/', '_', pathinfo($originalName, PATHINFO_FILENAME));
+    // $cleanName = trim($cleanName, '_') ?: 'file';
+    $filename = bin2hex(random_bytes(16)) . '.' . $ext;
     $targetFile = rtrim($targetDir, '/') . '/' . $filename;
 
     // Validate MIME type
