@@ -233,8 +233,69 @@ class ProjectModel extends Database {
             return false;
         }
 
+
         $stmt->close();
         return true;
+    }
+
+    public function getRequirementsByPostId(int $postId): array
+    {
+        $sql = "SELECT 
+                pr.Requirement_Text, pr .Project_ID
+            FROM project_requirements pr
+            JOIN Project p ON p.Project_ID = pr.Project_ID
+            WHERE p.Post_ID = ? AND (pr.Status = 'accepted' OR pr.Status = 'completed')
+        ";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('getProjectRequirementsById prepare: ' . $this->conn->error);
+            return null;
+        }
+
+        $stmt->bind_param('i', $postId);
+
+        if (!$stmt->execute()) {
+            error_log('getProjectRequirementsById exec: ' . $stmt->error);
+            return null;
+        }
+
+        $result = $stmt->get_result();
+        $requirements = [];
+        while ($row = $result->fetch_assoc()) {
+            $requirements[] = $row;
+        }
+
+        $stmt->close();
+
+        return $requirements;
+    }
+
+    public function addRequirement($project_id, $text)
+    {
+        $sql = "INSERT INTO project_requirements (Project_ID, Requirement_Text, Status)
+                VALUES (?, ?, 'pending')";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) return false;
+
+        $stmt->bind_param("is", $project_id, $text);
+
+        return $stmt->execute();
+    }
+
+    public function getProviderByProject($project_id)
+    {
+        $sql = "SELECT p.Provider_ID
+                FROM project pr
+                JOIN post p ON p.Post_ID = pr.Post_ID
+                WHERE pr.Project_ID = ?";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $project_id);
+        $stmt->execute();
+
+        return $stmt->get_result()->fetch_assoc();
     }
 
 }

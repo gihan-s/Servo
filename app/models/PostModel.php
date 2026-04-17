@@ -378,10 +378,14 @@ class PostModel extends Database
                 p.Request_Status,
                 p.Provider_ID,
                 p.Post_Type,
+                p.Provider_ID, 
+                p.Request_Status,
+                CONCAT(pr.First_Name, ' ', pr.Last_Name) AS Provider_Name,
                 c.Name AS CategoryName
-            FROM post p
-            LEFT JOIN category c ON c.Category_ID = p.Category_ID
-            LEFT JOIN post_need_skills sk ON sk.Post_ID = p.Post_ID
+            FROM Post p
+            LEFT JOIN Category c ON c.Category_ID = p.Category_ID
+            LEFT JOIN Post_Need_Skills sk ON sk.Post_ID = p.Post_ID
+            LEFT JOIN provider pr ON pr.Provider_ID = p.Provider_ID
             WHERE p.Post_ID = ?
             LIMIT 1";
 

@@ -203,6 +203,10 @@ switch ($url) {
         $controller->getPosts();
         break;
 
+    case 'project/submit-requirements-update':
+        (new ProjectController())->submitRequirementsUpdate();
+        break;
+
     case 'requests':
         $controller = new PostController();
         $controller->index();
@@ -230,6 +234,10 @@ switch ($url) {
 
     case (preg_match('#^requests/view/(\d+)$#', $url, $m) ? true : false):
         (new PostController())->viewPost((int)$m[1]);
+        break;
+    
+    case (preg_match('#^/?project/getrequirements/(\d+)$#', $url, $m) ? true : false):
+        (new ProjectController())->getRequirementsByPost((int)$m[1]);
         break;
 
     case (preg_match('#^requests/delete/(\d+)$#', $url, $m) ? true : false):

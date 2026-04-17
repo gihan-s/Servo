@@ -209,4 +209,85 @@ class ProjectController extends BaseController
         include $viewFile;
     }
 
+    public function getRequirementsByPost($id)
+    {
+        header('Content-Type: application/json');
+
+            $id = (int) $id;
+            if ($id <= 0) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Invalid post id']);
+                return;
+            }
+
+            // Implement this in PostModel to return ONE row (or rename to your actual method)
+            $requirements = $this->projectModel->getRequirementsByPostId($id);
+
+            // if (empty($requirements)) {
+            //     http_response_code(404);
+            //     echo json_encode(['error' => 'Project requirements not found']);
+            //     return;
+            // }
+
+            // $response = [
+            //     'Requirement_Text' => $requirements[0]['Requirement_Text'] ?? null
+            // ];
+
+            echo json_encode($requirements);
+        }
+
+    public function submitRequirementsUpdate()
+    {
+        header('Content-Type: application/json');
+        ob_clean();
+        try {
+            $data = json_decode(file_get_contents("php://input"), true);
+
+            if (!$data) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Invalid JSON data']);
+                return;
+            }
+
+            $project_id = $data['project_id'] ?? null;
+            $new_req = $data['new_requirement'] ?? null;
+
+            if (!$project_id || !$new_req) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Missing project_id or new_requirement']);
+                return;
+            }
+
+            // 1. add requirement
+            $ok = $this->projectModel->addRequirement($project_id, $new_req);
+
+            if (!$ok) {
+                http_response_code(500);
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'DB insert failed'
+                ]);
+                return;
+            }
+            // 2. get provider
+            $provider = $this->projectModel->getProviderByProject($project_id);
+
+            if (!$provider) {
+                echo json_encode(['success' => true, 'message' => 'Added but provider not found']);
+                return;
+            }
+
+            // 3. send notification / request
+            // $this->notificationModel->create([
+            //     'User_ID' => $provider['Provider_ID'],
+            //     'Message' => "New requirement added for your project #$project_id",
+            //     'Type' => 'project_update'
+            // ]);
+
+            echo json_encode(['success' => true, 'message' => 'Requirement added successfully']);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
 }
