@@ -59,84 +59,45 @@
         $searchHeader->render();
         ?>
         <div class="request-content">
-            <!-- New Requests Section -->
-             <!--
-            <div class="new-requests active requests-section" id="section-new">
-                <p class="section-note">New requests from clients. Review and respond with proposals.</p>
-                <div class="item-list">
-                    <div class="search-item" data-status="new">
-                        <div class="item-head">
-                            <div class="item-main-dets">
-                                <div class="item-name">Sarah Johnson</div>
-                                <div class="item-title">Logo Design for Tech Startup</div>
-                                <div class="item-district">
-                                    <span>Posted 15 Jul 2025 | 17:55</span>
-                                    <span>Budget: $500-$800</span>
-                                </div>
-                            </div>
-                            <div class="button">
-                                <button class="btn-outline btn-view" title="View Request"><i
-                                        class="fa-solid fa-eye"></i> View</button>
-                                <button class="btn-primary btn-propose" title="Send Proposal"><i
-                                        class="fa-solid fa-paper-plane"></i> Propose</button>
-                                <button class="btn-danger btn-decline" title="Decline Request"><i
-                                        class="fa-solid fa-circle-xmark"></i> Decline</button>
-                            </div>
-                        </div>
-                        <div class="item-middle">
-                            <div><i class="fa-solid fa-clock"></i> Timeline: 2 weeks</div>
-                            <div><i class="fa-solid fa-tag"></i> Category: Graphic Design</div>
-                        </div>
-                        <div class="item-description">Looking for a modern, minimalist logo for our new SaaS platform. Should work well in both digital and print formats.</div>
-                        <div class="status-bottom"><span class="status-chip status-new">New Request</span></div>
-                    </div>
-                </div>
-                <div class="pagination" aria-label="New Requests Pagination">
-                    <button class="page-btn prev" disabled><i class="fa-solid fa-chevron-left"></i></button>
-                    <button class="page-btn active">1</button>
-                    <button class="page-btn">2</button>
-                    <button class="page-btn">3</button>
-                    <button class="page-btn next"><i class="fa-solid fa-chevron-right"></i></button>
-                </div>
-            </div>
-    -->
             <!-- Incoming Requests Section -->
             <div class="pending-requests active requests-section" id="section-pending" data-section="pending-requests">
                 <p class="section-note">Incoming service requests from potential clients.</p>
                 <div class="item-list">
-                    <div class="search-item" data-status="pending" data-client="Michael Chen" data-title="E-commerce Website Development" data-category="Web Development" data-posted="Proposed 12 Jul 2025" data-budget="Proposal: $2,500" data-timeline="4 weeks" data-status-label="Pending Response" data-requirements="Full e-commerce site with product catalog, shopping cart, and payment integration." data-description="Full e-commerce site with product catalog, shopping cart, and payment integration.">
+                    <?php if (empty($incomingRequests)): ?>
+                        <div class="search-item">
+                            <div class="item-head">
+                                <div class="item-main-dets">
+                                    <div class="item-title">No incoming requests at this time.</div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php foreach ($incomingRequests as $request): ?>
+                    <div class="search-item" data-status="pending" data-client="<?= htmlspecialchars($request['Client_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-title="<?= htmlspecialchars($request['Title'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-category="<?= htmlspecialchars($request['Category_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-posted="<?= htmlspecialchars($request['Posted'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-budget="<?= htmlspecialchars($request['Budget'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-timeline="<?= htmlspecialchars($request['Timeline'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-status-label="<?= htmlspecialchars($request['Status'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-description="<?= htmlspecialchars($request['Description'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                         <div class="item-head">
                             <div class="item-main-dets">
-                                <div class="item-name">Michael Chen</div>
-                                <div class="item-title">E-commerce Website Development</div>
+                                <div class="item-name"><?= htmlspecialchars($request['Client_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
+                                <div class="item-title"><?= htmlspecialchars($request['Title'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
                                 <div class="item-district">
-                                    <span>Proposed 12 Jul 2025</span>
-                                    <span>Proposal: $2,500</span>
+                                    <span><?= htmlspecialchars($request['Posted'] ?? '', ENT_QUOTES, 'UTF-8') ?></span>
+                                    <span><?= htmlspecialchars($request['Budget'] ?? '', ENT_QUOTES, 'UTF-8') ?></span>
                                 </div>
                             </div>
                             <div class="button">
-                                <button class="btn-outline btn-view" title="View Proposal"><i
-                                        class="fa-solid fa-eye"></i> View</button>
-                                <button class="btn-outline btn-message" title="Message Client"><i
-                                        class="fa-solid fa-message"></i> Message</button>
-                                <button class="btn-danger btn-withdraw" title="Withdraw Proposal"><i
-                                        class="fa-solid fa-trash"></i> Withdraw</button>
+                                <button class="btn-outline btn-view" title="View Proposal"><i class="fa-solid fa-eye"></i> View</button>
+                                <button class="btn-outline btn-message" title="Message Client"><i class="fa-solid fa-message"></i> Message</button>
+                                <button class="btn-danger btn-withdraw" title="Withdraw Proposal"><i class="fa-solid fa-trash"></i> Withdraw</button>
                             </div>
                         </div>
                         <div class="item-middle">
-                            <div><i class="fa-solid fa-clock"></i> Timeline: 4 weeks</div>
-                            <div><i class="fa-solid fa-tag"></i> Proposed: $2,500</div>
+                            <div><i class="fa-solid fa-clock"></i> Timeline: <?= htmlspecialchars($request['Timeline'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
+                            <div><i class="fa-solid fa-tag"></i> <?= htmlspecialchars($request['Budget'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
                         </div>
-                        <div class="item-description">Full e-commerce site with product catalog, shopping cart, and payment integration.</div>
-                        <div class="status-bottom"><span class="status-chip status-pending">Pending Response</span></div>
+                        <div class="item-description"><?= htmlspecialchars($request['Description'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
+                        <div class="status-bottom"><span class="status-chip status-<?= htmlspecialchars(strtolower(str_replace(' ', '-', $request['Status'] ?? 'pending')), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($request['Status'] ?? 'Pending', ENT_QUOTES, 'UTF-8') ?></span></div>
                     </div>
-                </div>
-                <div class="pagination" aria-label="Pending Requests Pagination">
-                    <button class="page-btn prev" disabled><i class="fa-solid fa-chevron-left"></i></button>
-                    <button class="page-btn active">1</button>
-                    <button class="page-btn">2</button>
-                    <button class="page-btn">3</button>
-                    <button class="page-btn next"><i class="fa-solid fa-chevron-right"></i></button>
+                    <?php endforeach; ?>
                 </div>
             </div>
 
@@ -144,14 +105,25 @@
             <div class="in-progress-requests requests-section" id="section-progress" data-section="in-progress-requests">
                 <p class="section-note">Active projects you're currently working on.</p>
                 <div class="item-list">
-                    <div class="search-item" data-status="progress" data-client="Emma Wilson" data-title="Mobile App UI/UX Design" data-category="UI/UX Design" data-posted="Started 10 Jul 2025" data-budget="Budget: $1,200" data-timeline="ETA 12d" data-status-label="In Progress" data-progress="65" data-progress-detail="32h of 50h" data-logged="32h" data-requirements="Designing user interface and experience for a fitness tracking mobile application." data-description="Designing user interface and experience for a fitness tracking mobile application.">
+                    <?php if (empty($ongoingProjects)): ?>
+                        <div class="search-item">
+                            <div class="item-head">
+                                <div class="item-main-dets">
+                                    <div class="item-title">No ongoing projects at this time.</div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php foreach ($ongoingProjects as $project): ?>
+                    <div class="search-item" data-status="progress" data-client="<?= htmlspecialchars($project['Client_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-title="<?= htmlspecialchars($project['Title'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-category="<?= htmlspecialchars($project['Category_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-posted="<?= htmlspecialchars($project['Posted'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-budget="<?= htmlspecialchars($project['Budget'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-timeline="<?= htmlspecialchars($project['Timeline'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-status-label="<?= htmlspecialchars($project['Status'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-progress="<?= htmlspecialchars($project['Progress'] ?? '0', ENT_QUOTES, 'UTF-8') ?>" data-progress-detail="<?= htmlspecialchars($project['Progress_Detail'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-logged="<?= htmlspecialchars($project['Hours_Logged'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-description="<?= htmlspecialchars($project['Description'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                         <div class="item-head">
                             <div class="item-main-dets">
-                                <div class="item-name">Emma Wilson</div>
-                                <div class="item-title">Mobile App UI/UX Design</div>
+                                <div class="item-name"><?= htmlspecialchars($project['Client_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
+                                <div class="item-title"><?= htmlspecialchars($project['Title'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
                                 <div class="item-district">
-                                    <span>Started 10 Jul 2025</span>
-                                    <span>Budget: $1,200</span>
+                                    <span><?= htmlspecialchars($project['Posted'] ?? '', ENT_QUOTES, 'UTF-8') ?></span>
+                                    <span><?= htmlspecialchars($project['Budget'] ?? '', ENT_QUOTES, 'UTF-8') ?></span>
                                 </div>
                             </div>
                             <div class="button">
@@ -162,23 +134,19 @@
                             </div>
                         </div>
                         <div class="item-middle">
-                            <div><i class="fa-solid fa-hourglass"></i> ETA 12d</div>
-                            <div><i class="fa-solid fa-clock"></i> Logged 32h</div>
+                            <div><i class="fa-solid fa-hourglass"></i> <?= htmlspecialchars($project['Timeline'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
+                            <div><i class="fa-solid fa-clock"></i> Logged <?= htmlspecialchars($project['Hours_Logged'] ?? '0h', ENT_QUOTES, 'UTF-8') ?></div>
                         </div>
+                        <?php if (isset($project['Progress'])): ?>
                         <div class="progress-container" aria-label="Project progress">
-                            <div class="progress-label">Progress: <span class="progress-percent">65%</span> <span class="progress-detail" style="color:#64748b;">(32h of 50h)</span></div>
-                            <div class="progress-track"><div class="progress-fill" style="width:65%"></div></div>
+                            <div class="progress-label">Progress: <span class="progress-percent"><?= htmlspecialchars($project['Progress'], ENT_QUOTES, 'UTF-8') ?>%</span> <span class="progress-detail" style="color:#64748b;">(<?= htmlspecialchars($project['Progress_Detail'] ?? '', ENT_QUOTES, 'UTF-8') ?>)</span></div>
+                            <div class="progress-track"><div class="progress-fill" style="width:<?= htmlspecialchars($project['Progress'], ENT_QUOTES, 'UTF-8') ?>%"></div></div>
                         </div>
-                        <div class="item-description">Designing user interface and experience for a fitness tracking mobile application.</div>
-                        <div class="status-bottom"><span class="status-chip status-progress">In Progress</span></div>
+                        <?php endif; ?>
+                        <div class="item-description"><?= htmlspecialchars($project['Description'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
+                        <div class="status-bottom"><span class="status-chip status-<?= htmlspecialchars(strtolower(str_replace(' ', '-', $project['Status'] ?? 'progress')), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($project['Status'] ?? 'In Progress', ENT_QUOTES, 'UTF-8') ?></span></div>
                     </div>
-                </div>
-                <div class="pagination" aria-label="In Progress Pagination">
-                    <button class="page-btn prev" disabled><i class="fa-solid fa-chevron-left"></i></button>
-                    <button class="page-btn active">1</button>
-                    <button class="page-btn">2</button>
-                    <button class="page-btn">3</button>
-                    <button class="page-btn next"><i class="fa-solid fa-chevron-right"></i></button>
+                    <?php endforeach; ?>
                 </div>
             </div>
 
@@ -186,14 +154,25 @@
             <div class="pending-review requests-section" id="section-review" data-section="pending-review">
                 <p class="section-note">Project outputs submitted for review. Awaiting feedback or approval from client.</p>
                 <div class="item-list">
-                    <div class="search-item" data-status="review" data-client="David Rodriguez" data-title="Website Content Writing" data-category="Content Writing" data-posted="Submitted 08 Jul 2025" data-budget="Payment: $600" data-timeline="Not specified" data-status-label="Pending Review" data-requirements="Wrote homepage, about us, and services page content for a digital marketing agency." data-description="Wrote homepage, about us, and services page content for a digital marketing agency.">
+                    <?php if (empty($pendingReviewProjects)): ?>
+                        <div class="search-item">
+                            <div class="item-head">
+                                <div class="item-main-dets">
+                                    <div class="item-title">No projects pending review at this time.</div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php foreach ($pendingReviewProjects as $review): ?>
+                    <div class="search-item" data-status="review" data-client="<?= htmlspecialchars($review['Client_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-title="<?= htmlspecialchars($review['Title'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-category="<?= htmlspecialchars($review['Category_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-posted="<?= htmlspecialchars($review['Posted'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-budget="<?= htmlspecialchars($review['Budget'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-timeline="<?= htmlspecialchars($review['Timeline'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-status-label="<?= htmlspecialchars($review['Status'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-description="<?= htmlspecialchars($review['Description'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                         <div class="item-head">
                             <div class="item-main-dets">
-                                <div class="item-name">David Rodriguez</div>
-                                <div class="item-title">Website Content Writing</div>
+                                <div class="item-name"><?= htmlspecialchars($review['Client_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
+                                <div class="item-title"><?= htmlspecialchars($review['Title'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
                                 <div class="item-district">
-                                    <span>Submitted 08 Jul 2025</span>
-                                    <span>Payment: $600</span>
+                                    <span><?= htmlspecialchars($review['Posted'] ?? '', ENT_QUOTES, 'UTF-8') ?></span>
+                                    <span><?= htmlspecialchars($review['Budget'] ?? '', ENT_QUOTES, 'UTF-8') ?></span>
                                 </div>
                             </div>
                             <div class="button">
@@ -201,17 +180,10 @@
                                 <button class="btn-outline btn-message" title="Message Client"><i class="fa-solid fa-message"></i> Message</button>
                             </div>
                         </div>
-                        <div class="item-description">Wrote homepage, about us, and services page content for a digital marketing agency.</div>
-                        <div class="status-bottom"><span class="status-chip status-review"><i
-                                    class="fa-solid fa-clipboard-check"></i> Pending Review</span></div>
+                        <div class="item-description"><?= htmlspecialchars($review['Description'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
+                        <div class="status-bottom"><span class="status-chip status-<?= htmlspecialchars(strtolower(str_replace(' ', '-', $review['Status'] ?? 'review')), ENT_QUOTES, 'UTF-8') ?>"><i class="fa-solid fa-clipboard-check"></i> <?= htmlspecialchars($review['Status'] ?? 'Pending Review', ENT_QUOTES, 'UTF-8') ?></span></div>
                     </div>
-                </div>
-                <div class="pagination" aria-label="Pending Review Pagination">
-                    <button class="page-btn prev" disabled><i class="fa-solid fa-chevron-left"></i></button>
-                    <button class="page-btn active">1</button>
-                    <button class="page-btn">2</button>
-                    <button class="page-btn">3</button>
-                    <button class="page-btn next"><i class="fa-solid fa-chevron-right"></i></button>
+                    <?php endforeach; ?>
                 </div>
             </div>
 
@@ -219,14 +191,25 @@
             <div class="completed-jobs requests-section" id="section-completed" data-section="completed-jobs">
                 <p class="section-note">Successfully completed projects and delivered work.</p>
                 <div class="item-list">
-                    <div class="search-item" data-status="complete" data-client="Jennifer Lee" data-title="Social Media Marketing Campaign" data-category="Digital Marketing" data-posted="Completed 01 Jul 2025" data-budget="Earned: $1,500" data-timeline="Not specified" data-status-label="Completed" data-requirements="30-day social media campaign with content creation and community management across 3 platforms." data-description="30-day social media campaign with content creation and community management across 3 platforms.">
+                    <?php if (empty($completedJobs)): ?>
+                        <div class="search-item">
+                            <div class="item-head">
+                                <div class="item-main-dets">
+                                    <div class="item-title">No completed jobs yet.</div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php foreach ($completedJobs as $job): ?>
+                    <div class="search-item" data-status="complete" data-client="<?= htmlspecialchars($job['Client_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-title="<?= htmlspecialchars($job['Title'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-category="<?= htmlspecialchars($job['Category_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-posted="<?= htmlspecialchars($job['Posted'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-budget="<?= htmlspecialchars($job['Budget'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-timeline="<?= htmlspecialchars($job['Timeline'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-status-label="<?= htmlspecialchars($job['Status'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-description="<?= htmlspecialchars($job['Description'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                         <div class="item-head">
                             <div class="item-main-dets">
-                                <div class="item-name">Jennifer Lee</div>
-                                <div class="item-title">Social Media Marketing Campaign</div>
+                                <div class="item-name"><?= htmlspecialchars($job['Client_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
+                                <div class="item-title"><?= htmlspecialchars($job['Title'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
                                 <div class="item-district">
-                                    <span>Completed 01 Jul 2025</span>
-                                    <span>Earned: $1,500</span>
+                                    <span><?= htmlspecialchars($job['Posted'] ?? '', ENT_QUOTES, 'UTF-8') ?></span>
+                                    <span><?= htmlspecialchars($job['Budget'] ?? '', ENT_QUOTES, 'UTF-8') ?></span>
                                 </div>
                             </div>
                             <div class="button">
@@ -234,12 +217,11 @@
                                 <button class="btn-outline" title="Download Files"><i class="fa-solid fa-download"></i> Files</button>
                             </div>
                         </div>
-                        <div class="item-description">30-day social media campaign with content creation and community management across 3 platforms.</div>
-                        <div class="status-bottom"><span class="status-chip status-complete"><i
-                                    class="fa-solid fa-circle-check"></i> Completed</span></div>
+                        <div class="item-description"><?= htmlspecialchars($job['Description'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
+                        <div class="status-bottom"><span class="status-chip status-<?= htmlspecialchars(strtolower(str_replace(' ', '-', $job['Status'] ?? 'complete')), ENT_QUOTES, 'UTF-8') ?>"><i class="fa-solid fa-circle-check"></i> <?= htmlspecialchars($job['Status'] ?? 'Completed', ENT_QUOTES, 'UTF-8') ?></span></div>
                     </div>
+                    <?php endforeach; ?>
                 </div>
-                <div class="pagination" aria-label="Completed Jobs Pagination">
                     <button class="page-btn prev" disabled><i class="fa-solid fa-chevron-left"></i></button>
                     <button class="page-btn active">1</button>
                     <button class="page-btn">2</button>

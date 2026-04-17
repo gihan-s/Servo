@@ -28,7 +28,7 @@ $uriNoBase  = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '/';
 if ($_SESSION['role'] === 'Provider') {
     $navLinks = [
         ['label' => 'Dashboard', 'href' => BASE_URL . '/dashboard', 'class' => '"fas fa-gauge"'],
-        ['label' => 'Feed', 'href' => BASE_URL . '/feeds', 'class' => '"fas fa-briefcase"'],
+        ['label' => 'Feed', 'href' => BASE_URL . '/feed', 'class' => '"fas fa-briefcase"'],
         ['label' => 'Bids', 'href' => BASE_URL . '/bids', 'class' => '"fas fa-coins"'],
         ['label' => 'Projects', 'href' => BASE_URL . '/projects', 'class' => '"fas fa-layer-group"'],
         ['label' => 'Earnings', 'href' => BASE_URL . '/earnings', 'class' => '"fas fa-money-bill-wave"'],
