@@ -294,6 +294,16 @@ switch ($url) {
         $controller->getServices();
         break;
 
+    case 'provider/incoming-requests':
+        $controller = new ProviderController();
+        $controller->getIncomingRequests();
+        break;
+
+    case 'provider/reject-request':
+        $controller = new ProviderController();
+        $controller->rejectRequest();
+        break;
+
     case 'earnings':
         $controller = new EarningsController();
         $controller->index();

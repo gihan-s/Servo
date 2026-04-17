@@ -733,4 +733,124 @@ class PostModel extends Database
         $stmt->close();
         return true;
     }
+
+    /**
+     * Fetch incoming requests for a provider with pagination
+     * Filters by Post_Status = 'active' AND Request_Status = 'ongoing' AND Provider_ID
+     * 
+     * @param int $providerId Provider ID from session
+     * @param int $page Page number (1-indexed)
+     * @param int $limit Items per page
+     * @return array ['data' => array, 'total' => int, 'pages' => int, 'current_page' => int]
+     */
+    public function getIncomingRequestsForProvider(int $providerId, int $page = 1, int $limit = 10): array
+    {
+        $page = max(1, $page);
+        $limit = max(1, min($limit, 100)); // Cap at 100 per page
+        $offset = ($page - 1) * $limit;
+
+        // Get total count
+        $countSql = "SELECT COUNT(*) as total FROM post 
+                     WHERE Post_Status = 'active' AND Request_Status = 'ongoing' AND Provider_ID = ?";
+        
+        $countStmt = $this->conn->prepare($countSql);
+        $countStmt->bind_param('i', $providerId);
+        $countStmt->execute();
+        $countRow = $countStmt->get_result()->fetch_assoc();
+        $countStmt->close();
+        $totalRecords = (int) ($countRow['total'] ?? 0);
+        $totalPages = ceil($totalRecords / $limit);
+
+        // Get data with pagination
+        $sql = "SELECT 
+                    cl.Client_ID,
+                    p.Post_ID,
+                    p.Title,
+                    p.Description,
+                    p.Requesting_Price,
+                    p.Price_Type,
+                    p.Est_Date,
+                    p.Level,
+                    p.Created_At,
+                    p.Post_Type,
+                    p.Category_ID,
+                    c.Name as Category_Name,
+                    cl.First_Name,
+                    cl.Last_Name,
+                    cl.Profile_Picture,
+                    CONCAT(cl.First_Name, ' ', cl.Last_Name) as Client_Name
+                FROM post p
+                LEFT JOIN category c ON p.Category_ID = c.Category_ID
+                LEFT JOIN client cl ON p.Client_ID = cl.Client_ID
+                WHERE p.Post_Status = 'active' AND p.Request_Status = 'ongoing' AND p.Provider_ID = ?
+                ORDER BY p.Created_At DESC
+                LIMIT ? OFFSET ?";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('getIncomingRequestsForProvider prepare: ' . $this->conn->error);
+            return [
+                'data' => [],
+                'total' => 0,
+                'pages' => 0,
+                'current_page' => $page
+            ];
+        }
+
+        $stmt->bind_param('iii', $providerId, $limit, $offset);
+        if (!$stmt->execute()) {
+            error_log('getIncomingRequestsForProvider exec: ' . $stmt->error);
+            $stmt->close();
+            return [
+                'data' => [],
+                'total' => 0,
+                'pages' => 0,
+                'current_page' => $page
+            ];
+        }
+
+        $result = $stmt->get_result();
+        $data = $result->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+
+        return [
+            'data' => $data,
+            'total' => $totalRecords,
+            'pages' => $totalPages,
+            'current_page' => $page
+        ];
+    }
+
+    /**
+     * Reject an incoming request
+     * 
+     * @param int $postId Post ID
+     * @param string $reason Rejection reason
+     * @return bool Success status
+     */
+    public function rejectRequest(int $postId, string $reason = ''): bool
+    {
+        $sql = "UPDATE post 
+                SET Request_Status = 'rejected', Request_Reject_Reason = ? 
+                WHERE Post_ID = ?";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('rejectRequest prepare: ' . $this->conn->error);
+            return false;
+        }
+
+        $stmt->bind_param('si', $reason, $postId);
+
+        if (!$stmt->execute()) {
+            error_log('rejectRequest exec: ' . $stmt->error);
+            $stmt->close();
+            return false;
+        }
+
+        $affected = $stmt->affected_rows;
+        $stmt->close();
+
+        return $affected > 0;
+    }
 }
