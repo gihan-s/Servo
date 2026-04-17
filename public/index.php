@@ -235,7 +235,7 @@ switch ($url) {
     case (preg_match('#^requests/view/(\d+)$#', $url, $m) ? true : false):
         (new PostController())->viewPost((int)$m[1]);
         break;
-    
+
     case (preg_match('#^/?project/getrequirements/(\d+)$#', $url, $m) ? true : false):
         (new ProjectController())->getRequirementsByPost((int)$m[1]);
         break;
@@ -380,6 +380,13 @@ switch ($url) {
     case 'test/inputs':
         include '../inputs.html';
         break;
+
+    case (preg_match('#^payment-gateway/(.+)$#', $url, $matches) ? true : false):
+        $file = '../payment-gateway/' . $matches[1] . '.php';
+        if (file_exists($file)) {
+            include $file;
+            break;
+        }
 
     default:
         $controller = new NotFoundController();

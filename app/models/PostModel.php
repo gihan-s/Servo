@@ -154,12 +154,15 @@ class PostModel extends Database
     {
         error_log("PostModel::getPosts - Client: $clientId, Status: $status, Sort: $sort, Search: '$search'");
         
-        $query = "SELECT p.*, CONCAT(pr.First_Name, ' ', pr.Last_Name) AS Provider_Name, 
-                         COALESCE(proj.Progress, 0) AS Progress, proj.Started_At, proj.Ended_At
-                  FROM Post p  
+        $query = "SELECT p.*, CONCAT(pr.First_Name, ' ', pr.Last_Name) AS Provider_Name,
+                         pr.Profile_Picture AS Provider_Picture, pr.Rating AS Provider_Rating,
+                         COALESCE(proj.Progress, 0) AS Progress, proj.Started_At, proj.Ended_At,
+                         cat.Name AS Category_Name
+                  FROM Post p
                   LEFT JOIN Provider pr ON p.Provider_ID = pr.Provider_ID
                   LEFT JOIN project proj ON p.Post_ID = proj.Post_ID
-                  WHERE p.Client_ID = ? AND p.Post_Type = 'post'";
+                  LEFT JOIN category cat ON p.Category_ID = cat.Category_ID
+                  WHERE p.Client_ID = ? AND (p.Post_Type = 'post' OR p.Post_Type = 'direct')";
         $types = "i";
         $params = [$clientId];
 

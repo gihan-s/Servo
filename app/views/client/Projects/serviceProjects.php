@@ -410,7 +410,9 @@
         container.innerHTML = '';
         visiblePosts.forEach(item => {
             console.log('Rendering post:', item);
-            const postHTML = createPostCard(item.post, item.skills, status);
+            const postHTML = status === 'accepted'
+                ? createAcceptedCard(item.post, item.skills)
+                : createPostCard(item.post, item.skills, status);
             container.insertAdjacentHTML('beforeend', postHTML);
         });
 
@@ -634,12 +636,12 @@
         }*/
 
         // Post type badge
-        const postTypeLabel = post.post_type === 'direct' ? 'Direct Request' : 'Bid Request';
+        console.log('Post :', post);
+        const postTypeLabel = post.Post_Type === 'direct' ? 'Direct Request' : 'Bid Request';
         const postTypeHTML = `
             <div class="post-type-badge">
-                <span class="badge-label ${post.post_type === 'direct' ? 'direct' : 'bid'}">${postTypeLabel}</span>
+                <span class="badge-label ${post.Post_Type === 'direct' ? 'direct' : 'bid'}">${postTypeLabel}</span>
             </div>
-            
         `;
 
         let progressHTML = '';
@@ -672,15 +674,94 @@
                 </div>
                 ${progressHTML}
                 ${postTypeHTML}
-                
-                
             </div>
         `;
-        
+    }
 
-            
-                    
-        
+    function formatEstDate(estDate) {
+        if (!estDate) return 'N/A';
+        const end = new Date(estDate);
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        end.setHours(0, 0, 0, 0);
+        const diffDays = Math.ceil((end - now) / (1000 * 60 * 60 * 24));
+        if (diffDays < 0) return `${Math.abs(diffDays)} days ago`;
+        if (diffDays === 0) return 'Today';
+        if (diffDays === 1) return 'Tomorrow';
+        return `in ${diffDays} days`;
+    }
+
+    function createAcceptedCard(post, skills) {
+        const providerName = post.Provider_Name || 'Unassigned Provider';
+        const providerPicture = post.Provider_Picture
+            ? `${window.BASE_URL}/file/user-files/${post.Provider_Picture}`
+            : null;
+        const rating = post.Provider_Rating ? parseFloat(post.Provider_Rating).toFixed(1) : '0.0';
+        const category = post.Category_Name || 'N/A';
+        const estDate = formatEstDate(post.Est_Date);
+        const budget = `LKR ${post.Requesting_Price || 0}/= (${post.Price_Type || 'Fixed'})`;
+        const description = post.Description || '';
+        const snippet = description.length > 300
+            ? escapeHtml(description.substring(0, 300)) + '...'
+            : escapeHtml(description);
+        const postedDate = formatDate(post.Created_At);
+        const postTypeLabel = post.Post_Type === 'direct' ? 'Direct' : 'Bid';
+
+        const avatarImg = providerPicture
+            ? `<img src="${providerPicture}" alt="${escapeHtml(providerName)}" class="accepted-avatar" onerror="this.remove()">`
+            : '';
+
+        return `
+            <div class="search-item accepted-card">
+                <input type="hidden" class="post-id" value="${post.Post_ID}">
+                <div class="accepted-header">
+                    <div class="accepted-provider-section">
+                        <div class="accepted-avatar-wrapper">
+                            <i class="fas fa-user"></i>
+                            ${avatarImg}
+                        </div>
+                        <div class="accepted-provider-info">
+                            <div class="accepted-provider-name">${escapeHtml(providerName)}</div>
+                            <div class="accepted-provider-rating">⭐ ${rating}</div>
+                        </div>
+                    </div>
+                    <div class="accepted-actions">
+                        <a href="${window.BASE_URL}/messages?new=${post.Provider_ID}" class="action-btn btn-edit" aria-label="Messages">
+                            <i class="fas fa-comments"></i> Messages
+                        </a>
+                        <button class="action-btn btn-edit" onclick="payPayment(${post.Post_ID})">
+                            <i class="fas fa-credit-card"></i> Pay
+                        </button>
+                        <button class="action-btn btn-view" onclick="viewPost(${post.Post_ID})">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <button class="action-btn btn-delete" onclick="cancelRequest(${post.Post_ID})">
+                            <i class="fas fa-trash"></i> Cancel
+                        </button>
+                    </div>
+                </div>
+                <div class="accepted-title">${escapeHtml(post.Title)}</div>
+                <div class="accepted-description">${snippet}</div>
+                <div class="accepted-details">
+                    <div class="accepted-detail-item">
+                        <span class="accepted-detail-label"><i class="fa-solid fa-coins"></i> Budget</span>
+                        <span class="accepted-detail-value">${budget}</span>
+                    </div>
+                    <div class="accepted-detail-item">
+                        <span class="accepted-detail-label"><i class="fa-solid fa-tag"></i> Category</span>
+                        <span class="accepted-detail-value">${escapeHtml(category)}</span>
+                    </div>
+                    <div class="accepted-detail-item">
+                        <span class="accepted-detail-label"><i class="fa-solid fa-calendar"></i> Est. Date</span>
+                        <span class="accepted-detail-value">${estDate}</span>
+                    </div>
+                </div>
+                <div class="accepted-footer">
+                    <span class="accepted-time">${postedDate}</span>
+                    <span class="status-chip status-accepted">${postTypeLabel} Request</span>
+                </div>
+            </div>
+        `;
     }
 
     function updateAsExpired(id) {
