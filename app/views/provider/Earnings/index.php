@@ -9,12 +9,11 @@
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/main.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/earnings.css" />
-    
+
 </head>
 
 <body>
-    <?php // Use filesystem path for includes (BASE_URL is for URLs, not filesystem)
-    require_once __DIR__ . '/../../includes/navbar.php'; ?>
+    <?php require_once __DIR__ . '/../../includes/navbar.php'; ?>
     <main class="dashboard-wrapper">
         <header class="dashboard">
             <h1>Earnings</h1>
@@ -28,9 +27,9 @@
                     <i class="fas fa-wallet"></i>
                 </div>
                 <div class="metric-title">Total Earnings</div>
-                <div class="metric-value">$42,850</div>
-                <div class="metric-delta delta-up">
-                    <i class="fa-solid fa-arrow-up"></i> 18% from last month
+                <div class="metric-value">$<?= number_format($totalEarnings, 0) ?></div>
+                <div class="metric-delta <?= $earningsChange >= 0 ? 'delta-up' : 'delta-down' ?>">
+                    <i class="fa-solid fa-arrow-<?= $earningsChange >= 0 ? 'up' : 'down' ?>"></i> <?= abs($earningsChange) ?>% from last month
                 </div>
             </div>
             <div class="metric-card">
@@ -38,9 +37,9 @@
                     <i class="fas fa-clock"></i>
                 </div>
                 <div class="metric-title">Pending Payout</div>
-                <div class="metric-value">$8,250</div>
+                <div class="metric-value">$<?= number_format($pendingPayout, 0) ?></div>
                 <div class="metric-delta" style="color:#b45309;">
-                    <i class="fa-solid fa-hourglass"></i> Next payout: Sep 15
+                    <i class="fa-solid fa-hourglass"></i> Awaiting clearance
                 </div>
             </div>
             <div class="metric-card">
@@ -48,9 +47,9 @@
                     <i class="fas fa-chart-line"></i>
                 </div>
                 <div class="metric-title">Avg. Project Value</div>
-                <div class="metric-value">$3,570</div>
+                <div class="metric-value">$<?= number_format($avgProjectValue, 0) ?></div>
                 <div class="metric-delta delta-up">
-                    <i class="fa-solid fa-arrow-up"></i> 12% increase
+                    <i class="fa-solid fa-arrow-up"></i> Per project
                 </div>
             </div>
             <div class="metric-card">
@@ -58,9 +57,9 @@
                     <i class="fas fa-receipt"></i>
                 </div>
                 <div class="metric-title">Completed Projects</div>
-                <div class="metric-value">12</div>
+                <div class="metric-value"><?= $completedProjects ?></div>
                 <div class="metric-delta delta-up">
-                    <i class="fa-solid fa-arrow-up"></i> 3 this month
+                    <i class="fa-solid fa-arrow-up"></i> <?= $completedThisMonth ?> this month
                 </div>
             </div>
         </section>
@@ -71,11 +70,11 @@
                 <div class="chart-header">
                     <h3 class="chart-title">Earnings Overview</h3>
                     <div class="period-selector">
-                        <button class="period-btn active">1M</button>
-                        <button class="period-btn">3M</button>
-                        <button class="period-btn">6M</button>
-                        <button class="period-btn">1Y</button>
-                        <button class="period-btn">All</button>
+                        <button class="period-btn active" data-period="1M">1M</button>
+                        <button class="period-btn" data-period="3M">3M</button>
+                        <button class="period-btn" data-period="6M">6M</button>
+                        <button class="period-btn" data-period="1Y">1Y</button>
+                        <button class="period-btn" data-period="All">All</button>
                     </div>
                 </div>
                 <div class="chart-legend">
@@ -88,11 +87,53 @@
                         <span>Platform Fees</span>
                     </div>
                 </div>
-                <div class="chart-placeholder">
-                    <div style="text-align: center;">
-                        <i class="fa-solid fa-chart-bar" style="font-size: 48px; margin-bottom: 16px; display: block;"></i>
-                        Earnings chart visualization<br>
-                        <span style="font-size: 12px;">(Interactive chart would be implemented with a charting library)</span>
+                <div class="chart-area">
+                    <canvas id="earningsChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Report Generation -->
+        <section class="report-section">
+            <div class="card">
+                <div class="report-header">
+                    <h3 class="chart-title">Generate Earnings Report</h3>
+                </div>
+                <div class="report-controls">
+                    <div class="date-range">
+                        <div class="date-field">
+                            <label for="report-start">From</label>
+                            <input type="date" id="report-start" class="date-input">
+                        </div>
+                        <div class="date-field">
+                            <label for="report-end">To</label>
+                            <input type="date" id="report-end" class="date-input">
+                        </div>
+                    </div>
+                    <div class="report-actions">
+                        <button class="ghost-btn" id="btn-preview-report"><i class="fa-solid fa-eye"></i> Preview</button>
+                        <button class="primary-btn" id="btn-download-report"><i class="fa-solid fa-download"></i> Download PDF</button>
+                    </div>
+                </div>
+                <!-- Report Preview Area -->
+                <div class="report-preview" id="report-preview" style="display:none;">
+                    <div class="report-summary-grid">
+                        <div class="report-stat">
+                            <div class="report-stat-label">Total Earnings</div>
+                            <div class="report-stat-value" id="rpt-total">$0.00</div>
+                        </div>
+                        <div class="report-stat">
+                            <div class="report-stat-label">Platform Fees</div>
+                            <div class="report-stat-value" id="rpt-fees" style="color:#b91c1c;">$0.00</div>
+                        </div>
+                        <div class="report-stat">
+                            <div class="report-stat-label">Net Earnings</div>
+                            <div class="report-stat-value" id="rpt-net" style="color:#008500;">$0.00</div>
+                        </div>
+                        <div class="report-stat">
+                            <div class="report-stat-label">Transactions</div>
+                            <div class="report-stat-value" id="rpt-count">0</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -120,86 +161,47 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>
-                                <div class="transaction-project">E-commerce Platform</div>
-                                <div class="transaction-client">Invoice #INV-10452</div>
-                            </td>
-                            <td>Sep 02, 2025</td>
-                            <td>TechCorp Inc</td>
-                            <td>
-                                <div class="transaction-amount">$4,200.00</div>
-                                <div class="transaction-fee">Fee: $420.00</div>
-                            </td>
-                            <td><span class="transaction-status status-completed">Completed</span></td>
-                            <td style="text-align: right;">
-                                <button class="ghost-btn"><i class="fa-solid fa-receipt"></i> Receipt</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="transaction-project">Analytics Dashboard</div>
-                                <div class="transaction-client">Invoice #INV-10398</div>
-                            </td>
-                            <td>Aug 28, 2025</td>
-                            <td>DataSolutions LLC</td>
-                            <td>
-                                <div class="transaction-amount">$3,500.00</div>
-                                <div class="transaction-fee">Fee: $350.00</div>
-                            </td>
-                            <td><span class="transaction-status status-completed">Completed</span></td>
-                            <td style="text-align: right;">
-                                <button class="ghost-btn"><i class="fa-solid fa-receipt"></i> Receipt</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="transaction-project">Mobile App UI/UX</div>
-                                <div class="transaction-client">Invoice #INV-10375</div>
-                            </td>
-                            <td>Aug 22, 2025</td>
-                            <td>FitnessPlus</td>
-                            <td>
-                                <div class="transaction-amount">$2,800.00</div>
-                                <div class="transaction-fee">Fee: $280.00</div>
-                            </td>
-                            <td><span class="transaction-status status-pending">Pending</span></td>
-                            <td style="text-align: right;">
-                                <button class="ghost-btn"><i class="fa-solid fa-eye"></i> View</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="transaction-project">CRM Integration</div>
-                                <div class="transaction-client">Invoice #INV-10321</div>
-                            </td>
-                            <td>Aug 15, 2025</td>
-                            <td>SalesForce Pro</td>
-                            <td>
-                                <div class="transaction-amount">$5,100.00</div>
-                                <div class="transaction-fee">Fee: $510.00</div>
-                            </td>
-                            <td><span class="transaction-status status-processing">Processing</span></td>
-                            <td style="text-align: right;">
-                                <button class="ghost-btn"><i class="fa-solid fa-eye"></i> View</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="transaction-project">WordPress E-commerce</div>
-                                <div class="transaction-client">Invoice #INV-10294</div>
-                            </td>
-                            <td>Aug 08, 2025</td>
-                            <td>RetailTech</td>
-                            <td>
-                                <div class="transaction-amount">$2,400.00</div>
-                                <div class="transaction-fee">Fee: $240.00</div>
-                            </td>
-                            <td><span class="transaction-status status-completed">Completed</span></td>
-                            <td style="text-align: right;">
-                                <button class="ghost-btn"><i class="fa-solid fa-receipt"></i> Receipt</button>
-                            </td>
-                        </tr>
+                        <?php if (empty($transactions)): ?>
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 40px; color: #64748b;">
+                                    No transactions found.
+                                </td>
+                            </tr>
+                        <?php else: ?>
+                            <?php foreach ($transactions as $txn):
+                                $date = $txn['Paid_Time'] ?? $txn['Hold_Time'];
+                                $formattedDate = $date ? date('M d, Y', strtotime($date)) : '—';
+                                $invoiceNum = 'INV-' . $txn['Payment_ID'];
+                                $isCancelled = $txn['Project_Status'] === 'Cancelled';
+                                $statusClass = strtolower($txn['Status']);
+                            ?>
+                                <tr>
+                                    <td>
+                                        <div class="transaction-project"><?= htmlspecialchars($txn['Project_Title']) ?></div>
+                                        <div class="transaction-client">Invoice #<?= htmlspecialchars($invoiceNum) ?></div>
+                                        <?php if ($isCancelled): ?>
+                                            <span class="payment-type-label label-cancellation-penalty"><i class="fa-solid fa-triangle-exclamation"></i> Cancellation Penalty</span>
+                                        <?php else: ?>
+                                            <span class="payment-type-label label-completed-project"><i class="fa-solid fa-circle-check"></i> Completed Project</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td><?= $formattedDate ?></td>
+                                    <td><?= htmlspecialchars($txn['Client_Name']) ?></td>
+                                    <td>
+                                        <div class="transaction-amount">$<?= number_format($txn['Amount'], 2) ?></div>
+                                        <div class="transaction-fee">Fee: $<?= number_format($txn['Commission'], 2) ?></div>
+                                    </td>
+                                    <td><span class="transaction-status status-<?= $statusClass ?>"><?= htmlspecialchars($txn['Status']) ?></span></td>
+                                    <td style="text-align: right;">
+                                        <?php if ($txn['Status'] === 'Completed'): ?>
+                                            <button class="ghost-btn"><i class="fa-solid fa-receipt"></i> Receipt</button>
+                                        <?php else: ?>
+                                            <button class="ghost-btn"><i class="fa-solid fa-eye"></i> View</button>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
@@ -269,7 +271,7 @@
                     </div>
                 </div>
                 <div style="font-size: 13px; color: #64748b; text-align: center;">
-                    <i class="fa-solid fa-circle-info"></i> 
+                    <i class="fa-solid fa-circle-info"></i>
                     These are estimates for informational purposes. Consult a tax professional for accurate tax calculations.
                 </div>
             </div>
@@ -321,51 +323,119 @@
 
     <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <script>
-        // Period selector functionality
         document.addEventListener('DOMContentLoaded', function() {
-            const periodButtons = document.querySelectorAll('.period-btn');
-            
-            periodButtons.forEach(button => {
+            // --- Chart Data from PHP ---
+            const chartData = <?= json_encode($chartData) ?>;
+
+            const ctx = document.getElementById('earningsChart').getContext('2d');
+            let earningsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: chartData['1M'].labels,
+                    datasets: [
+                        {
+                            label: 'Earnings',
+                            data: chartData['1M'].earnings,
+                            backgroundColor: '#008500',
+                            borderRadius: 6,
+                            barPercentage: 0.6
+                        },
+                        {
+                            label: 'Platform Fees',
+                            data: chartData['1M'].fees,
+                            backgroundColor: '#e2e8f0',
+                            borderRadius: 6,
+                            barPercentage: 0.6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': $' + context.raw.toLocaleString();
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) { return '$' + value.toLocaleString(); }
+                            },
+                            grid: { color: '#f1f5f9' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+
+            // Period selector
+            document.querySelectorAll('.period-btn').forEach(button => {
                 button.addEventListener('click', function() {
-                    // Remove active class from all buttons
-                    periodButtons.forEach(btn => btn.classList.remove('active'));
-                    // Add active class to clicked button
+                    document.querySelectorAll('.period-btn').forEach(btn => btn.classList.remove('active'));
                     this.classList.add('active');
-                    
-                    // In a real application, you would update the chart data here
-                    console.log('Selected period:', this.textContent);
+                    const period = this.dataset.period;
+                    const data = chartData[period];
+                    earningsChart.data.labels = data.labels;
+                    earningsChart.data.datasets[0].data = data.earnings;
+                    earningsChart.data.datasets[1].data = data.fees;
+                    earningsChart.update();
                 });
             });
-            
-            // Payout method selection
-            const payoutMethods = document.querySelectorAll('.payout-method');
-            
-            payoutMethods.forEach(method => {
-                method.addEventListener('click', function() {
-                    if (this.classList.contains('active')) return;
-                    
-                    // Remove active class from all methods
-                    payoutMethods.forEach(m => m.classList.remove('active'));
-                    // Add active class to clicked method
-                    this.classList.add('active');
-                    
-                    // Update method actions
-                    payoutMethods.forEach(m => {
-                        const action = m.querySelector('.method-action');
-                        if (m === this) {
-                            action.textContent = 'Primary';
-                        } else {
-                            action.textContent = 'Set as Primary';
-                        }
-                    });
-                    
-                    console.log('Selected payout method:', this.querySelector('.method-name').textContent);
-                });
+
+            // --- Report Generation ---
+            const today = new Date();
+            const thirtyDaysAgo = new Date(today);
+            thirtyDaysAgo.setDate(today.getDate() - 30);
+            document.getElementById('report-start').value = thirtyDaysAgo.toISOString().split('T')[0];
+            document.getElementById('report-end').value = today.toISOString().split('T')[0];
+
+            document.getElementById('btn-preview-report').addEventListener('click', function() {
+                const startDate = document.getElementById('report-start').value;
+                const endDate = document.getElementById('report-end').value;
+                if (!startDate || !endDate) {
+                    alert('Please select both start and end dates.');
+                    return;
+                }
+                if (new Date(startDate) > new Date(endDate)) {
+                    alert('Start date must be before end date.');
+                    return;
+                }
+                // Mock report data based on date range
+                const days = Math.ceil((new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24));
+                const total = Math.round(days * 142.83 * 100) / 100;
+                const fees = Math.round(total * 0.1 * 100) / 100;
+                const net = Math.round((total - fees) * 100) / 100;
+                const count = Math.max(1, Math.round(days / 7));
+
+                document.getElementById('rpt-total').textContent = '$' + total.toLocaleString(undefined, {minimumFractionDigits: 2});
+                document.getElementById('rpt-fees').textContent = '-$' + fees.toLocaleString(undefined, {minimumFractionDigits: 2});
+                document.getElementById('rpt-net').textContent = '$' + net.toLocaleString(undefined, {minimumFractionDigits: 2});
+                document.getElementById('rpt-count').textContent = count;
+                document.getElementById('report-preview').style.display = 'block';
+            });
+
+            document.getElementById('btn-download-report').addEventListener('click', function() {
+                const startDate = document.getElementById('report-start').value;
+                const endDate = document.getElementById('report-end').value;
+                if (!startDate || !endDate) {
+                    alert('Please select both start and end dates.');
+                    return;
+                }
+                alert('Report for ' + startDate + ' to ' + endDate + ' will be generated and downloaded.');
             });
         });
     </script>
 </body>
 
 </html>
-
