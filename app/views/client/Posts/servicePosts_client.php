@@ -166,24 +166,10 @@
 
                 <p>No skill selected</p>
             </div>
-            <div class="input-grid-2">
+            <div class="input-grid-1">
                 <div class="text-container">
                     <div class="label text-label">Requesting Price</div>
                     <input type="text" class="text-field" name="price" id="">
-                </div>
-                <div class="search-select-container">
-                    <div class="text-container">
-                        <div class="label search-dropdown-label">Price Type</div>
-                        <input type="text" class="text-field-search-dropdown" autocomplete="off"
-                            onkeydown="return false" name="pricetype" id="">
-                    </div>
-                    <div class="options">
-                        <div class="option-list">
-                            <div>Fixed</div>
-                            <div>Hourly</div>
-                            <div>Daily</div>
-                        </div>
-                    </div>
                 </div>
             </div>
 
@@ -301,76 +287,6 @@
     </div>
 </div>
 
-<!-- Create Post Modal (matches project pop-up pattern) 
-<div class="pop-up-section create-post-pop-up deactive">
-    <div class="pop-up deactive">
-        <div class="pop-up-header">
-            <div class="pop-up-title">Create A New Service Request</div>
-            <i class="fa-solid fa-xmark" id="create-post-pop-up"></i>
-        </div>
-        <hr>
-        <div class="pop-up-content">
-            
-        </div>
-    </div>
-</div>-->
-<!-- Post Details Modal -->
-<!-- <div class="pop-up-section request-modal deactive" id="postDetailsRoot">
-    <div class="pop-up deactive" id="postDetailsModal" style="max-width:720px; border-radius:16px;">
-        <div class="pop-up-header" style="display:flex; align-items:center; justify-content:space-between;">
-            <div class="pop-up-title">Post Details</div>
-            <i class="fa-solid fa-xmark" id="postDetailsClose" style="cursor:pointer;"></i>
-        </div>
-        <hr>
-        <div class="pop-up-content post-view" id="postContent" style="display:flex; flex-direction:column; gap:12px;">
-
-        </div>
-        <div class="modal-actions" style="justify-content:flex-end;">
-            <button class="action-btn btn-delete" id="modalDeleteBtn"><i class="fa-solid fa-circle-xmark"></i>
-                Delete</button>
-        </div>
-    </div>
-</div> -->
-
-
-<!-- Confirm Delete Modal
-<div class="pop-up-section confirm-modal deactive" id="confirmDeleteRoot">
-    <div class="pop-up deactive" id="confirmDelete">
-        <div class="pop-up-header" style="display:flex; align-items:center; justify-content:space-between;">
-            <div class="pop-up-title">Confirm Delete</div>
-            <i class="fa-solid fa-xmark" id="confirmDeleteClose" style="cursor:pointer;"></i>
-        </div>
-        <hr>
-        <div class="pop-up-content">
-            Are you sure you want to delete this post? This action cannot be undone.
-        </div>
-        <div class="modal-actions">
-            <button class="action-btn btn-view" id="confirmKeep">Keep</button>
-            <button class="action-btn btn-delete" id="confirmDeleteBtn"><i class="fa-solid fa-circle-xmark"></i> Yes,
-                Delete</button>
-        </div>
-    </div>
-</div> -->
-
-<!-- Confirm Publish Modal -->
-<!-- <div class="pop-up-section confirm-modal deactive" id="confirmPublishRoot">
-    <div class="pop-up deactive" id="confirmPublish">
-        <div class="pop-up-header" style="display:flex; align-items:center; justify-content:space-between;">
-            <div class="pop-up-title">Publish Request</div>
-            <i class="fa-solid fa-xmark" id="confirmPublishClose" style="cursor:pointer;"></i>
-        </div>
-        <hr>
-        <div class="pop-up-content">
-            Are you sure you want to publish this draft? It will become visible for providers to bid.
-        </div>
-        <div class="modal-actions">
-            <button class="action-btn btn-view" id="confirmPublishKeep">Cancel</button>
-            <button class="action-btn btn-edit" id="confirmPublishBtn"><i class="fa-solid fa-rocket"></i>
-                Publish
-            </button>
-        </div>
-    </div>
-</div> -->
 <script>
     // Global variable to track current sort
     let currentSort = 'date_desc';
@@ -584,7 +500,7 @@
                     <div class="post-details">
                         <div class="detail-item">
                             <span class="detail-label">Budget</span>
-                            <span class="detail-value budget-amount">LKR ${post.Requesting_Price || 0}/= (${post.Price_Type || 'Fixed'})</span>
+                            <span class="detail-value budget-amount">LKR ${post.Requesting_Price || 0}/=</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Final Proposals</span>
@@ -603,7 +519,7 @@
                     <div class="post-details">
                         <div class="detail-item">
                             <span class="detail-label">Budget</span>
-                            <span class="detail-value budget-amount">LKR ${post.Requesting_Price || 0}/= (${post.Price_Type || 'Fixed'})</span>
+                            <span class="detail-value budget-amount">LKR ${post.Requesting_Price || 0}/=</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Proposals Received</span>
@@ -683,7 +599,26 @@
     /**
      * Show empty state
      */
+    function renderNoResultsState() {
+        const searchTerm = (currentSearch || '').trim();
+        const safeSearchTerm = escapeHtml(searchTerm);
+
+        return `
+            <section class="empty-state search-no-results">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <h3>No Search Item Found</h3>
+                <p>Try a different keyword or clear the search.</p>
+                ${safeSearchTerm ? `<div class="search-term-hint">Search: "${safeSearchTerm}"</div>` : ''}
+            </section>
+        `;
+    }
+
     function showEmptyState(status, container) {
+        if ((currentSearch || '').trim() !== '') {
+            container.innerHTML = renderNoResultsState();
+            return;
+        }
+
         let message = '';
         let icon = 'fa-inbox';
 
@@ -865,7 +800,6 @@
 
         // console.log("Skills IDs String:", skillIdsString);
         const price = document.querySelector("input[name='price']");
-        const price_type = document.querySelector("input[name='pricetype']");
         const est_date = document.querySelector("input[name='estdate']");
         const level = document.querySelector("input[name='level']");
         const end_at = document.querySelector("input[name='endat']");
@@ -906,7 +840,6 @@
             category_id: categoryId.value,
             skills: skillIdsString,
             price: price.value.trim() || '',
-            price_type: price_type.value.trim() || '',
             est_date: est_date.value || '',
             level: level.value.trim() || '',
             end_at: end_at.value || '',
@@ -1031,7 +964,7 @@
                         const fullName = `${bid.First_Name || ''} ${bid.Last_Name || ''}`.trim() || 'Unknown Provider';
                         const initials = fullName.split(' ').map((n) => n.charAt(0)).join('').substring(0, 2).toUpperCase();
                         const rating = bid.Provider_Rating ? Number(bid.Provider_Rating).toFixed(1) : 'N/A';
-                        const imagePath = bid.Profile_Picture ? `<?= BASE_URL ?>/../uploads/Users/${bid.Profile_Picture}` : '';
+                        const imagePath = bid.Profile_Picture ? `<?= BASE_URL ?>/file/user-files/${bid.Profile_Picture}` : '';
                         const safeComment = bid.Comment ? bid.Comment : 'No comment provided';
                         const bidAmount = bid.Amount ? Number(bid.Amount).toLocaleString() : '0';
                         const bidEstDate = bid.Est_Date ? String(bid.Est_Date).split(' ')[0] : 'N/A';
@@ -1079,7 +1012,7 @@
                     <div class="post-view-section">
                         <div class="section-title">Details</div>
                         <div class="kv-grid">
-                            <div class="kv-item"><span class="kv-label">Budget:</span><span class="kv-value">LKR ${post.Requesting_Price || '0'}/= (${post.Price_Type || 'N/A'})</span></div>
+                            <div class="kv-item"><span class="kv-label">Budget:</span><span class="kv-value">LKR ${post.Requesting_Price || '0'}/=</span></div>
                             <div class="kv-item"><span class="kv-label">Level:</span><span class="kv-value">${post.Level || 'N/A'}</span></div>
                             <div class="kv-item"><span class="kv-label">Estimated Date:</span><span class="kv-value">${post.Est_Date || 'N/A'}</span></div>
                             <div class="kv-item"><span class="kv-label">Proposals:</span><span class="kv-value">${post.Proposal_Count || '0'}</span></div>
@@ -1210,7 +1143,6 @@
         const skills = document.getElementById("Skills");
 
         const price = root.querySelector("input[name='price']");
-        const price_type = root.querySelector("input[name='pricetype']");
         const est_date = root.querySelector("input[name='estdate']");
         const level = root.querySelector("input[name='level']");
         const end_at = root.querySelector("input[name='endat']");
@@ -1265,7 +1197,6 @@
             category_id: categoryId.value,
             skills: cleanedSkills,  // Use cleaned skills
             price: price.value.trim() || '0',
-            price_type: price_type.value.trim() || 'Fixed',
             est_date: est_date.value || '',
             level: level.value.trim() || 'Beginner',
             end_at: endDateValue || ''
@@ -1361,7 +1292,6 @@
                 document.getElementById("Category_ID").value = post.Category_ID || '';
 
                 root.querySelector("input[name='price']").value = post.Requesting_Price || '';
-                root.querySelector("input[name='pricetype']").value = post.Price_Type || '';
                 root.querySelector("input[name='estdate']").value = post.Est_Date || '';
                 root.querySelector("input[name='level']").value = post.Level || '';
 
@@ -1589,7 +1519,7 @@
      */
     document.addEventListener('DOMContentLoaded', function () {
         // Setup search input handler with debouncing
-        document.getElementById('searchInput').addEventListener('change', handleSearch);
+        document.getElementById('searchInput').addEventListener('input', handleSearch);
         document.getElementById('searchButton').addEventListener('click', handleSearch);
 
         function handleSearch() {

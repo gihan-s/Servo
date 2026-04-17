@@ -62,6 +62,7 @@ class PostModel extends Database
     public function getPosts($clientId, $status = null, $sort = 'date_desc', $search = '')
     {
         error_log("PostModel::getPosts - Client: $clientId, Status: $status, Sort: $sort, Search: '$search'");
+        $viewSortDirection = null;
         
         $query = "SELECT p.*
               FROM post p
@@ -120,10 +121,12 @@ class PostModel extends Database
                     $orderBy = 'p.Requesting_Price DESC';
                 break;
             case 'views_asc':
-                    $orderBy = 'p.Views ASC';
+                    $orderBy = 'p.Created_At DESC';
+                    $viewSortDirection = 'asc';
                 break;
             case 'views_desc':
-                    $orderBy = 'p.Views DESC';
+                    $orderBy = 'p.Created_At DESC';
+                    $viewSortDirection = 'desc';
                 break;
         }
         
@@ -145,6 +148,23 @@ class PostModel extends Database
         foreach ($posts as &$post) {
             $postId = (int) ($post['Post_ID'] ?? 0);
             $post['Proposal_Count'] = $bidCounts[$postId] ?? 0;
+        }
+
+        if ($viewSortDirection !== null) {
+            usort($posts, static function ($a, $b) use ($viewSortDirection) {
+                $aViews = (int) ($a['Views'] ?? ($a['View_Count'] ?? 0));
+                $bViews = (int) ($b['Views'] ?? ($b['View_Count'] ?? 0));
+
+                if ($aViews === $bViews) {
+                    $aCreated = strtotime((string) ($a['Created_At'] ?? '')) ?: 0;
+                    $bCreated = strtotime((string) ($b['Created_At'] ?? '')) ?: 0;
+                    return $bCreated <=> $aCreated;
+                }
+
+                return $viewSortDirection === 'asc'
+                    ? ($aViews <=> $bViews)
+                    : ($bViews <=> $aViews);
+            });
         }
 
         return $posts;
