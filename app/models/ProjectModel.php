@@ -197,7 +197,7 @@ class ProjectModel extends Database {
                 pr.Requirement_Text, pr .Project_ID
             FROM project_requirements pr
             JOIN Project p ON p.Project_ID = pr.Project_ID
-            WHERE p.Post_ID = ?
+            WHERE p.Post_ID = ? AND (pr.Status = 'accepted' OR pr.Status = 'completed')
         ";
 
         $stmt = $this->conn->prepare($sql);
@@ -226,8 +226,8 @@ class ProjectModel extends Database {
 
     public function addRequirement($project_id, $text)
     {
-        $sql = "INSERT INTO project_requirements (Project_ID, Requirement_Text)
-                VALUES (?, ?)";
+        $sql = "INSERT INTO project_requirements (Project_ID, Requirement_Text, Status)
+                VALUES (?, ?, 'pending')";
 
         $stmt = $this->conn->prepare($sql);
         if (!$stmt) return false;

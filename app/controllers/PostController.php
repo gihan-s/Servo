@@ -286,6 +286,8 @@ class PostController extends BaseController
             'Views' => $post['Views'] ?? ($post['View_Count'] ?? null),
             'Category_Name' => $post['CategoryName'] ?? '',
             'Category_ID' => $post['Category_ID'] ?? null,
+            'Provider_Name' => $post['Provider_Name'] ?? null,
+            'Request_Status' => $post['Request_Status'] ?? null,
             'skills' => array_column($skills, 'Skill'),
         ];
 

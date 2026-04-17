@@ -9,6 +9,8 @@
     <script>
         window.BASE_URL = "<?= BASE_URL ?>";
         window.currentProjectId = null;
+        let requirementList = [];
+        let removedRequirements = [];
     </script>
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/cardList.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/clientPosts.css">
@@ -407,6 +409,7 @@
 
         container.innerHTML = '';
         visiblePosts.forEach(item => {
+            console.log('Rendering post:', item);
             const postHTML = createPostCard(item.post, item.skills, status);
             container.insertAdjacentHTML('beforeend', postHTML);
         });
@@ -642,9 +645,9 @@
         let progressHTML = '';
         if (status === 'ongoing') {
             const progress = post.Progress || 0;
-            const hoursWorked = Math.round((progress / 100) * 80);
+            // const hoursWorked = Math.round((progress / 100) * 80);
             progressHTML = `<div class="progress-container" aria-label="Project progress">
-                <div class="progress-label">Progress: <span class="progress-percent">${progress}%</span> <span class="progress-detail" style="color:#64748b;">(${hoursWorked}h of 80h)</span></div>
+                <div class="progress-label">Progress: <span class="progress-percent">${progress}%</span> </div>
                 <div class="progress-track"><div class="progress-fill" style="width: ${progress}%;"></div></div>
             </div>`;
         }
@@ -850,6 +853,7 @@
                     return;
                 }
                 const providerName = post.Provider_Name || 'Unassigned provider';
+                console.log('Fetched post details:', post);
                 // Format date
                 const publishDate = post.Published_At ?
                     new Date(post.Published_At).toLocaleDateString('en-US', {
@@ -860,7 +864,7 @@
 
                 // Build skills HTML
                 const skillsHTML = post.skills && post.skills.length > 0
-                    ? post.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')
+                    ? post.skills.map(skill => `<span class="skill-tag">${escapeHtml(skill)}</span>`).join('')
                     : '<span>No skills specified</span>';
 
                 // Replace form content with a div wrapper for proper styling
@@ -876,7 +880,7 @@
                     </div>
                     <div class="post-view-section">
                         <div class="section-title">Provider</div>
-                        <div class="post-provider">${providerName}</div>
+                        <div class="post-provider">${escapeHtml(providerName)}</div>
                     </div> 
                     <div class="post-view-section">
                         <div class="section-title">Required Skills</div>
@@ -1119,7 +1123,15 @@
                 const requirementsHTML = requirements && requirements.length > 0
                     ? requirements.map(r => `<span class="skill-tag">${r.Requirement_Text}</span>`).join('')
                     : '<span>No requirements yet</span>';
-                
+                // let requirementName = '';
+                // if (post.Request_Status === 'completed') {
+                //     requirementName = 'Change Requirements';
+                // } else if (post.Request_Status === 'ongoing') {
+                //     requirementName = 'Add Requirements';
+                // } else {
+                //     requirementName = 'Project Requirements';
+                // }
+                // console.log('Determined requirementName:', requirementName);
 
                 // Replace form content with a div wrapper for proper styling
                 formContainer.innerHTML = `
@@ -1144,7 +1156,8 @@
 
                     <!-- 🔥 INPUT FIELD -->
                     <div class="post-view-section">
-                        <div class="section-title">Add New Requirement</div>
+                        
+                        <div class="section-title">Add Requirements</div>
                         <textarea class="text-field" id="newRequirement" placeholder="Enter new requirement..."></textarea>
                     </div>
                     
@@ -1262,12 +1275,12 @@ function addRequirement() {
     const projectId = window.currentProjectId;
     console.log("Adding requirement:", { projectId, text });
     if (!text.trim()) {
-        alert("Please enter requirement");
+        window.showErrorToast("Error", "Please enter requirement");
         return;
     }
 
     if (!projectId) {
-        alert("No project selected. Please refresh and try again.");
+        window.showErrorToast("Error", "No project selected. Please refresh and try again.");
         return;
     }
 
@@ -1288,16 +1301,16 @@ function addRequirement() {
 })
     .then(data => {
         if (data.success) {
-            alert("Requirement added successfully");
+            window.showSuccessToast("Success!", "Requirement added successfully.");
             document.getElementById("newRequirement").value = "";
             closeDialogBox('update-requirements-popup');
         } else {
-            alert("Failed to add requirement");
+            window.showErrorToast("Error", "Failed to add requirement");
         }
     })
     .catch(err => {
         console.error("Error:", err);
-        alert("Error adding requirement: " + err.message);
+        window.showErrorToast("Error", "Error adding requirement: " + err.message);
     });
 }
 
