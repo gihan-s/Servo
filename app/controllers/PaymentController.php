@@ -11,7 +11,7 @@ class PaymentController extends BaseController
         $this->paymentModel = new PaymentModel();
     }
 
-    // GET /payments
+    // GET /dashboard
     public function index()
     {
         $this->ensureAuth();
@@ -19,15 +19,14 @@ class PaymentController extends BaseController
         $userId = $_SESSION['user_id'];
         $role   = $_SESSION['role'];
 
+        // Choose view by role
         if ($role === 'Client') {
-            // Fetch all payment sections
-            $awaitingPayments  = $this->paymentModel->getAwaitingPaymentsByClientId($userId);
-            $pendingPayments   = $this->paymentModel->getPendingPaymentsByClientId($userId);
-            $completedPayments = $this->paymentModel->getCompletedPaymentsByClientId($userId);
-            $refundedPayments  = $this->paymentModel->getRefundedPaymentsByClientId($userId);
-
             $viewFile = __DIR__ . '/../views/client/Payments/index.php';
-        } else {
+        }
+        // elseif ($role === 'Provider') {
+        //     $viewFile = __DIR__ . '/../views/provider/Payments/index.php';
+        // }
+        else {
             http_response_code(403);
             echo "Invalid role";
             return;
