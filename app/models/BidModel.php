@@ -263,22 +263,22 @@ class BidModel extends Database
         ];
     }
 
-    private function getProviderBids($providerId)
+    public function getProviderBids($providerId)
     {
         // TODO: Uncomment when ready to use actual database
         /*
         $sql = "SELECT 
                     b.Bid_ID,
-                    b.Provider_ID,
+                    b.Comment,
                     b.Amount,
                     b.Created_At,
                     b.Est_Date,
                     b.Status,
-                    b.Comment,
                     b.Post_ID,
                     p.Title,
                     p.Description AS Post_Description,
                     p.Category_ID,
+                    p.Provider_ID AS Post_Provider_ID,
                     c.First_Name AS Client_First_Name,
                     c.Last_Name AS Client_Last_Name,
                     cat.Name AS Category_Name
@@ -334,12 +334,11 @@ class BidModel extends Database
         return [
             [
                 'Bid_ID' => 1,
-                'Provider_ID' => $providerId,
+                'Comment' => 'Custom responsive portfolio with blog/case-study CMS and deployment support.',
                 'Amount' => 550,
                 'Created_At' => date('Y-m-d H:i:s', strtotime('-2 hours')),
                 'Est_Date' => date('Y-m-d', strtotime('+8 days')),
                 'Status' => 'Active',
-                'Comment' => 'Custom responsive portfolio with blog/case-study CMS and deployment support.',
                 'Post_ID' => 1,
                 'Title' => 'Portfolio Website + CMS',
                 'Post_Description' => 'Need a professional portfolio website with CMS capabilities.',
@@ -347,21 +346,16 @@ class BidModel extends Database
                 'Client_First_Name' => 'Nadia',
                 'Client_Last_Name' => 'Perera',
                 'Category_Name' => 'Web Development',
-                'Client_Name' => 'Nadia Perera',
-                'Bid_Amount' => '$550',
-                'Timeline' => '8 days',
-                'Bid_Date' => '2 hours ago',
-                'Bid_Ref' => 'BID-000001',
-                'Status_Key' => self::STATUS_ACTIVE
+                // data below is formatted will be formatted in the controller/view normally, but included here for testing purposes
+                'Duration' => 8 * 24,
             ],
             [
                 'Bid_ID' => 2,
-                'Provider_ID' => $providerId,
+                'Comment' => 'Technical audit, on-page optimization and speed improvements for better rankings.',
                 'Amount' => 460,
                 'Created_At' => date('Y-m-d H:i:s', strtotime('-1 day')),
                 'Est_Date' => date('Y-m-d', strtotime('+12 days')),
                 'Status' => 'Active',
-                'Comment' => 'Technical audit, on-page optimization and speed improvements for better rankings.',
                 'Post_ID' => 2,
                 'Title' => 'WordPress SEO Optimization',
                 'Post_Description' => 'Need SEO expert to optimize WordPress site.',
@@ -369,21 +363,15 @@ class BidModel extends Database
                 'Client_First_Name' => 'Tharushi',
                 'Client_Last_Name' => 'De Silva',
                 'Category_Name' => 'SEO',
-                'Client_Name' => 'Tharushi De Silva',
-                'Bid_Amount' => '$460',
-                'Timeline' => '12 days',
-                'Bid_Date' => '1 day ago',
-                'Bid_Ref' => 'BID-000002',
-                'Status_Key' => self::STATUS_ACTIVE
+                'Duration' => 12 * 24,
             ],
             [
                 'Bid_ID' => 3,
-                'Provider_ID' => $providerId,
+                'Comment' => 'Logo, color system and typography package prepared for social and print use.',
                 'Amount' => 340,
                 'Created_At' => date('Y-m-d H:i:s', strtotime('-3 days')),
                 'Est_Date' => date('Y-m-d', strtotime('+5 days')),
                 'Status' => 'Accepted',
-                'Comment' => 'Logo, color system and typography package prepared for social and print use.',
                 'Post_ID' => 3,
                 'Title' => 'Brand Kit for Startup Launch',
                 'Post_Description' => 'Creating brand identity for new startup.',
@@ -391,21 +379,15 @@ class BidModel extends Database
                 'Client_First_Name' => 'Isuru',
                 'Client_Last_Name' => 'Fernando',
                 'Category_Name' => 'Graphic Design',
-                'Client_Name' => 'Isuru Fernando',
-                'Bid_Amount' => '$340',
-                'Timeline' => '5 days',
-                'Bid_Date' => '3 days ago',
-                'Bid_Ref' => 'BID-000003',
-                'Status_Key' => self::STATUS_ACCEPTED
+                'Duration' => 5 * 24,
             ],
             [
                 'Bid_ID' => 4,
-                'Provider_ID' => $providerId,
+                'Comment' => 'Conversion-focused rewrite for hero, services and CTA blocks.',
                 'Amount' => 190,
                 'Created_At' => date('Y-m-d H:i:s', strtotime('-4 days')),
                 'Est_Date' => date('Y-m-d', strtotime('+4 days')),
                 'Status' => 'Rejected',
-                'Comment' => 'Conversion-focused rewrite for hero, services and CTA blocks.',
                 'Post_ID' => 4,
                 'Title' => 'Landing Page Copy Refresh',
                 'Post_Description' => 'Need compelling copy for landing page.',
@@ -413,13 +395,17 @@ class BidModel extends Database
                 'Client_First_Name' => 'Kavindu',
                 'Client_Last_Name' => 'Jayasekara',
                 'Category_Name' => 'Content Writing',
-                'Client_Name' => 'Kavindu Jayasekara',
-                'Bid_Amount' => '$190',
-                'Timeline' => '4 days',
-                'Bid_Date' => '4 days ago',
-                'Bid_Ref' => 'BID-000004',
-                'Status_Key' => self::STATUS_REJECTED
+                'Duration' => 4 * 24,
             ],
         ];
     }
+
+    public function getActiveBidsForProvider($providerId) // Request_Status = 'open' AND Post_Provider_ID = null means bid is active and waiting for client action
+    {}
+
+    public function getAcceptedBidsForProvider($providerId) // Request_Status = 'pending' || 'accepted' AND Post_Provider_ID = providerId means bid is accepted and waiting for provider to accept or reject the job
+    {}
+
+    public function getClosedBidForProvider($providerId) // Request_Status = 'pending' || 'accepted' AND Post_Provider_ID != providerId means bid is no longer viable for the provider, either because client accepted another bid or the post got closed without accepting any bid
+    {}
 }

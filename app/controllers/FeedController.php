@@ -23,11 +23,11 @@ class FeedController extends BaseController
         // Choose view by role
         if ($role === 'Provider') {
             $feedItems = $this->feedModel->getFeedItemsForProvider($userId);
-            foreach ($feedItems as $item) {
+            foreach ($feedItems as &$item) {
                 $item['Posted'] = timeAgo($item['Created_At']);
-                $item['Timeline'] = formatDuration($item['Est_Date']);
                 $item['Client_Name'] = $item['Client_First_Name'] . ' ' . $item['Client_Last_Name'];
             }
+            unset($item); // break reference
             $viewFile = __DIR__ . '/../views/provider/Feed/index.php';
         } else {
             http_response_code(403);
@@ -68,22 +68,42 @@ class FeedController extends BaseController
         }
 
         $bidAmount = $_POST['bid_amount'] ?? null;
-        $bidComment = $_POST['bid_message'] ?? null;
-        $bidTimeline = $_POST['bid_timeline'] ?? null;
-        $estDate = date('Y-m-d H:i:s', strtotime("+$bidTimeline days"));
-
-        if (!$bidAmount || !$bidTimeline) {
+        $duration = $_POST['bid_duration'] ?? null;
+        if (!$bidAmount || !$duration) {
             http_response_code(400);
-            echo 'Bid Amount, and Timeline are required';
+            echo 'Bid Amount, and Duration are required';
             return;
+        }
+        $bidComment = $_POST['bid_message'] ?? null;
+        // calculate duration in days based on unit (d/w/m) and value from form
+        $bidDurationUnit = $_POST['bid_duration_unit'] ?? 'd';
+        $allowedUnits = ['d', 'w', 'm'];
+        if (!in_array($bidDurationUnit, $allowedUnits, true)) {
+            http_response_code(400);
+            echo 'Invalid duration unit';
+            return;
+        }
+        switch ($bidDurationUnit) {
+            case 'd':
+                $durationDays = $duration;
+                break;
+            case 'w':
+                $durationDays = $duration * 7;
+                break;
+            case 'm':
+                $durationDays = $duration * 30;
+                break;
+            default:
+                $durationDays = $duration;
         }
 
         echo '<pre>';
         print_r($_POST);
+        echo 'Calculated duration in days: ' . $durationDays;
         echo '</pre>';
         exit();
 
-        // $result = $this->feedModel->submitBid($userId, $postId, $bidAmount, $bidComment, $estDate);
+        // $result = $this->feedModel->submitBid($userId, $postId, $bidAmount, $bidComment, $durationDays);
 
         // if ($result['success']) {
         //     header('Location: ' . BASE_URL . '/feed');

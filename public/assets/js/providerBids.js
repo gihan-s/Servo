@@ -24,9 +24,20 @@ const filterClose = document.getElementById('bidsFilterClose');
 const filterApply = document.getElementById('bidsFilterApply');
 const filterClear = document.getElementById('bidsFilterClear');
 const categoryList = document.getElementById('bidsCategoryList');
+const bidDetailTitle = document.getElementById('bidDetailTitle');
+const bidDetailClient = document.getElementById('bidDetailClient');
+const bidDetailDetails = document.getElementById('bidDetailDetails');
 const cards = Array.from(document.querySelectorAll('.request-content .search-item[data-title]'));
 let selectedCategories = new Set();
 let activeSectionKey = 'active';
+
+const bidDetailFieldMap = [
+	{ key: 'amount', label: 'Bid Amount' },
+	{ key: 'duration', label: 'Duration' },
+	{ key: 'category', label: 'Category' },
+	{ key: 'status', label: 'Status' },
+	{ key: 'description', label: 'Description' }
+];
 
 if (!tabContainer || !tabs.length || !sections.length) {
 	throw new Error('Required tab elements not found');
@@ -37,12 +48,34 @@ function applyFiltersWrapper() {
 }
 
 function openDetails(card) {
-	document.getElementById('bidDetailTitle').textContent = card.dataset.title || 'Project';
-	document.getElementById('bidDetailClient').textContent = card.dataset.client || 'Client';
-	document.getElementById('bidDetailAmount').textContent = card.dataset.amount || '$0';
-	document.getElementById('bidDetailTimeline').textContent = card.dataset.timeline || '-';
-	document.getElementById('bidDetailRef').textContent = card.dataset.ref || '-';
-	document.getElementById('bidDetailDescription').textContent = card.dataset.description || '';
+	if (!bidDetailTitle || !bidDetailClient || !bidDetailDetails) return;
+
+	bidDetailTitle.textContent = card.dataset.title || 'Bid Details';
+	bidDetailClient.textContent = card.dataset.client || '-';
+	bidDetailDetails.innerHTML = '';
+
+	bidDetailFieldMap.forEach((field) => {
+		const value = card.dataset[field.key] || '-';
+		const row = document.createElement('div');
+		row.style.display = 'grid';
+		row.style.gridTemplateColumns = '140px 1fr';
+		row.style.gap = '10px';
+		row.style.alignItems = 'start';
+
+		const label = document.createElement('div');
+		label.style.fontWeight = '700';
+		label.style.color = '#111827';
+		label.textContent = field.label;
+
+		const content = document.createElement('div');
+		content.style.color = '#334155';
+		content.style.whiteSpace = field.key === 'description' ? 'pre-wrap' : 'normal';
+		content.textContent = value;
+
+		row.appendChild(label);
+		row.appendChild(content);
+		bidDetailDetails.appendChild(row);
+	});
 
 	openModal(detailsModalRoot);
 }
