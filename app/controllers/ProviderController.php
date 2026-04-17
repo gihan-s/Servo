@@ -44,10 +44,12 @@ class ProviderController extends BaseController
         try {
             require_once __DIR__ . '/../models/ProviderModel.php';
             require_once __DIR__ . '/../models/ProviderSocialModel.php';
+            require_once __DIR__ . '/../models/CategoryModel.php';
             require_once __DIR__ . '/../../helpers/socialmedia.php';
 
             $providerModel = new ProviderModel();
             $socialModel = new ProviderSocialModel();
+            $categoryModel = new CategoryModel();
 
             // Get pagination parameters
             $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
@@ -55,10 +57,22 @@ class ProviderController extends BaseController
             $offset = ($page - 1) * $limit;
 
             $providers = [];
-            $providerRows = $providerModel->getActiveProvidersForSearch($limit, $offset);
+            $search = trim((string) ($_GET['q'] ?? ''));
+            $sort = trim((string) ($_GET['sort'] ?? ''));
+
+            $providerRows = $providerModel->getActiveProvidersForSearch($limit, $offset, $search, $sort);
 
             foreach ($providerRows as $provider) {
                 $providerSkills = $providerModel->getSkillsByProviderId($provider['Provider_ID']);
+                $providerCategoriesRaw = $categoryModel->getByProviderId((int) $provider['Provider_ID']);
+                $providerCategories = [];
+                foreach ($providerCategoriesRaw as $categoryRow) {
+                    $categoryName = trim((string) ($categoryRow['Category_Type'] ?? ''));
+                    if ($categoryName !== '') {
+                        $providerCategories[] = $categoryName;
+                    }
+                }
+                $providerCategories = array_values(array_unique($providerCategories));
 
                 // Get social media links
                 $socialLinks = $socialModel->getByProviderId($provider['Provider_ID']);
@@ -80,16 +94,18 @@ class ProviderController extends BaseController
 
                 // Format provider data
                 $provider['skills'] = $providerSkills;
+                $provider['categories'] = $providerCategories;
                 $provider['social_links'] = $formattedSocialLinks;
-                $provider['avatar'] = $provider['Profile_Picture'] ? BASE_URL . $provider['Profile_Picture'] : BASE_URL . '/assets/img/default-avatar.jpg';
-                $provider['rating'] = $provider['avg_rating'] ? round($provider['avg_rating'], 1) : 0;
-                $provider['total_earning_formatted'] = $provider['Total_Earning'] > 0 ? '$' . number_format($provider['Total_Earning']) : '$0';
+                $provider['avatar'] = $provider['Profile_Picture'];
+                $providerRatingPercentage = isset($provider['avg_rating']) ? (float) $provider['avg_rating'] : 0.0;
+                $provider['rating'] = round(max(0.0, min(5.0, $providerRatingPercentage / 20)), 1);
+                $provider['total_earning_formatted'] = $provider['Total_Earning'] > 0 ? 'LKR ' . number_format($provider['Total_Earning'], 2) : 'LKR 0.00';
 
                 $providers[] = $provider;
             }
 
             // Get total count for pagination
-            $total = $providerModel->getActiveProviderCount();
+            $total = $providerModel->getActiveProviderCount($search);
             $totalPages = ceil($total / $limit);
 
             echo json_encode([
@@ -116,15 +132,6 @@ class ProviderController extends BaseController
         header('Content-Type: application/json');
 
         try {
-            // Get provider_id from URL (e.g., /providers/123/services)
-            $providerId = isset($_GET['provider_id']) ? (int)$_GET['provider_id'] : 0;
-            
-            if ($providerId <= 0) {
-                http_response_code(400);
-                echo json_encode(['success' => false, 'message' => 'Invalid provider ID']);
-                return;
-            }
-
             require_once __DIR__ . '/../models/ProviderCategoriesModel.php';
 
             $providerCategoriesModel = new ProviderCategoriesModel();
@@ -132,8 +139,18 @@ class ProviderController extends BaseController
             $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
             $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
             $offset = ($page - 1) * $limit;
+            $providerId = isset($_GET['provider_id']) ? (int) $_GET['provider_id'] : 0;
 
-            $services = $providerCategoriesModel->getByProviderId($providerId, $limit, $offset);
+            $filters = [
+                'search' => trim((string) ($_GET['q'] ?? '')),
+                'sort' => trim((string) ($_GET['sort'] ?? '')),
+                'price_range' => trim((string) ($_GET['price_range'] ?? '')),
+                'completion_range' => trim((string) ($_GET['completion_range'] ?? '')),
+                'price_types' => trim((string) ($_GET['price_types'] ?? '')),
+            ];
+
+            $services = $providerCategoriesModel->getServicesForListing($providerId, $limit, $offset, $filters);
+            $totalCount = $providerCategoriesModel->getServicesForListingCount($providerId, $filters);
             $serviceIds = array_values(array_filter(array_map(static function ($service) {
                 return (int) ($service['Provider_Categories_ID'] ?? 0);
             }, $services)));
@@ -151,11 +168,19 @@ class ProviderController extends BaseController
                 $service['skills'] = $skillsByService[$serviceId] ?? [];
                 $service['locations'] = $locationsByService[$serviceId] ?? [];
                 $service['price_display'] = isset($service['Default_Price']) && $service['Default_Price'] !== null && (float) $service['Default_Price'] > 0
-                    ? '$' . number_format((float) $service['Default_Price'], 2)
+                    ? 'LKR ' . number_format((float) $service['Default_Price'], 2)
                     : 'Contact for price';
+                $service['Rating'] = isset($service['Rating']) ? (float) $service['Rating'] : 0.0;
+                $service['Total_Earning'] = isset($service['Total_Earning']) ? (float) $service['Total_Earning'] : 0.0;
+                $providerRatingPercentage = isset($service['Provider_Rating']) ? (float) $service['Provider_Rating'] : 0.0;
+                $service['provider_star_rating'] = round(max(0.0, min(5.0, $providerRatingPercentage / 20)), 1);
+                $service['success_rate_display'] = (string) max(0, min(100, (int) round($service['Rating']))) . '%';
                 $service['rate_type_display'] = trim((string) ($service['Price_Type'] ?? '')) !== ''
                     ? $service['Price_Type']
                     : 'N/A';
+                $service['total_earning_formatted'] = $service['Total_Earning'] > 0
+                    ? 'LKR ' . number_format($service['Total_Earning'], 2)
+                    : 'LKR 0.00';
                 $service['portfolio_link'] = trim((string) ($service['Portfolio_Link'] ?? ''));
                 $service['show_links'] = !empty($service['portfolio_link']) ? [[
                     'label' => 'Portfolio',
@@ -163,8 +188,6 @@ class ProviderController extends BaseController
                 ]] : [];
                 $service['request_status'] = in_array($serviceId, $ongoingServiceIds, true) ? 'ongoing' : '';
             }
-
-            $totalCount = $providerCategoriesModel->getCountByProviderId($providerId);
 
             echo json_encode([
                 'success' => true,
