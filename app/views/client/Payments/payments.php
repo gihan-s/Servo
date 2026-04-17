@@ -8,8 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/payments.css">
 
-    
-
     <title>My Payments - ServiceHub</title>
 </head>
 
@@ -81,72 +79,53 @@
             <div class="awaiting-payments active requests-section">
                 <p class="section-note">Accepted requests awaiting your payment. Fund these to start the project work.</p>
                 <div class="item-list">
-                    <!-- Awaiting Payment 1 -->
-                    <div class="search-item" data-status="awaiting">
-                        <div class="status-badge status-pending">Awaiting Payment</div>
-                        <div class="item-head">
-                            <div class="item-main-dets">
-                                <div class="item-title">3D Asset Pack Creation</div>
-                                <div class="item-district">
-                                    <span>Accepted: 15 Aug 2025</span>
-                                    <span>Rate: $90/hr</span>
+                    <?php if (empty($awaitingPayments)): ?>
+                        <div class="search-item" style="text-align: center; padding: 40px; color: #64748b;">
+                            No awaiting payments found.
+                        </div>
+                    <?php else: ?>
+                        <?php foreach ($awaitingPayments as $item):
+                            $acceptedDate = date('d M Y', strtotime($item['Started_At']));
+                            $rate = '$' . number_format($item['Requesting_Price'], 0) . '/' . strtolower(substr($item['Price_Type'], 0, 2));
+                            $estimatedTotal = isset($item['Estimated_Total']) ? $item['Estimated_Total'] : $item['Requesting_Price'];
+                        ?>
+                            <div class="search-item" data-status="awaiting">
+                                <div class="status-badge status-pending">Awaiting Payment</div>
+                                <div class="item-head">
+                                    <div class="item-main-dets">
+                                        <div class="item-title"><?= htmlspecialchars($item['Title']) ?></div>
+                                        <div class="item-district">
+                                            <span>Accepted: <?= $acceptedDate ?></span>
+                                            <span>Rate: <?= $rate ?></span>
+                                        </div>
+                                    </div>
+                                    <div class="post-actions">
+                                        <button class="action-btn btn-outline"><i class="fa-solid fa-message"></i> Message</button>
+                                        <button class="action-btn btn-primary"><i class="fa-solid fa-credit-card"></i> Pay Now</button>
+                                        <button class="action-btn btn-danger"><i class="fa-solid fa-ban"></i> Cancel</button>
+                                    </div>
+                                </div>
+                                <div class="item-middle">
+                                    <div><i class="fa-solid fa-hourglass"></i> Estimated Time: <?= htmlspecialchars($item['Duration']) ?> <?= strtolower(htmlspecialchars($item['Duration_Type'])) ?></div>
+                                    <div><i class="fa-solid fa-dollar-sign"></i> Estimated Total: $<?= number_format($estimatedTotal, 2) ?></div>
+                                </div>
+                                <div class="post-description"><?= htmlspecialchars($item['Description']) ?></div>
+                                <div class="post-footer">
+                                    <div class="post-details">
+                                        <div class="detail-item"><span class="detail-label">Amount</span><span class="detail-value budget-amount">$<?= number_format($estimatedTotal, 2) ?></span></div>
+                                        <div class="detail-item"><span class="detail-label">Provider</span><span class="detail-value"><?= htmlspecialchars($item['Provider_Name']) ?></span></div>
+                                        <div class="detail-item"><span class="detail-label">Type</span><span class="detail-value"><?= htmlspecialchars($item['Post_Type']) ?></span></div>
+                                        <?php if (!empty($item['Project_Title'])): ?>
+                                            <div class="detail-item"><span class="detail-label">Project</span><span class="detail-value"><?= htmlspecialchars($item['Project_Title']) ?></span></div>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="post-actions">
-                                <button class="action-btn btn-outline"><i class="fa-solid fa-message"></i> Message</button>
-                                <button class="action-btn btn-primary"><i class="fa-solid fa-credit-card"></i> Pay Now</button>
-                                <button class="action-btn btn-danger"><i class="fa-solid fa-ban"></i> Cancel</button>
-                            </div>
-                        </div>
-                        <div class="item-middle">
-                            <div><i class="fa-solid fa-hourglass"></i> Estimated Time: 6 days</div>
-                            <div><i class="fa-solid fa-dollar-sign"></i> Estimated Total: $4,320.00</div>
-                        </div>
-                        <div class="post-description">Creating 15 optimized low-poly environment props for prototype. Payment required before work begins.</div>
-                        <div class="post-footer">
-                            <div class="post-details">
-                                <div class="detail-item"><span class="detail-label">Amount</span><span class="detail-value budget-amount">$4,320.00</span></div>
-                                <div class="detail-item"><span class="detail-label">Provider</span><span class="detail-value">DevStudio Labs</span></div>
-                                <div class="detail-item"><span class="detail-label">Type</span><span class="detail-value">Bid Request</span></div>
-                                <div class="detail-item"><span class="detail-label">Project</span><span class="detail-value">Game Assets</span></div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Awaiting Payment 2 -->
-                    <div class="search-item" data-status="awaiting">
-                        <div class="status-badge status-pending">Awaiting Payment</div>
-                        <div class="item-head">
-                            <div class="item-main-dets">
-                                <div class="item-title">Brand Identity Development</div>
-                                <div class="item-district">
-                                    <span>Accepted: 01 Sep 2025</span>
-                                    <span>Rate: $75/hr</span>
-                                </div>
-                            </div>
-                            <div class="post-actions">
-                                <button class="action-btn btn-outline"><i class="fa-solid fa-message"></i> Message</button>
-                                <button class="action-btn btn-primary"><i class="fa-solid fa-credit-card"></i> Pay Now</button>
-                                <button class="action-btn btn-danger"><i class="fa-solid fa-ban"></i> Cancel</button>
-                            </div>
-                        </div>
-                        <div class="item-middle">
-                            <div><i class="fa-solid fa-hourglass"></i> Estimated Time: 10 days</div>
-                            <div><i class="fa-solid fa-dollar-sign"></i> Estimated Total: $6,000.00</div>
-                        </div>
-                        <div class="post-description">Developing a comprehensive brand identity including logo, color palette, and typography. Milestone payment needed to proceed.</div>
-                        <div class="post-footer">
-                            <div class="post-details">
-                                <div class="detail-item"><span class="detail-label">Amount</span><span class="detail-value budget-amount">$6,000.00</span></div>
-                                <div class="detail-item"><span class="detail-label">Provider</span><span class="detail-value">UXPro Studio</span></div>
-                                <div class="detail-item"><span class="detail-label">Type</span><span class="detail-value">Direct Request</span></div>
-                                <div class="detail-item"><span class="detail-label">Project</span><span class="detail-value">Brand Suite</span></div>
-                            </div>
-                        </div>
-                    </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                     <div class="pagination" aria-label="Pagination Awaiting Payments">
                         <button class="page-btn prev" disabled><i class="fa-solid fa-chevron-left"></i></button>
                         <button class="page-btn active">1</button>
-                        <button class="page-btn">2</button>
                         <button class="page-btn next"><i class="fa-solid fa-chevron-right"></i></button>
                     </div>
                 </div>
@@ -155,168 +134,156 @@
             <!-- PENDING PAYMENTS SECTION -->
             <div class="pending-payments requests-section" style="display:none;">
                 <div class="item-list">
-                    <!-- Pending Payment 1 -->
-                    <div class="search-item">
-                        <div class="status-badge status-pending">Pending</div>
-                        <span class="payment-type-label label-completed-project"><i class="fa-solid fa-circle-check"></i> Completed Project</span>
-                        <div class="post-header">
-                            <div class="post-meta">
-                                <div class="post-date">
-                                    <i class="fas fa-calendar"></i>
-                                    <span>Invoice Date: Sep 02, 2025</span>
+                    <?php if (empty($pendingPayments)): ?>
+                        <div class="search-item" style="text-align: center; padding: 40px; color: #64748b;">
+                            No pending payments found.
+                        </div>
+                    <?php else: ?>
+                        <?php foreach ($pendingPayments as $payment):
+                            $invoiceDate = date('M d, Y', strtotime($payment['Hold_Time']));
+                            $isCancelled = $payment['Project_Status'] === 'Cancelled';
+                            $invoiceNum = 'INV-' . $payment['Payment_ID'];
+                            $dueDate = isset($payment['Due_Date']) ? date('M d, Y', strtotime($payment['Due_Date'])) : '—';
+                            $method = $payment['Method'] ?? '—';
+                            $projectName = $payment['Project_Name'] ?? '—';
+                        ?>
+                            <div class="search-item">
+                                <div class="status-badge status-pending">Pending</div>
+                                <?php if ($isCancelled): ?>
+                                    <span class="payment-type-label label-cancellation-penalty"><i class="fa-solid fa-triangle-exclamation"></i> Cancellation Penalty</span>
+                                <?php else: ?>
+                                    <span class="payment-type-label label-completed-project"><i class="fa-solid fa-circle-check"></i> Completed Project</span>
+                                <?php endif; ?>
+                                <div class="post-header">
+                                    <div class="post-meta">
+                                        <div class="post-date">
+                                            <i class="fas fa-calendar"></i>
+                                            <span>Invoice Date: <?= $invoiceDate ?></span>
+                                        </div>
+                                    </div>
+                                    <div class="post-actions">
+                                        <button class="action-btn btn-primary"><i class="fas fa-credit-card"></i>Pay Now</button>
+                                        <button class="action-btn btn-secondary"><i class="fas fa-eye"></i>View Invoice</button>
+                                        <button class="action-btn btn-danger"><i class="fas fa-ban"></i>Cancel</button>
+                                    </div>
+                                </div>
+                                <h3 class="post-title">Invoice #<?= htmlspecialchars($invoiceNum) ?> &bull; <?= htmlspecialchars($payment['Project_Title']) ?></h3>
+                                <div class="post-description"><?= htmlspecialchars($payment['Description']) ?></div>
+                                <div class="post-footer">
+                                    <div class="post-details">
+                                        <div class="detail-item"><span class="detail-label">Amount</span><span class="detail-value budget-amount">$<?= number_format($payment['Amount'], 2) ?></span></div>
+                                        <div class="detail-item"><span class="detail-label">Method</span><span class="detail-value"><?= htmlspecialchars($method) ?></span></div>
+                                        <div class="detail-item"><span class="detail-label">Due Date</span><span class="detail-value"><?= $dueDate ?></span></div>
+                                        <div class="detail-item"><span class="detail-label">Project</span><span class="detail-value"><?= htmlspecialchars($projectName) ?></span></div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="post-actions">
-                                <button class="action-btn btn-primary"><i class="fas fa-credit-card"></i>Pay Now</button>
-                                <button class="action-btn btn-secondary"><i class="fas fa-eye"></i>View Invoice</button>
-                                <button class="action-btn btn-danger"><i class="fas fa-ban"></i>Cancel</button>
-                            </div>
-                        </div>
-                        <h3 class="post-title">Invoice #INV-10452 • Development Sprint 3</h3>
-                        <div class="post-description">Payment for sprint 3 covering implementation of authentication module, profile settings page, and database optimization tasks as agreed in the project milestone plan.</div>
-                        <div class="post-footer">
-                            <div class="post-details">
-                                <div class="detail-item"><span class="detail-label">Amount</span><span class="detail-value budget-amount">$1,200.00</span></div>
-                                <div class="detail-item"><span class="detail-label">Method</span><span class="detail-value">Card (Visa)</span></div>
-                                <div class="detail-item"><span class="detail-label">Due Date</span><span class="detail-value">Sep 15, 2025</span></div>
-                                <div class="detail-item"><span class="detail-label">Project</span><span class="detail-value">E-Commerce App</span></div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Pending Payment 2 -->
-                    <div class="search-item">
-                        <div class="status-badge status-pending">Pending</div>
-                        <span class="payment-type-label label-cancellation-penalty"><i class="fa-solid fa-triangle-exclamation"></i> Cancellation Penalty</span>
-                        <div class="post-header">
-                            <div class="post-meta">
-                                <div class="post-date"><i class="fas fa-calendar"></i><span>Invoice Date: Sep 05, 2025</span></div>
-                            </div>
-                            <div class="post-actions">
-                                <button class="action-btn btn-primary"><i class="fas fa-credit-card"></i>Pay Now</button>
-                                <button class="action-btn btn-secondary"><i class="fas fa-eye"></i>View Invoice</button>
-                                <button class="action-btn btn-danger"><i class="fas fa-ban"></i>Cancel</button>
-                            </div>
-                        </div>
-                        <h3 class="post-title">Invoice #INV-10463 • UI Design Phase</h3>
-                        <div class="post-description">Cancellation penalty for UI/UX design project that was terminated after initial milestone. Penalty as per service agreement terms.</div>
-                        <div class="post-footer">
-                            <div class="post-details">
-                                <div class="detail-item"><span class="detail-label">Amount</span><span class="detail-value budget-amount">$680.00</span></div>
-                                <div class="detail-item"><span class="detail-label">Method</span><span class="detail-value">PayPal</span></div>
-                                <div class="detail-item"><span class="detail-label">Due Date</span><span class="detail-value">Sep 18, 2025</span></div>
-                                <div class="detail-item"><span class="detail-label">Project</span><span class="detail-value">Mobile Fitness App</span></div>
-                            </div>
-                        </div>
-                    </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                     <div class="pagination" aria-label="Pagination Pending Payments">
                         <button class="page-btn prev" disabled><i class="fa-solid fa-chevron-left"></i></button>
                         <button class="page-btn active">1</button>
-                        <button class="page-btn">2</button>
-                        <button class="page-btn">3</button>
                         <button class="page-btn next"><i class="fa-solid fa-chevron-right"></i></button>
                     </div>
                 </div>
             </div>
+
             <!-- COMPLETED PAYMENTS SECTION -->
             <div class="completed-payments requests-section" style="display:none;">
                 <div class="item-list">
-                    <!-- Completed Payment 1 -->
-                    <div class="search-item">
-                        <div class="status-badge status-paid">Paid</div>
-                        <span class="payment-type-label label-completed-project"><i class="fa-solid fa-circle-check"></i> Completed Project</span>
-                        <div class="post-header">
-                            <div class="post-meta"><div class="post-date"><i class="fas fa-calendar"></i><span>Paid on Aug 28, 2025</span></div></div>
-                            <div class="post-actions">
-                                <button class="action-btn btn-primary"><i class="fas fa-file"></i>Receipt</button>
-                                <button class="action-btn btn-secondary"><i class="fas fa-download"></i>Download</button>
-                                <button class="action-btn btn-outline"><i class="fas fa-rotate-left"></i>Refund</button>
-                            </div>
+                    <?php if (empty($completedPayments)): ?>
+                        <div class="search-item" style="text-align: center; padding: 40px; color: #64748b;">
+                            No completed payments found.
                         </div>
-                        <h3 class="post-title">Invoice #INV-10398 • Logo & Brand Pack</h3>
-                        <div class="post-description">Final payment for brand identity delivery including vector logo assets, color guide and typography scale for marketing usage.</div>
-                        <div class="post-footer"><div class="post-details">
-                            <div class="detail-item"><span class="detail-label">Amount</span><span class="detail-value budget-amount">$950.00</span></div>
-                            <div class="detail-item"><span class="detail-label">Method</span><span class="detail-value">Stripe</span></div>
-                            <div class="detail-item"><span class="detail-label">Txn ID</span><span class="detail-value">TXN78C92</span></div>
-                            <div class="detail-item"><span class="detail-label">Project</span><span class="detail-value">Brand Suite</span></div>
-                        </div></div>
-                    </div>
-                    <!-- Completed Payment 2 -->
-                    <div class="search-item">
-                        <div class="status-badge status-paid">Paid</div>
-                        <span class="payment-type-label label-cancellation-penalty"><i class="fa-solid fa-triangle-exclamation"></i> Cancellation Penalty</span>
-                        <div class="post-header">
-                            <div class="post-meta"><div class="post-date"><i class="fas fa-calendar"></i><span>Paid on Aug 22, 2025</span></div></div>
-                            <div class="post-actions">
-                                <button class="action-btn btn-primary"><i class="fas fa-file"></i>Receipt</button>
-                                <button class="action-btn btn-secondary"><i class="fas fa-download"></i>Download</button>
-                                <button class="action-btn btn-outline"><i class="fas fa-rotate-left"></i>Refund</button>
+                    <?php else: ?>
+                        <?php foreach ($completedPayments as $payment):
+                            $paidDate = date('M d, Y', strtotime($payment['Paid_Time']));
+                            $isCancelled = $payment['Project_Status'] === 'Cancelled';
+                            $invoiceNum = 'INV-' . $payment['Payment_ID'];
+                            $method = $payment['Method'] ?? '—';
+                            $txnId = $payment['Txn_ID'] ?? '—';
+                            $projectName = $payment['Project_Name'] ?? '—';
+                        ?>
+                            <div class="search-item">
+                                <div class="status-badge status-paid">Paid</div>
+                                <?php if ($isCancelled): ?>
+                                    <span class="payment-type-label label-cancellation-penalty"><i class="fa-solid fa-triangle-exclamation"></i> Cancellation Penalty</span>
+                                <?php else: ?>
+                                    <span class="payment-type-label label-completed-project"><i class="fa-solid fa-circle-check"></i> Completed Project</span>
+                                <?php endif; ?>
+                                <div class="post-header">
+                                    <div class="post-meta">
+                                        <div class="post-date"><i class="fas fa-calendar"></i><span>Paid on <?= $paidDate ?></span></div>
+                                    </div>
+                                    <div class="post-actions">
+                                        <button class="action-btn btn-primary"><i class="fas fa-file"></i>Receipt</button>
+                                        <button class="action-btn btn-secondary"><i class="fas fa-download"></i>Download</button>
+                                        <button class="action-btn btn-outline"><i class="fas fa-rotate-left"></i>Refund</button>
+                                    </div>
+                                </div>
+                                <h3 class="post-title">Invoice #<?= htmlspecialchars($invoiceNum) ?> &bull; <?= htmlspecialchars($payment['Project_Title']) ?></h3>
+                                <div class="post-description"><?= htmlspecialchars($payment['Description']) ?></div>
+                                <div class="post-footer">
+                                    <div class="post-details">
+                                        <div class="detail-item"><span class="detail-label">Amount</span><span class="detail-value budget-amount">$<?= number_format($payment['Amount'], 2) ?></span></div>
+                                        <div class="detail-item"><span class="detail-label">Method</span><span class="detail-value"><?= htmlspecialchars($method) ?></span></div>
+                                        <div class="detail-item"><span class="detail-label">Txn ID</span><span class="detail-value"><?= htmlspecialchars($txnId) ?></span></div>
+                                        <div class="detail-item"><span class="detail-label">Project</span><span class="detail-value"><?= htmlspecialchars($projectName) ?></span></div>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        <h3 class="post-title">Invoice #INV-10374 • Analytics Dashboard</h3>
-                        <div class="post-description">Cancellation penalty payment for analytics dashboard module per contract terms after early termination.</div>
-                        <div class="post-footer"><div class="post-details">
-                            <div class="detail-item"><span class="detail-label">Amount</span><span class="detail-value budget-amount">$1,480.00</span></div>
-                            <div class="detail-item"><span class="detail-label">Method</span><span class="detail-value">Card (Mastercard)</span></div>
-                            <div class="detail-item"><span class="detail-label">Txn ID</span><span class="detail-value">TXN65B11</span></div>
-                            <div class="detail-item"><span class="detail-label">Project</span><span class="detail-value">BI Platform</span></div>
-                        </div></div>
-                    </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                     <div class="pagination" aria-label="Pagination Completed Payments">
                         <button class="page-btn prev" disabled><i class="fa-solid fa-chevron-left"></i></button>
                         <button class="page-btn active">1</button>
-                        <button class="page-btn">2</button>
-                        <button class="page-btn">3</button>
                         <button class="page-btn next"><i class="fa-solid fa-chevron-right"></i></button>
                     </div>
                 </div>
             </div>
+
             <!-- REFUNDED PAYMENTS SECTION -->
             <div class="refunded-payments requests-section" style="display:none;">
                 <div class="item-list">
-                    <!-- Refunded Payment 1 -->
-                    <div class="search-item">
-                        <div class="status-badge status-refunded">Refunded</div>
-                        <div class="post-header">
-                            <div class="post-meta"><div class="post-date"><i class="fas fa-calendar"></i><span>Refunded on Aug 30, 2025</span></div></div>
-                            <div class="post-actions">
-                                <button class="action-btn btn-secondary"><i class="fas fa-eye"></i>Details</button>
-                                <button class="action-btn btn-outline"><i class="fas fa-circle-info"></i>Support</button>
-                            </div>
+                    <?php if (empty($refundedPayments)): ?>
+                        <div class="search-item" style="text-align: center; padding: 40px; color: #64748b;">
+                            No refunded payments found.
                         </div>
-                        <h3 class="post-title">Invoice #INV-10321 • QA Testing Cycle</h3>
-                        <div class="post-description">Refund issued due to scope change after partial QA cycle execution. Remaining tasks were descoped and credited back.</div>
-                        <div class="post-footer"><div class="post-details">
-                            <div class="detail-item"><span class="detail-label">Amount</span><span class="detail-value budget-amount">$420.00</span></div>
-                            <div class="detail-item"><span class="detail-label">Method</span><span class="detail-value">Stripe</span></div>
-                            <div class="detail-item"><span class="detail-label">Refund ID</span><span class="detail-value">RFN9021</span></div>
-                            <div class="detail-item"><span class="detail-label">Project</span><span class="detail-value">Platform QA</span></div>
-                        </div></div>
-                    </div>
-                    <!-- Refunded Payment 2 -->
-                    <div class="search-item">
-                        <div class="status-badge status-refunded">Refunded</div>
-                        <div class="post-header">
-                            <div class="post-meta"><div class="post-date"><i class="fas fa-calendar"></i><span>Refunded on Aug 12, 2025</span></div></div>
-                            <div class="post-actions">
-                                <button class="action-btn btn-secondary"><i class="fas fa-eye"></i>Details</button>
-                                <button class="action-btn btn-outline"><i class="fas fa-circle-info"></i>Support</button>
+                    <?php else: ?>
+                        <?php foreach ($refundedPayments as $payment):
+                            $refundDate = date('M d, Y', strtotime($payment['Paid_Time']));
+                            $invoiceNum = 'INV-' . $payment['Payment_ID'];
+                            $method = $payment['Method'] ?? '—';
+                            $refundId = $payment['Refund_ID'] ?? '—';
+                            $projectName = $payment['Project_Name'] ?? '—';
+                        ?>
+                            <div class="search-item">
+                                <div class="status-badge status-refunded">Refunded</div>
+                                <div class="post-header">
+                                    <div class="post-meta">
+                                        <div class="post-date"><i class="fas fa-calendar"></i><span>Refunded on <?= $refundDate ?></span></div>
+                                    </div>
+                                    <div class="post-actions">
+                                        <button class="action-btn btn-secondary"><i class="fas fa-eye"></i>Details</button>
+                                        <button class="action-btn btn-outline"><i class="fas fa-circle-info"></i>Support</button>
+                                    </div>
+                                </div>
+                                <h3 class="post-title">Invoice #<?= htmlspecialchars($invoiceNum) ?> &bull; <?= htmlspecialchars($payment['Project_Title']) ?></h3>
+                                <div class="post-description"><?= htmlspecialchars($payment['Description']) ?></div>
+                                <div class="post-footer">
+                                    <div class="post-details">
+                                        <div class="detail-item"><span class="detail-label">Amount</span><span class="detail-value budget-amount">$<?= number_format($payment['Amount'], 2) ?></span></div>
+                                        <div class="detail-item"><span class="detail-label">Method</span><span class="detail-value"><?= htmlspecialchars($method) ?></span></div>
+                                        <div class="detail-item"><span class="detail-label">Refund ID</span><span class="detail-value"><?= htmlspecialchars($refundId) ?></span></div>
+                                        <div class="detail-item"><span class="detail-label">Project</span><span class="detail-value"><?= htmlspecialchars($projectName) ?></span></div>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        <h3 class="post-title">Invoice #INV-10294 • Initial Wireframes</h3>
-                        <div class="post-description">Original design direction changed after stakeholder review. Early milestone payment was reversed and credited to account balance.</div>
-                        <div class="post-footer"><div class="post-details">
-                            <div class="detail-item"><span class="detail-label">Amount</span><span class="detail-value budget-amount">$300.00</span></div>
-                            <div class="detail-item"><span class="detail-label">Method</span><span class="detail-value">Card (Visa)</span></div>
-                            <div class="detail-item"><span class="detail-label">Refund ID</span><span class="detail-value">RFN8810</span></div>
-                            <div class="detail-item"><span class="detail-label">Project</span><span class="detail-value">Design System</span></div>
-                        </div></div>
-                    </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                     <div class="pagination" aria-label="Pagination Refunded Payments">
                         <button class="page-btn prev" disabled><i class="fa-solid fa-chevron-left"></i></button>
                         <button class="page-btn active">1</button>
-                        <button class="page-btn">2</button>
-                        <button class="page-btn">3</button>
                         <button class="page-btn next"><i class="fa-solid fa-chevron-right"></i></button>
                     </div>
                 </div>
@@ -382,5 +349,3 @@
 <script src="<?= BASE_URL ?>/assets/js/cardList.js" defer></script>
 
 </html>
-
-
