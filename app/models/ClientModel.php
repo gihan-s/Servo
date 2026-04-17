@@ -1,4 +1,21 @@
 <?php
+// CLIENT TABLE STRUCTURE
+// +-----------------+---------------+------+-----+---------+----------------+
+// | Field           | Type          | Null | Key | Default | Extra          |
+// +-----------------+---------------+------+-----+---------+----------------+
+// | Client_ID       | int           | NO   | PRI | NULL    | auto_increment |
+// | Email           | varchar(256)  | YES  | UNI | NULL    |                |
+// | Contact_No      | varchar(45)   | YES  |     | NULL    |                |
+// | Password        | varchar(512)  | YES  |     | NULL    |                |
+// | Created_At      | datetime      | YES  |     | NULL    |                |
+// | First_Name      | varchar(100)  | YES  |     | NULL    |                |
+// | Last_Name       | varchar(100)  | YES  |     | NULL    |                |
+// | Gender          | varchar(45)   | YES  |     | NULL    |                |
+// | Profile_Picture | varchar(512)  | YES  |     | NULL    |                |
+// | Social_Link     | varchar(512)  | YES  |     | NULL    |                |
+// | Bio             | varchar(1024) | YES  |     | NULL    |                |
+// | Status          | varchar(45)   | YES  |     | NULL    |                |
+// +-----------------+---------------+------+-----+---------+----------------+
 
 require_once __DIR__ . '/../core/Database.php';
 
@@ -8,7 +25,7 @@ class ClientModel extends Database
     public function getByEmail($email)
     {
         $email = strtolower($email);
-        $stmt = $this->conn->prepare("SELECT * FROM Client WHERE Email = ?");
+        $stmt = $this->conn->prepare("SELECT * FROM client WHERE Email = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -20,7 +37,7 @@ class ClientModel extends Database
     public function getClientById($id)
     {
         $id = $this->conn->real_escape_string($id);
-        $sql = "SELECT * FROM Client WHERE Client_ID = $id";
+        $sql = "SELECT * FROM client WHERE Client_ID = $id";
         $result = $this->conn->query($sql);
 
         if ($result->num_rows > 0) {
@@ -40,7 +57,7 @@ class ClientModel extends Database
         $website = $this->conn->real_escape_string($website);
         $bio = $this->conn->real_escape_string($bio);
 
-        $stmt = $this->conn->prepare("UPDATE Client
+        $stmt = $this->conn->prepare("UPDATE client
                 SET First_Name=?, Last_Name=?, Contact_No=?, Gender=?, Social_Link=?, Bio=?
                 WHERE Client_ID=?");
         if (!$stmt)
@@ -50,12 +67,35 @@ class ClientModel extends Database
 
     }
 
+
+    public function updateProfilePicture($id, $profilePic)
+    {
+        $stmt = $this->conn->prepare("UPDATE client SET Profile_Picture = ? WHERE Client_ID = ?");
+        if (!$stmt)
+            return false;
+        $stmt->bind_param("si", $profilePic, $id);
+        return $stmt->execute();
+    }
+
+
+    public function getCurrentPassword($id)
+    {
+        $stmt = $this->conn->prepare("SELECT Password FROM client WHERE Client_ID = ?");
+        if (!$stmt) return false;
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result->fetch_assoc()['Password'] ?? false;
+    }
+
+
     public function updatePassword($id, $hashed)
     {
         $stmt = $this->conn->prepare("UPDATE client SET Password = ? WHERE Client_ID = ?");
         if (!$stmt)
             return false;
         $stmt->bind_param("si", $hashed, $id);
+
         return $stmt->execute();
     }
 
@@ -63,7 +103,7 @@ class ClientModel extends Database
     {
         // Prepare SQL with placeholders
         $stmt = $this->conn->prepare(
-            "INSERT INTO Client (`Email`, `Contact_No`, `Password`, `Created_At`, `First_Name`, `Last_Name`, `Gender`, `Profile_Picture`, `Social_Link`, `Bio`, `Status`) 
+            "INSERT INTO client (`Email`, `Contact_No`, `Password`, `Created_At`, `First_Name`, `Last_Name`, `Gender`, `Profile_Picture`, `Social_Link`, `Bio`, `Status`) 
              VALUES (?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?)"
         );
 
@@ -111,7 +151,7 @@ class ClientModel extends Database
     public function emailExists($email)
     {
         $email = strtolower($email);
-        $stmt = $this->conn->prepare("SELECT Client_ID FROM Client WHERE Email = ?");
+        $stmt = $this->conn->prepare("SELECT Client_ID FROM client WHERE Email = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $stmt->store_result();
@@ -119,7 +159,7 @@ class ClientModel extends Database
 
         if (!$status) {
 
-            $stmt = $this->conn->prepare("SELECT Provider_ID FROM Provider WHERE Email = ?");
+            $stmt = $this->conn->prepare("SELECT Provider_ID FROM provider WHERE Email = ?");
             $stmt->bind_param("s", $email);
             $stmt->execute();
             $stmt->store_result();
@@ -132,7 +172,7 @@ class ClientModel extends Database
     public function deleteClient($id)
     {
         // mark status as 'Deleted' instead of hard-deleting the row
-        $stmt = $this->conn->prepare("UPDATE Client SET Status = ? WHERE Client_ID = ?");
+        $stmt = $this->conn->prepare("UPDATE client SET Status = ? WHERE Client_ID = ?");
         if (!$stmt)
             return false;
         $status = 'Deleted';

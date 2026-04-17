@@ -836,3 +836,8 @@
         min-width: 120px;
     }
 }
+
+
+.message-link{
+    text-decoration: none;
+}

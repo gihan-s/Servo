@@ -1,4 +1,14 @@
 <?php
+// CATEGORY TABLE STRUCTURE
+// +-------------+--------------+------+-----+---------+-------+
+// | Field       | Type         | Null | Key | Default | Extra |
+// +-------------+--------------+------+-----+---------+-------+
+// | Category_ID | int          | NO   | PRI | NULL    |       |
+// | Name        | varchar(100) | YES  |     | NULL    |       |
+// | Description | varchar(100) | YES  |     | NULL    |       |
+// | Icon        | varchar(100) | YES  |     | NULL    |       |
+// +-------------+--------------+------+-----+---------+-------+
+
 
 require_once __DIR__ . '/../core/Database.php';
 
@@ -7,7 +17,7 @@ class CategoryModel extends Database
 
     public function getCategories()
     {
-        $stmt = $this->conn->prepare("SELECT Category_ID, Name FROM Category");
+        $stmt = $this->conn->prepare("SELECT Category_ID, Name, Icon FROM category");
         $stmt->execute();
         $result = $stmt->get_result();
         $stmt->close();
@@ -17,9 +27,9 @@ class CategoryModel extends Database
     public function getByProviderId(int $providerId): array
     {
         $stmt = $this->conn->prepare(
-            "SELECT Provider_Categories.*, Category.Name AS Category_Type
-            FROM Provider_Categories
-            INNER JOIN Category ON Provider_Categories.Category_ID = Category.Category_ID
+            "SELECT provider_categories.*, category.Name AS Category_Type
+            FROM provider_categories
+            INNER JOIN category ON provider_categories.Category_ID = category.Category_ID
             WHERE Provider_ID = ?"
         );
         $stmt->bind_param("i", $providerId);

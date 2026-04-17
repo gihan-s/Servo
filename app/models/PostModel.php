@@ -14,34 +14,70 @@
 // | Description      | varchar(2048) | YES  |     | NULL    |                |
 // | Requesting_Price | double        | YES  |     | NULL    |                |
 // | Price_Type       | varchar(25)   | NO   |     | NULL    |                |
-// | Duration         | varchar(50)   | NO   |     | NULL    |                |
+// | Est_Date         | date          | YES  |     | NULL    |                |
 // | Level            | varchar(30)   | NO   |     | NULL    |                |
 // | End_At           | date          | NO   |     | NULL    |                |
 // | Published_At     | datetime      | YES  |     | NULL    |                |
-// | Duration_Type    | varchar(25)   | NO   |     | NULL    |                |
+// | Duration_Type    | varchar(25)   | YES  |     | NULL    | legacy         |
 // +------------------+---------------+------+-----+---------+----------------+
 
 require_once __DIR__ . '/../core/Database.php';
+require_once __DIR__ . '/BidModel.php';
 
 class PostModel extends Database
 {
+    private ?BidModel $bidModel = null;
+
+    public function __construct(bool $loadBidModel = true)
+    {
+        parent::__construct();
+        if ($loadBidModel) {
+            $this->bidModel = new BidModel();
+        }
+    }
+
+    public function getPostIdsByProviderId(int $providerId): array
+    {
+        $stmt = $this->conn->prepare("SELECT Post_ID FROM post WHERE Provider_ID = ?");
+        if (!$stmt) {
+            error_log('PostModel::getPostIdsByProviderId prepare: ' . $this->conn->error);
+            return [];
+        }
+
+        $stmt->bind_param('i', $providerId);
+        if (!$stmt->execute()) {
+            error_log('PostModel::getPostIdsByProviderId exec: ' . $stmt->error);
+            $stmt->close();
+            return [];
+        }
+
+        $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+
+        return array_values(array_filter(array_map(static function ($row) {
+            return (int) ($row['Post_ID'] ?? 0);
+        }, $rows)));
+    }
+
     public function getPosts($clientId, $status = null, $sort = 'date_desc', $search = '')
     {
         error_log("PostModel::getPosts - Client: $clientId, Status: $status, Sort: $sort, Search: '$search'");
         
-        $query = "SELECT * FROM Post WHERE Client_ID = ? AND Post_Type = 'post'";
+        $query = "SELECT p.*
+              FROM post p
+              WHERE p.Client_ID = ? AND p.Post_Type = 'post'";
         $types = "i";
         $params = [$clientId];
 
         if ($status !== null) {
-            $query .= " AND Post_Status = ?";
+            $query .= " AND p.Post_Status = ?";
             $types .= "s";
             $params[] = $status;
         }
 
         // Add search filter if search term is provided
         if (!empty($search)) {
-            $query .= " AND (Title LIKE ? OR Description LIKE ? OR Requesting_Price LIKE ? OR Level LIKE ?)";
+            $query .= " AND (p.Title LIKE ? OR p.Description LIKE ? OR p.Requesting_Price LIKE ? OR p.Level LIKE ?)";
             $types .= "ssss";
             $searchTerm = "%$search%";
             $params[] = $searchTerm;
@@ -61,33 +97,33 @@ class PostModel extends Database
         switch ($sort) {
             case 'date_asc':
                 if ($status === 'active') {
-                    $orderBy = 'Published_At ASC';
+                    $orderBy = 'p.Published_At ASC';
                 } elseif ($status === 'Draft') {
-                    $orderBy = 'Created_At ASC';
+                        $orderBy = 'p.Created_At ASC';
                 } else {
-                    $orderBy = 'End_At ASC'; // For expired posts
+                        $orderBy = 'p.End_At ASC'; // For expired posts
                 }
                 break;
             case 'date_desc':
                 if ($status === 'active') {
-                    $orderBy = 'Published_At DESC';
+                        $orderBy = 'p.Published_At DESC';
                 } elseif ($status === 'Draft') {
-                    $orderBy = 'Created_At DESC';
+                        $orderBy = 'p.Created_At DESC';
                 } else {
-                    $orderBy = 'End_At DESC'; // For expired posts
+                        $orderBy = 'p.End_At DESC'; // For expired posts
                 }
                 break;
             case 'price_asc':
-                $orderBy = 'Requesting_Price ASC';
+                    $orderBy = 'p.Requesting_Price ASC';
                 break;
             case 'price_desc':
-                $orderBy = 'Requesting_Price DESC';
+                    $orderBy = 'p.Requesting_Price DESC';
                 break;
             case 'views_asc':
-                $orderBy = 'Views ASC';
+                    $orderBy = 'p.Views ASC';
                 break;
             case 'views_desc':
-                $orderBy = 'Views DESC';
+                    $orderBy = 'p.Views DESC';
                 break;
         }
         
@@ -101,7 +137,17 @@ class PostModel extends Database
         $stmt->execute();
         $result = $stmt->get_result();
         $stmt->close();
-        return $result->fetch_all(MYSQLI_ASSOC);
+        $posts = $result->fetch_all(MYSQLI_ASSOC);
+
+        $postIds = array_map(static fn($row) => (int) ($row['Post_ID'] ?? 0), $posts);
+        $bidCounts = $this->bidModel ? $this->bidModel->getCountsByPostIds($postIds) : [];
+
+        foreach ($posts as &$post) {
+            $postId = (int) ($post['Post_ID'] ?? 0);
+            $post['Proposal_Count'] = $bidCounts[$postId] ?? 0;
+        }
+
+        return $posts;
     }
 
     public function getRequestPosts($clientId, $status = null, $sort = 'date_desc', $search = '')
@@ -191,9 +237,9 @@ class PostModel extends Database
     public function createPost($data)
     {
         try {
-            $query = "INSERT INTO Post (Client_ID, Title, Description, Category_ID, Requesting_Price, 
-                  Price_Type, Duration, Duration_Type, Level, End_At, Post_Status, Created_At, Published_At, Post_Type) 
-                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, 'post')";
+            $query = "INSERT INTO post (Client_ID, Title, Description, Category_ID, Requesting_Price, 
+                Price_Type, Est_Date, Level, End_At, Post_Status, Created_At, Published_At, Post_Type) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, 'post')";
 
             $stmt = $this->conn->prepare($query);
 
@@ -203,15 +249,14 @@ class PostModel extends Database
             }
 
             $stmt->bind_param(
-                'issidsssssss',  // i=integer, s=string, d=double
+                'issidssssss',  // i=integer, s=string, d=double
                 $data['Client_ID'],
                 $data['Title'],
                 $data['Description'],
                 $data['Category_ID'],
                 $data['Requesting_Price'],
                 $data['Price_Type'],
-                $data['Duration'],
-                $data['Duration_Type'],
+                $data['Est_Date'],
                 $data['Level'],
                 $data['End_At'],
                 $data['Status'],
@@ -240,7 +285,7 @@ class PostModel extends Database
         error_log("Publishing draft post ID: $postId");
 
         // First check if the post exists and is a draft
-        $checkSql = "SELECT Post_ID, Post_Status FROM Post WHERE Post_ID = ?";
+        $checkSql = "SELECT Post_ID, Post_Status FROM post WHERE Post_ID = ?";
         $checkStmt = $this->conn->prepare($checkSql);
 
         if (!$checkStmt) {
@@ -269,7 +314,7 @@ class PostModel extends Database
             error_log("ERROR: Post $postId is not a draft. Current status: '" . $post['Post_Status'] . "'");
 
             // Log what statuses exist in the database for debugging
-            $statusCheckSql = "SELECT DISTINCT Post_Status FROM Post";
+            $statusCheckSql = "SELECT DISTINCT Post_Status FROM post";
             $statusResult = $this->conn->query($statusCheckSql);
             if ($statusResult) {
                 $statuses = [];
@@ -283,7 +328,7 @@ class PostModel extends Database
         }
 
         // Update to active status
-        $sql = "UPDATE Post SET Post_Status = 'active', Published_At = NOW() WHERE Post_ID = ?";
+        $sql = "UPDATE post SET Post_Status = 'active', Published_At = NOW() WHERE Post_ID = ?";
         error_log("Executing SQL: $sql with Post_ID = $postId");
 
         $stmt = $this->conn->prepare($sql);
@@ -323,14 +368,15 @@ class PostModel extends Database
                 p.Description,
                 p.Requesting_Price, 
                 p.Price_Type,
-                p.Duration, 
-                p.Duration_Type, 
+                p.Est_Date,
                 p.Level,
                 p.Category_ID, 
                 p.Created_At, 
                 p.Published_At,
                 p.End_At, 
                 p.Post_Status, 
+                p.Request_Status,
+                p.Provider_ID,
                 p.Post_Type,
                 p.Provider_ID, 
                 p.Request_Status,
@@ -360,7 +406,192 @@ class PostModel extends Database
         $row = $result->fetch_assoc();
         $stmt->close();
 
+        if ($row) {
+            $post['Proposal_Count'] = $this->bidModel ? $this->bidModel->countByPostId((int) $postId) : 0;
+        }
+
         return $row ?: null;
+    }
+
+    public function getBidsForPost(int $postId): array
+    {
+        return $this->bidModel ? $this->bidModel->getBidsForPost($postId) : [];
+    }
+
+    public function sendRequestToProvider(int $postId, int $providerId, int $clientId): array
+    {
+        if (!$this->bidModel || !$this->bidModel->providerHasBidForPost($postId, $providerId)) {
+            return ['success' => false, 'message' => 'Selected provider has not bid on this post'];
+        }
+
+        $checkSql = "SELECT Post_ID, Client_ID, Post_Status, Request_Status FROM post WHERE Post_ID = ? LIMIT 1";
+        $checkStmt = $this->conn->prepare($checkSql);
+        if (!$checkStmt) {
+            return ['success' => false, 'message' => 'Failed to prepare status check'];
+        }
+
+        $checkStmt->bind_param('i', $postId);
+        $checkStmt->execute();
+        $row = $checkStmt->get_result()->fetch_assoc();
+        $checkStmt->close();
+
+        if (!$row) {
+            return ['success' => false, 'message' => 'Post not found'];
+        }
+
+        if ((int) ($row['Client_ID'] ?? 0) !== $clientId) {
+            return ['success' => false, 'message' => 'Unauthorized post access'];
+        }
+
+        if (strtolower((string) ($row['Post_Status'] ?? '')) !== 'active') {
+            return ['success' => false, 'message' => 'Requests can only be sent for active posts'];
+        }
+
+        $current = strtolower(trim((string) ($row['Request_Status'] ?? '')));
+        $canSend = ($current === '' || $current === 'declined');
+        if (!$canSend) {
+            return ['success' => false, 'message' => 'Cannot send request when status is ongoing or accepted'];
+        }
+
+        $updateSql = "UPDATE post
+            SET Provider_ID = ?, Request_Status = 'ongoing'
+            WHERE Post_ID = ?
+              AND Client_ID = ?
+              AND (Request_Status IS NULL OR LOWER(Request_Status) = 'declined' OR Request_Status = '')";
+
+        $updateStmt = $this->conn->prepare($updateSql);
+        if (!$updateStmt) {
+            return ['success' => false, 'message' => 'Failed to prepare request update'];
+        }
+
+        $updateStmt->bind_param('iii', $providerId, $postId, $clientId);
+        $updateStmt->execute();
+        $affected = $updateStmt->affected_rows;
+        $updateStmt->close();
+
+        if ($affected <= 0) {
+            return ['success' => false, 'message' => 'Request status did not change'];
+        }
+
+        return ['success' => true, 'message' => 'Request sent successfully', 'request_status' => 'ongoing'];
+    }
+
+    public function createDirectServiceRequest(array $data): array
+    {
+        $clientId = (int) ($data['Client_ID'] ?? 0);
+        $providerCategoryId = (int) ($data['Provider_Categories_ID'] ?? 0);
+        $title = trim((string) ($data['Title'] ?? ''));
+        $description = trim((string) ($data['Description'] ?? ''));
+        $requestingPrice = (float) ($data['Requesting_Price'] ?? 0);
+        $priceType = trim((string) ($data['Price_Type'] ?? '')) ?: 'Fixed';
+        $estDate = trim((string) ($data['Est_Date'] ?? ''));
+        $level = trim((string) ($data['Level'] ?? '')) ?: 'Beginner';
+        $endAt = trim((string) ($data['End_At'] ?? '')) ?: date('Y-m-d', strtotime('+30 days'));
+
+        if ($clientId <= 0 || $providerCategoryId <= 0 || $title === '' || $description === '' || $estDate === '') {
+            return ['success' => false, 'message' => 'Missing required request data'];
+        }
+
+        $checkStmt = $this->conn->prepare(
+            "SELECT Post_ID
+             FROM post
+             WHERE Client_ID = ?
+               AND Provider_Categories_ID = ?
+               AND Post_Type = 'direct'
+               AND Request_Status = 'ongoing'
+             LIMIT 1"
+        );
+
+        if (!$checkStmt) {
+            return ['success' => false, 'message' => 'Failed to prepare duplicate check'];
+        }
+
+        $checkStmt->bind_param('ii', $clientId, $providerCategoryId);
+        $checkStmt->execute();
+        $existing = $checkStmt->get_result()->fetch_assoc();
+        $checkStmt->close();
+
+        if ($existing) {
+            return ['success' => false, 'message' => 'You already have an ongoing request for this service'];
+        }
+
+        $serviceStmt = $this->conn->prepare(
+            "SELECT pc.Provider_ID, pc.Category_ID
+             FROM provider_categories pc
+             WHERE pc.ID = ?
+             LIMIT 1"
+        );
+
+        if (!$serviceStmt) {
+            return ['success' => false, 'message' => 'Failed to prepare service lookup'];
+        }
+
+        $serviceStmt->bind_param('i', $providerCategoryId);
+        $serviceStmt->execute();
+        $serviceRow = $serviceStmt->get_result()->fetch_assoc();
+        $serviceStmt->close();
+
+        if (!$serviceRow) {
+            return ['success' => false, 'message' => 'Service not found'];
+        }
+
+        $providerId = (int) ($serviceRow['Provider_ID'] ?? 0);
+        $categoryId = (int) ($serviceRow['Category_ID'] ?? 0);
+
+        $sql = "INSERT INTO post (
+                    Created_At,
+                    Category_ID,
+                    Post_Type,
+                    Post_Status,
+                    Client_ID,
+                    Provider_ID,
+                    Provider_Categories_ID,
+                    Title,
+                    Description,
+                    Requesting_Price,
+                    Price_Type,
+                    Est_Date,
+                    Level,
+                    End_At,
+                    Published_At,
+                    Request_Status
+                ) VALUES (NOW(), ?, 'direct', 'active', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), 'ongoing')";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            return ['success' => false, 'message' => 'Failed to prepare direct request insert'];
+        }
+
+        $stmt->bind_param(
+            'iiiissdssss',
+            $categoryId,
+            $clientId,
+            $providerId,
+            $providerCategoryId,
+            $title,
+            $description,
+            $requestingPrice,
+            $priceType,
+            $estDate,
+            $level,
+            $endAt
+        );
+
+        if (!$stmt->execute()) {
+            $message = $stmt->error ?: 'Failed to create direct request';
+            $stmt->close();
+            return ['success' => false, 'message' => $message];
+        }
+
+        $newPostId = $this->conn->insert_id;
+        $stmt->close();
+
+        return [
+            'success' => true,
+            'message' => 'Service request sent successfully',
+            'post_id' => $newPostId,
+            'request_status' => 'ongoing'
+        ];
     }
 
     public function countActiveRequests($clientId)
@@ -410,7 +641,7 @@ class PostModel extends Database
 
     public function deletePost(int $postId): bool
     {
-        $sql = "UPDATE Post SET Post_Status = 'deleted' WHERE Post_ID = ?";
+        $sql = "UPDATE post SET Post_Status = 'deleted' WHERE Post_ID = ?";
 
         $stmt = $this->conn->prepare($sql);
         if (!$stmt) {
@@ -452,8 +683,8 @@ class PostModel extends Database
 
     public function updatePost(int $postId, array $data): bool
     {
-        $sql = "UPDATE Post SET Title = ?, Description = ?, Category_ID = ?, Requesting_Price = ?, 
-                Price_Type = ?, Duration = ?, Duration_Type = ?, Level = ?, End_At = ?
+        $sql = "UPDATE post SET Title = ?, Description = ?, Category_ID = ?, Requesting_Price = ?, 
+            Price_Type = ?, Est_Date = ?, Level = ?, End_At = ?
                 WHERE Post_ID = ?";
 
         $stmt = $this->conn->prepare($sql);
@@ -465,14 +696,13 @@ class PostModel extends Database
         error_log('Update data: ' . $data['End_At']);
 
         $stmt->bind_param(
-            'ssissssssi',
+            'ssisdsssi',
             $data['Title'],
             $data['Description'],
             $data['Category_ID'],
             $data['Requesting_Price'],
             $data['Price_Type'],
-            $data['Duration'],
-            $data['Duration_Type'],
+            $data['Est_Date'],
             $data['Level'],
             $data['End_At'],
             $postId
@@ -489,7 +719,7 @@ class PostModel extends Database
 
     public function markPostAsExpired(int $postId): bool
     {
-        $sql = "UPDATE Post SET Post_Status = 'expired' WHERE Post_ID = ?";
+        $sql = "UPDATE post SET Post_Status = 'expired' WHERE Post_ID = ?";
 
         $stmt = $this->conn->prepare($sql);
         if (!$stmt) {
@@ -506,5 +736,125 @@ class PostModel extends Database
 
         $stmt->close();
         return true;
+    }
+
+    /**
+     * Fetch incoming requests for a provider with pagination
+     * Filters by Post_Status = 'active' AND Request_Status = 'ongoing' AND Provider_ID
+     * 
+     * @param int $providerId Provider ID from session
+     * @param int $page Page number (1-indexed)
+     * @param int $limit Items per page
+     * @return array ['data' => array, 'total' => int, 'pages' => int, 'current_page' => int]
+     */
+    public function getIncomingRequestsForProvider(int $providerId, int $page = 1, int $limit = 10): array
+    {
+        $page = max(1, $page);
+        $limit = max(1, min($limit, 100)); // Cap at 100 per page
+        $offset = ($page - 1) * $limit;
+
+        // Get total count
+        $countSql = "SELECT COUNT(*) as total FROM post 
+                     WHERE Post_Status = 'active' AND Request_Status = 'ongoing' AND Provider_ID = ?";
+        
+        $countStmt = $this->conn->prepare($countSql);
+        $countStmt->bind_param('i', $providerId);
+        $countStmt->execute();
+        $countRow = $countStmt->get_result()->fetch_assoc();
+        $countStmt->close();
+        $totalRecords = (int) ($countRow['total'] ?? 0);
+        $totalPages = ceil($totalRecords / $limit);
+
+        // Get data with pagination
+        $sql = "SELECT 
+                    cl.Client_ID,
+                    p.Post_ID,
+                    p.Title,
+                    p.Description,
+                    p.Requesting_Price,
+                    p.Price_Type,
+                    p.Est_Date,
+                    p.Level,
+                    p.Created_At,
+                    p.Post_Type,
+                    p.Category_ID,
+                    c.Name as Category_Name,
+                    cl.First_Name,
+                    cl.Last_Name,
+                    cl.Profile_Picture,
+                    CONCAT(cl.First_Name, ' ', cl.Last_Name) as Client_Name
+                FROM post p
+                LEFT JOIN category c ON p.Category_ID = c.Category_ID
+                LEFT JOIN client cl ON p.Client_ID = cl.Client_ID
+                WHERE p.Post_Status = 'active' AND p.Request_Status = 'ongoing' AND p.Provider_ID = ?
+                ORDER BY p.Created_At DESC
+                LIMIT ? OFFSET ?";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('getIncomingRequestsForProvider prepare: ' . $this->conn->error);
+            return [
+                'data' => [],
+                'total' => 0,
+                'pages' => 0,
+                'current_page' => $page
+            ];
+        }
+
+        $stmt->bind_param('iii', $providerId, $limit, $offset);
+        if (!$stmt->execute()) {
+            error_log('getIncomingRequestsForProvider exec: ' . $stmt->error);
+            $stmt->close();
+            return [
+                'data' => [],
+                'total' => 0,
+                'pages' => 0,
+                'current_page' => $page
+            ];
+        }
+
+        $result = $stmt->get_result();
+        $data = $result->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+
+        return [
+            'data' => $data,
+            'total' => $totalRecords,
+            'pages' => $totalPages,
+            'current_page' => $page
+        ];
+    }
+
+    /**
+     * Reject an incoming request
+     * 
+     * @param int $postId Post ID
+     * @param string $reason Rejection reason
+     * @return bool Success status
+     */
+    public function rejectRequest(int $postId, string $reason = ''): bool
+    {
+        $sql = "UPDATE post 
+                SET Request_Status = 'rejected', Request_Reject_Reason = ? 
+                WHERE Post_ID = ?";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('rejectRequest prepare: ' . $this->conn->error);
+            return false;
+        }
+
+        $stmt->bind_param('si', $reason, $postId);
+
+        if (!$stmt->execute()) {
+            error_log('rejectRequest exec: ' . $stmt->error);
+            $stmt->close();
+            return false;
+        }
+
+        $affected = $stmt->affected_rows;
+        $stmt->close();
+
+        return $affected > 0;
     }
 }

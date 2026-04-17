@@ -108,9 +108,24 @@ switch ($url) {
         $controller->showUserImage($matches[1]);
         break;
 
+    case (preg_match('#^file/category-icons/(.+)$#', $url, $matches) ? true : false):
+        $controller = new FileController();
+        $controller->getCategoryIcons($matches[1]);
+        break;
+
     case 'profile':
         $controller = new ProfileController();
         $controller->view();
+        break;
+
+    case 'profile/add-service':
+        $controller = new ProfileController();
+        $controller->addService();
+        break;
+
+    case 'profile/remove-service':
+        $controller = new ProfileController();
+        $controller->removeService();
         break;
 
     case 'register/documents':
@@ -163,6 +178,16 @@ switch ($url) {
         $controller->sendResetCode();
         break;
 
+    case 'profile/change-profile-pic':
+        $controller = new ProfileController();
+        $controller->changeProfilePicture();
+        break;
+
+    case 'profile/update-password':
+        $controller = new ProfileController();
+        $controller->changePassword();
+        break;
+
     case 'dashboard':
         $controller = new DashboardController();
         $controller->index();
@@ -202,6 +227,11 @@ switch ($url) {
         $controller->create();
         break;
 
+    case 'requests/direct-request':
+        $controller = new PostController();
+        $controller->createDirectRequest();
+        break;
+
     case (preg_match('#^requests/view/(\d+)$#', $url, $m) ? true : false):
         (new PostController())->viewPost((int)$m[1]);
         break;
@@ -234,6 +264,10 @@ switch ($url) {
         (new PostController())->publishById((int)$m[1]);
         break;
 
+    case (preg_match('#^requests/send-request/(\d+)$#', $url, $m) ? true : false):
+        (new PostController())->sendRequestToProvider((int)$m[1]);
+        break;
+
     case (preg_match('#^requests/update-expired/(\d+)$#', $url, $m) ? true : false):
         (new PostController())->markAsExpired((int)$m[1]);
         break;
@@ -256,6 +290,26 @@ switch ($url) {
     case 'providers':
         $controller = new ProviderController();
         $controller->index();
+        break;
+
+    case 'providers/search':
+        $controller = new ProviderController();
+        $controller->search();
+        break;
+
+    case 'providers/services':
+        $controller = new ProviderController();
+        $controller->getServices();
+        break;
+
+    case 'provider/incoming-requests':
+        $controller = new ProviderController();
+        $controller->getIncomingRequests();
+        break;
+
+    case 'provider/reject-request':
+        $controller = new ProviderController();
+        $controller->rejectRequest();
         break;
 
     case 'earnings':
@@ -296,6 +350,30 @@ switch ($url) {
     case 'admin/providers/provider-review':
         $controller = new AdminProviderController();
         $controller->review();
+        break;
+
+    case 'messages/get-messages':
+        $controller = new MessageController();
+        $controller->getMessages();
+        break;
+
+    case 'messages/start-conversation':
+        $controller = new MessageController();
+        $controller->startConversation();
+        break;
+
+    case 'messages/get-user':
+        $controller = new MessageController();
+        $controller->getUser();
+        break;
+
+    case 'messages/unread-count':
+        $controller = new MessageController();
+        $controller->getUnreadCount();
+        break;
+
+    case 'test/inputs':
+        include '../inputs.html';
         break;
 
     default:

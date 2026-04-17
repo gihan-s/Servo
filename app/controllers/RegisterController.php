@@ -2,11 +2,13 @@
 
 require_once __DIR__ . '/../models/ClientModel.php';
 require_once __DIR__ . '/../models/ProviderModel.php';
+require_once __DIR__ . '/../models/SkillsModel.php';
 require_once __DIR__ . '/../models/CategoryModel.php';
 require_once __DIR__ . '/../models/LocationModel.php';
 require_once __DIR__ . '/../../helpers/upload.php';
 require_once __DIR__ . '/../../helpers/email.php';
 
+require_once __DIR__ . '/../services/provider.php';
 
 class RegisterController
 {
@@ -37,6 +39,13 @@ class RegisterController
     {
         $_SESSION['register']['bio'] = $_POST['bio'] ?? '';
         $_SESSION['register']['website'] = $_POST['website'] ?? '';
+
+        $_SESSION['register']['facebook'] = $_POST['social_media_facebook'] ?? '';
+        $_SESSION['register']['instagram'] = $_POST['social_media_instagram'] ?? '';
+        $_SESSION['register']['tiktok'] = $_POST['social_media_tiktok'] ?? '';
+        $_SESSION['register']['youtube'] = $_POST['social_media_youtube'] ?? '';
+        $_SESSION['register']['github'] = $_POST['social_media_github'] ?? '';
+        $_SESSION['register']['linkedin'] = $_POST['social_media_linkedin'] ?? '';
 
         if ($_FILES['profile_picture']['name'] != '') {
             $profile_picture = uploadFile('profile_picture', __DIR__ . '/../../uploads/temp/', 'image/*');
@@ -121,7 +130,7 @@ class RegisterController
             rename($targetDir . $_SESSION['register']['profile_picture'], $finalDir . $_SESSION['register']['profile_picture']);
         }
 
-
+        
 
         if ($_SESSION['register']['user_type'] == 'client') {
             $model = new ClientModel();
@@ -151,34 +160,12 @@ class RegisterController
             $userId = $model->insertProvider($data);
             if ($userId) {
 
-                foreach ($data["category_id"] as $key => $value) {
-                    $ProviderCategoryID = $model->insertProviderCategory($userId, $data, $key);
-
-                    $Skills = json_decode($data["skills"][$key]);
-                    foreach ($Skills as $key1 => $value1) {
-                        $SkillID = $model->insertSkill($ProviderCategoryID, $value1);
-                    }
-
-                    $Locations = json_decode($data["locations"][$key]);
-                    foreach ($Locations as $key2 => $value2) {
-                        echo $value2;
-                        $District = "";
-                        $City = "";
-
-                        if ($value2 == 'All Districts') {
-                            $District = "All";
-                            $City = "All";
-                        } else if (strpos($value2, "District") > -1) {
-                            $District = str_replace(" District", "", $value2);
-                        } else {
-                            $City = $value2;
-                        }
-
-                        $LocationID = $model->getLocationID($District, $City)[0]["Location_ID"];
-
-                        $model->insertLocation($ProviderCategoryID, $LocationID);
-                    }
+                $SocialMediaLinkElements = ["facebook", "instagram", "tiktok", "youtube", "github", "linkedin"];
+                foreach ($SocialMediaLinkElements as $key => $value) {
+                    $model->insertProviderSocialLinks($userId, $value, $data[$value]);
                 }
+
+                addServicesToProvider($data, $userId);
 
                 $_SESSION['reg_pending_notice'] = "Provider";
                 unset($_SESSION['register']);
@@ -263,6 +250,10 @@ class RegisterController
         $_SESSION['register']['default_price'] = $_POST['default_price'] ?? [];
         $_SESSION['register']['skills'] = $_POST['skills'] ?? [];
         $_SESSION['register']['locations'] = $_POST['locations'] ?? [];
+
+        $_SESSION['register']['portfolio_link'] = $_POST['portfolio_link'] ?? [];
+        $_SESSION['register']['price_type'] = $_POST['price_type'] ?? [];
+        $_SESSION['register']['price_negotiability'] = $_POST['price_negotiability'] ?? [];
         header('Location: password');
         exit;
     }
@@ -277,9 +268,9 @@ class RegisterController
             return;
         }
 
-        $CategoryID = trim($_POST['category_id']);
-        $model = new ProviderModel();
-        echo json_encode(['status' => 'ok', 'result' => $model->getAllSkills($CategoryID)]);
+        $CategoryID = (int)trim($_POST['category_id']);
+        $model = new SkillsModel();
+        echo json_encode(['status' => 'ok', 'result' => $model->getByCategoryId($CategoryID)]);
     }
 
 
@@ -294,6 +285,9 @@ class RegisterController
 
         $_SESSION['otp'] = random_int(100000, 999999);
         $_SESSION['otp_expire'] = time() + 300;
+
+
+        $_SESSION['otp'] = 111111;
 
         $EmailTemplate = '
         <!DOCTYPE html>

@@ -14,6 +14,53 @@
 require_once __DIR__ . '/../core/Database.php';
 
 class ProjectModel extends Database {
+  public function getByPostId(int $postId): ?array {
+    $stmt = $this->conn->prepare("SELECT * FROM project WHERE Post_ID = ? LIMIT 1");
+    if (!$stmt) {
+      error_log('ProjectModel::getByPostId prepare: ' . $this->conn->error);
+      return null;
+    }
+
+    $stmt->bind_param('i', $postId);
+    if (!$stmt->execute()) {
+      error_log('ProjectModel::getByPostId exec: ' . $stmt->error);
+      $stmt->close();
+      return null;
+    }
+
+    $row = $stmt->get_result()->fetch_assoc() ?: null;
+    $stmt->close();
+    return $row;
+  }
+
+  public function getProjectIdsByProviderId(int $providerId): array {
+    $stmt = $this->conn->prepare(
+      "SELECT pr.Project_ID
+       FROM project pr
+       INNER JOIN post p ON p.Post_ID = pr.Post_ID
+       WHERE p.Provider_ID = ?"
+    );
+
+    if (!$stmt) {
+      error_log('ProjectModel::getProjectIdsByProviderId prepare: ' . $this->conn->error);
+      return [];
+    }
+
+    $stmt->bind_param('i', $providerId);
+    if (!$stmt->execute()) {
+      error_log('ProjectModel::getProjectIdsByProviderId exec: ' . $stmt->error);
+      $stmt->close();
+      return [];
+    }
+
+    $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+
+    return array_values(array_filter(array_map(static function ($row) {
+      return (int) ($row['Project_ID'] ?? 0);
+    }, $rows)));
+  }
+
   public function getProjectsByClientId($clientId, $count = null, $status = 'Active') {
     // actual data fetching logic to be implemented
     return [

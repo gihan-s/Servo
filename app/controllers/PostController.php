@@ -165,8 +165,7 @@ class PostController extends BaseController
             $skills = $_POST['skills'] ?? '';
             $price = $_POST['price'] ?? '';
             $priceType = $_POST['price_type'] ?? '';
-            $duration = $_POST['duration'] ?? '';
-            $durationType = $_POST['duration_type'] ?? '';
+            $estDate = $_POST['est_date'] ?? '';
             $level = $_POST['level'] ?? '';
             $endAt = $_POST['end_at'] ?? '';
             $status = $_POST['status'] ?? 'draft';
@@ -199,8 +198,7 @@ class PostController extends BaseController
                 'Category_ID' => $categoryId,
                 'Requesting_Price' => $price ?: '0',
                 'Price_Type' => $priceType ?: 'Fixed',
-                'Duration' => $duration ?: '0',
-                'Duration_Type' => $durationType ?: 'Days',
+                'Est_Date' => $estDate ?: date('Y-m-d', strtotime('+7 days')),
                 'Level' => $level ?: 'Beginner',
                 'End_At' => $endAt ?: date('Y-m-d', strtotime('+30 days')),
                 'Status' => $status === 'publish' ? 'active' : 'draft',
@@ -270,6 +268,7 @@ class PostController extends BaseController
 
         // Reuse existing helper to get skills for this post
         $skills = $this->postSkillsModel->getPostSkills($id);
+        $bids = $this->postModel->getBidsForPost($id);
 
         $response = [
             'Post_ID' => $post['Post_ID'] ?? null,
@@ -278,8 +277,10 @@ class PostController extends BaseController
             'Requesting_Price' => $post['Requesting_Price'] ?? '',
             'Price_Type' => $post['Price_Type'] ?? '',
             'Level' => $post['Level'] ?? '',
-            'Duration' => $post['Duration'] ?? '',
-            'Duration_Type' => $post['Duration_Type'] ?? '',
+            'Est_Date' => $post['Est_Date'] ?? null,
+            'Post_Status' => $post['Post_Status'] ?? null,
+            'Request_Status' => $post['Request_Status'] ?? null,
+            'Provider_ID' => $post['Provider_ID'] ?? null,
             'Proposal_Count' => $post['Proposal_Count'] ?? ($post['ProposalsCount'] ?? 0),
             'Published_At' => $post['Published_At'] ?? ($post['Created_At'] ?? null),
             'End_At' => $post['End_At'] ?? null,
@@ -289,6 +290,7 @@ class PostController extends BaseController
             'Provider_Name' => $post['Provider_Name'] ?? null,
             'Request_Status' => $post['Request_Status'] ?? null,
             'skills' => array_column($skills, 'Skill'),
+            'bids' => $bids,
         ];
 
         echo json_encode($response);
@@ -390,8 +392,7 @@ class PostController extends BaseController
             $skills = $_POST['skills'] ?? '';
             $price = $_POST['price'] ?? '';
             $priceType = $_POST['price_type'] ?? '';
-            $duration = $_POST['duration'] ?? '';
-            $durationType = $_POST['duration_type'] ?? '';
+            $estDate = $_POST['est_date'] ?? '';
             $level = $_POST['level'] ?? '';
             $endAt = $_POST['end_at'] ?? '';
 
@@ -430,8 +431,7 @@ class PostController extends BaseController
                 'Category_ID' => $categoryId,
                 'Requesting_Price' => $price ?: '0',
                 'Price_Type' => $priceType ?: 'Fixed',
-                'Duration' => $duration ?: '0',
-                'Duration_Type' => $durationType ?: 'Days',
+                'Est_Date' => $estDate ?: date('Y-m-d', strtotime('+7 days')),
                 'Level' => $level ?: 'Beginner',
                 'End_At' => $endAt
             ];
@@ -541,6 +541,72 @@ class PostController extends BaseController
                 'success' => false,
                 'message' => 'An error occurred while publishing: ' . $e->getMessage()
             ]);
+        }
+
+        exit;
+    }
+
+    public function sendRequestToProvider($id): void
+    {
+        if (ob_get_level())
+            ob_clean();
+
+        header('Content-Type: application/json');
+        $this->ensureAuth();
+
+        try {
+            $postId = (int) $id;
+            $providerId = (int) ($_POST['provider_id'] ?? 0);
+            $clientId = (int) ($_SESSION['user_id'] ?? 0);
+
+            if ($postId <= 0 || $providerId <= 0 || $clientId <= 0) {
+                echo json_encode(['success' => false, 'message' => 'Invalid request data']);
+                exit;
+            }
+
+            $result = $this->postModel->sendRequestToProvider($postId, $providerId, $clientId);
+            echo json_encode($result);
+        } catch (Exception $e) {
+            error_log('sendRequestToProvider exception: ' . $e->getMessage());
+            echo json_encode(['success' => false, 'message' => 'Failed to send request']);
+        }
+
+        exit;
+    }
+
+    public function createDirectRequest(): void
+    {
+        if (ob_get_level()) {
+            ob_clean();
+        }
+
+        header('Content-Type: application/json');
+        $this->ensureAuth();
+
+        try {
+            $clientId = (int) ($_SESSION['user_id'] ?? 0);
+            if ($clientId <= 0) {
+                echo json_encode(['success' => false, 'message' => 'User not authenticated']);
+                exit;
+            }
+
+            $payload = [
+                'Client_ID' => $clientId,
+                'Provider_Categories_ID' => (int) ($_POST['provider_categories_id'] ?? 0),
+                'Title' => (string) ($_POST['title'] ?? ''),
+                'Description' => (string) ($_POST['description'] ?? ''),
+                'Requesting_Price' => (float) ($_POST['requesting_price'] ?? 0),
+                'Price_Type' => (string) ($_POST['price_type'] ?? ''),
+                'Est_Date' => (string) ($_POST['est_date'] ?? ''),
+                'Level' => (string) ($_POST['level'] ?? 'Beginner'),
+                'End_At' => (string) ($_POST['end_at'] ?? date('Y-m-d', strtotime('+30 days'))),
+            ];
+
+            $result = $this->postModel->createDirectServiceRequest($payload);
+            echo json_encode($result);
+        } catch (Exception $e) {
+            error_log('createDirectRequest exception: ' . $e->getMessage());
+            echo json_encode(['success' => false, 'message' => 'Failed to create service request']);
         }
 
         exit;

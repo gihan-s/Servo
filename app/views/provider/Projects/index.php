@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/providerProjects.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/cardList.css" />
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/main.css" />
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/elementStyles.css" />
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/incomingRequests.css" />
     <title>Provider Dashboard - Service Requests & Projects</title>
     
 </head>
@@ -92,32 +94,7 @@
             <div class="pending-requests active requests-section" id="section-pending">
                 <p class="section-note">Incoming service requests from potential clients.</p>
                 <div class="item-list">
-                    <div class="search-item" data-status="pending">
-                        <div class="item-head">
-                            <div class="item-main-dets">
-                                <div class="item-name">Michael Chen</div>
-                                <div class="item-title">E-commerce Website Development</div>
-                                <div class="item-district">
-                                    <span>Proposed 12 Jul 2025</span>
-                                    <span>Proposal: $2,500</span>
-                                </div>
-                            </div>
-                            <div class="button">
-                                <button class="btn-outline btn-view" title="View Proposal"><i
-                                        class="fa-solid fa-eye"></i> View</button>
-                                <button class="btn-outline btn-message" title="Message Client"><i
-                                        class="fa-solid fa-messages"></i> Message</button>
-                                <button class="btn-danger btn-withdraw" title="Withdraw Proposal"><i
-                                        class="fa-solid fa-trash"></i> Withdraw</button>
-                            </div>
-                        </div>
-                        <div class="item-middle">
-                            <div><i class="fa-solid fa-clock"></i> Timeline: 4 weeks</div>
-                            <div><i class="fa-solid fa-tag"></i> Proposed: $2,500</div>
-                        </div>
-                        <div class="item-description">Full e-commerce site with product catalog, shopping cart, and payment integration.</div>
-                        <div class="status-bottom"><span class="status-chip status-pending">Pending Response</span></div>
-                    </div>
+                    
                 </div>
                 <div class="pagination" aria-label="Pending Requests Pagination">
                     <button class="page-btn prev" disabled><i class="fa-solid fa-chevron-left"></i></button>
@@ -332,7 +309,7 @@
                 <button class="btn-primary" id="btnPropose" style="display:none;"><i class="fa-solid fa-paper-plane"></i> Send Proposal</button>
                 <button class="btn-primary" id="btnSubmit" style="display:none;"><i class="fa-solid fa-paper-plane"></i> Submit for Review</button>
                 <button class="btn-primary" id="btnUpdate" style="display:none;"><i class="fa-solid fa-arrow-up"></i> Update Progress</button>
-                <button class="btn-outline" id="btnMessage"><i class="fa-solid fa-messages"></i> Message Client</button>
+                <button class="btn-outline" id="btnMessage"><i class="fa-solid fa-comments"></i> Message Client</button>
                 <button class="btn-danger" id="btnDecline"><i class="fa-solid fa-circle-xmark"></i> Decline</button>
                 <button class="btn-danger" id="btnWithdraw" style="display:none;"><i class="fa-solid fa-trash"></i> Withdraw</button>
             </div>
@@ -471,10 +448,35 @@
             </div>
         </div>
     </div>
+
+    <!-- Rejection Reason Modal -->
+    <div class="pop-up-section confirm-modal deactive" id="rejectionModalRoot">
+        <div class="pop-up" id="rejectionModal" style="max-width:500px;">
+            <div class="pop-up-header" style="display:flex; align-items:center; justify-content:space-between;">
+                <div class="pop-up-title">Reject Request</div>
+                <i class="fa-solid fa-xmark" id="rejectionModalClose" style="cursor:pointer;"></i>
+            </div>
+            <hr>
+            <div class="pop-up-content" style="display:flex; flex-direction:column; gap:12px;">
+                <div style="font-size:14px; color:#475569;">
+                    Please provide a reason for rejecting this request. The client will be notified.
+                </div>
+                <textarea id="rejectionReason" 
+                          rows="5" 
+                          placeholder="Enter your reason for rejection..." 
+                          style="padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-family: inherit; font-size: 14px; resize: vertical;"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-secondary" id="btnCancelRejection">Cancel</button>
+                <button class="btn-danger" id="btnConfirmRejection"><i class="fa-solid fa-circle-xmark"></i> Reject Request</button>
+            </div>
+        </div>
+    </div>
     </div> <!-- End of main-content -->
 
     <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
 
+    <script src="<?= BASE_URL ?>/assets/js/incomingRequests.js"></script>
     <script>
         // Main functionality for provider interface
         document.addEventListener('DOMContentLoaded', function() {

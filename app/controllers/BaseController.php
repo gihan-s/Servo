@@ -4,39 +4,61 @@ require_once __DIR__ . '/../core/helpers.php';
 require_once __DIR__ . '/../models/ClientModel.php';
 require_once __DIR__ . '/../models/ProviderModel.php';
 require_once __DIR__ . '/../models/NotificationModel.php';
-require_once __DIR__ . '/../models/MessageModel.php';
 
 class BaseController
 {
     protected $clientModel;
     protected $providerModel;
     protected $notificationModel;
-    protected $messageModel;
 
+    protected $unreadNotificationCount = 0;
     protected $notifications = [];
-    protected $messages = [];
+    protected $lastNotifTimestamp = null; // latest loaded notification timestamp
+    protected $firstNotifTimestamp = null; // oldest loaded notification timestamp
 
     public function __construct()
     {
         $this->clientModel = new ClientModel();
         $this->providerModel = new ProviderModel();
         $this->notificationModel = new NotificationModel();
-        $this->messageModel = new MessageModel();
-
         $this->ensureAuth();
-        $this->loadNotificationsAndMessages($_SESSION['user_id'], $_SESSION['role']);
+        $this->loadNotifs($_SESSION['user_id'], $_SESSION['role']);
+        return;
     }
 
-    public function loadNotificationsAndMessages($userId, $role)
+    // method to process and append notifications to controller
+    protected function appendNotifications($unprocessedNotifications, &$notifications)
     {
-        if ($role === 'Client') {
-            $notifications = $this->notificationModel->getNotificationsByClientId($userId, 10);
-            $messages = $this->messageModel->getMessagesByClientId($userId, 10);
-        } elseif ($role === 'Provider') {
-            $notifications = $this->notificationModel->getNotificationsByProviderId($userId, 10);
-            $messages = $this->messageModel->getMessagesByProviderId($userId, 10);
+        foreach ($unprocessedNotifications as $notif) {
+            $data = json_decode($notif['Data'], true);
+            $notifications[] = array_merge($notif, $data);
         }
-        return [];
+        return;
+    } 
+
+    public function loadNotifs($userId, $role)
+    {
+        $notifications = [];
+        $unprocessedNotifications = [];
+        $unreadNotificationCount = 0;
+
+        if ($role === 'Client') {
+            $unprocessedNotifications = $this->notificationModel->getNotificationsByClientId($userId, 10);
+            $unreadNotificationCount = $this->notificationModel->getUnreadNotificationsCountByClientId($userId);
+            $this->appendNotifications($unprocessedNotifications, $notifications);
+        } elseif ($role === 'Provider') {
+            $unprocessedNotifications = $this->notificationModel->getNotificationsByProviderId($userId, 10);
+            // $unreadNotificationCount = $this->notificationModel->getUnreadNotificationsCountByProviderId($userId);
+            $this->appendNotifications($unprocessedNotifications, $notifications);
+        }
+
+        $this->unreadNotificationCount = $unreadNotificationCount;
+        $this->notifications = $notifications;
+        // update notification timestamps
+        $this->lastNotifTimestamp = !empty($notifications) ? $notifications[0]['Created_At'] : null;
+        $this->firstNotifTimestamp = !empty($notifications) ? $notifications[count($notifications) - 1]['Created_At'] : null;
+
+        return;
     }
 
     protected function ensureAuth(): void
@@ -46,5 +68,6 @@ class BaseController
             header("Location: /login");
             exit;
         }
+        return;
     }
 }
