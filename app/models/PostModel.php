@@ -178,8 +178,8 @@ class PostModel extends Database
                          pr.Profile_Picture AS Provider_Picture, pr.Rating AS Provider_Rating,
                          COALESCE(proj.Progress, 0) AS Progress, proj.Started_At, proj.Ended_At,
                          cat.Name AS Category_Name, proj.Project_ID
-                  FROM Post p
-                  LEFT JOIN Provider pr ON p.Provider_ID = pr.Provider_ID
+                  FROM post p
+                  LEFT JOIN provider pr ON p.Provider_ID = pr.Provider_ID
                   LEFT JOIN project proj ON p.Post_ID = proj.Post_ID
                   LEFT JOIN category cat ON p.Category_ID = cat.Category_ID
                   WHERE p.Client_ID = ? AND (p.Post_Type = 'post' OR p.Post_Type = 'direct')";
@@ -405,9 +405,9 @@ class PostModel extends Database
                 p.Request_Status,
                 CONCAT(pr.First_Name, ' ', pr.Last_Name) AS Provider_Name,
                 c.Name AS CategoryName
-            FROM Post p
-            LEFT JOIN Category c ON c.Category_ID = p.Category_ID
-            LEFT JOIN Post_Need_Skills sk ON sk.Post_ID = p.Post_ID
+            FROM post p
+            LEFT JOIN category c ON c.Category_ID = p.Category_ID
+            LEFT JOIN post_need_skills sk ON sk.Post_ID = p.Post_ID
             LEFT JOIN provider pr ON pr.Provider_ID = p.Provider_ID
             WHERE p.Post_ID = ?
             LIMIT 1";
