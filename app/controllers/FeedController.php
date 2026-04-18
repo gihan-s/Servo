@@ -12,7 +12,7 @@ class FeedController extends BaseController
         $this->feedModel = new FeedModel();
     }
 
-    // GET /dashboard
+    // GET /feed
     public function index()
     {
         $this->ensureAuth();
@@ -30,8 +30,7 @@ class FeedController extends BaseController
             unset($item); // break reference
             $viewFile = __DIR__ . '/../views/provider/Feed/index.php';
         } else {
-            http_response_code(403);
-            echo "Invalid role";
+            $this->notFound();
             return;
         }
 
@@ -43,9 +42,7 @@ class FeedController extends BaseController
         $this->ensureAuth();
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            http_response_code(405);
-            // show error page and a link to go back to feed
-            include __DIR__ . '/../views/error.php';
+            $this->htmlError(405);
             return;
         }
 
@@ -53,25 +50,27 @@ class FeedController extends BaseController
         $role = $_SESSION['role'];
 
         if ($role !== 'Provider') {
-            http_response_code(403);
-            echo 'Sorry something unexpected happened';
-            include __DIR__ . '/../views/error.php';
+            $this->htmlError(403);
             return;
         }
 
         $postId = $_POST['post_id'] ?? null;
 
         if (!$postId) {
-            http_response_code(400);
-            echo 'Post ID is required';
+            $this->htmlError(400);
+            return;
+        }
+
+        $providerHasBid = $this->feedModel->providerHasBidOnPost($userId, $postId);
+        if ($providerHasBid) {
+            $this->htmlError(400);
             return;
         }
 
         $bidAmount = $_POST['bid_amount'] ?? null;
         $duration = $_POST['bid_duration'] ?? null;
         if (!$bidAmount || !$duration) {
-            http_response_code(400);
-            echo 'Bid Amount, and Duration are required';
+            $this->htmlError(400);
             return;
         }
         $bidComment = $_POST['bid_message'] ?? null;
@@ -79,8 +78,7 @@ class FeedController extends BaseController
         $bidDurationUnit = $_POST['bid_duration_unit'] ?? 'd';
         $allowedUnits = ['d', 'w', 'm'];
         if (!in_array($bidDurationUnit, $allowedUnits, true)) {
-            http_response_code(400);
-            echo 'Invalid duration unit';
+            $this->htmlError(400);
             return;
         }
         switch ($bidDurationUnit) {
@@ -97,21 +95,15 @@ class FeedController extends BaseController
                 $durationDays = $duration;
         }
 
-        echo '<pre>';
-        print_r($_POST);
-        echo 'Calculated duration in days: ' . $durationDays;
-        echo '</pre>';
-        exit();
+        $result = $this->feedModel->submitBid($userId, $postId, $bidAmount, $bidComment, $durationDays);
 
-        // $result = $this->feedModel->submitBid($userId, $postId, $bidAmount, $bidComment, $durationDays);
-
-        // if ($result['success']) {
-        //     header('Location: ' . BASE_URL . '/feed');
-        //     exit();
-        // } else {
-        //     http_response_code(500);
-        //     echo 'Failed to submit bid';
-        // }
+        if ($result['success']) {
+            header('Location: ' . BASE_URL . '/feed');
+            exit();
+        } else {
+            $this->htmlError(500);
+            return;
+        }
     }
 
 }

@@ -274,6 +274,11 @@ switch ($url) {
         $controller->index();
         break;
 
+    case 'bids/edit':
+        $controller = new BidsController();
+        $controller->edit();
+        break;
+
     case 'admin/login':
         $controller = new AdminLoginController();
         $controller->index();

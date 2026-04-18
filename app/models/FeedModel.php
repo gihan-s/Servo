@@ -89,7 +89,7 @@ class FeedModel extends Database
                 'Requesting_Price' => 600,
                 'Created_At' => date('Y-m-d H:i:s', strtotime('-2 hours')),
                 'Deadline' => date('Y-m-d', strtotime('+10 days')),
-                'Post_Status' => 'Open',
+                'Post_Status' => 'Published',
                 'Client_ID' => 1,
                 'Client_First_Name' => 'Nadia', // from database join with client table
                 'Client_Last_Name' => 'Perera', // from database join with client table
@@ -104,8 +104,8 @@ class FeedModel extends Database
                 'Requesting_Price' => 350,
                 'Created_At' => date('Y-m-d H:i:s', strtotime('-5 hours')),
                 'Deadline' => date('Y-m-d', strtotime('+5 days')),
-                'Post_Status' => 'Open',
-                'Request_Status' => 'Pending',
+                'Post_Status' => 'Published',
+                'Request_Status' => 'open',
                 'Client_ID' => 2,
                 'Client_First_Name' => 'Isuru',
                 'Client_Last_Name' => 'Fernando',
@@ -119,8 +119,8 @@ class FeedModel extends Database
                 'Requesting_Price' => 480,
                 'Created_At' => date('Y-m-d H:i:s', strtotime('-1 day')),
                 'Deadline' => date('Y-m-d', strtotime('+14 days')),
-                'Post_Status' => 'Open',
-                'Request_Status' => 'Pending',
+                'Post_Status' => 'Published',
+                'Request_Status' => 'open',
                 'Client_ID' => 3,
                 'Client_First_Name' => 'Tharushi',
                 'Client_Last_Name' => 'De Silva',
@@ -179,6 +179,26 @@ class FeedModel extends Database
         return $row;
     }
 
+    public function providerHasBidonPost($providerId, $postId)
+    {
+        $sql = "SELECT COUNT(*) FROM bids WHERE Provider_ID = ? AND Post_ID = ?";
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('FeedModel::providerHasBidOnPost prepare: ' . $this->conn->error);
+            return false;
+        }
+        $stmt->bind_param('ii', $providerId, $postId);
+        if (!$stmt->execute()) {
+            error_log('FeedModel::providerHasBidOnPost exec: ' . $stmt->error);
+            $stmt->close();
+            return false;
+        }
+        $stmt->bind_result($count);
+        $stmt->fetch();
+        $stmt->close();
+        return $count > 0;
+    }
+
     public function submitBid($providerId, $postId, $amount, $comment, $duration)
     {
         // add entry to database, bids table with status 'Active' and current timestamp for created_at
@@ -188,7 +208,7 @@ class FeedModel extends Database
             error_log('BidModel::submitBid prepare: ' . $this->conn->error);
             return ['success' => false, 'error' => 'Database error'];
         }
-        $stmt->bind_param('iiiis', $providerId, $postId, $amount, $comment, $duration);
+        $stmt->bind_param('iiisi', $providerId, $postId, $amount, $comment, $duration);
         if (!$stmt->execute()) {
             error_log('BidModel::submitBid exec: ' . $stmt->error);
             $stmt->close();

@@ -15,6 +15,18 @@ const tabs = document.querySelectorAll('.container-changer .buttons');
 const sections = document.querySelectorAll('.request-content .requests-section');
 const detailsModalRoot = document.getElementById('bidDetailsModalRoot');
 const detailsModalClose = document.getElementById('bidDetailsModalClose');
+const editModalRoot = document.getElementById('bidEditModalRoot');
+const editModal = document.getElementById('bidEditModal');
+const editModalClose = document.getElementById('bidEditModalClose');
+const editForm = document.getElementById('bidEditForm');
+const editBidId = document.getElementById('editBidId');
+const editBidProjectTitle = document.getElementById('editBidProjectTitle');
+const editBidClientName = document.getElementById('editBidClientName');
+const editBidAmount = document.getElementById('editBidAmount');
+const editBidDuration = document.getElementById('editBidDuration');
+const editBidDurationUnit = document.getElementById('editBidDurationUnit');
+const editBidMessage = document.getElementById('editBidMessage');
+const editBidSubmitBtn = document.getElementById('editBidSubmitBtn');
 const searchInput = document.getElementById('bidsSearchInput');
 const searchBtn = document.getElementById('bidsSearchBtn');
 const filterRoot = document.getElementById('bidsFilterRoot');
@@ -30,6 +42,7 @@ const bidDetailDetails = document.getElementById('bidDetailDetails');
 const cards = Array.from(document.querySelectorAll('.request-content .search-item[data-title]'));
 let selectedCategories = new Set();
 let activeSectionKey = 'active';
+let activeEditCard = null;
 
 const bidDetailFieldMap = [
 	{ key: 'amount', label: 'Bid Amount' },
@@ -84,6 +97,167 @@ function closeDetails() {
 	closeModal(detailsModalRoot);
 }
 
+function parsePositiveInt(value, fallback = 1) {
+	const parsed = Number.parseInt(String(value || '').trim(), 10);
+	return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+function parseAmount(rawAmount, formattedAmount) {
+	const parsedRaw = Number.parseFloat(String(rawAmount || '').replace(/[^\d.]/g, ''));
+	if (Number.isFinite(parsedRaw) && parsedRaw > 0) {
+		return parsedRaw;
+	}
+
+	const parsedFormatted = Number.parseFloat(String(formattedAmount || '').replace(/[^\d.]/g, ''));
+	return Number.isFinite(parsedFormatted) && parsedFormatted > 0 ? parsedFormatted : 1;
+}
+
+function durationDaysToEditableValue(durationDays) {
+	const days = parsePositiveInt(durationDays, 1);
+	if (days % 30 === 0) {
+		return { value: String(days / 30), unit: 'm' };
+	}
+
+	if (days % 7 === 0) {
+		return { value: String(days / 7), unit: 'w' };
+	}
+
+	return { value: String(days), unit: 'd' };
+}
+
+function updateCardAfterEdit(card, bidData) {
+	if (!card || !bidData) return;
+
+	const amountFormatted = bidData.amountFormatted || card.dataset.amount || '-';
+	const amountRaw = String(bidData.amount ?? card.dataset.amountRaw ?? '').trim();
+	const durationLabel = bidData.durationLabel || card.dataset.duration || '-';
+	const durationDays = String(bidData.durationDays ?? card.dataset.durationDays ?? '').trim();
+	const durationState = durationDaysToEditableValue(durationDays);
+	const comment = bidData.comment || card.dataset.description || '';
+	const status = bidData.status || card.dataset.status || 'Active';
+	const statusKey = bidData.statusKey || card.dataset.statusKey || 'active';
+	const bidDateLabel = bidData.bidDateLabel || card.dataset.bidDateLabel || '';
+
+	card.dataset.amount = amountFormatted;
+	card.dataset.amountRaw = amountRaw;
+	card.dataset.duration = durationLabel;
+	card.dataset.durationDays = durationDays;
+	card.dataset.durationUnitValue = durationState.value;
+	card.dataset.durationUnit = durationState.unit;
+	card.dataset.description = comment;
+	card.dataset.status = status;
+	card.dataset.statusKey = statusKey;
+	if (bidDateLabel) {
+		card.dataset.bidDateLabel = bidDateLabel;
+	}
+
+	const districtSpans = card.querySelectorAll('.item-district span');
+	if (districtSpans[0] && bidDateLabel) {
+		districtSpans[0].innerHTML = '<i class="fa-solid fa-clock"></i> Bid placed ' + bidDateLabel;
+	}
+	if (districtSpans[1]) {
+		districtSpans[1].innerHTML = '<i class="fa-solid fa-tag"></i> Your bid: ' + amountFormatted;
+	}
+
+	const middleDivs = card.querySelectorAll('.item-middle div');
+	if (middleDivs[0]) {
+		middleDivs[0].innerHTML = '<i class="fa-solid fa-calendar-days"></i> Duration: ' + durationLabel;
+	}
+
+	const desc = card.querySelector('.item-description');
+	if (desc) {
+		desc.textContent = comment;
+	}
+
+	const statusChip = card.querySelector('.status-bottom .status-chip');
+	if (statusChip) {
+		statusChip.textContent = status;
+		statusChip.className = 'status-chip status-' + statusKey;
+	}
+}
+
+function openEditModal(card) {
+	if (!editForm || !editModalRoot || !editBidId || !editBidAmount || !editBidDuration || !editBidDurationUnit || !editBidMessage) {
+		return;
+	}
+
+	activeEditCard = card;
+
+	const bidId = card.dataset.bidId || '';
+	const title = card.dataset.title || 'Project';
+	const client = card.dataset.client || 'Client';
+	const amount = parseAmount(card.dataset.amountRaw, card.dataset.amount);
+	const datasetDurationValue = parsePositiveInt(card.dataset.durationUnitValue, 0);
+	const datasetDurationUnit = (card.dataset.durationUnit || '').trim().toLowerCase();
+	const durationState = datasetDurationValue > 0 && ['d', 'w', 'm'].includes(datasetDurationUnit)
+		? { value: String(datasetDurationValue), unit: datasetDurationUnit }
+		: durationDaysToEditableValue(card.dataset.durationDays);
+	const comment = card.dataset.description || '';
+
+	editForm.reset();
+	editBidId.value = bidId;
+	editBidProjectTitle.textContent = title;
+	editBidClientName.textContent = client;
+	editBidAmount.value = String(Math.max(1, Math.round(amount)));
+	editBidDuration.value = durationState.value;
+	editBidDurationUnit.value = durationState.unit;
+	editBidMessage.value = comment;
+
+	openModal(editModalRoot, editModal);
+	editBidAmount.focus();
+}
+
+function closeEditModal() {
+	closeModal(editModalRoot, editModal);
+	activeEditCard = null;
+}
+
+async function submitEditForm(event) {
+	event.preventDefault();
+	if (!editForm || !activeEditCard) return;
+
+	const previousLabel = editBidSubmitBtn ? editBidSubmitBtn.innerHTML : '';
+	if (editBidSubmitBtn) {
+		editBidSubmitBtn.disabled = true;
+		editBidSubmitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+	}
+
+	try {
+		const response = await fetch(editForm.action, {
+			method: 'POST',
+			body: new FormData(editForm),
+			headers: {
+				'X-Requested-With': 'XMLHttpRequest'
+			}
+		});
+
+		let payload = null;
+		try {
+			payload = await response.json();
+		} catch (_error) {
+			payload = null;
+		}
+
+		if (!response.ok || !payload || payload.success !== true) {
+			const message = payload && payload.message ? payload.message : 'Unable to update bid.';
+			alert(message);
+			return;
+		}
+
+		updateCardAfterEdit(activeEditCard, payload.bid || {});
+		applyFiltersWrapper();
+		closeEditModal();
+		alert(payload.message || 'Bid updated successfully.');
+	} catch (_error) {
+		alert('Unable to update bid right now. Please try again.');
+	} finally {
+		if (editBidSubmitBtn) {
+			editBidSubmitBtn.disabled = false;
+			editBidSubmitBtn.innerHTML = previousLabel;
+		}
+	}
+}
+
 // Bid-specific button handlers
 document.querySelectorAll('.search-item .btn-view').forEach((btn) => {
 	btn.addEventListener('click', function () {
@@ -114,11 +288,9 @@ document.querySelectorAll('.search-item .btn-withdraw').forEach((btn) => {
 document.querySelectorAll('.search-item .btn-edit').forEach((btn) => {
 	btn.addEventListener('click', function () {
 		const card = this.closest('.search-item');
-		const title = card ? card.dataset.title || 'this bid' : 'this bid';
-		alert(
-			'Edit for "' + title + '" will be processed as withdraw + new bid in backend. ' +
-			'This complexity stays hidden from you (placeholder).'
-		);
+		if (card) {
+			openEditModal(card);
+		}
 	});
 });
 
@@ -127,6 +299,12 @@ detailsModalClose && detailsModalClose.addEventListener('click', closeDetails);
 detailsModalRoot && detailsModalRoot.addEventListener('click', (event) => {
 	if (event.target === detailsModalRoot) closeDetails();
 });
+
+editModalClose && editModalClose.addEventListener('click', closeEditModal);
+editModalRoot && editModalRoot.addEventListener('click', (event) => {
+	if (event.target === editModalRoot) closeEditModal();
+});
+editForm && editForm.addEventListener('submit', submitEditForm);
 
 // Setup search handlers using common module
 setupSearchHandlers(searchInput, searchBtn, applyFiltersWrapper);
@@ -159,6 +337,7 @@ setupTabNavigation(tabContainer, tabs, sections, (targetId) => {
 // Setup escape key handler for all modals
 setupEscapeKeyHandler([
 	{ root: detailsModalRoot },
+	{ root: editModalRoot, element: editModal },
 	{ root: filterRoot, element: filterModal }
 ]);
 

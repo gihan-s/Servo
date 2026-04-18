@@ -225,13 +225,112 @@ class BidModel extends Database
 
     public function editBidForProvider($providerId, $bidRef, array $newBidData)
     {
-        // Business rule: edit is implemented as withdraw + create under the hood.
+        $amount = (float) ($newBidData['amount'] ?? 0);
+        $comment = (string) ($newBidData['comment'] ?? '');
+        $durationDays = (int) ($newBidData['durationDays'] ?? 0);
+
+        return $this->updateBidForProvider((int) $providerId, (int) $bidRef, $amount, $comment, $durationDays);
+    }
+
+    public function updateBidForProvider(int $providerId, int $bidId, float $amount, string $comment, int $durationDays): array
+    {
+        if ($providerId <= 0 || $bidId <= 0) {
+            return [
+                'success' => false,
+                'errorCode' => 'invalid_input',
+                'message' => 'Invalid provider or bid id',
+            ];
+        }
+
+        if ($amount <= 0 || $durationDays <= 0) {
+            return [
+                'success' => false,
+                'errorCode' => 'invalid_input',
+                'message' => 'Invalid amount or duration',
+            ];
+        }
+
+        $comment = trim($comment);
+
+        $editable = $this->getEditableBidRecord($providerId, $bidId);
+        if ($editable !== null) {
+            if (!$editable['canEdit']) {
+                return [
+                    'success' => false,
+                    'errorCode' => 'not_editable',
+                    'message' => 'Only active bids can be edited',
+                ];
+            }
+
+            $estDate = date('Y-m-d H:i:s', strtotime('+' . $durationDays . ' days'));
+            $sql = 'UPDATE bids SET Amount = ?, Comment = ?, Est_Date = ? WHERE Bid_ID = ? AND Provider_ID = ?';
+            $stmt = $this->conn->prepare($sql);
+            if (!$stmt) {
+                error_log('BidModel::updateBidForProvider prepare: ' . $this->conn->error);
+                return [
+                    'success' => false,
+                    'errorCode' => 'db_prepare_error',
+                    'message' => 'Database error',
+                ];
+            }
+
+            $stmt->bind_param('dssii', $amount, $comment, $estDate, $bidId, $providerId);
+            if (!$stmt->execute()) {
+                error_log('BidModel::updateBidForProvider exec: ' . $stmt->error);
+                $stmt->close();
+                return [
+                    'success' => false,
+                    'errorCode' => 'db_exec_error',
+                    'message' => 'Database error',
+                ];
+            }
+
+            $stmt->close();
+            return [
+                'success' => true,
+                'bidId' => $bidId,
+                'amount' => $amount,
+                'comment' => $comment,
+                'durationDays' => $durationDays,
+                'updatedAt' => date('Y-m-d H:i:s'),
+            ];
+        }
+
+        // Fallback for current dummy-data mode so UI flow can be validated end-to-end.
+        $providerBids = $this->getProviderBids($providerId);
+        $target = null;
+        foreach ($providerBids as $bid) {
+            if ((int) ($bid['Bid_ID'] ?? 0) === $bidId) {
+                $target = $bid;
+                break;
+            }
+        }
+
+        if ($target === null) {
+            return [
+                'success' => false,
+                'errorCode' => 'not_found',
+                'message' => 'Bid not found',
+            ];
+        }
+
+        $statusLower = strtolower((string) ($target['Status'] ?? ''));
+        if (!in_array($statusLower, ['active', 'pending', 'open'], true)) {
+            return [
+                'success' => false,
+                'errorCode' => 'not_editable',
+                'message' => 'Only active bids can be edited',
+            ];
+        }
+
         return [
             'success' => true,
-            'providerId' => $providerId,
-            'oldBidRef' => $bidRef,
-            'operation' => 'withdraw_and_recreate',
-            'newBidData' => $newBidData,
+            'bidId' => $bidId,
+            'amount' => $amount,
+            'comment' => $comment,
+            'durationDays' => $durationDays,
+            'updatedAt' => date('Y-m-d H:i:s'),
+            'isSimulated' => true,
         ];
     }
 
@@ -261,6 +360,8 @@ class BidModel extends Database
                     p.Title,
                     p.Description AS Post_Description,
                     p.Category_ID,
+                    p.Post_Status,
+                    p.Request_Status AS Post_Request_Status,
                     p.Provider_ID AS Post_Provider_ID,
                     c.First_Name AS Client_First_Name,
                     c.Last_Name AS Client_Last_Name,
@@ -321,16 +422,19 @@ class BidModel extends Database
                 'Amount' => 550,
                 'Created_At' => date('Y-m-d H:i:s', strtotime('-2 hours')),
                 'Est_Date' => date('Y-m-d', strtotime('+8 days')),
-                'Status' => 'Active',
+                'Status' => 'active',
                 'Post_ID' => 1,
                 'Title' => 'Portfolio Website + CMS',
                 'Post_Description' => 'Need a professional portfolio website with CMS capabilities.',
                 'Category_ID' => 1,
+                'Post_Status' => 'published',
+                'Post_Request_Status' => 'pending',
+                'Post_Provider_ID' => null,
                 'Client_First_Name' => 'Nadia',
                 'Client_Last_Name' => 'Perera',
                 'Category_Name' => 'Web Development',
                 // data below is formatted will be formatted in the controller/view normally, but included here for testing purposes
-                'Duration' => 8 * 24,
+                'Duration' => 8,
             ],
             [
                 'Bid_ID' => 2,
@@ -338,15 +442,18 @@ class BidModel extends Database
                 'Amount' => 460,
                 'Created_At' => date('Y-m-d H:i:s', strtotime('-1 day')),
                 'Est_Date' => date('Y-m-d', strtotime('+12 days')),
-                'Status' => 'Active',
+                'Status' => 'active',
                 'Post_ID' => 2,
                 'Title' => 'WordPress SEO Optimization',
                 'Post_Description' => 'Need SEO expert to optimize WordPress site.',
                 'Category_ID' => 2,
+                'Post_Status' => 'published',
+                'Post_Request_Status' => 'pending',
+                'Post_Provider_ID' => null,
                 'Client_First_Name' => 'Tharushi',
                 'Client_Last_Name' => 'De Silva',
                 'Category_Name' => 'SEO',
-                'Duration' => 12 * 24,
+                'Duration' => 12,
             ],
             [
                 'Bid_ID' => 3,
@@ -354,15 +461,18 @@ class BidModel extends Database
                 'Amount' => 340,
                 'Created_At' => date('Y-m-d H:i:s', strtotime('-3 days')),
                 'Est_Date' => date('Y-m-d', strtotime('+5 days')),
-                'Status' => 'Accepted',
+                'Status' => 'accepted',
                 'Post_ID' => 3,
                 'Title' => 'Brand Kit for Startup Launch',
                 'Post_Description' => 'Creating brand identity for new startup.',
                 'Category_ID' => 3,
+                'Post_Status' => 'published',
+                'Post_Request_Status' => 'accepted',
+                'Post_Provider_ID' => (int) $providerId,
                 'Client_First_Name' => 'Isuru',
                 'Client_Last_Name' => 'Fernando',
                 'Category_Name' => 'Graphic Design',
-                'Duration' => 5 * 24,
+                'Duration' => 5,
             ],
             [
                 'Bid_ID' => 4,
@@ -370,25 +480,70 @@ class BidModel extends Database
                 'Amount' => 190,
                 'Created_At' => date('Y-m-d H:i:s', strtotime('-4 days')),
                 'Est_Date' => date('Y-m-d', strtotime('+4 days')),
-                'Status' => 'Rejected',
+                'Status' => 'closed',
                 'Post_ID' => 4,
                 'Title' => 'Landing Page Copy Refresh',
                 'Post_Description' => 'Need compelling copy for landing page.',
                 'Category_ID' => 4,
+                'Post_Status' => 'expired',
+                'Post_Request_Status' => 'accepted',
+                'Post_Provider_ID' => 9999,
                 'Client_First_Name' => 'Kavindu',
                 'Client_Last_Name' => 'Jayasekara',
                 'Category_Name' => 'Content Writing',
-                'Duration' => 4 * 24,
+                'Duration' => 4,
             ],
         ];
     }
 
-    public function getActiveBidsForProvider($providerId) // Request_Status = 'open' AND Post_Provider_ID = null means bid is active and waiting for client action
-    {}
+    private function getEditableBidRecord(int $providerId, int $bidId): ?array
+    {
+        $sql = "
+            SELECT
+                b.Bid_ID,
+                b.Provider_ID,
+                b.Status AS Bid_Status,
+                p.Post_Status,
+                p.Request_Status AS Post_Request_Status,
+                p.Provider_ID AS Post_Provider_ID
+            FROM bids b
+            INNER JOIN post p ON p.Post_ID = b.Post_ID
+            WHERE b.Bid_ID = ? AND b.Provider_ID = ?
+            LIMIT 1
+        ";
 
-    public function getAcceptedBidsForProvider($providerId) // Request_Status = 'pending' || 'accepted' AND Post_Provider_ID = providerId means bid is accepted and waiting for provider to accept or reject the job
-    {}
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('BidModel::getEditableBidRecord prepare: ' . $this->conn->error);
+            return null;
+        }
 
-    public function getClosedBidForProvider($providerId) // Request_Status = 'pending' || 'accepted' AND Post_Provider_ID != providerId means bid is no longer viable for the provider, either because client accepted another bid or the post got closed without accepting any bid
-    {}
+        $stmt->bind_param('ii', $bidId, $providerId);
+        if (!$stmt->execute()) {
+            error_log('BidModel::getEditableBidRecord exec: ' . $stmt->error);
+            $stmt->close();
+            return null;
+        }
+
+        $row = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+
+        if (!$row) {
+            return null;
+        }
+
+        $postStatus = strtolower(trim((string) ($row['Post_Status'] ?? '')));
+        $requestStatus = strtolower(trim((string) ($row['Post_Request_Status'] ?? '')));
+        $postProviderRaw = $row['Post_Provider_ID'] ?? null;
+        $postProviderId = ($postProviderRaw === null || $postProviderRaw === '') ? null : (int) $postProviderRaw;
+        $bidStatus = strtolower(trim((string) ($row['Bid_Status'] ?? '')));
+
+        $isOpenPost = in_array($postStatus, ['published', 'active'], true);
+        $isPendingRequest = $requestStatus === 'pending';
+        $isUnassignedPost = $postProviderId === null;
+        $isActiveBid = in_array($bidStatus, ['active', 'pending', 'open'], true);
+
+        $row['canEdit'] = $isOpenPost && $isPendingRequest && $isUnassignedPost && $isActiveBid;
+        return $row;
+    }
 }
