@@ -211,6 +211,24 @@
             <div id="service-details-content" style="padding: 20px 0;"></div>
         </div>
     </div>
+
+    <div class="dialog-box-2" id="request-confirmation-modal">
+        <div class="dialog-content" style="width: 520px;">
+            <div class="dialog-title">
+                <div class="title">Confirm Request</div>
+                <div>
+                    <i class="fa-solid fa-xmark dialog-close-button-2" onclick="closeRequestConfirmationModal(false)"></i>
+                </div>
+            </div>
+            <div class="dialog-body" style="padding: 0 20px 14px;">
+                <p id="request-confirmation-message" style="margin: 0; color: #334155; line-height: 1.7;"></p>
+            </div>
+            <div class="modal-actions" style="padding: 0 20px 20px; justify-content: flex-end;">
+                <button type="button" class="action-btn btn-delete" onclick="closeRequestConfirmationModal(false)">Cancel</button>
+                <button type="button" class="action-btn btn-edit" onclick="closeRequestConfirmationModal(true)"><i class="fa-solid fa-paper-plane"></i> Continue</button>
+            </div>
+        </div>
+    </div>
 </body>
 
 <script>
@@ -239,8 +257,6 @@
             { value: 'name_desc', label: 'Name (Z -> A)' },
             { value: 'rating_asc', label: 'Rating (Low -> High)' },
             { value: 'rating_desc', label: 'Rating (High -> Low)' },
-            { value: 'earnings_asc', label: 'Earnings (Low -> High)' },
-            { value: 'earnings_desc', label: 'Earnings (High -> Low)' },
         ];
 
         const serviceState = {
@@ -269,6 +285,7 @@
         const providerProfileCache = {};
         let providerDialogZIndex = 2000;
         let hasSortOptionClickListener = false;
+        let requestConfirmationResolver = null;
 
         function escapeHtml(value) {
             return String(value ?? '')
@@ -362,13 +379,40 @@
             `;
         }
 
+        function showRequestConfirmationModal() {
+            const modal = document.getElementById('request-confirmation-modal');
+            const message = document.getElementById('request-confirmation-message');
+
+            if (!modal || !message) {
+                return Promise.resolve(false);
+            }
+
+            message.textContent = 'There is a request ongoing for the same service. Do you want to send another request?';
+
+            return new Promise(resolve => {
+                requestConfirmationResolver = resolve;
+                bringProviderDialogToFront(modal);
+                modal.classList.add('dialog-box-2-view');
+            });
+        }
+
+        function closeRequestConfirmationModal(confirmed) {
+            const modal = document.getElementById('request-confirmation-modal');
+            if (modal) {
+                modal.classList.remove('dialog-box-2-view');
+            }
+
+            if (typeof requestConfirmationResolver === 'function') {
+                requestConfirmationResolver(Boolean(confirmed));
+            }
+            requestConfirmationResolver = null;
+        }
+
         function renderServiceCardMarkup(service) {
             serviceCardsCache[service.Provider_Categories_ID] = service;
 
             const providerName = `${service.First_Name || ''} ${service.Last_Name || ''}`.trim() || 'Provider';
-            const providerLocation = Array.isArray(service.locations) && service.locations.length
-                ? [service.locations[0].District, service.locations[0].City].filter(Boolean).join(' - ')
-                : 'Location not specified';
+            const providerLocation = (service.formatted_location || '').trim() || 'Location not specified';
             const providerRating = service.provider_star_rating !== undefined && service.provider_star_rating !== null
                 ? Number(service.provider_star_rating).toFixed(1)
                 : `${Math.max(0, Math.min(5, Number(service.Provider_Rating || 0) / 20)).toFixed(1)}`;
@@ -376,6 +420,7 @@
             const providerImage = service.Profile_Picture
                 ? `<?= BASE_URL ?>/file/user-files/${service.Profile_Picture}`
                 : 'sampleImg.jpg';
+            const messageUrl = `<?= BASE_URL ?>/messages?new=${encodeURIComponent(String(Number(service.Provider_ID) || 0))}`;
             const skills = (service.skills || []).slice(0, 6);
             const skillsTags = skills.length
                 ? skills.map(skill => `<span class="skill-tag">${escapeHtml(skill)}</span>`).join('')
@@ -397,7 +442,7 @@
                             </div>
                         </div>
                         <div class="post-actions">
-                            <button class="action-btn btn-view" title="Message Provider"><i class="fa-solid fa-messages"></i> Message</button>
+                            <button class="action-btn btn-view" title="Message Provider" onclick="window.location.href='${messageUrl}'"><i class="fa-solid fa-messages"></i> Message</button>
                             <button class="action-btn btn-view" title="View Service" onclick="openServiceCardDetailsModal(${service.Provider_Categories_ID})"><i class="fa-solid fa-eye"></i> View Service</button>
                             <button class="action-btn btn-edit service-hire-btn" title="Send Request" data-service-id="${service.Provider_Categories_ID}" data-request-status="${service.request_status}"><i class="fa-solid fa-paper-plane"></i> Send Request</button>
                         </div>
@@ -420,10 +465,6 @@
                                 <span class="detail-label">Successive Rate</span>
                                 <span class="detail-value">${escapeHtml(successiveRate)}</span>
                             </div>
-                            <div class="detail-item">
-                                <span class="detail-label">Earnings</span>
-                                <span class="detail-value">${escapeHtml(service.total_earning_formatted || 'LKR 0.00')}</span>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -437,15 +478,11 @@
                 return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="action-btn btn-view" style="padding: 7px 12px; font-size: 12px; text-decoration: none;"><i class="fa-solid fa-link"></i> ${label}</a>`;
             }).join('');
 
-            const locationsHTML = (service.locations || []).map(location => {
-                const district = escapeHtml(location.District || '');
-                const city = escapeHtml(location.City || '');
-                return `<span class="skill-tag">${district}${city ? ' - ' + city : ''}</span>`;
-            }).join('');
+            const formattedLocation = (service.formatted_location || '').trim();
+            const locationsHTML = formattedLocation ? `<span class="skill-tag">${escapeHtml(formattedLocation)}</span>` : '';
 
             const skillsHTML = (service.skills || []).map(skill => `<span class="skill-tag">${escapeHtml(skill)}</span>`).join('');
             const successiveRate = service.success_rate_display || `${Math.max(0, Math.min(100, Math.round(Number(service.Rating || 0))))}%`;
-            const earningsDisplay = service.total_earning_formatted || 'LKR 0.00';
 
             return `
                 <div style="display:grid; gap:14px; padding:0 20px 10px;">
@@ -471,10 +508,6 @@
                                 <div style="display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background:#fff7ed; color:#9a3412; font-size:13px; font-weight:700;">
                                     <i class="fa-solid fa-chart-line"></i>
                                     ${escapeHtml(successiveRate)}
-                                </div>
-                                <div style="display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background:#ecfdf5; color:#166534; font-size:13px; font-weight:700;">
-                                    <i class="fa-solid fa-coins"></i>
-                                    ${escapeHtml(earningsDisplay)}
                                 </div>
                             </div>
                         </div>
@@ -535,12 +568,6 @@
 
             e.preventDefault();
             const serviceId = button.getAttribute('data-service-id');
-            const requestStatus = button.getAttribute('data-request-status');
-
-            if (requestStatus === 'ongoing') {
-                showToast('warning', 'Request In Progress', 'You already have an ongoing request for this service.');
-                return;
-            }
 
             if (serviceId) {
                 openServiceCardRequestModal(parseInt(serviceId, 10));
@@ -617,10 +644,12 @@
 
             const categoryTags = Array.isArray(provider.categories) && provider.categories.length ? provider.categories : (provider.skills || []);
             const categoriesHTML = categoryTags.map(category => `<span class="skill-tag">${escapeHtml(category)}</span>`).join('');
-            const socialHTML = (provider.social_links || []).map(social => {
+            const availableSocialLinks = (provider.social_links || []).filter(social => String(social?.link || '').trim());
+            const socialHTML = availableSocialLinks.map(social => {
                 const iconPrefix = (social.icon_class === 'fa-envelope' || social.icon_class === 'fa-link') ? 'fa-solid' : 'fa-brands';
                 return `<a href="${escapeHtml(social.link)}" title="${escapeHtml(social.name)}" target="_blank" style="background-color: ${escapeHtml(social.color || '#008500')}"><i class="${iconPrefix} ${escapeHtml(social.icon_class)}"></i></a>`;
             }).join('');
+            const messageUrl = `<?= BASE_URL ?>/messages?new=${encodeURIComponent(String(Number(provider.Provider_ID) || 0))}`;
 
             return `
                 <div class="profile-card search-item">
@@ -632,15 +661,14 @@
                             <div class="profile-services">${categoriesHTML || '<span class="skill-tag">View Services</span>'}</div>
                         </div>
 
-                        <div class="profile-stats">
+                        <div class="profile-stats" style="grid-template-columns: 1fr;">
                             <div class="stat-pill">Rating<br><b><i class="fa-solid fa-star" style="color:#f59e0b;"></i> ${escapeHtml(provider.rating)}</b></div>
-                            <div class="stat-pill">Earnings<br><b>${escapeHtml(provider.total_earning_formatted || 'LKR 0.00')}</b></div>
                         </div>
 
                         <div class="provider-bio" style="padding: 0 18px; box-sizing: border-box;">${escapeHtml(provider.Bio || 'Experienced professional ready to help with your project.')}</div>
 
                         <div class="provider-actions">
-                            <button class="action-btn btn-view" type="button"><i class="fa-solid fa-messages"></i> Message</button>
+                            <button class="action-btn btn-view" type="button" onclick="window.location.href='${messageUrl}'"><i class="fa-solid fa-messages"></i> Message</button>
                             <button class="action-btn btn-view" type="button" onclick="openProviderProfileModal(${provider.Provider_ID})"><i class="fa-solid fa-user"></i> View Profile</button>
                             <button class="action-btn btn-edit" type="button" data-provider-id="${provider.Provider_ID}" data-provider-name="${escapeHtml((provider.First_Name || '') + ' ' + (provider.Last_Name || ''))}" onclick="openProviderServicesModal(this)"><i class="fa-solid fa-briefcase"></i> Hire</button>
                         </div>
@@ -762,11 +790,6 @@
                 return;
             }
 
-            if (service.request_status === 'ongoing') {
-                showToast('warning', 'Request In Progress', 'You already have an ongoing request for this service.');
-                return;
-            }
-
             const modal = document.getElementById('provider-request-modal');
             const form = document.getElementById('provider-request-form');
             if (!modal || !form) {
@@ -824,13 +847,15 @@
             }
 
             const providerName = `${provider.First_Name || ''} ${provider.Last_Name || ''}`.trim() || 'Provider';
-            const providerLocation = [provider.Location, provider.location, provider.Address].find(value => String(value || '').trim()) || '';
+            const providerLocation = [provider.formatted_location, provider.Location, provider.location, provider.Address]
+                .find(value => String(value || '').trim()) || '';
             const categories = Array.isArray(provider.categories) && provider.categories.length ? provider.categories : (provider.skills || []);
             const skills = Array.isArray(provider.skills) && provider.skills.length ? provider.skills : [];
             const categoriesHTML = categories.length ? categories.map(item => `<span class="skill-tag">${escapeHtml(item)}</span>`).join('') : '<span class="skill-tag">No categories listed</span>';
             const skillsHTML = skills.length ? skills.map(item => `<span class="skill-tag">${escapeHtml(item)}</span>`).join('') : '<span class="skill-tag">No skills listed</span>';
-            const socialHTML = (provider.social_links || []).length
-                ? provider.social_links.map(social => {
+            const availableSocialLinks = (provider.social_links || []).filter(social => String(social?.link || '').trim());
+            const socialHTML = availableSocialLinks.length
+                ? availableSocialLinks.map(social => {
                     const iconPrefix = (social.icon_class === 'fa-envelope' || social.icon_class === 'fa-link') ? 'fa-solid' : 'fa-brands';
                     return `<a href="${escapeHtml(social.link || '#')}" title="${escapeHtml(social.name || 'Link')}" target="_blank" rel="noopener noreferrer" style="background-color: ${escapeHtml(social.color || '#008500')};"><i class="${iconPrefix} ${escapeHtml(social.icon_class || 'fa-link')}"></i></a>`;
                 }).join('')
@@ -850,7 +875,6 @@
                                 <div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:10px; align-items:center; color:rgba(255,255,255,0.92); font-size:14px;">
                                     ${providerLocation ? `<span style="display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background:rgba(255,255,255,0.14);"><i class="fa-solid fa-location-dot"></i>${escapeHtml(providerLocation)}</span>` : ''}
                                     <span style="display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background:rgba(255,255,255,0.14);"><i class="fa-solid fa-star" style="color:#fbbf24;"></i>${escapeHtml(provider.rating || 0)}</span>
-                                    <span style="display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background:rgba(255,255,255,0.14);"><i class="fa-solid fa-coins"></i>${escapeHtml(provider.total_earning_formatted || 'LKR 0.00')} earned</span>
                                 </div>
                             </div>
                             <div style="display:flex; flex-direction:column; gap:10px; justify-self:end;">
@@ -870,7 +894,6 @@
                                 <div style="font-size:13px; font-weight:800; color:#008500; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:12px;">Stats</div>
                                 <div style="display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:10px;">
                                     <div class="stat-pill" style="background:#eff6ff; border-color:#bfdbfe;"><b>${escapeHtml(provider.rating || 0)}</b><br>Rating</div>
-                                    <div class="stat-pill" style="background:#ecfdf5; border-color:#bbf7d0;"><b>${escapeHtml(provider.total_earning_formatted || 'LKR 0.00')}</b><br>Earnings</div>
                                     <div class="stat-pill" style="background:#f8fafc; border-color:#e2e8f0;"><b>${Array.isArray(provider.categories) ? provider.categories.length : 0}</b><br>Categories</div>
                                     <div class="stat-pill" style="background:#fdf4ff; border-color:#f5d0fe;"><b>${provider.social_links ? provider.social_links.length : 0}</b><br>Links</div>
                                 </div>
@@ -911,7 +934,6 @@
             const skillsHTML = (service.skills || []).map(skill => `<span class="skill-tag">${escapeHtml(skill)}</span>`).join('');
             const linksHTML = (service.show_links || []).map(link => `<a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer" class="action-btn btn-view" style="padding: 7px 12px; font-size: 12px; text-decoration: none;"><i class="fa-solid fa-link"></i> ${escapeHtml(link.label)}</a>`).join('');
             const successiveRate = service.success_rate_display || `${Math.max(0, Math.min(100, Math.round(Number(service.Rating || 0))))}%`;
-            const earningsDisplay = service.total_earning_formatted || 'LKR 0.00';
 
             return `
                 <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; background: #f9fafb; transition: all 0.2s ease;">
@@ -930,10 +952,9 @@
                     </div>
                     <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
                         <span class="skill-tag" style="background:#fff7ed; color:#9a3412; border-color:#fed7aa;">Successive Rate: ${escapeHtml(successiveRate)}</span>
-                        <span class="skill-tag" style="background:#ecfdf5; color:#166534; border-color:#bbf7d0;">Earnings: ${escapeHtml(earningsDisplay)}</span>
                     </div>
                     <div style="display: flex; gap: 8px; justify-content: flex-end;">
-                        <button class="action-btn btn-view" type="button" style="padding: 7px 12px; font-size: 12px;" onclick="openServiceCardRequestModal(${service.Provider_Categories_ID})" ${service.request_status === 'ongoing' ? 'disabled' : ''}><i class="fa-solid fa-paper-plane"></i> ${service.request_status === 'ongoing' ? 'Requested' : 'Send Request'}</button>
+                        <button class="action-btn btn-view" type="button" style="padding: 7px 12px; font-size: 12px;" onclick="openServiceCardRequestModal(${service.Provider_Categories_ID})"><i class="fa-solid fa-paper-plane"></i> Send Request</button>
                         <button class="action-btn btn-edit" type="button" style="padding: 7px 12px; font-size: 12px;" onclick="openServiceDetailsModal(${service.Provider_Categories_ID})"><i class="fa-solid fa-eye"></i> View Service</button>
                     </div>
                 </div>
@@ -1046,7 +1067,7 @@
             }
         }
 
-        function submitProviderServiceRequest() {
+        async function submitProviderServiceRequest(skipConfirmation = false) {
             const serviceId = document.getElementById('provider-request-service-id').value;
             const providerId = document.getElementById('provider-request-provider-id').value;
             if (!serviceId || !providerId) {
@@ -1056,6 +1077,19 @@
 
             if (!validateProviderRequestForm()) {
                 return;
+            }
+
+            if (!skipConfirmation) {
+                const serviceNumericId = parseInt(serviceId, 10);
+                const service = serviceCardsCache[serviceNumericId] || providerServiceCache[serviceNumericId];
+                const currentStatus = (service?.request_status || '').trim().toLowerCase();
+
+                if (currentStatus && currentStatus !== 'open') {
+                    const confirmed = await showRequestConfirmationModal();
+                    if (!confirmed) {
+                        return;
+                    }
+                }
             }
 
             const payload = new URLSearchParams({
@@ -1084,8 +1118,8 @@
                     }
 
                     const id = parseInt(serviceId, 10);
-                    if (serviceCardsCache[id]) serviceCardsCache[id].request_status = 'ongoing';
-                    if (providerServiceCache[id]) providerServiceCache[id].request_status = 'ongoing';
+                    if (serviceCardsCache[id]) serviceCardsCache[id].request_status = (data.request_status || 'open');
+                    if (providerServiceCache[id]) providerServiceCache[id].request_status = (data.request_status || 'open');
 
                     closeServiceDetailsModal();
                     closeProviderRequestModal();
@@ -1234,6 +1268,7 @@
         window.openServiceDetailsModal = openServiceDetailsModal;
         window.closeProviderRequestModal = closeProviderRequestModal;
         window.submitProviderServiceRequest = submitProviderServiceRequest;
+        window.closeRequestConfirmationModal = closeRequestConfirmationModal;
     });
 </script>
 

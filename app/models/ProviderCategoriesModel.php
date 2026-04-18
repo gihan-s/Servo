@@ -464,47 +464,55 @@ class ProviderCategoriesModel extends Database
         return $locationsByCategory;
     }
 
-    public function getOngoingRequestServiceIds(int $clientId, array $providerCategoryIds): array
+    public function getLatestRequestStatusesByServiceIds(int $clientId, array $providerCategoryIds): array
     {
         if ($clientId <= 0 || empty($providerCategoryIds)) {
             return [];
         }
 
         $placeholders = implode(',', array_fill(0, count($providerCategoryIds), '?'));
-        $types = 'i' . str_repeat('i', count($providerCategoryIds));
+        $types = 'i' . str_repeat('i', count($providerCategoryIds)) . 'i';
 
         $stmt = $this->conn->prepare(
-            "SELECT DISTINCT Provider_Categories_ID
-             FROM post
-             WHERE Client_ID = ?
-               AND Post_Type = 'direct'
-               AND Request_Status = 'ongoing'
-               AND Provider_Categories_ID IN ($placeholders)"
+            "SELECT p.Provider_Categories_ID, p.Request_Status
+             FROM post p
+             INNER JOIN (
+                SELECT Provider_Categories_ID, MAX(Created_At) AS latest_created_at
+                FROM post
+                WHERE Client_ID = ?
+                  AND Post_Type = 'direct'
+                  AND Provider_Categories_ID IN ($placeholders)
+                GROUP BY Provider_Categories_ID
+             ) latest
+                ON latest.Provider_Categories_ID = p.Provider_Categories_ID
+               AND latest.latest_created_at = p.Created_At
+             WHERE p.Client_ID = ?
+               AND p.Post_Type = 'direct'"
         );
 
         if (!$stmt) {
-            error_log('ProviderCategoriesModel::getOngoingRequestServiceIds prepare: ' . $this->conn->error);
+            error_log('ProviderCategoriesModel::getLatestRequestStatusesByServiceIds prepare: ' . $this->conn->error);
             return [];
         }
 
-        $params = array_merge([$clientId], $providerCategoryIds);
+        $params = array_merge([$clientId], $providerCategoryIds, [$clientId]);
         $stmt->bind_param($types, ...$params);
 
         if (!$stmt->execute()) {
-            error_log('ProviderCategoriesModel::getOngoingRequestServiceIds exec: ' . $stmt->error);
+            error_log('ProviderCategoriesModel::getLatestRequestStatusesByServiceIds exec: ' . $stmt->error);
             $stmt->close();
             return [];
         }
 
-        $ids = [];
+        $statuses = [];
         foreach ($stmt->get_result()->fetch_all(MYSQLI_ASSOC) as $row) {
             $serviceId = (int) ($row['Provider_Categories_ID'] ?? 0);
             if ($serviceId > 0) {
-                $ids[] = $serviceId;
+                $statuses[$serviceId] = strtolower(trim((string) ($row['Request_Status'] ?? '')));
             }
         }
 
         $stmt->close();
-        return $ids;
+        return $statuses;
     }
 }
