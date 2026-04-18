@@ -296,6 +296,14 @@
                 .replace(/'/g, '&#039;');
         }
 
+        function truncateText(value, maxLength = 160) {
+            const text = String(value ?? '').trim();
+            if (text.length <= maxLength) {
+                return text;
+            }
+            return `${text.slice(0, maxLength).trimEnd()}...`;
+        }
+
         function getServicePriceTypesFromFilters() {
             return Array.from(document.querySelectorAll('input[name="pricing_type"]:checked')).map(input => input.value);
         }
@@ -425,6 +433,7 @@
             const skillsTags = skills.length
                 ? skills.map(skill => `<span class="skill-tag">${escapeHtml(skill)}</span>`).join('')
                 : '<span class="skill-tag">No skills listed</span>';
+            const shortDescription = truncateText(service.Description || '', 180);
 
             return `
                 <div class="search-item">
@@ -448,7 +457,7 @@
                         </div>
                     </div>
                     <h3 class="post-title">${escapeHtml(service.Title || 'Untitled Service')}</h3>
-                    <div class="post-description">${escapeHtml(service.Description || '')}</div>
+                    <div class="post-description">${escapeHtml(shortDescription)}</div>
                     <div class="post-skills">
                         <span class="skills-label">Skills:</span>
                         <div class="skills-tags">${skillsTags}</div>
@@ -650,6 +659,7 @@
                 return `<a href="${escapeHtml(social.link)}" title="${escapeHtml(social.name)}" target="_blank" style="background-color: ${escapeHtml(social.color || '#008500')}"><i class="${iconPrefix} ${escapeHtml(social.icon_class)}"></i></a>`;
             }).join('');
             const messageUrl = `<?= BASE_URL ?>/messages?new=${encodeURIComponent(String(Number(provider.Provider_ID) || 0))}`;
+            const shortBio = truncateText(provider.Bio || 'Experienced professional ready to help with your project.', 150);
 
             return `
                 <div class="profile-card search-item">
@@ -665,7 +675,7 @@
                             <div class="stat-pill">Rating<br><b><i class="fa-solid fa-star" style="color:#f59e0b;"></i> ${escapeHtml(provider.rating)}</b></div>
                         </div>
 
-                        <div class="provider-bio" style="padding: 0 18px; box-sizing: border-box;">${escapeHtml(provider.Bio || 'Experienced professional ready to help with your project.')}</div>
+                        <div class="provider-bio" style="padding: 0 18px; box-sizing: border-box;">${escapeHtml(shortBio)}</div>
 
                         <div class="provider-actions">
                             <button class="action-btn btn-view" type="button" onclick="window.location.href='${messageUrl}'"><i class="fa-solid fa-messages"></i> Message</button>
