@@ -124,8 +124,7 @@ class PostController extends BaseController
         } elseif ($role === 'Provider') {
             $viewFile = __DIR__ . '/../views/provider/Posts/index.php';
         } else {
-            http_response_code(403);
-            echo "Invalid role";
+            $this->notFound();
             return;
         }
 

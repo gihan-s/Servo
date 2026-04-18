@@ -128,6 +128,60 @@ class BidsController extends BaseController
         ]);
     }
 
+    public function withdraw()
+    {
+        $this->ensureAuth();
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->jsonError('Method not allowed', 405);
+            return;
+        }
+
+        $role = $_SESSION['role'] ?? '';
+        if ($role !== 'Provider') {
+            $this->jsonError('Forbidden', 403, 'forbidden');
+            return;
+        }
+
+        $providerId = (int) ($_SESSION['user_id'] ?? 0);
+        $bidId = (int) ($_POST['bid_id'] ?? 0);
+
+        if ($providerId <= 0 || $bidId <= 0) {
+            $this->jsonError('Invalid provider or bid identifier', 400, 'invalid_input');
+            return;
+        }
+
+        $result = $this->bidModel->withdrawBidForProvider($providerId, $bidId);
+
+        if (!($result['success'] ?? false)) {
+            $errorCode = (string) ($result['errorCode'] ?? 'unknown');
+
+            if ($errorCode === 'not_found') {
+                $this->jsonError($result['message'] ?? 'Bid not found', 404, 'not_found');
+                return;
+            }
+
+            if ($errorCode === 'not_withdrawable') {
+                $this->jsonError($result['message'] ?? 'Only active bids can be withdrawn', 409, 'not_withdrawable');
+                return;
+            }
+
+            $statusCode = $errorCode === 'forbidden' ? 403 : 400;
+            $this->jsonError($result['message'] ?? 'Unable to withdraw bid', $statusCode, $errorCode);
+            return;
+        }
+
+        $this->jsonResponse([
+            'success' => true,
+            'message' => 'Bid withdrawn successfully',
+            'bid' => [
+                'bidId' => (int) ($result['bidId'] ?? $bidId),
+                'status' => 'Deleted',
+                'statusKey' => 'deleted',
+            ],
+        ]);
+    }
+
     private function groupBids(array $bids, int $providerId): array
     {
         // Post-level state is the source of truth because bid status can be stale.

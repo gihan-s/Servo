@@ -28,8 +28,7 @@ class PaymentController extends BaseController
 
             $viewFile = __DIR__ . '/../views/client/Payments/index.php';
         } else {
-            http_response_code(403);
-            echo "Invalid role";
+            $this->notFound();
             return;
         }
 

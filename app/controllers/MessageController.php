@@ -29,8 +29,7 @@ class MessageController extends BaseController
         if ($role === 'Client' || $role === 'Provider') {
             $viewFile = __DIR__ . '/../views/message/index.php';
         } else {
-            http_response_code(403);
-            echo "Invalid role";
+            $this->notFound();
             return;
         }
 

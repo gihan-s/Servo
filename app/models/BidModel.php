@@ -11,6 +11,7 @@ class BidModel extends Database
     private const STATUS_ACTIVE = 'active';
     private const STATUS_ACCEPTED = 'accepted';
     private const STATUS_REJECTED = 'rejected';
+    private const STATUS_DELETED = 'deleted';
 
     public function __construct()
     {
@@ -336,12 +337,73 @@ class BidModel extends Database
 
     public function withdrawBidForProvider($providerId, $bidRef)
     {
-        // Withdrawn bids are removed from provider list completely.
+        $providerId = (int) $providerId;
+        $bidId = (int) $bidRef;
+
+        if ($providerId <= 0 || $bidId <= 0) {
+            return [
+                'success' => false,
+                'errorCode' => 'invalid_input',
+                'message' => 'Invalid provider or bid id',
+            ];
+        }
+
+        $ownedBid = $this->getProviderBidRecord($providerId, $bidId);
+        if ($ownedBid !== null) {
+            $sql = 'UPDATE bids SET Status = ? WHERE Bid_ID = ? AND Provider_ID = ?';
+            $stmt = $this->conn->prepare($sql);
+            if (!$stmt) {
+                error_log('BidModel::withdrawBidForProvider prepare: ' . $this->conn->error);
+                return [
+                    'success' => false,
+                    'errorCode' => 'db_prepare_error',
+                    'message' => 'Database error',
+                ];
+            }
+
+            $deletedStatus = self::STATUS_DELETED;
+            $stmt->bind_param('sii', $deletedStatus, $bidId, $providerId);
+            if (!$stmt->execute()) {
+                error_log('BidModel::withdrawBidForProvider exec: ' . $stmt->error);
+                $stmt->close();
+                return [
+                    'success' => false,
+                    'errorCode' => 'db_exec_error',
+                    'message' => 'Database error',
+                ];
+            }
+
+            $stmt->close();
+            return [
+                'success' => true,
+                'bidId' => $bidId,
+                'status' => self::STATUS_DELETED,
+            ];
+        }
+
+        // Fallback for dummy-data mode.
+        $providerBids = $this->getProviderBids($providerId);
+        $target = null;
+        foreach ($providerBids as $bid) {
+            if ((int) ($bid['Bid_ID'] ?? 0) === $bidId) {
+                $target = $bid;
+                break;
+            }
+        }
+
+        if ($target === null) {
+            return [
+                'success' => false,
+                'errorCode' => 'not_found',
+                'message' => 'Bid not found',
+            ];
+        }
+
         return [
             'success' => true,
-            'providerId' => $providerId,
-            'bidRef' => $bidRef,
-            'removedFromList' => true,
+            'bidId' => $bidId,
+            'status' => self::STATUS_DELETED,
+            'isSimulated' => true,
         ];
     }
 
@@ -498,6 +560,28 @@ class BidModel extends Database
 
     private function getEditableBidRecord(int $providerId, int $bidId): ?array
     {
+        $row = $this->getProviderBidRecord($providerId, $bidId);
+        if (!$row) {
+            return null;
+        }
+
+        $postStatus = strtolower(trim((string) ($row['Post_Status'] ?? '')));
+        $requestStatus = strtolower(trim((string) ($row['Post_Request_Status'] ?? '')));
+        $postProviderRaw = $row['Post_Provider_ID'] ?? null;
+        $postProviderId = ($postProviderRaw === null || $postProviderRaw === '') ? null : (int) $postProviderRaw;
+        $bidStatus = strtolower(trim((string) ($row['Bid_Status'] ?? '')));
+
+        $isOpenPost = in_array($postStatus, ['published', 'active'], true);
+        $isPendingRequest = $requestStatus === 'pending';
+        $isUnassignedPost = $postProviderId === null;
+        $isActiveBid = in_array($bidStatus, ['active', 'pending', 'open'], true);
+
+        $row['canEdit'] = $isOpenPost && $isPendingRequest && $isUnassignedPost && $isActiveBid;
+        return $row;
+    }
+
+    private function getProviderBidRecord(int $providerId, int $bidId): ?array
+    {
         $sql = "
             SELECT
                 b.Bid_ID,
@@ -528,22 +612,6 @@ class BidModel extends Database
         $row = $stmt->get_result()->fetch_assoc();
         $stmt->close();
 
-        if (!$row) {
-            return null;
-        }
-
-        $postStatus = strtolower(trim((string) ($row['Post_Status'] ?? '')));
-        $requestStatus = strtolower(trim((string) ($row['Post_Request_Status'] ?? '')));
-        $postProviderRaw = $row['Post_Provider_ID'] ?? null;
-        $postProviderId = ($postProviderRaw === null || $postProviderRaw === '') ? null : (int) $postProviderRaw;
-        $bidStatus = strtolower(trim((string) ($row['Bid_Status'] ?? '')));
-
-        $isOpenPost = in_array($postStatus, ['published', 'active'], true);
-        $isPendingRequest = $requestStatus === 'pending';
-        $isUnassignedPost = $postProviderId === null;
-        $isActiveBid = in_array($bidStatus, ['active', 'pending', 'open'], true);
-
-        $row['canEdit'] = $isOpenPost && $isPendingRequest && $isUnassignedPost && $isActiveBid;
-        return $row;
+        return $row ?: null;
     }
 }

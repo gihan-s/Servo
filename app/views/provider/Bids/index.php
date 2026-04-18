@@ -182,6 +182,25 @@
 		</div>
 	</div>
 
+	<div class="pop-up-section request-modal deactive" id="bidWithdrawModalRoot">
+		<div class="pop-up" id="bidWithdrawModal" style="max-width:560px; border-radius:16px;">
+			<div class="pop-up-header" style="display:flex; align-items:center; justify-content:space-between;">
+				<div class="pop-up-title">Withdraw Bid</div>
+				<i class="fa-solid fa-xmark" id="bidWithdrawModalClose" style="cursor:pointer;"></i>
+			</div>
+			<hr>
+			<form id="bidWithdrawForm" class="pop-up-content" style="display:flex; flex-direction:column; gap:12px;" method="POST" action="<?= BASE_URL ?>/bids/withdraw">
+				<input type="hidden" id="withdrawBidId" name="bid_id" value="">
+				<div style="font-size:14px; color:#334155;">Are you sure you want to withdraw this bid?</div>
+				<div style="font-size:13px; color:#64748b;">Withdrawing this bid is permanent. If you change your mind, you'll need to submit a new bid.</div>
+				<div class="modal-actions" style="margin-top:6px;">
+					<button class="btn-outline" id="bidWithdrawCancelBtn" type="button">Cancel</button>
+					<button class="btn-danger" id="bidWithdrawConfirmBtn" type="submit"><i class="fa-solid fa-trash"></i> Withdraw</button>
+				</div>
+			</form>
+		</div>
+	</div>
+
 	<?php
 	$filterModal = new FilterModal([
 		'modalRootId' => 'bidsFilterRoot',

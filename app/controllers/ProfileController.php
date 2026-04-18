@@ -24,7 +24,8 @@ class ProfileController extends BaseController
             $user = $this->providerModel->getProviderById($userId);
             $viewFile = __DIR__ . '/../views/provider/Profile/index.php';
         } else {
-            die("Invalid user role!");
+            $this->notFound();
+            return;
         }
 
         // Step 3: Pass data to the correct view
@@ -57,9 +58,8 @@ class ProfileController extends BaseController
         } elseif ($role === 'Provider') {
             $ok = $this->providerModel->updateProfile($userId, $firstName, $lastName, $contact, $gender, $website, $bio);
         } else {
-            $_SESSION['flash'] = ['type' => 'error', 'message' => 'Invalid user role'];
-            header("Location: /profile");
-            exit;
+            $this->htmlError(403);
+            return;
         }
 
         $redirect = $_SERVER['HTTP_REFERER'] ?? "/profile";

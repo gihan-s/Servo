@@ -19,6 +19,13 @@ const editModalRoot = document.getElementById('bidEditModalRoot');
 const editModal = document.getElementById('bidEditModal');
 const editModalClose = document.getElementById('bidEditModalClose');
 const editForm = document.getElementById('bidEditForm');
+const withdrawModalRoot = document.getElementById('bidWithdrawModalRoot');
+const withdrawModal = document.getElementById('bidWithdrawModal');
+const withdrawModalClose = document.getElementById('bidWithdrawModalClose');
+const withdrawForm = document.getElementById('bidWithdrawForm');
+const withdrawBidId = document.getElementById('withdrawBidId');
+const withdrawCancelBtn = document.getElementById('bidWithdrawCancelBtn');
+const withdrawConfirmBtn = document.getElementById('bidWithdrawConfirmBtn');
 const editBidId = document.getElementById('editBidId');
 const editBidProjectTitle = document.getElementById('editBidProjectTitle');
 const editBidClientName = document.getElementById('editBidClientName');
@@ -43,6 +50,7 @@ const cards = Array.from(document.querySelectorAll('.request-content .search-ite
 let selectedCategories = new Set();
 let activeSectionKey = 'active';
 let activeEditCard = null;
+let activeWithdrawCard = null;
 
 const bidDetailFieldMap = [
 	{ key: 'amount', label: 'Bid Amount' },
@@ -212,6 +220,25 @@ function closeEditModal() {
 	activeEditCard = null;
 }
 
+function openWithdrawModal(card) {
+	if (!withdrawForm || !withdrawModalRoot || !withdrawModal || !withdrawBidId) {
+		return;
+	}
+
+	activeWithdrawCard = card;
+	withdrawForm.reset();
+	withdrawBidId.value = card.dataset.bidId || '';
+	openModal(withdrawModalRoot, withdrawModal);
+}
+
+function closeWithdrawModal() {
+	closeModal(withdrawModalRoot, withdrawModal);
+	activeWithdrawCard = null;
+	if (withdrawBidId) {
+		withdrawBidId.value = '';
+	}
+}
+
 async function submitEditForm(event) {
 	event.preventDefault();
 	if (!editForm || !activeEditCard) return;
@@ -258,6 +285,52 @@ async function submitEditForm(event) {
 	}
 }
 
+async function submitWithdrawForm(event) {
+	event.preventDefault();
+	if (!withdrawForm || !activeWithdrawCard) return;
+
+	const previousLabel = withdrawConfirmBtn ? withdrawConfirmBtn.innerHTML : '';
+	if (withdrawConfirmBtn) {
+		withdrawConfirmBtn.disabled = true;
+		withdrawConfirmBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Withdrawing...';
+	}
+
+	try {
+		const response = await fetch(withdrawForm.action, {
+			method: 'POST',
+			body: new FormData(withdrawForm),
+			headers: {
+				'X-Requested-With': 'XMLHttpRequest'
+			}
+		});
+
+		let payload = null;
+		try {
+			payload = await response.json();
+		} catch (_error) {
+			payload = null;
+		}
+
+		if (!response.ok || !payload || payload.success !== true) {
+			const message = payload && payload.message ? payload.message : 'Unable to withdraw bid.';
+			alert(message);
+			return;
+		}
+
+		activeWithdrawCard.remove();
+		applyFiltersWrapper();
+		closeWithdrawModal();
+		alert(payload.message || 'Bid withdrawn successfully.');
+	} catch (_error) {
+		alert('Unable to withdraw bid right now. Please try again.');
+	} finally {
+		if (withdrawConfirmBtn) {
+			withdrawConfirmBtn.disabled = false;
+			withdrawConfirmBtn.innerHTML = previousLabel;
+		}
+	}
+}
+
 // Bid-specific button handlers
 document.querySelectorAll('.search-item .btn-view').forEach((btn) => {
 	btn.addEventListener('click', function () {
@@ -277,10 +350,8 @@ document.querySelectorAll('.search-item .btn-message').forEach((btn) => {
 document.querySelectorAll('.search-item .btn-withdraw').forEach((btn) => {
 	btn.addEventListener('click', function () {
 		const card = this.closest('.search-item');
-		const title = card ? card.dataset.title || 'this bid' : 'this bid';
-		if (confirm('Withdraw bid for "' + title + '"?')) {
-			if (card) card.remove();
-			alert('Bid withdrawn. Withdrawn bids are removed from your list.');
+		if (card) {
+			openWithdrawModal(card);
 		}
 	});
 });
@@ -305,6 +376,13 @@ editModalRoot && editModalRoot.addEventListener('click', (event) => {
 	if (event.target === editModalRoot) closeEditModal();
 });
 editForm && editForm.addEventListener('submit', submitEditForm);
+
+withdrawModalClose && withdrawModalClose.addEventListener('click', closeWithdrawModal);
+withdrawCancelBtn && withdrawCancelBtn.addEventListener('click', closeWithdrawModal);
+withdrawModalRoot && withdrawModalRoot.addEventListener('click', (event) => {
+	if (event.target === withdrawModalRoot) closeWithdrawModal();
+});
+withdrawForm && withdrawForm.addEventListener('submit', submitWithdrawForm);
 
 // Setup search handlers using common module
 setupSearchHandlers(searchInput, searchBtn, applyFiltersWrapper);
@@ -338,6 +416,7 @@ setupTabNavigation(tabContainer, tabs, sections, (targetId) => {
 setupEscapeKeyHandler([
 	{ root: detailsModalRoot },
 	{ root: editModalRoot, element: editModal },
+	{ root: withdrawModalRoot, element: withdrawModal },
 	{ root: filterRoot, element: filterModal }
 ]);
 

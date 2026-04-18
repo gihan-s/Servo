@@ -36,8 +36,7 @@ class ProjectController extends BaseController
             $completedJobs = $this->projectModel->getCompletedJobsByProviderId($userId);
             $viewFile = __DIR__ . '/../views/provider/Projects/index.php';
         } else {
-            http_response_code(403);
-            echo "Invalid role";
+            $this->notFound();
             return;
         }
 

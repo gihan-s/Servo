@@ -21,8 +21,7 @@ class EarningsController extends BaseController
         $role   = $_SESSION['role'];
 
         if ($role !== 'Provider') {
-            http_response_code(403);
-            echo "Invalid role";
+            $this->notFound();
             return;
         }
 
