@@ -1,7 +1,13 @@
 <?php
 
+error_reporting(E_ALL & ~E_DEPRECATED);
+ini_set('display_errors', 0);
+
+
 require_once __DIR__ . '/../app/controllers/LoginController.php';
 require_once __DIR__ . '/../app/models/MessageModel.php';
+require_once __DIR__ . '/../app/models/ClientModel.php';
+require_once __DIR__ . '/../app/models/ProviderModel.php';
 
 use Ratchet\MessageComponentInterface;
 use Ratchet\ConnectionInterface;
@@ -26,6 +32,19 @@ class ChatServer implements MessageComponentInterface
     private function getOppositeRole($role)
     {
         return $role === 'Provider' ? 'Client' : 'Provider';
+    }
+
+    private function getUserFirstName($userId, $role)
+    {
+        if ($role === 'Provider') {
+            $model = new ProviderModel();
+            $user = $model->getProviderById($userId);
+        } else {
+            $model = new ClientModel();
+            $user = $model->getClientById($userId);
+        }
+
+        return $user['First_Name'] ?? null;
     }
 
     public function onOpen(ConnectionInterface $conn)
@@ -100,6 +119,14 @@ class ChatServer implements MessageComponentInterface
 
 
 
+        if (isset($data['Type']) && $data['Type'] === 'Ping') {
+            $from->send(json_encode([
+                'Type' => 'Pong',
+                'Timestamp' => time()
+            ]));
+            return;
+        }
+
         if (isset($data['Type']) && $data['Type'] === 'Seen') {
 
             $receiverId = $this->userData[$from->resourceId]['User_ID'];
@@ -153,21 +180,26 @@ class ChatServer implements MessageComponentInterface
         }
 
         $messageContent = $data['Content'];
+        $ReplyTo = isset($data['Reply_To']) ? (int)$data['Reply_To'] : null;
 
         $Model = new MessageModel;
-        $MessageID = $Model->insertMessage($messageContent, $ClientToProvider, $ProviderID, $ClientID);
+        $MessageID = $Model->insertMessage($messageContent, $ClientToProvider, $ProviderID, $ClientID, $ReplyTo);
 
         $Status = 'Sent';
 
         $receiverKey = $this->getUserKey($receiverId, $receiverRole);
 
         if (isset($this->userConnections[$receiverKey])) {
+            $senderFirstName = $this->getUserFirstName($senderId, $senderRole);
             foreach ($this->userConnections[$receiverKey] as $client) {
                 if ($client !== $from) {
                     $client->send(json_encode([
                         'Type' => 'New Message',
                         'From' => $senderId,
-                        'Content' => $messageContent
+                        'From_Name' => $senderFirstName,
+                        'Content' => $messageContent,
+                        'Reply_To' => $ReplyTo,
+                        'DB_ID' => $MessageID
                     ]));
                 }
             }
@@ -179,8 +211,10 @@ class ChatServer implements MessageComponentInterface
         $from->send(json_encode([
             'Type' => 'Ack',
             'Message_ID' => $data["Message_ID"],
-            'Status' => $Status
+            'Status' => $Status,
+            'DB_ID' => $MessageID
         ]));
+
     }
 
     public function onClose(ConnectionInterface $conn)
@@ -200,15 +234,13 @@ class ChatServer implements MessageComponentInterface
                     fn($c) => $c->resourceId !== $conn->resourceId
                 ));
 
-                // 🔥 FORCE offline broadcast (your requirement)
-                $this->broadcastPresenceToRelevant($userId, $role, 'Offline');
-
-                // ✅ If no more connections → update DB
+                // ✅ If no more connections → update DB and broadcast offline
                 if (empty($this->userConnections[$userKey])) {
                     unset($this->userConnections[$userKey]);
 
                     $Model = new MessageModel;
                     $Model->setUserOffline($userId, $role);
+                    $this->broadcastPresenceToRelevant($userId, $role, 'Offline');
 
                     echo "User $userId ($role) OFFLINE\n";
                 }
