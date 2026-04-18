@@ -42,9 +42,6 @@
                     <input type="text" id="searchInput" placeholder="Search my service requests...">
                     <button id="searchButton"><i class="fa-solid fa-magnifying-glass"></i></button>
                 </div>
-                <button class="filter" id="filter-pop-up"><i class="fa-solid fa-filter"
-                        onclick="window.showSuccessToast('Test','Test Message')"></i><span>filter</span></button>
-
                 <div class="advance-search">
                     <span>Sort By: </span>
                     <div class="select-container" style="width: 150px;">
@@ -169,48 +166,14 @@
 
                 <p>No skill selected</p>
             </div>
-            <div class="input-grid-2">
+            <div class="input-grid-1">
                 <div class="text-container">
                     <div class="label text-label">Requesting Price</div>
                     <input type="text" class="text-field" name="price" id="">
                 </div>
-                <div class="search-select-container">
-                    <div class="text-container">
-                        <div class="label search-dropdown-label">Price Type</div>
-                        <input type="text" class="text-field-search-dropdown" autocomplete="off"
-                            onkeydown="return false" name="pricetype" id="">
-                    </div>
-                    <div class="options">
-                        <div class="option-list">
-                            <div>Fixed</div>
-                            <div>Hourly</div>
-                            <div>Daily</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="input-grid-2">
-                <div class="text-container">
-                    <div class="label text-label">Duration</div>
-                    <input type="text" class="text-field" name="duration" id="">
-                </div>
-                <div class="search-select-container">
-                    <div class="text-container">
-                        <div class="label search-dropdown-label">Duration Type</div>
-                        <input type="text" class="text-field-search-dropdown" autocomplete="off"
-                            onkeydown="return false" name="durationtype" id="">
-                    </div>
-                    <div class="options">
-                        <div class="option-list">
-                            <div>Days</div>
-                            <div>Weeks</div>
-                            <div>Months</div>
-                        </div>
-                    </div>
-                </div>
             </div>
 
-            <div class="input-grid-2">
+            <div class="input-grid-1">
                 <div class="search-select-container">
                     <div class="text-container">
                         <div class="label search-dropdown-label">Level</div>
@@ -226,8 +189,15 @@
                     </div>
                 </div>
 
+            </div>
+            
+            <div class="input-grid-2">
                 <div class="text-container">
-                    <div class="label text-label label-float">Expired Date</div>
+                    <div class="label text-label label-float">Estimated Date</div>
+                    <input type="date" class="text-field" name="estdate" id="">
+                </div>
+                <div class="text-container">
+                    <div class="label text-label label-float"> Post Expired Date</div>
                     <input type="date" class="text-field" name="endat" id="">
                 </div>
             </div>
@@ -317,76 +287,6 @@
     </div>
 </div>
 
-<!-- Create Post Modal (matches project pop-up pattern) 
-<div class="pop-up-section create-post-pop-up deactive">
-    <div class="pop-up deactive">
-        <div class="pop-up-header">
-            <div class="pop-up-title">Create A New Service Request</div>
-            <i class="fa-solid fa-xmark" id="create-post-pop-up"></i>
-        </div>
-        <hr>
-        <div class="pop-up-content">
-            
-        </div>
-    </div>
-</div>-->
-<!-- Post Details Modal -->
-<!-- <div class="pop-up-section request-modal deactive" id="postDetailsRoot">
-    <div class="pop-up deactive" id="postDetailsModal" style="max-width:720px; border-radius:16px;">
-        <div class="pop-up-header" style="display:flex; align-items:center; justify-content:space-between;">
-            <div class="pop-up-title">Post Details</div>
-            <i class="fa-solid fa-xmark" id="postDetailsClose" style="cursor:pointer;"></i>
-        </div>
-        <hr>
-        <div class="pop-up-content post-view" id="postContent" style="display:flex; flex-direction:column; gap:12px;">
-
-        </div>
-        <div class="modal-actions" style="justify-content:flex-end;">
-            <button class="action-btn btn-delete" id="modalDeleteBtn"><i class="fa-solid fa-circle-xmark"></i>
-                Delete</button>
-        </div>
-    </div>
-</div> -->
-
-
-<!-- Confirm Delete Modal
-<div class="pop-up-section confirm-modal deactive" id="confirmDeleteRoot">
-    <div class="pop-up deactive" id="confirmDelete">
-        <div class="pop-up-header" style="display:flex; align-items:center; justify-content:space-between;">
-            <div class="pop-up-title">Confirm Delete</div>
-            <i class="fa-solid fa-xmark" id="confirmDeleteClose" style="cursor:pointer;"></i>
-        </div>
-        <hr>
-        <div class="pop-up-content">
-            Are you sure you want to delete this post? This action cannot be undone.
-        </div>
-        <div class="modal-actions">
-            <button class="action-btn btn-view" id="confirmKeep">Keep</button>
-            <button class="action-btn btn-delete" id="confirmDeleteBtn"><i class="fa-solid fa-circle-xmark"></i> Yes,
-                Delete</button>
-        </div>
-    </div>
-</div> -->
-
-<!-- Confirm Publish Modal -->
-<!-- <div class="pop-up-section confirm-modal deactive" id="confirmPublishRoot">
-    <div class="pop-up deactive" id="confirmPublish">
-        <div class="pop-up-header" style="display:flex; align-items:center; justify-content:space-between;">
-            <div class="pop-up-title">Publish Request</div>
-            <i class="fa-solid fa-xmark" id="confirmPublishClose" style="cursor:pointer;"></i>
-        </div>
-        <hr>
-        <div class="pop-up-content">
-            Are you sure you want to publish this draft? It will become visible for providers to bid.
-        </div>
-        <div class="modal-actions">
-            <button class="action-btn btn-view" id="confirmPublishKeep">Cancel</button>
-            <button class="action-btn btn-edit" id="confirmPublishBtn"><i class="fa-solid fa-rocket"></i>
-                Publish
-            </button>
-        </div>
-    </div>
-</div> -->
 <script>
     // Global variable to track current sort
     let currentSort = 'date_desc';
@@ -600,15 +500,15 @@
                     <div class="post-details">
                         <div class="detail-item">
                             <span class="detail-label">Budget</span>
-                            <span class="detail-value budget-amount">LKR ${post.Requesting_Price || 0}/= (${post.Price_Type || 'Fixed'})</span>
+                            <span class="detail-value budget-amount">LKR ${post.Requesting_Price || 0}/=</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Final Proposals</span>
                             <span class="detail-value proposals-count">${post.Proposal_Count || post.ProposalsCount || 0}</span>
                         </div>
                         <div class="detail-item">
-                            <span class="detail-label">Duration</span>
-                            <span class="detail-value project-duration">${post.Duration || 0} ${post.Duration_Type || 'Days'}</span>
+                            <span class="detail-label">Estimated Date</span>
+                            <span class="detail-value project-duration">${post.Est_Date || 'N/A'}</span>
                         </div>
                     </div>
                 </div>
@@ -619,7 +519,7 @@
                     <div class="post-details">
                         <div class="detail-item">
                             <span class="detail-label">Budget</span>
-                            <span class="detail-value budget-amount">LKR ${post.Requesting_Price || 0}/= (${post.Price_Type || 'Fixed'})</span>
+                            <span class="detail-value budget-amount">LKR ${post.Requesting_Price || 0}/=</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Proposals Received</span>
@@ -630,8 +530,8 @@
                             <span class="detail-value project-level">${post.Level || 'N/A'}</span>
                         </div>
                         <div class="detail-item">
-                            <span class="detail-label">Duration</span>
-                            <span class="detail-value project-duration">${post.Duration || 0} ${post.Duration_Type || 'Days'}</span>
+                            <span class="detail-label">Estimated Date</span>
+                            <span class="detail-value project-duration">${post.Est_Date || 'N/A'}</span>
                         </div>
                     </div>
                 </div>
@@ -699,7 +599,26 @@
     /**
      * Show empty state
      */
+    function renderNoResultsState() {
+        const searchTerm = (currentSearch || '').trim();
+        const safeSearchTerm = escapeHtml(searchTerm);
+
+        return `
+            <section class="empty-state search-no-results">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <h3>No Search Item Found</h3>
+                <p>Try a different keyword or clear the search.</p>
+                ${safeSearchTerm ? `<div class="search-term-hint">Search: "${safeSearchTerm}"</div>` : ''}
+            </section>
+        `;
+    }
+
     function showEmptyState(status, container) {
+        if ((currentSearch || '').trim() !== '') {
+            container.innerHTML = renderNoResultsState();
+            return;
+        }
+
         let message = '';
         let icon = 'fa-inbox';
 
@@ -881,9 +800,7 @@
 
         // console.log("Skills IDs String:", skillIdsString);
         const price = document.querySelector("input[name='price']");
-        const price_type = document.querySelector("input[name='pricetype']");
-        const duration = document.querySelector("input[name='duration']");
-        const duration_type = document.querySelector("input[name='durationtype']");
+        const est_date = document.querySelector("input[name='estdate']");
         const level = document.querySelector("input[name='level']");
         const end_at = document.querySelector("input[name='endat']");
 
@@ -916,12 +833,6 @@
             return;
         }
 
-        if (duration.value.trim() !== '' && (isNaN(duration.value.trim()) || duration.value.trim() < 0)) {
-            showValidationTooltip(duration, "Please enter a valid number");
-            closeDialogBox('confirm-publish');
-            return;
-        }
-
         // Collect all form data manually
         const postData = {
             title: title.value.trim() || '',
@@ -929,9 +840,7 @@
             category_id: categoryId.value,
             skills: skillIdsString,
             price: price.value.trim() || '',
-            price_type: price_type.value.trim() || '',
-            duration: duration.value.trim() || '',
-            duration_type: duration_type.value.trim() || '',
+            est_date: est_date.value || '',
             level: level.value.trim() || '',
             end_at: end_at.value || '',
             status: action // 'draft' or 'publish'
@@ -1049,6 +958,42 @@
                     ? post.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')
                     : '<span>No skills specified</span>';
 
+                const bids = Array.isArray(post.bids) ? post.bids : [];
+                const providerBidsHTML = bids.length > 0
+                    ? bids.map((bid) => {
+                        const fullName = `${bid.First_Name || ''} ${bid.Last_Name || ''}`.trim() || 'Unknown Provider';
+                        const initials = fullName.split(' ').map((n) => n.charAt(0)).join('').substring(0, 2).toUpperCase();
+                        const rating = bid.Provider_Rating ? Number(bid.Provider_Rating).toFixed(1) : 'N/A';
+                        const imagePath = bid.Profile_Picture ? `<?= BASE_URL ?>/file/user-files/${bid.Profile_Picture}` : '';
+                        const safeComment = bid.Comment ? bid.Comment : 'No comment provided';
+                        const bidAmount = bid.Amount ? Number(bid.Amount).toLocaleString() : '0';
+                        const bidEstDate = bid.Est_Date ? String(bid.Est_Date).split(' ')[0] : 'N/A';
+
+                        return `
+                            <article class="provider-bid-card">
+                                <div class="provider-bid-top">
+                                    ${imagePath
+                                        ? `<img class="provider-avatar-img" src="${imagePath}" alt="">`
+                                        : `<div class="provider-avatar">${initials}</div>`
+                                    }
+                                    <div class="provider-meta">
+                                        <h4>${fullName}</h4>
+                                        <p><i class="fa-solid fa-star"></i> ${rating}</p>
+                                    </div>
+                                    <span class="provider-bid-price">LKR ${bidAmount}</span>
+                                </div>
+                                <div class="provider-bid-bottom">
+                                    <span><i class="fa-solid fa-calendar-days"></i> Est: ${bidEstDate}</span>
+                                    <span><i class="fa-solid fa-message"></i> ${safeComment}</span>
+                                </div>
+                                <div class="provider-bid-actions">
+                                    <button class="action-btn btn-edit provider-request-btn" data-provider-id="${bid.Provider_ID}" onclick="sendRequestToProvider(${post.Post_ID}, ${bid.Provider_ID}, this)">Send Request</button>
+                                </div>
+                            </article>
+                        `;
+                    }).join('')
+                    : '<div class="provider-bid-empty">No bids received for this post yet.</div>';
+
                 // Replace form content with a div wrapper for proper styling
                 formContainer.innerHTML = `
                 <div class="post-view">
@@ -1067,10 +1012,17 @@
                     <div class="post-view-section">
                         <div class="section-title">Details</div>
                         <div class="kv-grid">
-                            <div class="kv-item"><span class="kv-label">Budget:</span><span class="kv-value">LKR ${post.Requesting_Price || '0'}/= (${post.Price_Type || 'N/A'})</span></div>
+                            <div class="kv-item"><span class="kv-label">Budget:</span><span class="kv-value">LKR ${post.Requesting_Price || '0'}/=</span></div>
                             <div class="kv-item"><span class="kv-label">Level:</span><span class="kv-value">${post.Level || 'N/A'}</span></div>
-                            <div class="kv-item"><span class="kv-label">Duration:</span><span class="kv-value">${post.Duration || 'N/A'} ${post.Duration_Type || 'N/A'}</span></div>
+                            <div class="kv-item"><span class="kv-label">Estimated Date:</span><span class="kv-value">${post.Est_Date || 'N/A'}</span></div>
                             <div class="kv-item"><span class="kv-label">Proposals:</span><span class="kv-value">${post.Proposal_Count || '0'}</span></div>
+                        </div>
+                    </div>
+                    <div class="post-view-section">
+                        <div class="section-title">Bidded Providers</div>
+                        <div class="request-status-note" id="requestStatusNote"></div>
+                        <div class="bidded-providers-grid">
+                            ${providerBidsHTML}
                         </div>
                     </div>
                     <div class="post-view-section">
@@ -1081,6 +1033,38 @@
                     </div>
                 </div>
             `;
+
+                const requestStatus = (post.Request_Status || '').toLowerCase();
+                const postStatus = (post.Post_Status || '').toLowerCase();
+                const canSendRequest = postStatus === 'active' && (requestStatus === '' || requestStatus === 'declined');
+                const statusNote = document.getElementById('requestStatusNote');
+                const requestButtons = formContainer.querySelectorAll('.provider-request-btn');
+
+                if (statusNote) {
+                    if (canSendRequest) {
+                        statusNote.textContent = 'You can send a request to one provider.';
+                    } else if (requestStatus === 'ongoing' || requestStatus === 'accepted') {
+                        statusNote.textContent = `Requests are locked because current status is ${requestStatus}.`;
+                    } else {
+                        statusNote.textContent = 'Requests are available only for active posts.';
+                    }
+                }
+
+                requestButtons.forEach((btn) => {
+                    if (!canSendRequest) {
+                        btn.disabled = true;
+                        btn.textContent = requestStatus === 'accepted' ? 'Accepted' : 'Request Sent';
+                        btn.classList.remove('btn-edit');
+                        btn.classList.add('btn-view');
+                    }
+
+                    if ((requestStatus === 'ongoing' || requestStatus === 'accepted') && post.Provider_ID && Number(btn.dataset.providerId) === Number(post.Provider_ID)) {
+                        btn.disabled = true;
+                        btn.textContent = requestStatus === 'accepted' ? 'Accepted' : 'Request Sent';
+                        btn.classList.remove('btn-edit');
+                        btn.classList.add('btn-view');
+                    }
+                });
             })
             .catch(error => {
                 console.error('Error fetching post:', error);
@@ -1091,6 +1075,55 @@
                         <button onclick="viewPost(${id})" class="retry-btn">Retry</button>
                     </div>
                 `;
+            });
+    }
+
+    function sendRequestToProvider(postId, providerId, button) {
+        if (!postId || !providerId) {
+            window.showErrorToast('Error', 'Invalid post/provider data');
+            return;
+        }
+
+        button.disabled = true;
+        const originalText = button.textContent;
+        button.textContent = 'Sending...';
+
+        fetch(`<?= BASE_URL ?>/requests/send-request/${postId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: `provider_id=${encodeURIComponent(providerId)}`
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    button.disabled = false;
+                    button.textContent = originalText;
+                    window.showErrorToast('Request Not Sent', data.message || 'Unable to send request');
+                    return;
+                }
+
+                window.showSuccessToast('Request Sent', 'Provider request status is now ongoing.');
+
+                const allButtons = document.querySelectorAll('.provider-request-btn');
+                allButtons.forEach((btn) => {
+                    btn.disabled = true;
+                    btn.textContent = 'Request Sent';
+                    btn.classList.remove('btn-edit');
+                    btn.classList.add('btn-view');
+                });
+
+                const statusNote = document.getElementById('requestStatusNote');
+                if (statusNote) {
+                    statusNote.textContent = 'Request status is ongoing. You cannot send another request right now.';
+                }
+            })
+            .catch((error) => {
+                console.error('sendRequestToProvider error:', error);
+                button.disabled = false;
+                button.textContent = originalText;
+                window.showErrorToast('Error', 'Failed to send request');
             });
     }
 
@@ -1109,19 +1142,10 @@
         const categoryId = document.getElementById("Category_ID");
         const skills = document.getElementById("Skills");
 
-        // ADD THIS DEBUG LINE
-        console.log("Skills input element:", skills);
-        console.log("Skills value:", skills.value);
-        console.log("Skills value type:", typeof skills.value);
-
         const price = root.querySelector("input[name='price']");
-        const price_type = root.querySelector("input[name='pricetype']");
-        const duration = root.querySelector("input[name='duration']");
-        const duration_type = root.querySelector("input[name='durationtype']");
+        const est_date = root.querySelector("input[name='estdate']");
         const level = root.querySelector("input[name='level']");
         const end_at = root.querySelector("input[name='endat']");
-
-        console.log("End date value:", end_at.value);
 
         endDateValue = end_at.value;
 
@@ -1173,9 +1197,7 @@
             category_id: categoryId.value,
             skills: cleanedSkills,  // Use cleaned skills
             price: price.value.trim() || '0',
-            price_type: price_type.value.trim() || 'Fixed',
-            duration: duration.value.trim() || '0',
-            duration_type: duration_type.value.trim() || 'Days',
+            est_date: est_date.value || '',
             level: level.value.trim() || 'Beginner',
             end_at: endDateValue || ''
         };
@@ -1270,9 +1292,7 @@
                 document.getElementById("Category_ID").value = post.Category_ID || '';
 
                 root.querySelector("input[name='price']").value = post.Requesting_Price || '';
-                root.querySelector("input[name='pricetype']").value = post.Price_Type || '';
-                root.querySelector("input[name='duration']").value = post.Duration || '';
-                root.querySelector("input[name='durationtype']").value = post.Duration_Type || '';
+                root.querySelector("input[name='estdate']").value = post.Est_Date || '';
                 root.querySelector("input[name='level']").value = post.Level || '';
 
                 const endAtInput = root.querySelector("input[name='endat']");
@@ -1499,7 +1519,7 @@
      */
     document.addEventListener('DOMContentLoaded', function () {
         // Setup search input handler with debouncing
-        document.getElementById('searchInput').addEventListener('change', handleSearch);
+        document.getElementById('searchInput').addEventListener('input', handleSearch);
         document.getElementById('searchButton').addEventListener('click', handleSearch);
 
         function handleSearch() {

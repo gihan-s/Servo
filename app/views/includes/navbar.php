@@ -4,19 +4,22 @@
 <!-- Header -->
 
 <?php
-    // sample notification data in PHP
-    $notifications = [
-        ['Notification_ID' => 1, 'Title' => 'Payment of $250 released for Project Alpha.', 'Timestamp' => '2025-12-30 11:39:00', 'Type' => 'payment', 'Unread' => true],
-        ['Notification_ID' => 2, 'Title' => 'New bid received on your post: UI Revamp', 'Timestamp' => '2025-12-30 11:30:00', 'Type' => 'bid', 'Unread' => true],
-        ['Notification_ID' => 3, 'Title' => 'DevStudio Labs sent you a message.', 'Timestamp' => '2025-12-30 11:22:00', 'Type' => 'message', 'Unread' => false],
-        ['Notification_ID' => 4, 'Title' => 'Contract milestone approved.', 'Timestamp' => '2025-12-30 10:00:00', 'Type' => 'milestone', 'Unread' => false],
-    ];
+// sample notification data in PHP
+$notifications = [
+    ['Notification_ID' => 1, 'Title' => 'Payment of $250 released for Project Alpha.', 'Timestamp' => '2025-12-30 11:39:00', 'Type' => 'payment', 'Unread' => true],
+    ['Notification_ID' => 2, 'Title' => 'New bid received on your post: UI Revamp', 'Timestamp' => '2025-12-30 11:30:00', 'Type' => 'bid', 'Unread' => true],
+    ['Notification_ID' => 3, 'Title' => 'DevStudio Labs sent you a message.', 'Timestamp' => '2025-12-30 11:22:00', 'Type' => 'message', 'Unread' => false],
+    ['Notification_ID' => 4, 'Title' => 'Contract milestone approved.', 'Timestamp' => '2025-12-30 10:00:00', 'Type' => 'milestone', 'Unread' => false],
+    ['Notification_ID' => 5, 'Title' => 'New bid received on your post: Mobile App Development', 'Timestamp' => '2025-12-29 16:45:00', 'Type' => 'bid', 'Unread' => true],
+];
 ?>
 
 <?php
 
 $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($_SERVER['SERVER_PORT'] ?? '') == 443 ? 'https' : 'http';
-if (!empty($_SERVER['HTTP_X_FORWARDED_PROTO'])) { $scheme = $_SERVER['HTTP_X_FORWARDED_PROTO']; } // if behind proxy
+if (!empty($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
+    $scheme = $_SERVER['HTTP_X_FORWARDED_PROTO'];
+} // if behind proxy
 $currentUrl = $scheme . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 $uriNoBase  = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '/';
 // Now $currentUrl is the full URL, $uriNoBase is just the path (useful for active() checks)
@@ -25,13 +28,12 @@ $uriNoBase  = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '/';
 if ($_SESSION['role'] === 'Provider') {
     $navLinks = [
         ['label' => 'Dashboard', 'href' => BASE_URL . '/dashboard', 'class' => '"fas fa-gauge"'],
-        ['label' => 'Feeds', 'href' => BASE_URL . '/feeds', 'class' => '"fas fa-briefcase"'],
+        ['label' => 'Feed', 'href' => BASE_URL . '/feed', 'class' => '"fas fa-briefcase"'],
         ['label' => 'Bids', 'href' => BASE_URL . '/bids', 'class' => '"fas fa-coins"'],
         ['label' => 'Projects', 'href' => BASE_URL . '/projects', 'class' => '"fas fa-layer-group"'],
         ['label' => 'Earnings', 'href' => BASE_URL . '/earnings', 'class' => '"fas fa-money-bill-wave"'],
     ];
-}
-elseif ($_SESSION['role'] === 'Client') {
+} elseif ($_SESSION['role'] === 'Client') {
     $navLinks = [
         ['label' => 'Dashboard', 'href' => BASE_URL . '/dashboard', 'class' => '"fas fa-chart-simple"'],
         ['label' => 'Projects', 'href' => BASE_URL . '/projects', 'class' => '"fas fa-briefcase"'],
@@ -65,7 +67,7 @@ $navRight = [
             <div class="nav-links" id="navLinks">
                 <!-- use a loop to generate links -->
                 <?php foreach ($navLinks as $link): ?>
-                    <a href="<?= $link['href'] ?>" class="<?= ('./' . basename( $_SERVER['REQUEST_URI'])) === $link['href'] ? 'active' : '' ?>">
+                    <a href="<?= $link['href'] ?>" class="<?= ('./' . basename($_SERVER['REQUEST_URI'])) === $link['href'] ? 'active' : '' ?>">
                         <i class=<?= $link['class']; ?>></i>
                         <span><?= $link['label'] ?></span>
                     </a>
@@ -75,12 +77,14 @@ $navRight = [
 
         <div class="user-menu" id="userMenu">
             <!-- messages section -->
-            <a href="<?= $navRight[0]['href'] ?>" class="<?= ('./' . basename( $_SERVER['REQUEST_URI'])) === $navRight[0]['href'] ? 'active' : '' ?>"
+            <a style="position: relative; padding: 5px;" href="<?= $navRight[0]['href'] ?>" class="<?= ('./' . basename($_SERVER['REQUEST_URI'])) === $navRight[0]['href'] ? 'active' : '' ?>"
                 aria-label="Messages">
                 <i class="fas fa-comments"></i>
+                <span class="notification-badge message-badge" id="msgBadge" style="display:none;"></span>
             </a>
+
             <!-- notifications section -->
-            <button class="notification-icon <?= ('./' . basename( $_SERVER['REQUEST_URI'])) === $navRight[1]['href'] ? 'active' : '' ?>" id="notifToggle" aria-label="Notifications" aria-haspopup="true"
+            <button class="notification-icon <?= ('./' . basename($_SERVER['REQUEST_URI'])) === $navRight[1]['href'] ? 'active' : '' ?>" id="notifToggle" aria-label="Notifications" aria-haspopup="true"
                 aria-expanded="false">
                 <i class="fas fa-bell"></i>
                 <span class="notification-badge" id="notifBadge">3</span>
@@ -88,8 +92,8 @@ $navRight = [
             <!-- user profile section -->
             <div class="user-profile" onclick="window.location.href='<?= $navRight[2]['href'] ?>'" role="button"
                 tabindex="0" aria-label="Profile">
-                <div class="user-avatar" style="overflow: hidden; background-color: transparent; border: 1px solid #33333353;"><img src="<?= BASE_URL . '/../uploads/Users/'. $_SESSION['user_image']?>" alt="" style="height: 100%; width: 100%;"></div>
-                <div class="user-name"><?= $_SESSION['user_name']?></div>
+                <div class="user-avatar" style="overflow: hidden; background-color: transparent; border: 1px solid #33333353;"><img src="<?= BASE_URL . '/file/user-files/' . $_SESSION['user_image'] ?>" alt="" style="height: 100%; width: 100%;"></div>
+                <div class="user-name"><?= $_SESSION['user_name'] ?></div>
             </div>
             <!-- notifications pop-up panel -->
             <div class="notif-popover" id="notifPopover" role="dialog" aria-label="Notifications" aria-modal="false">
@@ -134,175 +138,292 @@ $navRight = [
         </div>
         <div class="drawer-overlay" id="drawerOverlay" tabindex="-1" aria-hidden="true"></div>
     </nav>
+
+    <script src="<?= BASE_URL ?>/assets/js/elementScript.js" defer></script>
+    <script>
+        window.WEBSOCKET_URL = window.WEBSOCKET_URL || <?= json_encode(WEBSOCKET_URL . "?token=" . $_SESSION['authorize_token']) ?>;
+        window.CURRENT_USER_ID = window.CURRENT_USER_ID || <?= json_encode($_SESSION['user_id']) ?>;
+        window.CURRENT_USER_ROLE = window.CURRENT_USER_ROLE || <?= json_encode($_SESSION['role']) ?>;
+        window.BASE_URL = window.BASE_URL || <?= json_encode(BASE_URL) ?>;
+    </script>
+    <script src="<?= BASE_URL ?>/assets/js/websocketCommon.js" defer></script>
 </header>
 
 <script>
-// JS for responsive navbar: overflow management & drawer
-(function () {
-    const linksContainer = document.getElementById('navLinks');
-    const overflowWrap = document.getElementById('navOverflow');
-    const overflowMenu = document.getElementById('overflowMenu');
-    const trigger = document.getElementById('overflowTrigger');
-    const hamburger = document.getElementById('navHamburger');
-    const drawer = document.getElementById('drawerMenu');
-    const drawerClose = document.getElementById('drawerClose');
-    const drawerOverlay = document.getElementById('drawerOverlay');
-    const drawerLinks = document.getElementById('drawerLinks');
+    // JS for responsive navbar: overflow management & drawer
+    (function() {
+        const linksContainer = document.getElementById('navLinks');
+        const overflowWrap = document.getElementById('navOverflow');
+        const overflowMenu = document.getElementById('overflowMenu');
+        const trigger = document.getElementById('overflowTrigger');
+        const hamburger = document.getElementById('navHamburger');
+        const drawer = document.getElementById('drawerMenu');
+        const drawerClose = document.getElementById('drawerClose');
+        const drawerOverlay = document.getElementById('drawerOverlay');
+        const drawerLinks = document.getElementById('drawerLinks');
 
-    // Notifications
-    const notifToggle = document.getElementById('notifToggle');
-    const notifPopover = document.getElementById('notifPopover');
-    const notifClose = document.getElementById('notifClose');
-    const notifList = document.getElementById('notifList');
-    const markAllBtn = document.getElementById('markAllBtn');
-    const notifTabs = () => [...document.querySelectorAll('.notif-tabs .n-tab')];
+        // Notifications
+        const notifToggle = document.getElementById('notifToggle');
+        const notifPopover = document.getElementById('notifPopover');
+        const notifClose = document.getElementById('notifClose');
+        const notifList = document.getElementById('notifList');
+        const markAllBtn = document.getElementById('markAllBtn');
+        const notifTabs = () => [...document.querySelectorAll('.notif-tabs .n-tab')];
 
-    function timeAgo(dateString) {
-        const now = new Date();
-        const then = new Date(dateString.replace(' ', 'T'));
-        const diff = Math.floor((now - then) / 1000); // in seconds
+        function timeAgo(dateString) {
+            const now = new Date();
+            const then = new Date(dateString.replace(' ', 'T'));
+            const diff = Math.floor((now - then) / 1000); // in seconds
 
-        if (diff < 60) return '${diff}s';
-        if (diff < 3600) return `${Math.floor(diff / 60)}m`;
-        if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
-        return `${Math.floor(diff / 86400)}d`;
-    }
-
-    // Sample notification data in JS
-    const notifications = <?php echo json_encode($notifications); ?>;
-    function renderNotifications(filter = 'all') {
-        if (!notifList) return;
-        notifList.innerHTML = '';
-        const items = notifications.filter(n => filter === 'all' || (filter === 'unread' && n.Unread));
-        if (!items.length) {
-            notifList.innerHTML = '<div class="notif-empty"><h4>No notifications</h4><p>You\'re all caught up.</p></div>'; return;
+            if (diff < 60) return '${diff}s';
+            if (diff < 3600) return `${Math.floor(diff / 60)}m`;
+            if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
+            return `${Math.floor(diff / 86400)}d`;
         }
-        items.forEach(n => {
-            const div = document.createElement('div');
-            div.className = 'notif-item ' + (n.Unread ? 'unread' : '');
-            div.dataset.id = n.Notification_ID;
-            div.innerHTML = `<div class=\"notif-icon\">${iconFor(n.Type)}</div><div class=\"notif-content\"><div class=\"notif-title\">${escapeHTML(n.Title)}</div><div class=\"notif-meta\"><span>${timeAgo(n.Timestamp)}</span><span>${n.Unread ? 'Unread' : 'Read'}</span></div></div>`;
-            div.addEventListener('click', () => { if (n.Unread) { n.Unread = false; div.classList.remove('unread'); updateBadge(); renderNotifications(currentTab); } });
-            notifList.appendChild(div);
-        });
-    }
 
-    function iconFor(type) {
-        switch (type) {
-            case 'payment': return '<i class="fa-solid fa-credit-card"></i>';
-            case 'bid': return '<i class="fa-solid fa-gavel"></i>';
-            case 'message': return '<i class="fa-solid fa-comments"></i>';
-            case 'milestone': return '<i class="fa-solid fa-flag-checkered"></i>';
-            default: return '<i class="fa-solid fa-bell"></i>';
+        // Sample notification data in JS
+        const notifications = <?php echo json_encode($notifications); ?>;
+
+        function renderNotifications(filter = 'all') {
+            if (!notifList) return;
+            notifList.innerHTML = '';
+            const items = notifications.filter(n => filter === 'all' || (filter === 'unread' && n.Unread));
+            if (!items.length) {
+                notifList.innerHTML = '<div class="notif-empty"><h4>No notifications</h4><p>You\'re all caught up.</p></div>';
+                return;
+            }
+            items.forEach(n => {
+                const div = document.createElement('div');
+                div.className = 'notif-item ' + (n.Unread ? 'unread' : '');
+                div.dataset.id = n.Notification_ID;
+                div.innerHTML = `<div class=\"notif-icon\">${iconFor(n.Type)}</div><div class=\"notif-content\"><div class=\"notif-title\">${escapeHTML(n.Title)}</div><div class=\"notif-meta\"><span>${timeAgo(n.Timestamp)}</span><span>${n.Unread ? 'Unread' : 'Read'}</span></div></div>`;
+                div.addEventListener('click', () => {
+                    if (n.Unread) {
+                        n.Unread = false;
+                        div.classList.remove('unread');
+                        updateBadge();
+                        renderNotifications(currentTab);
+                    }
+                });
+                notifList.appendChild(div);
+            });
         }
-    }
 
-    function updateBadge() {
-        const unread = notifications.filter(n => n.Unread).length;
-        const badge = document.getElementById('notifBadge');
-        if (!badge) return;
-        badge.textContent = unread; badge.style.display = unread ? 'flex' : 'none';
-    }
-
-    let currentTab = 'all';
-    function openNotif() { if (!notifPopover) return; notifPopover.classList.add('open'); notifToggle.setAttribute('aria-expanded', 'true'); positionNotif(); }
-    function closeNotif() { if (!notifPopover) return; notifPopover.classList.remove('open'); notifToggle.setAttribute('aria-expanded', 'false'); }
-    function toggleNotif() { if (!notifPopover) return; (notifPopover.classList.contains('open')) ? closeNotif() : openNotif(); }
-    function positionNotif() {
-        if (!notifPopover || !notifPopover.classList.contains('open')) return;
-        // For desktop we rely on CSS: top: calc(100% + 2px); right:0 inside .user-menu (position:relative)
-        // Ensure any inline overrides from previous version are cleared
-        if (window.innerWidth > 760) {
-            notifPopover.style.left = 'auto';
-            notifPopover.style.right = '0';
-            notifPopover.style.top = 'calc(100% + 2px)';
-        } else {
-            // Mobile (fixed) style already defined in media query; leave untouched
-            notifPopover.style.top = '';
-            notifPopover.style.right = '';
-            notifPopover.style.left = '';
+        function iconFor(type) {
+            switch (type) {
+                case 'payment':
+                    return '<i class="fa-solid fa-credit-card"></i>';
+                case 'bid':
+                    return '<i class="fa-solid fa-gavel"></i>';
+                case 'message':
+                    return '<i class="fa-solid fa-comments"></i>';
+                case 'milestone':
+                    return '<i class="fa-solid fa-flag-checkered"></i>';
+                default:
+                    return '<i class="fa-solid fa-bell"></i>';
+            }
         }
-    }
 
-    notifToggle && notifToggle.addEventListener(
-        'click', e => { 
-            e.stopPropagation(); toggleNotif(); 
+        function updateBadge() {
+            const unread = notifications.filter(n => n.Unread).length;
+            const badge = document.getElementById('notifBadge');
+            if (!badge) return;
+            badge.textContent = unread;
+            badge.style.display = unread ? 'flex' : 'none';
         }
-    );
 
-    notifClose && notifClose.addEventListener(
-        'click', closeNotif
-    );
+        let currentTab = 'all';
 
-    document.addEventListener(
-        'click', e => { 
+        function openNotif() {
+            if (!notifPopover) return;
+            notifPopover.classList.add('open');
+            notifToggle.setAttribute('aria-expanded', 'true');
+            positionNotif();
+        }
+
+        function closeNotif() {
+            if (!notifPopover) return;
+            notifPopover.classList.remove('open');
+            notifToggle.setAttribute('aria-expanded', 'false');
+        }
+
+        function toggleNotif() {
+            if (!notifPopover) return;
+            (notifPopover.classList.contains('open')) ? closeNotif(): openNotif();
+        }
+
+        function positionNotif() {
             if (!notifPopover || !notifPopover.classList.contains('open')) return;
-            if (!notifPopover.contains(e.target) && e.target !== notifToggle && !notifToggle.contains(e.target))
-                closeNotif();
+            // For desktop we rely on CSS: top: calc(100% + 2px); right:0 inside .user-menu (position:relative)
+            // Ensure any inline overrides from previous version are cleared
+            if (window.innerWidth > 760) {
+                notifPopover.style.left = 'auto';
+                notifPopover.style.right = '0';
+                notifPopover.style.top = 'calc(100% + 2px)';
+            } else {
+                // Mobile (fixed) style already defined in media query; leave untouched
+                notifPopover.style.top = '';
+                notifPopover.style.right = '';
+                notifPopover.style.left = '';
+            }
         }
-    );
-    
-    window.addEventListener(
-        'keydown', e => {
-             if (e.key === 'Escape' && notifPopover && notifPopover.classList.contains('open'))
-                closeNotif(); 
-        }
-    );
 
-    window.addEventListener('resize', () => { if (notifPopover && notifPopover.classList.contains('open')) positionNotif(); });
-    notifTabs().forEach(tab => tab.addEventListener('click', () => { notifTabs().forEach(t => t.classList.remove('active')); tab.classList.add('active'); currentTab = tab.dataset.tab; renderNotifications(currentTab); }));
-    markAllBtn && markAllBtn.addEventListener('click', () => { notifications.forEach(n => n.Unread = false); updateBadge(); renderNotifications(currentTab); });
-    function escapeHTML(s) { return s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', '\'': '&#39;' }[c])); }
-    renderNotifications(); updateBadge();
+        notifToggle && notifToggle.addEventListener(
+            'click', e => {
+                e.stopPropagation();
+                toggleNotif();
+            }
+        );
 
-    function distribute() {
-        if (window.innerWidth > 1150) { // reset
-            overflowWrap.hidden = true; overflowMenu.innerHTML = '';
-            [...linksContainer.querySelectorAll('.overflow-clone')].forEach(el => { el.classList.remove('overflow-clone'); });
-            return;
+        notifClose && notifClose.addEventListener(
+            'click', closeNotif
+        );
+
+        document.addEventListener(
+            'click', e => {
+                if (!notifPopover || !notifPopover.classList.contains('open')) return;
+                if (!notifPopover.contains(e.target) && e.target !== notifToggle && !notifToggle.contains(e.target))
+                    closeNotif();
+            }
+        );
+
+        window.addEventListener(
+            'keydown', e => {
+                if (e.key === 'Escape' && notifPopover && notifPopover.classList.contains('open'))
+                    closeNotif();
+            }
+        );
+
+        window.addEventListener('resize', () => {
+            if (notifPopover && notifPopover.classList.contains('open')) positionNotif();
+        });
+        notifTabs().forEach(tab => tab.addEventListener('click', () => {
+            notifTabs().forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            currentTab = tab.dataset.tab;
+            renderNotifications(currentTab);
+        }));
+        markAllBtn && markAllBtn.addEventListener('click', () => {
+            notifications.forEach(n => n.Unread = false);
+            updateBadge();
+            renderNotifications(currentTab);
+        });
+
+        function escapeHTML(s) {
+            return s.replace(/[&<>"']/g, c => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                '\'': '&#39;'
+            } [c]));
         }
-        // show overflow container
-        overflowWrap.hidden = false;
-        // measure available width for links area
-        const maxWidth = window.innerWidth - 520; // heuristic subtract logo + user menu
-        let used = 0;
-        const linkEls = [...linksContainer.children];
-        overflowMenu.innerHTML = '';
-        linkEls.forEach(a => { a.style.display = ''; });
-        linkEls.forEach(a => {
-            const w = a.getBoundingClientRect().width + 20;
-            used += w;
-            if (used > maxWidth) {
-                a.classList.add('overflow-clone');
-                // hide original
-                a.style.display = 'none';
-                const clone = a.cloneNode(true); clone.className = 'overflow-item' + (a.classList.contains('active') ? ' active' : ''); overflowMenu.appendChild(clone);
+        renderNotifications();
+        updateBadge();
+
+        function distribute() {
+            if (window.innerWidth > 1150) { // reset
+                overflowWrap.hidden = true;
+                overflowMenu.innerHTML = '';
+                [...linksContainer.querySelectorAll('.overflow-clone')].forEach(el => {
+                    el.classList.remove('overflow-clone');
+                });
+                return;
+            }
+            // show overflow container
+            if (overflowWrap) {
+                overflowWrap.hidden = false;
+
+
+                // measure available width for links area
+                const maxWidth = window.innerWidth - 520; // heuristic subtract logo + user menu
+                let used = 0;
+                const linkEls = [...linksContainer.children];
+                overflowMenu.innerHTML = '';
+                linkEls.forEach(a => {
+                    a.style.display = '';
+                });
+                linkEls.forEach(a => {
+                    const w = a.getBoundingClientRect().width + 20;
+                    used += w;
+                    if (used > maxWidth) {
+                        a.classList.add('overflow-clone');
+                        // hide original
+                        a.style.display = 'none';
+                        const clone = a.cloneNode(true);
+                        clone.className = 'overflow-item' + (a.classList.contains('active') ? ' active' : '');
+                        overflowMenu.appendChild(clone);
+                    }
+                });
+                trigger.setAttribute('aria-expanded', 'false');
+                overflowMenu.style.display = 'none';
+
+            }
+        }
+
+        function toggleOverflow() {
+            const open = overflowMenu.style.display === 'flex';
+            if (open) {
+                overflowMenu.style.display = 'none';
+                trigger.setAttribute('aria-expanded', 'false');
+            } else {
+                overflowMenu.style.display = 'flex';
+            }
+        }
+        trigger && trigger.addEventListener('click', toggleOverflow);
+        window.addEventListener('resize', () => {
+            distribute();
+            if (window.innerWidth > 760 && drawer.classList.contains('open')) closeDrawer();
+        });
+        window.addEventListener('click', e => {
+            if (trigger && !trigger.contains(e.target) && !overflowMenu.contains(e.target)) {
+                overflowMenu.style.display = 'none';
+                trigger.setAttribute('aria-expanded', 'false');
             }
         });
-        trigger.setAttribute('aria-expanded', 'false'); overflowMenu.style.display = 'none';
-    }
 
-    function toggleOverflow() {
-        const open = overflowMenu.style.display === 'flex';
-        if (open) { overflowMenu.style.display = 'none'; trigger.setAttribute('aria-expanded', 'false'); }
-        else { overflowMenu.style.display = 'flex'; }
-    }
-    trigger && trigger.addEventListener('click', toggleOverflow);
-    window.addEventListener('resize', () => { distribute(); if (window.innerWidth > 760 && drawer.classList.contains('open')) closeDrawer(); });
-    window.addEventListener('click', e => { if (trigger && !trigger.contains(e.target) && !overflowMenu.contains(e.target)) { overflowMenu.style.display = 'none'; trigger.setAttribute('aria-expanded', 'false'); } });
+        // Drawer
+        function openDrawer() {
+            drawer.classList.add('open');
+            drawerOverlay.classList.add('show');
+            hamburger.setAttribute('aria-expanded', 'true');
+            document.body.style.overflow = 'hidden';
+            cloneLinksToDrawer();
+        }
 
-    // Drawer
-    function openDrawer() { drawer.classList.add('open'); drawerOverlay.classList.add('show'); hamburger.setAttribute('aria-expanded', 'true'); document.body.style.overflow = 'hidden'; cloneLinksToDrawer(); }
-    function closeDrawer() { drawer.classList.remove('open'); drawerOverlay.classList.remove('show'); hamburger.setAttribute('aria-expanded', 'false'); document.body.style.overflow = ''; }
-    function cloneLinksToDrawer() { drawerLinks.innerHTML = '';[...linksContainer.querySelectorAll('a')].forEach(a => { const c = a.cloneNode(true); c.classList.remove('overflow-item'); c.classList.add('drawer-link'); drawerLinks.appendChild(c); }); }
-    hamburger && hamburger.addEventListener('click', () => { drawer.classList.contains('open') ? closeDrawer() : openDrawer(); });
-    drawerClose && drawerClose.addEventListener('click', closeDrawer);
-    drawerOverlay && drawerOverlay.addEventListener('click', closeDrawer);
-    window.addEventListener('keydown', e => { if (e.key === 'Escape' && drawer.classList.contains('open')) closeDrawer(); });
-    drawer.addEventListener('click', e => { if (e.target.matches('a')) closeDrawer(); });
+        function closeDrawer() {
+            drawer.classList.remove('open');
+            drawerOverlay.classList.remove('show');
+            hamburger.setAttribute('aria-expanded', 'false');
+            document.body.style.overflow = '';
+        }
 
-    // Initialize after load to ensure widths measurable
-    window.addEventListener('load', () => { distribute(); positionNotif(); });
-    distribute();
-})();
+        function cloneLinksToDrawer() {
+            drawerLinks.innerHTML = '';
+            [...linksContainer.querySelectorAll('a')].forEach(a => {
+                const c = a.cloneNode(true);
+                c.classList.remove('overflow-item');
+                c.classList.add('drawer-link');
+                drawerLinks.appendChild(c);
+            });
+        }
+        hamburger && hamburger.addEventListener('click', () => {
+            drawer.classList.contains('open') ? closeDrawer() : openDrawer();
+        });
+        drawerClose && drawerClose.addEventListener('click', closeDrawer);
+        drawerOverlay && drawerOverlay.addEventListener('click', closeDrawer);
+        window.addEventListener('keydown', e => {
+            if (e.key === 'Escape' && drawer.classList.contains('open')) closeDrawer();
+        });
+        drawer.addEventListener('click', e => {
+            if (e.target.matches('a')) closeDrawer();
+        });
+
+        // Initialize after load to ensure widths measurable
+        window.addEventListener('load', () => {
+            distribute();
+            positionNotif();
+        });
+        distribute();
+    })();
 </script>

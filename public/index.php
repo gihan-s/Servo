@@ -17,6 +17,8 @@ require_once '../app/controllers/NotificationController.php';
 require_once '../app/controllers/PaymentController.php';
 require_once '../app/controllers/ProviderController.php';
 require_once '../app/controllers/EarningsController.php';
+require_once '../app/controllers/FeedController.php';
+require_once '../app/controllers/BidController.php';
 
 require_once '../app/controllers/admin/AdminLoginController.php';
 require_once '../app/controllers/admin/AdminDashboardController.php';
@@ -108,9 +110,24 @@ switch ($url) {
         $controller->showUserImage($matches[1]);
         break;
 
+    case (preg_match('#^file/category-icons/(.+)$#', $url, $matches) ? true : false):
+        $controller = new FileController();
+        $controller->getCategoryIcons($matches[1]);
+        break;
+
     case 'profile':
         $controller = new ProfileController();
         $controller->view();
+        break;
+
+    case 'profile/add-service':
+        $controller = new ProfileController();
+        $controller->addService();
+        break;
+
+    case 'profile/remove-service':
+        $controller = new ProfileController();
+        $controller->removeService();
         break;
 
     case 'register/documents':
@@ -163,6 +180,16 @@ switch ($url) {
         $controller->sendResetCode();
         break;
 
+    case 'profile/change-profile-pic':
+        $controller = new ProfileController();
+        $controller->changeProfilePicture();
+        break;
+
+    case 'profile/update-password':
+        $controller = new ProfileController();
+        $controller->changePassword();
+        break;
+
     case 'dashboard':
         $controller = new DashboardController();
         $controller->index();
@@ -193,6 +220,11 @@ switch ($url) {
         $controller->create();
         break;
 
+    case 'requests/direct-request':
+        $controller = new PostController();
+        $controller->createDirectRequest();
+        break;
+
     case (preg_match('#^requests/view/(\d+)$#', $url, $m) ? true : false):
         (new PostController())->viewPost((int)$m[1]);
         break;
@@ -207,6 +239,10 @@ switch ($url) {
 
     case (preg_match('#^requests/publish/(\d+)$#', $url, $m) ? true : false):
         (new PostController())->publishById((int)$m[1]);
+        break;
+
+    case (preg_match('#^requests/send-request/(\d+)$#', $url, $m) ? true : false):
+        (new PostController())->sendRequestToProvider((int)$m[1]);
         break;
 
     case (preg_match('#^requests/update-expired/(\d+)$#', $url, $m) ? true : false):
@@ -233,8 +269,33 @@ switch ($url) {
         $controller->index();
         break;
 
+    case 'providers/search':
+        $controller = new ProviderController();
+        $controller->search();
+        break;
+
+    case 'providers/services':
+        $controller = new ProviderController();
+        $controller->getServices();
+        break;
+
     case 'earnings':
         $controller = new EarningsController();
+        $controller->index();
+        break;
+
+    case 'feed':
+        $controller = new FeedController();
+        $controller->index();
+        break;
+
+    case 'feed/submit-bid':
+        $controller = new FeedController();
+        $controller->submitBid();
+        break;
+
+    case 'bids':
+        $controller = new BidsController();
         $controller->index();
         break;
 
@@ -271,6 +332,30 @@ switch ($url) {
     case 'admin/providers/provider-review':
         $controller = new AdminProviderController();
         $controller->review();
+        break;
+
+    case 'messages/get-messages':
+        $controller = new MessageController();
+        $controller->getMessages();
+        break;
+
+    case 'messages/start-conversation':
+        $controller = new MessageController();
+        $controller->startConversation();
+        break;
+
+    case 'messages/get-user':
+        $controller = new MessageController();
+        $controller->getUser();
+        break;
+
+    case 'messages/unread-count':
+        $controller = new MessageController();
+        $controller->getUnreadCount();
+        break;
+
+    case 'test/inputs':
+        include '../inputs.html';
         break;
 
     default:

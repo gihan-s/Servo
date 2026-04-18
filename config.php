@@ -32,6 +32,8 @@ define('DB_USER', $_ENV['DB_USER']);
 define('DB_PASS', $_ENV['DB_PASS']);
 define('DB_NAME', $_ENV['DB_NAME']);
 define('BASE_URL', $_ENV['BASE_URL']);
+define('APP_SECRET', $_ENV['APP_SECRET']);
+define('WEBSOCKET_URL', $_ENV['WEBSOCKET_URL']);
 
 date_default_timezone_set("Asia/Colombo");
 

@@ -6,215 +6,210 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/providerProjects.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/cardList.css" />
-    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/main.css" />
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/serviceProjects.css" />
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/footer.css" />
     <title>Provider Dashboard - Service Requests & Projects</title>
+    <style>
+        html,
+        body {
+            height: 100%;
+        }
+
+        body.projects-page {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        body.projects-page .main-content {
+            flex: 1 0 auto;
+            width: 100%;
+        }
+
+        body.projects-page footer {
+            margin-top: auto;
+        }
+    </style>
     
 </head>
-<body>
-    <?php // Use filesystem path for includes (BASE_URL is for URLs, not filesystem)
-    require_once __DIR__ . '/../../includes/navbar.php'; ?>
+<body class="projects-page">
+    <?php 
+    require_once __DIR__ . '/../../includes/navbar.php';
+    require_once __DIR__ . '/../../components/SearchHeader.php';
+    require_once __DIR__ . '/../../components/FilterModal.php';
+    ?>
     <div class="main-content">
-    <section class="service-requests">
-        <div class="header-requests">
-            <h1>My Service Requests & Projects</h1>
-            <div class="search-header">
-                <div class="search-button">
-                    <input type="text" placeholder="Search for Requests...">
-                    <button><i class="fa-solid fa-magnifying-glass"></i></button>
-                </div>
-                <button class="filter" id="filter-pop-up"><i
-                        class="fa-solid fa-filter"></i><span>Filter</span></button>
-                <div class="advance-search">
-                    <div class="sort-selection">
-                        <div class="selection-input-field">
-                            <input type="selection-input" id="selection-input" name="sort" value="Sort By Relevence"
-                                disabled><i class="fa-solid fa-chevron-down"></i>
-                        </div>
-                        <div class="selection-options" id="selection-options">
-                            <div class="opt">Sort By Relevence</div>
-                            <div class="opt">Sort By Price</div>
-                            <div class="opt">Sort By Rating</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="container-changer">
-                <!--<div id="new-requests" class="buttons active" data-target="new-requests">New Requests</div>-->
-                <div id="pending-requests" class="buttons active" data-target="pending-requests">Incoming Requests</div>
-                <div id="in-progress-requests" class="buttons" data-target="in-progress-requests">Ongoing</div>
-                <div id="pending-review" class="buttons" data-target="pending-review">Pending Review</div>
-                <div id="completed-jobs" class="buttons" data-target="completed-jobs">Completed</div>
-            </div>
-        </div>
+    <section class="service-requests" style="padding-top: 12px; padding-bottom: 28px;">
+        <?php
+        $searchHeader = new SearchHeader([
+            'inputId' => 'projectsSearchInput',
+            'placeholder' => 'Search by title, category, or client...',
+            'filterBtnId' => 'projectsFilterBtn',
+            'searchBtnId' => 'projectsSearchBtn',
+            'title' => 'Projects',
+            'note' => 'Track incoming project requests, ongoing projects, and project history',
+            'showTabs' => true,
+            'tabs' => [
+                ['id' => 'pending-requests', 'label' => 'Incoming Requests', 'target' => 'pending-requests', 'active' => true],
+                ['id' => 'in-progress-requests', 'label' => 'Ongoing', 'target' => 'in-progress-requests'],
+                ['id' => 'pending-review', 'label' => 'Pending Review', 'target' => 'pending-review'],
+                ['id' => 'completed-jobs', 'label' => 'Completed', 'target' => 'completed-jobs']
+            ]
+        ]);
+        $searchHeader->render();
+        ?>
         <div class="request-content">
-            <!-- New Requests Section -->
-             <!--
-            <div class="new-requests active requests-section" id="section-new">
-                <p class="section-note">New requests from clients. Review and respond with proposals.</p>
-                <div class="item-list">
-                    <div class="search-item" data-status="new">
-                        <div class="item-head">
-                            <div class="item-main-dets">
-                                <div class="item-name">Sarah Johnson</div>
-                                <div class="item-title">Logo Design for Tech Startup</div>
-                                <div class="item-district">
-                                    <span>Posted 15 Jul 2025 | 17:55</span>
-                                    <span>Budget: $500-$800</span>
-                                </div>
-                            </div>
-                            <div class="button">
-                                <button class="btn-outline btn-view" title="View Request"><i
-                                        class="fa-solid fa-eye"></i> View</button>
-                                <button class="btn-primary btn-propose" title="Send Proposal"><i
-                                        class="fa-solid fa-paper-plane"></i> Propose</button>
-                                <button class="btn-danger btn-decline" title="Decline Request"><i
-                                        class="fa-solid fa-circle-xmark"></i> Decline</button>
-                            </div>
-                        </div>
-                        <div class="item-middle">
-                            <div><i class="fa-solid fa-clock"></i> Timeline: 2 weeks</div>
-                            <div><i class="fa-solid fa-tag"></i> Category: Graphic Design</div>
-                        </div>
-                        <div class="item-description">Looking for a modern, minimalist logo for our new SaaS platform. Should work well in both digital and print formats.</div>
-                        <div class="status-bottom"><span class="status-chip status-new">New Request</span></div>
-                    </div>
-                </div>
-                <div class="pagination" aria-label="New Requests Pagination">
-                    <button class="page-btn prev" disabled><i class="fa-solid fa-chevron-left"></i></button>
-                    <button class="page-btn active">1</button>
-                    <button class="page-btn">2</button>
-                    <button class="page-btn">3</button>
-                    <button class="page-btn next"><i class="fa-solid fa-chevron-right"></i></button>
-                </div>
-            </div>
-    -->
             <!-- Incoming Requests Section -->
-            <div class="pending-requests active requests-section" id="section-pending">
+            <div class="pending-requests active requests-section" id="section-pending" data-section="pending-requests">
                 <p class="section-note">Incoming service requests from potential clients.</p>
                 <div class="item-list">
-                    <div class="search-item" data-status="pending">
+                    <?php if (empty($incomingRequests)): ?>
+                        <div class="search-item">
+                            <div class="item-head">
+                                <div class="item-main-dets">
+                                    <div class="item-title">No incoming requests at this time.</div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php foreach ($incomingRequests as $request): ?>
+                    <div class="search-item" data-status="pending" data-client="<?= htmlspecialchars($request['Client_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-title="<?= htmlspecialchars($request['Title'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-category="<?= htmlspecialchars($request['Category_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-posted="<?= htmlspecialchars($request['Posted'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-budget="<?= htmlspecialchars($request['Budget'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-timeline="<?= htmlspecialchars($request['Timeline'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-status-label="<?= htmlspecialchars($request['Status'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-description="<?= htmlspecialchars($request['Description'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                         <div class="item-head">
                             <div class="item-main-dets">
-                                <div class="item-name">Michael Chen</div>
-                                <div class="item-title">E-commerce Website Development</div>
+                                <div class="item-name"><?= htmlspecialchars($request['Client_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
+                                <div class="item-title"><?= htmlspecialchars($request['Title'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
                                 <div class="item-district">
-                                    <span>Proposed 12 Jul 2025</span>
-                                    <span>Proposal: $2,500</span>
+                                    <span><?= htmlspecialchars($request['Posted'] ?? '', ENT_QUOTES, 'UTF-8') ?></span>
+                                    <span><?= htmlspecialchars($request['Budget'] ?? '', ENT_QUOTES, 'UTF-8') ?></span>
                                 </div>
                             </div>
                             <div class="button">
-                                <button class="btn-outline btn-view" title="View Proposal"><i
-                                        class="fa-solid fa-eye"></i> View</button>
-                                <button class="btn-outline btn-message" title="Message Client"><i
-                                        class="fa-solid fa-messages"></i> Message</button>
-                                <button class="btn-danger btn-withdraw" title="Withdraw Proposal"><i
-                                        class="fa-solid fa-trash"></i> Withdraw</button>
+                                <button class="btn-outline btn-view" title="View Proposal"><i class="fa-solid fa-eye"></i> View</button>
+                                <button class="btn-outline btn-message" title="Message Client"><i class="fa-solid fa-message"></i> Message</button>
+                                <button class="btn-danger btn-withdraw" title="Withdraw Proposal"><i class="fa-solid fa-trash"></i> Withdraw</button>
                             </div>
                         </div>
                         <div class="item-middle">
-                            <div><i class="fa-solid fa-clock"></i> Timeline: 4 weeks</div>
-                            <div><i class="fa-solid fa-tag"></i> Proposed: $2,500</div>
+                            <div><i class="fa-solid fa-clock"></i> Timeline: <?= htmlspecialchars($request['Timeline'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
+                            <div><i class="fa-solid fa-tag"></i> <?= htmlspecialchars($request['Budget'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
                         </div>
-                        <div class="item-description">Full e-commerce site with product catalog, shopping cart, and payment integration.</div>
-                        <div class="status-bottom"><span class="status-chip status-pending">Pending Response</span></div>
+                        <div class="item-description"><?= htmlspecialchars($request['Description'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
+                        <div class="status-bottom"><span class="status-chip status-<?= htmlspecialchars(strtolower(str_replace(' ', '-', $request['Status'] ?? 'pending')), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($request['Status'] ?? 'Pending', ENT_QUOTES, 'UTF-8') ?></span></div>
                     </div>
-                </div>
-                <div class="pagination" aria-label="Pending Requests Pagination">
-                    <button class="page-btn prev" disabled><i class="fa-solid fa-chevron-left"></i></button>
-                    <button class="page-btn active">1</button>
-                    <button class="page-btn">2</button>
-                    <button class="page-btn">3</button>
-                    <button class="page-btn next"><i class="fa-solid fa-chevron-right"></i></button>
+                    <?php endforeach; ?>
                 </div>
             </div>
 
             <!-- Ongoing Section -->
-            <div class="in-progress-requests requests-section" id="section-progress">
+            <div class="in-progress-requests requests-section" id="section-progress" data-section="in-progress-requests">
                 <p class="section-note">Active projects you're currently working on.</p>
                 <div class="item-list">
-                    <div class="search-item" data-status="progress">
+                    <?php if (empty($ongoingProjects)): ?>
+                        <div class="search-item">
+                            <div class="item-head">
+                                <div class="item-main-dets">
+                                    <div class="item-title">No ongoing projects at this time.</div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php foreach ($ongoingProjects as $project): ?>
+                    <div class="search-item" data-status="progress" data-client="<?= htmlspecialchars($project['Client_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-title="<?= htmlspecialchars($project['Title'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-category="<?= htmlspecialchars($project['Category_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-posted="<?= htmlspecialchars($project['Posted'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-budget="<?= htmlspecialchars($project['Budget'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-timeline="<?= htmlspecialchars($project['Timeline'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-status-label="<?= htmlspecialchars($project['Status'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-progress="<?= htmlspecialchars($project['Progress'] ?? '0', ENT_QUOTES, 'UTF-8') ?>" data-progress-detail="<?= htmlspecialchars($project['Progress_Detail'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-logged="<?= htmlspecialchars($project['Hours_Logged'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-description="<?= htmlspecialchars($project['Description'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                         <div class="item-head">
                             <div class="item-main-dets">
-                                <div class="item-name">Emma Wilson</div>
-                                <div class="item-title">Mobile App UI/UX Design</div>
+                                <div class="item-name"><?= htmlspecialchars($project['Client_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
+                                <div class="item-title"><?= htmlspecialchars($project['Title'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
                                 <div class="item-district">
-                                    <span>Started 10 Jul 2025</span>
-                                    <span>Budget: $1,200</span>
+                                    <span><?= htmlspecialchars($project['Posted'] ?? '', ENT_QUOTES, 'UTF-8') ?></span>
+                                    <span><?= htmlspecialchars($project['Budget'] ?? '', ENT_QUOTES, 'UTF-8') ?></span>
                                 </div>
                             </div>
                             <div class="button">
                                 <button class="btn-outline btn-view" title="View Project"><i class="fa-solid fa-eye"></i> View</button>
-                                <button class="btn-outline btn-message" title="Message Client"><i class="fa-solid fa-messages"></i> Message</button>
+                                <button class="btn-outline btn-message" title="Message Client"><i class="fa-solid fa-message"></i> Message</button>
                                 <button class="btn-primary btn-update" title="Update Progress"><i class="fa-solid fa-arrow-up"></i> Update</button>
                                 <button class="btn-primary btn-submit" title="Submit for Review"><i class="fa-solid fa-paper-plane"></i> Submit</button>
                             </div>
                         </div>
                         <div class="item-middle">
-                            <div><i class="fa-solid fa-hourglass"></i> ETA 12d</div>
-                            <div><i class="fa-solid fa-clock"></i> Logged 32h</div>
+                            <div><i class="fa-solid fa-hourglass"></i> <?= htmlspecialchars($project['Timeline'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
+                            <div><i class="fa-solid fa-clock"></i> Logged <?= htmlspecialchars($project['Hours_Logged'] ?? '0h', ENT_QUOTES, 'UTF-8') ?></div>
                         </div>
+                        <?php if (isset($project['Progress'])): ?>
                         <div class="progress-container" aria-label="Project progress">
-                            <div class="progress-label">Progress: <span class="progress-percent">65%</span> <span class="progress-detail" style="color:#64748b;">(32h of 50h)</span></div>
-                            <div class="progress-track"><div class="progress-fill" style="width:65%"></div></div>
+                            <div class="progress-label">Progress: <span class="progress-percent"><?= htmlspecialchars($project['Progress'], ENT_QUOTES, 'UTF-8') ?>%</span> <span class="progress-detail" style="color:#64748b;">(<?= htmlspecialchars($project['Progress_Detail'] ?? '', ENT_QUOTES, 'UTF-8') ?>)</span></div>
+                            <div class="progress-track"><div class="progress-fill" style="width:<?= htmlspecialchars($project['Progress'], ENT_QUOTES, 'UTF-8') ?>%"></div></div>
                         </div>
-                        <div class="item-description">Designing user interface and experience for a fitness tracking mobile application.</div>
-                        <div class="status-bottom"><span class="status-chip status-progress">In Progress</span></div>
+                        <?php endif; ?>
+                        <div class="item-description"><?= htmlspecialchars($project['Description'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
+                        <div class="status-bottom"><span class="status-chip status-<?= htmlspecialchars(strtolower(str_replace(' ', '-', $project['Status'] ?? 'progress')), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($project['Status'] ?? 'In Progress', ENT_QUOTES, 'UTF-8') ?></span></div>
                     </div>
-                </div>
-                <div class="pagination" aria-label="In Progress Pagination">
-                    <button class="page-btn prev" disabled><i class="fa-solid fa-chevron-left"></i></button>
-                    <button class="page-btn active">1</button>
-                    <button class="page-btn">2</button>
-                    <button class="page-btn">3</button>
-                    <button class="page-btn next"><i class="fa-solid fa-chevron-right"></i></button>
+                    <?php endforeach; ?>
                 </div>
             </div>
 
             <!-- Pending Review Section -->
-            <div class="pending-review requests-section" id="section-review">
+            <div class="pending-review requests-section" id="section-review" data-section="pending-review">
                 <p class="section-note">Project outputs submitted for review. Awaiting feedback or approval from client.</p>
                 <div class="item-list">
-                    <div class="search-item" data-status="review">
+                    <?php if (empty($pendingReviewProjects)): ?>
+                        <div class="search-item">
+                            <div class="item-head">
+                                <div class="item-main-dets">
+                                    <div class="item-title">No projects pending review at this time.</div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php foreach ($pendingReviewProjects as $review): ?>
+                    <div class="search-item" data-status="review" data-client="<?= htmlspecialchars($review['Client_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-title="<?= htmlspecialchars($review['Title'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-category="<?= htmlspecialchars($review['Category_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-posted="<?= htmlspecialchars($review['Posted'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-budget="<?= htmlspecialchars($review['Budget'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-timeline="<?= htmlspecialchars($review['Timeline'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-status-label="<?= htmlspecialchars($review['Status'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-description="<?= htmlspecialchars($review['Description'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                         <div class="item-head">
                             <div class="item-main-dets">
-                                <div class="item-name">David Rodriguez</div>
-                                <div class="item-title">Website Content Writing</div>
+                                <div class="item-name"><?= htmlspecialchars($review['Client_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
+                                <div class="item-title"><?= htmlspecialchars($review['Title'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
                                 <div class="item-district">
-                                    <span>Submitted 08 Jul 2025</span>
-                                    <span>Payment: $600</span>
+                                    <span><?= htmlspecialchars($review['Posted'] ?? '', ENT_QUOTES, 'UTF-8') ?></span>
+                                    <span><?= htmlspecialchars($review['Budget'] ?? '', ENT_QUOTES, 'UTF-8') ?></span>
                                 </div>
                             </div>
                             <div class="button">
                                 <button class="btn-outline btn-view" title="View Submission"><i class="fa-solid fa-eye"></i> View</button>
-                                <button class="btn-outline btn-message" title="Message Client"><i class="fa-solid fa-messages"></i> Message</button>
+                                <button class="btn-outline btn-message" title="Message Client"><i class="fa-solid fa-message"></i> Message</button>
                             </div>
                         </div>
-                        <div class="item-description">Wrote homepage, about us, and services page content for a digital marketing agency.</div>
-                        <div class="status-bottom"><span class="status-chip status-review"><i
-                                    class="fa-solid fa-clipboard-check"></i> Pending Review</span></div>
+                        <div class="item-description"><?= htmlspecialchars($review['Description'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
+                        <div class="status-bottom"><span class="status-chip status-<?= htmlspecialchars(strtolower(str_replace(' ', '-', $review['Status'] ?? 'review')), ENT_QUOTES, 'UTF-8') ?>"><i class="fa-solid fa-clipboard-check"></i> <?= htmlspecialchars($review['Status'] ?? 'Pending Review', ENT_QUOTES, 'UTF-8') ?></span></div>
                     </div>
-                </div>
-                <div class="pagination" aria-label="Pending Review Pagination">
-                    <button class="page-btn prev" disabled><i class="fa-solid fa-chevron-left"></i></button>
-                    <button class="page-btn active">1</button>
-                    <button class="page-btn">2</button>
-                    <button class="page-btn">3</button>
-                    <button class="page-btn next"><i class="fa-solid fa-chevron-right"></i></button>
+                    <?php endforeach; ?>
                 </div>
             </div>
 
             <!-- Completed Jobs Section -->
-            <div class="completed-jobs requests-section" id="section-completed">
+            <div class="completed-jobs requests-section" id="section-completed" data-section="completed-jobs">
                 <p class="section-note">Successfully completed projects and delivered work.</p>
                 <div class="item-list">
-                    <div class="search-item" data-status="complete">
+                    <?php if (empty($completedJobs)): ?>
+                        <div class="search-item">
+                            <div class="item-head">
+                                <div class="item-main-dets">
+                                    <div class="item-title">No completed jobs yet.</div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php foreach ($completedJobs as $job): ?>
+                    <div class="search-item" data-status="complete" data-client="<?= htmlspecialchars($job['Client_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-title="<?= htmlspecialchars($job['Title'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-category="<?= htmlspecialchars($job['Category_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-posted="<?= htmlspecialchars($job['Posted'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-budget="<?= htmlspecialchars($job['Budget'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-timeline="<?= htmlspecialchars($job['Timeline'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-status-label="<?= htmlspecialchars($job['Status'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-description="<?= htmlspecialchars($job['Description'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                         <div class="item-head">
                             <div class="item-main-dets">
-                                <div class="item-name">Jennifer Lee</div>
-                                <div class="item-title">Social Media Marketing Campaign</div>
+                                <div class="item-name"><?= htmlspecialchars($job['Client_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
+                                <div class="item-title"><?= htmlspecialchars($job['Title'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
                                 <div class="item-district">
-                                    <span>Completed 01 Jul 2025</span>
-                                    <span>Earned: $1,500</span>
+                                    <span><?= htmlspecialchars($job['Posted'] ?? '', ENT_QUOTES, 'UTF-8') ?></span>
+                                    <span><?= htmlspecialchars($job['Budget'] ?? '', ENT_QUOTES, 'UTF-8') ?></span>
                                 </div>
                             </div>
                             <div class="button">
@@ -222,12 +217,11 @@
                                 <button class="btn-outline" title="Download Files"><i class="fa-solid fa-download"></i> Files</button>
                             </div>
                         </div>
-                        <div class="item-description">30-day social media campaign with content creation and community management across 3 platforms.</div>
-                        <div class="status-bottom"><span class="status-chip status-complete"><i
-                                    class="fa-solid fa-circle-check"></i> Completed</span></div>
+                        <div class="item-description"><?= htmlspecialchars($job['Description'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
+                        <div class="status-bottom"><span class="status-chip status-<?= htmlspecialchars(strtolower(str_replace(' ', '-', $job['Status'] ?? 'complete')), ENT_QUOTES, 'UTF-8') ?>"><i class="fa-solid fa-circle-check"></i> <?= htmlspecialchars($job['Status'] ?? 'Completed', ENT_QUOTES, 'UTF-8') ?></span></div>
                     </div>
+                    <?php endforeach; ?>
                 </div>
-                <div class="pagination" aria-label="Completed Jobs Pagination">
                     <button class="page-btn prev" disabled><i class="fa-solid fa-chevron-left"></i></button>
                     <button class="page-btn active">1</button>
                     <button class="page-btn">2</button>
@@ -239,56 +233,23 @@
     </section>
 
     <!-- Filter Popup -->
-    <div class="pop-up-section filter-pop-up deactive">
-        <div class="pop-up deactive">
-            <div class="pop-up-header">
-                <div class="pop-up-title">Add Filters</div>
-                <i class="fa-solid fa-xmark" id="filter-pop-up-close"></i>
-            </div>
-            <hr>
-            <div class="pop-up-content">
-                <div class="search-filters">
-                    <div class="filter-item">
-                        <div class="filter-title"><span>Project Budget</span><i
-                                class="fa-solid fa-chevron-down rotated"></i>
-                        </div>
-                        <ul class="filter-options active radios">
-                            <li><input type="radio" name="budget" id="budget" checked>Any budget</li>
-                            <li><input type="radio" name="budget" id="budget">Less than $500</li>
-                            <li><input type="radio" name="budget" id="budget">$500 - $1,000</li>
-                            <li><input type="radio" name="budget" id="budget">$1,000 - $2,500</li>
-                            <li><input type="radio" name="budget" id="budget">$2,500 & above</li>
-                        </ul>
-                    </div>
-                    <div class="filter-item">
-                        <div class="filter-title"><span>Project Duration</span><i class="fa-solid fa-chevron-down"></i>
-                        </div>
-                        <ul class="filter-options radios">
-                            <li><input type="radio" name="duration" id="duration" checked>Any duration</li>
-                            <li><input type="radio" name="duration" id="duration">Less than 1 week</li>
-                            <li><input type="radio" name="duration" id="duration">1-2 weeks</li>
-                            <li><input type="radio" name="duration" id="duration">2-4 weeks</li>
-                            <li><input type="radio" name="duration" id="duration">More than 4 weeks</li>
-                        </ul>
-                    </div>
-                    <div class="filter-item">
-                        <div class="filter-title"><span>Project Category</span><i class="fa-solid fa-chevron-down"></i>
-                        </div>
-                        <ul class="filter-options checkboxes">
-                            <li><input type="checkbox" name="category" id="category" checked>Web Development</li>
-                            <li><input type="checkbox" name="category" id="category">Graphic Design</li>
-                            <li><input type="checkbox" name="category" id="category">Content Writing</li>
-                            <li><input type="checkbox" name="category" id="category">Digital Marketing</li>
-                            <li><input type="checkbox" name="category" id="category">Mobile Development</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            <div class="button-apply">
-                <button>Apply filters</button>
-            </div>
-        </div>
-    </div>
+    <?php
+    $filterModal = new FilterModal([
+        'modalRootId' => 'projectsFilterRoot',
+        'modalId' => 'projectsFilterModal',
+        'closeId' => 'projectsFilterClose',
+        'applyId' => 'projectsFilterApply',
+        'clearId' => 'projectsFilterClear',
+        'filters' => [
+            [
+                'type' => 'checkbox',
+                'label' => 'Category',
+                'id' => 'projectsCategoryList'
+            ]
+        ]
+    ]);
+    $filterModal->render();
+    ?>
 
     <!-- Request Details Modal -->
     <div class="pop-up-section request-modal deactive" id="requestModalRoot">
@@ -327,12 +288,16 @@
                     <div style="font-weight:700; color:#111827; margin-top:4px;">Client Requirements</div>
                     <div id="reqRequirements" style="font-size:14px; color:#475569; line-height:1.6; margin-top:6px;">—</div>
                 </div>
+                <div id="reqAdditionalSection" class="modal-requirements" style="display:none;">
+                    <div style="font-weight:700; color:#111827; margin-top:4px;">Additional Details</div>
+                    <div id="reqAdditionalDetails" style="display:flex; flex-direction:column; gap:8px; margin-top:6px;"></div>
+                </div>
             </div>
             <div class="modal-actions">
                 <button class="btn-primary" id="btnPropose" style="display:none;"><i class="fa-solid fa-paper-plane"></i> Send Proposal</button>
                 <button class="btn-primary" id="btnSubmit" style="display:none;"><i class="fa-solid fa-paper-plane"></i> Submit for Review</button>
                 <button class="btn-primary" id="btnUpdate" style="display:none;"><i class="fa-solid fa-arrow-up"></i> Update Progress</button>
-                <button class="btn-outline" id="btnMessage"><i class="fa-solid fa-messages"></i> Message Client</button>
+                <button class="btn-outline" id="btnMessage"><i class="fa-solid fa-message"></i> Message Client</button>
                 <button class="btn-danger" id="btnDecline"><i class="fa-solid fa-circle-xmark"></i> Decline</button>
                 <button class="btn-danger" id="btnWithdraw" style="display:none;"><i class="fa-solid fa-trash"></i> Withdraw</button>
             </div>
@@ -475,485 +440,7 @@
 
     <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
 
-    <script>
-        // Main functionality for provider interface
-        document.addEventListener('DOMContentLoaded', function() {
-            // Tab navigation
-            const tabButtons = document.querySelectorAll('.container-changer .buttons');
-            const tabSections = document.querySelectorAll('.requests-section');
-            
-            tabButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const targetId = this.getAttribute('data-target');
-                    
-                    // Update active tab
-                    tabButtons.forEach(btn => btn.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    // Show corresponding section
-                    tabSections.forEach(section => {
-                        section.classList.remove('active');
-                        if (section.classList.contains(targetId)) {
-                            section.classList.add('active');
-                        }
-                    });
-                });
-            });
-            
-            // Filter popup functionality
-            const filterButton = document.getElementById('filter-pop-up');
-            const filterPopup = document.querySelector('.filter-pop-up');
-            const filterClose = document.getElementById('filter-pop-up-close');
-            
-            if (filterButton && filterPopup) {
-                filterButton.addEventListener('click', function() {
-                    filterPopup.classList.remove('deactive');
-                });
-                
-                filterClose.addEventListener('click', function() {
-                    filterPopup.classList.add('deactive');
-                });
-                
-                filterPopup.addEventListener('click', function(e) {
-                    if (e.target === filterPopup) {
-                        filterPopup.classList.add('deactive');
-                    }
-                });
-            }
-            
-            // Filter options toggle
-            const filterTitles = document.querySelectorAll('.filter-title');
-            
-            filterTitles.forEach(title => {
-                title.addEventListener('click', function() {
-                    const options = this.nextElementSibling;
-                    const icon = this.querySelector('i');
-                    
-                    options.classList.toggle('active');
-                    icon.classList.toggle('rotated');
-                });
-            });
-            
-            // Sort selection functionality
-            const sortInput = document.getElementById('selection-input');
-            const sortOptions = document.getElementById('selection-options');
-            
-            if (sortInput && sortOptions) {
-                sortInput.addEventListener('click', function() {
-                    sortOptions.style.display = sortOptions.style.display === 'block' ? 'none' : 'block';
-                });
-                
-                sortOptions.querySelectorAll('.opt').forEach(option => {
-                    option.addEventListener('click', function() {
-                        sortInput.value = this.textContent;
-                        sortOptions.style.display = 'none';
-                    });
-                });
-                
-                // Close sort options when clicking outside
-                document.addEventListener('click', function(e) {
-                    if (!sortInput.contains(e.target) && !sortOptions.contains(e.target)) {
-                        sortOptions.style.display = 'none';
-                    }
-                });
-            }
-            
-            // Modal functionality
-            initializeModals();
-        });
-
-        // Modal management
-        function initializeModals() {
-            // Request Details Modal
-            const requestModalRoot = document.getElementById('requestModalRoot');
-            const requestModalClose = document.getElementById('requestModalClose');
-            
-            if (requestModalRoot && requestModalClose) {
-                requestModalClose.addEventListener('click', () => closeModal(requestModalRoot));
-                requestModalRoot.addEventListener('click', (e) => {
-                    if (e.target === requestModalRoot) closeModal(requestModalRoot);
-                });
-            }
-            
-            // Proposal Modal
-            const proposalModalRoot = document.getElementById('proposalModalRoot');
-            const proposalModalClose = document.getElementById('proposalModalClose');
-            
-            if (proposalModalRoot && proposalModalClose) {
-                proposalModalClose.addEventListener('click', () => closeModal(proposalModalRoot));
-                proposalModalRoot.addEventListener('click', (e) => {
-                    if (e.target === proposalModalRoot) closeModal(proposalModalRoot);
-                });
-            }
-            
-            // Progress Modal
-            const progressModalRoot = document.getElementById('progressModalRoot');
-            const progressModalClose = document.getElementById('progressModalClose');
-            
-            if (progressModalRoot && progressModalClose) {
-                progressModalClose.addEventListener('click', () => closeModal(progressModalRoot));
-                progressModalRoot.addEventListener('click', (e) => {
-                    if (e.target === progressModalRoot) closeModal(progressModalRoot);
-                });
-            }
-            
-            // Submit Modal
-            const submitModalRoot = document.getElementById('submitModalRoot');
-            const submitModalClose = document.getElementById('submitModalClose');
-            
-            if (submitModalRoot && submitModalClose) {
-                submitModalClose.addEventListener('click', () => closeModal(submitModalRoot));
-                submitModalRoot.addEventListener('click', (e) => {
-                    if (e.target === submitModalRoot) closeModal(submitModalRoot);
-                });
-            }
-            
-            // Confirm Modal
-            const confirmModalRoot = document.getElementById('confirmModalRoot');
-            const confirmModalClose = document.getElementById('confirmModalClose');
-            
-            if (confirmModalRoot && confirmModalClose) {
-                confirmModalClose.addEventListener('click', () => closeModal(confirmModalRoot));
-                confirmModalRoot.addEventListener('click', (e) => {
-                    if (e.target === confirmModalRoot) closeModal(confirmModalRoot);
-                });
-            }
-            
-            // Button event handlers
-            setupButtonHandlers();
-        }
-
-        function setupButtonHandlers() {
-            // View buttons - open request details modal
-            document.querySelectorAll('.btn-view').forEach(button => {
-                button.addEventListener('click', function() {
-                    const card = this.closest('.search-item');
-                    openRequestDetailsModal(card);
-                });
-            });
-            
-            // Propose buttons - open proposal modal
-            document.querySelectorAll('.btn-propose').forEach(button => {
-                button.addEventListener('click', function() {
-                    const card = this.closest('.search-item');
-                    openProposalModal(card);
-                });
-            });
-            
-            // Update buttons - open progress modal
-            document.querySelectorAll('.btn-update').forEach(button => {
-                button.addEventListener('click', function() {
-                    const card = this.closest('.search-item');
-                    openProgressModal(card);
-                });
-            });
-            
-            // Submit buttons - open submit modal
-            document.querySelectorAll('.btn-submit').forEach(button => {
-                button.addEventListener('click', function() {
-                    const card = this.closest('.search-item');
-                    openSubmitModal(card);
-                });
-            });
-            
-            // Decline buttons - open confirm modal
-            document.querySelectorAll('.btn-decline').forEach(button => {
-                button.addEventListener('click', function() {
-                    const card = this.closest('.search-item');
-                    openConfirmModal(
-                        'Decline Request', 
-                        'Are you sure you want to decline this request? This action cannot be undone.',
-                        () => {
-                            // Action to perform on confirm
-                            card.remove();
-                            alert('Request declined successfully.');
-                        }
-                    );
-                });
-            });
-            
-            // Withdraw buttons - open confirm modal
-            document.querySelectorAll('.btn-withdraw').forEach(button => {
-                button.addEventListener('click', function() {
-                    const card = this.closest('.search-item');
-                    openConfirmModal(
-                        'Withdraw Proposal', 
-                        'Are you sure you want to withdraw your proposal? This action cannot be undone.',
-                        () => {
-                            // Action to perform on confirm
-                            card.remove();
-                            alert('Proposal withdrawn successfully.');
-                        }
-                    );
-                });
-            });
-            
-            // Modal action buttons
-            const btnPropose = document.getElementById('btnPropose');
-            if (btnPropose) {
-                btnPropose.addEventListener('click', function() {
-                    closeModal(document.getElementById('requestModalRoot'));
-                    openProposalModal();
-                });
-            }
-            
-            const btnUpdate = document.getElementById('btnUpdate');
-            if (btnUpdate) {
-                btnUpdate.addEventListener('click', function() {
-                    closeModal(document.getElementById('requestModalRoot'));
-                    openProgressModal();
-                });
-            }
-            
-            const btnSubmit = document.getElementById('btnSubmit');
-            if (btnSubmit) {
-                btnSubmit.addEventListener('click', function() {
-                    closeModal(document.getElementById('requestModalRoot'));
-                    openSubmitModal();
-                });
-            }
-            
-            const btnSendProposal = document.getElementById('btnSendProposal');
-            if (btnSendProposal) {
-                btnSendProposal.addEventListener('click', function() {
-                    // Validate form
-                    const amount = document.getElementById('proposalAmount').value;
-                    const timeline = document.getElementById('proposalTimeline').value;
-                    const description = document.getElementById('proposalDescription').value;
-                    
-                    if (!amount || !timeline || !description) {
-                        alert('Please fill in all required fields.');
-                        return;
-                    }
-                    
-                    // Submit proposal (in a real app, this would be an API call)
-                    alert('Proposal sent successfully!');
-                    closeModal(document.getElementById('proposalModalRoot'));
-                });
-            }
-            
-            const btnUpdateProgress = document.getElementById('btnUpdateProgress');
-            if (btnUpdateProgress) {
-                btnUpdateProgress.addEventListener('click', function() {
-                    // Validate form
-                    const description = document.getElementById('progressDescription').value;
-                    
-                    if (!description) {
-                        alert('Please provide a progress update.');
-                        return;
-                    }
-                    
-                    // Update progress (in a real app, this would be an API call)
-                    alert('Progress updated successfully!');
-                    closeModal(document.getElementById('progressModalRoot'));
-                });
-            }
-            
-            const btnSubmitForReview = document.getElementById('btnSubmitForReview');
-            if (btnSubmitForReview) {
-                btnSubmitForReview.addEventListener('click', function() {
-                    // Validate form
-                    const description = document.getElementById('submitDescription').value;
-                    const files = document.getElementById('submitFiles').files;
-                    
-                    if (!description || files.length === 0) {
-                        alert('Please provide submission notes and attach deliverables.');
-                        return;
-                    }
-                    
-                    // Submit for review (in a real app, this would be an API call)
-                    alert('Project submitted for review successfully!');
-                    closeModal(document.getElementById('submitModalRoot'));
-                });
-            }
-            
-            // Progress percentage slider
-            const progressSlider = document.getElementById('progressPercent');
-            if (progressSlider) {
-                progressSlider.addEventListener('input', function() {
-                    document.getElementById('progressPercentValue').textContent = this.value + '%';
-                });
-            }
-            
-            // Confirm modal actions
-            const btnCancelAction = document.getElementById('btnCancelAction');
-            const btnConfirmAction = document.getElementById('btnConfirmAction');
-            
-            if (btnCancelAction) {
-                btnCancelAction.addEventListener('click', function() {
-                    closeModal(document.getElementById('confirmModalRoot'));
-                });
-            }
-            
-            // Note: btnConfirmAction action is set dynamically in openConfirmModal
-        }
-
-        function openModal(modal) {
-            modal.classList.remove('deactive');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeModal(modal) {
-            modal.classList.add('deactive');
-            document.body.style.overflow = '';
-        }
-
-        function openRequestDetailsModal(card) {
-            const modal = document.getElementById('requestModalRoot');
-            const client = card.querySelector('.item-name').textContent;
-            const title = card.querySelector('.item-title').textContent;
-            const description = card.querySelector('.item-description').textContent;
-            const date = card.querySelector('.item-district span').textContent;
-            
-            // Extract budget and timeline information
-            let budget = 'Budget: Not specified';
-            let timeline = 'Timeline: Not specified';
-            
-            const middleItems = card.querySelectorAll('.item-middle div');
-            middleItems.forEach(item => {
-                const text = item.textContent;
-                if (text.includes('Budget:')) budget = text;
-                if (text.includes('Timeline:')) timeline = text;
-            });
-            
-            // Set modal content
-            document.getElementById('reqClient').textContent = client;
-            document.getElementById('reqTitle').textContent = title;
-            document.getElementById('reqDescription').textContent = description;
-            document.getElementById('reqDate').textContent = date;
-            document.getElementById('reqBudget').textContent = budget;
-            document.getElementById('reqTimeline').textContent = timeline;
-            
-            // Show/hide buttons based on request status
-            const status = card.getAttribute('data-status');
-            const btnPropose = document.getElementById('btnPropose');
-            const btnUpdate = document.getElementById('btnUpdate');
-            const btnSubmit = document.getElementById('btnSubmit');
-            const btnWithdraw = document.getElementById('btnWithdraw');
-            const btnDecline = document.getElementById('btnDecline');
-            
-            // Reset all buttons
-            [btnPropose, btnUpdate, btnSubmit, btnWithdraw, btnDecline].forEach(btn => {
-                if (btn) btn.style.display = 'none';
-            });
-            
-            // Show appropriate buttons based on status
-            switch(status) {
-                case 'new':
-                    if (btnPropose) btnPropose.style.display = '';
-                    if (btnDecline) btnDecline.style.display = '';
-                    break;
-                case 'pending':
-                    if (btnWithdraw) btnWithdraw.style.display = '';
-                    break;
-                case 'progress':
-                    if (btnUpdate) btnUpdate.style.display = '';
-                    if (btnSubmit) btnSubmit.style.display = '';
-                    break;
-            }
-            
-            // Show progress section for in-progress projects
-            const progressSection = document.getElementById('modalProgressSection');
-            if (progressSection) {
-                if (status === 'progress') {
-                    progressSection.style.display = 'block';
-                    // Set progress values (in a real app, these would come from the data)
-                    document.getElementById('modalProgressPercent').textContent = '65%';
-                    document.getElementById('modalProgressDetail').textContent = '(32h of 50h)';
-                    document.getElementById('modalProgressFill').style.width = '65%';
-                } else {
-                    progressSection.style.display = 'none';
-                }
-            }
-            
-            openModal(modal);
-        }
-
-        function openProposalModal(card) {
-            const modal = document.getElementById('proposalModalRoot');
-            
-            if (card) {
-                const client = card.querySelector('.item-name').textContent;
-                const title = card.querySelector('.item-title').textContent;
-                
-                document.getElementById('proposalClient').textContent = client;
-                document.getElementById('proposalTitle').textContent = title;
-            }
-            
-            // Reset form
-            document.getElementById('proposalAmount').value = '';
-            document.getElementById('proposalTimeline').value = '';
-            document.getElementById('proposalDescription').value = '';
-            document.getElementById('proposalFiles').value = '';
-            
-            openModal(modal);
-        }
-
-        function openProgressModal(card) {
-            const modal = document.getElementById('progressModalRoot');
-            
-            if (card) {
-                const client = card.querySelector('.item-name').textContent;
-                const title = card.querySelector('.item-title').textContent;
-                
-                document.getElementById('progressClient').textContent = client;
-                document.getElementById('progressTitle').textContent = title;
-            }
-            
-            // Reset form
-            document.getElementById('progressPercent').value = '65';
-            document.getElementById('progressPercentValue').textContent = '65%';
-            document.getElementById('hoursWorked').value = '32';
-            document.getElementById('progressDescription').value = '';
-            document.getElementById('progressFiles').value = '';
-            
-            openModal(modal);
-        }
-
-        function openSubmitModal(card) {
-            const modal = document.getElementById('submitModalRoot');
-            
-            if (card) {
-                const client = card.querySelector('.item-name').textContent;
-                const title = card.querySelector('.item-title').textContent;
-                
-                document.getElementById('submitClient').textContent = client;
-                document.getElementById('submitTitle').textContent = title;
-            }
-            
-            // Reset form
-            document.getElementById('submitDescription').value = '';
-            document.getElementById('submitFiles').value = '';
-            
-            openModal(modal);
-        }
-
-        function openConfirmModal(title, message, confirmAction) {
-            const modal = document.getElementById('confirmModalRoot');
-            
-            document.getElementById('confirmTitle').textContent = title;
-            document.getElementById('confirmMessage').textContent = message;
-            
-            // Set up confirm action
-            const btnConfirmAction = document.getElementById('btnConfirmAction');
-            btnConfirmAction.onclick = function() {
-                confirmAction();
-                closeModal(modal);
-            };
-            
-            openModal(modal);
-        }
-
-        // Close modals with Escape key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                const openModals = document.querySelectorAll('.pop-up-section:not(.deactive)');
-                openModals.forEach(modal => {
-                    closeModal(modal);
-                });
-            }
-        });
-    </script>
+    <script type="module" src="<?= BASE_URL ?>/assets/js/providerProjects.js"></script>
 </body>
 </html>
 

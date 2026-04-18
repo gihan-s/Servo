@@ -8,7 +8,7 @@ class ProviderModel extends Database
     public function getByEmail($email)
     {
         $email = strtolower($email);
-        $stmt = $this->conn->prepare("SELECT * FROM Provider WHERE Email = ?");
+        $stmt = $this->conn->prepare("SELECT * FROM provider WHERE Email = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -20,7 +20,7 @@ class ProviderModel extends Database
     {
         // Prepare SQL with placeholders
         $stmt = $this->conn->prepare(
-            "INSERT INTO Provider (`Email`, `Contact_No`, `NIC_No`, `Password`, `Created_At`, `First_Name`, `Last_Name`, `Gender`, `Profile_Picture`, `Bio`, `NIC_Front`, `NIC_Back`, `Resume`, `Website`, `Status`) 
+            "INSERT INTO provider (`Email`, `Contact_No`, `NIC_No`, `Password`, `Created_At`, `First_Name`, `Last_Name`, `Gender`, `Profile_Picture`, `Bio`, `NIC_Front`, `NIC_Back`, `Resume`, `Website`, `Status`) 
              VALUES (?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         );
 
@@ -75,20 +75,25 @@ class ProviderModel extends Database
     public function insertProviderCategory($Provider_ID, $data, $key)
     {
         $stmt = $this->conn->prepare(
-            "INSERT INTO Provider_Categories (`Category_ID`, `Provider_ID`, `Title`, `Description`, `Default_Price`) 
-                VALUES (?, ?, ?, ?, ?)"
+            "INSERT INTO provider_categories (`Category_ID`, `Provider_ID`, `Title`, `Description`, `Default_Price`, `Price_Type`, `Portfolio_Link`, `Price_Negotiability`) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
         );
+
+        $PriceNegotiability = $data['price_negotiability'][$key] == 'true' ? 1 : 0;
 
         if (!$stmt) {
             die("Prepare failed: " . $this->conn->error);
         }
         $stmt->bind_param(
-            "sssss",
+            "sssssssi",
             $data['category_id'][$key],
             $Provider_ID,
             $data['title'][$key],
             $data['description'][$key],
-            $data['default_price'][$key]
+            $data['default_price'][$key],
+            $data['price_type'][$key],
+            $data['portfolio_link'][$key],
+            $PriceNegotiability
         );
 
         if ($stmt->execute()) {
@@ -101,20 +106,65 @@ class ProviderModel extends Database
     }
 
 
-    public function insertSkill($Provider_Category_ID, $Skill)
+    public function insertProviderSocialLinks($Provider_ID, $SocialType, $SocialLink)
     {
         $stmt = $this->conn->prepare(
-            "INSERT INTO Skills (`Skill`, `Provider_Categories_ID`) 
-                VALUES (?, ?)"
+            "INSERT INTO provider_social (`Social_Type`, `Social_Link`, `Provider_ID`) 
+                VALUES (?, ?, ?)"
+        );
+        $stmt->bind_param(
+            "ssi",
+            $SocialType,
+            $SocialLink,
+            $Provider_ID,
+        );
+
+        if ($stmt->execute()) {
+            $id = $stmt->insert_id;
+            $stmt->close();
+            return $id;
+        } else {
+            die("Insert failed: " . $stmt->error);
+        }
+    }
+
+
+    public function insertSkill($Category_ID, $Skill)
+    {
+        $stmt = $this->conn->prepare(
+            "INSERT INTO skills (`Skill`, `Category_ID`) 
+            VALUES (?, ?)
+            ON DUPLICATE KEY UPDATE 
+            Skill_ID = LAST_INSERT_ID(Skill_ID)"
         );
 
         if (!$stmt) {
             die("Prepare failed: " . $this->conn->error);
         }
+
+        $stmt->bind_param("si", $Skill, $Category_ID);
+
+        if ($stmt->execute()) {
+            $id = $this->conn->insert_id; // <-- THIS is the key
+            $stmt->close();
+            return $id;
+        } else {
+            die("Insert failed: " . $stmt->error);
+        }
+    }
+
+
+        public function insertProviderSkills($ProviderCategoryID, $SkillID)
+    {
+        $stmt = $this->conn->prepare(
+            "INSERT INTO provider_categories_has_skills (`Provider_Categories_ID`, `Skills_Skill_ID`) 
+                VALUES (?, ?)"
+        );
+
         $stmt->bind_param(
-            "ss",
-            $Skill,
-            $Provider_Category_ID
+            "ii",
+            $ProviderCategoryID,
+            $SkillID
         );
 
         if ($stmt->execute()) {
@@ -139,7 +189,7 @@ class ProviderModel extends Database
             $CityFilter = "AND City = '{$City}'";
         }
 
-        $stmt = $this->conn->prepare("SELECT Location_ID FROM Location WHERE 1 {$DistrictFilter} {$CityFilter}");
+        $stmt = $this->conn->prepare("SELECT Location_ID FROM location WHERE 1 {$DistrictFilter} {$CityFilter}");
         $stmt->execute();
         $result = $stmt->get_result();
         $stmt->close();
@@ -150,7 +200,7 @@ class ProviderModel extends Database
     public function insertLocation($Provider_Category_ID, $Location_ID)
     {
         $stmt = $this->conn->prepare(
-            "INSERT INTO Provider_Categories_has_Location (`Provider_Categories_ID`, `Location_Location_ID`) 
+            "INSERT INTO provider_categories_has_location (`Provider_Categories_ID`, `Location_Location_ID`) 
                 VALUES (?, ?)"
         );
 
@@ -176,9 +226,10 @@ class ProviderModel extends Database
     public function getAllSkills($Category_ID)
     {
         $stmt = $this->conn->prepare(
-            "SELECT DISTINCT Skill FROM Skills, Provider_Categories
-            WHERE Skills.Provider_Categories_ID = Provider_Categories.ID 
-            AND Provider_Categories.Category_ID = '{$Category_ID}'
+            "SELECT DISTINCT Skill FROM skills, provider_categories
+            WHERE skills.Provider_Categories_ID = provider_categories.ID 
+            AND provider_categories.Category_ID = '{$Category_ID}'
+            AND provider_categories.Status = 'Active'
             "
         );
         $stmt->execute();
@@ -192,7 +243,7 @@ class ProviderModel extends Database
     public function getProviderById(int $id): ?array
     {
         $stmt = $this->conn->prepare(
-            "SELECT * FROM Provider WHERE Provider_ID = ?"
+            "SELECT * FROM provider WHERE Provider_ID = ?"
         );
         $stmt->bind_param("i", $id);
         $stmt->execute();
@@ -202,7 +253,7 @@ class ProviderModel extends Database
 
 
     // Update provider profile (example)
-    public function updateProfile($id, $firstName, $lastName, $contact, $gender, $website, $bio)
+    public function updateProfile($id, $firstName, $lastName, $contact, $gender, $website, $bio, $Resume = null)
     {
         $id = $this->conn->real_escape_string($id);
         $firstName = $this->conn->real_escape_string($firstName);
@@ -212,11 +263,18 @@ class ProviderModel extends Database
         $website = $this->conn->real_escape_string($website);
         $bio = $this->conn->real_escape_string($bio);
 
-        $sql = "UPDATE Provider 
-                SET first_name='$firstName', last_name='$lastName', contact='$contact', gender='$gender', website='$website', bio='$bio' 
-                WHERE id=$id";
+        $ResumeUpdate = "";
+        if ($Resume) {
+            $ResumeUpdate = ", Resume = '". $this->conn->real_escape_string($Resume) ."'";
+        }
 
-        return $this->conn->query($sql);
+        $sql = "UPDATE provider 
+                SET First_Name='$firstName', Last_Name='$lastName', Contact_No='$contact', Gender='$gender', Website='$website', Bio='$bio' $ResumeUpdate
+                WHERE Provider_ID=$id";
+
+        $this->conn->query($sql);
+
+        header('Location: ' . BASE_URL . '/profile');
     }
 
     public function updatePassword($id, $hashed)
@@ -227,11 +285,31 @@ class ProviderModel extends Database
         return $stmt->execute();
     }
 
+    public function getCurrentPassword($id)
+    {
+        $stmt = $this->conn->prepare("SELECT Password FROM provider WHERE Provider_ID = ?");
+        if (!$stmt) return false;
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result->fetch_assoc()['Password'] ?? false;
+    }
+
+
+     public function updateProfilePicture($id, $profilePic)
+    {
+        $stmt = $this->conn->prepare("UPDATE provider SET Profile_Picture = ? WHERE Provider_ID = ?");
+        if (!$stmt)
+            return false;
+        $stmt->bind_param("si", $profilePic, $id);
+        return $stmt->execute();
+    }
+
 
 
     public function nicExists($nic_no)
     {
-        $stmt = $this->conn->prepare("SELECT Provider_ID FROM Provider WHERE NIC_No = ?");
+        $stmt = $this->conn->prepare("SELECT Provider_ID FROM provider WHERE NIC_No = ?");
         $stmt->bind_param("s", $nic_no);
         $stmt->execute();
         $stmt->store_result(); // store result to get num_rows
@@ -241,7 +319,7 @@ class ProviderModel extends Database
     public function deleteProvider($id)
     {
         // mark status as 'Deleted' instead of hard-deleting the row
-        $stmt = $this->conn->prepare("UPDATE Provider SET Status = ? WHERE Provider_ID = ?");
+        $stmt = $this->conn->prepare("UPDATE provider SET Status = ? WHERE Provider_ID = ?");
         if (!$stmt) return false;
         $status = 'Deleted';
         $stmt->bind_param("si", $status, $id);
@@ -251,26 +329,264 @@ class ProviderModel extends Database
 
     public function getAllProviders($limit, $offset)
     {
-        $stmt = $this->conn->prepare("SELECT Provider_ID, First_Name, Last_Name, Contact_No, Email, NIC_No, Status FROM Provider WHERE Status <> 'Deleted' ORDER BY Provider_ID DESC LIMIT ? OFFSET ?");
+        $stmt = $this->conn->prepare("SELECT Provider_ID, First_Name, Last_Name, Contact_No, Email, NIC_No, Status FROM provider WHERE Status <> 'Deleted' ORDER BY Provider_ID DESC LIMIT ? OFFSET ?");
         $stmt->bind_param("ii", $limit, $offset);
         $stmt->execute();
         $result = $stmt->get_result();
         return $result->fetch_all(MYSQLI_ASSOC);
     }
 
+
+    public function getActiveProvidersForSearch($limit, $offset, string $search = '', string $sort = '')
+    {
+        $providers = $this->fetchProvidersForSearchByStatus('active', $limit, $offset, $search, $sort);
+        if (!empty($providers)) {
+            return $providers;
+        }
+
+        return $this->fetchProvidersForSearchByStatus('fallback', $limit, $offset, $search, $sort);
+    }
+
+
+    public function getActiveProviderCount(string $search = '')
+    {
+        $search = trim($search);
+        $activeCount = $this->getProviderCountByStatus('active', $search);
+
+        if ($activeCount > 0) {
+            return $activeCount;
+        }
+
+        return $this->getProviderCountByStatus('fallback', $search);
+    }
+
+
+    public function getSkillsByProviderId($providerId)
+    {
+        $stmt = $this->conn->prepare(
+            "SELECT DISTINCT s.Skill FROM provider_categories_has_skills pcs
+             JOIN skills s ON pcs.Skills_Skill_ID = s.Skill_ID
+             JOIN provider_categories pc ON pcs.Provider_Categories_ID = pc.ID
+             WHERE pc.Provider_ID = ?
+             AND pc.Status = 'Active'
+             LIMIT 3"
+        );
+
+        if (!$stmt) {
+            return [];
+        }
+
+        $stmt->bind_param("i", $providerId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $skills = [];
+        while ($row = $result->fetch_assoc()) {
+            $skills[] = $row['Skill'];
+        }
+        $stmt->close();
+
+        return $skills;
+    }
+
+
+    private function fetchProvidersForSearchByStatus($statusMode, $limit, $offset, string $search = '', string $sort = '')
+    {
+        $whereClause = $statusMode === 'active' ? "WHERE p.Status = 'active'" : "WHERE p.Status <> 'Deleted'";
+        $params = [];
+        $types = 'ii';
+
+        $search = trim($search);
+        if ($search !== '') {
+            $whereClause .= " AND (p.First_Name LIKE ? OR p.Last_Name LIKE ? OR CONCAT(p.First_Name, ' ', p.Last_Name) LIKE ? OR p.Email LIKE ?)";
+            $like = '%' . $search . '%';
+            $params[] = $like;
+            $params[] = $like;
+            $params[] = $like;
+            $params[] = $like;
+            $types = 'ssss' . $types;
+        }
+
+        $orderByClause = $this->getProviderSortClause($sort);
+
+        $stmt = $this->conn->prepare(
+            "SELECT p.*, 
+                    COUNT(DISTINCT pc.ID) as category_count,
+                    p.Rating as avg_rating
+             FROM provider p
+             LEFT JOIN provider_categories pc ON p.Provider_ID = pc.Provider_ID
+             $whereClause
+             AND pc.Status = 'Active'
+             GROUP BY p.Provider_ID
+             ORDER BY $orderByClause
+             LIMIT ? OFFSET ?"
+        );
+
+        if (!$stmt) {
+            return [];
+        }
+
+        $params[] = $limit;
+        $params[] = $offset;
+        $this->bindDynamicParams($stmt, $types, $params);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $providers = $result->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+
+        return $providers;
+    }
+
+    private function getProviderCountByStatus(string $statusMode, string $search = ''): int
+    {
+        $whereClause = $statusMode === 'active' ? "WHERE p.Status = 'active'" : "WHERE p.Status <> 'Deleted'";
+        $params = [];
+        $types = '';
+
+        if ($search !== '') {
+            $whereClause .= " AND (p.First_Name LIKE ? OR p.Last_Name LIKE ? OR CONCAT(p.First_Name, ' ', p.Last_Name) LIKE ? OR p.Email LIKE ?)";
+            $like = '%' . $search . '%';
+            $params = [$like, $like, $like, $like];
+            $types = 'ssss';
+        }
+
+        $stmt = $this->conn->prepare(
+            "SELECT COUNT(*) AS total
+             FROM provider p
+             $whereClause"
+        );
+
+        if (!$stmt) {
+            return 0;
+        }
+
+        if (!empty($params)) {
+            $this->bindDynamicParams($stmt, $types, $params);
+        }
+
+        if (!$stmt->execute()) {
+            $stmt->close();
+            return 0;
+        }
+
+        $row = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+
+        return (int)($row['total'] ?? 0);
+    }
+
+    private function getProviderSortClause(string $sort): string
+    {
+        $map = [
+            'name_asc' => 'p.First_Name ASC, p.Last_Name ASC',
+            'name_desc' => 'p.First_Name DESC, p.Last_Name DESC',
+            'rating_asc' => 'p.Rating ASC, p.Provider_ID DESC',
+            'rating_desc' => 'p.Rating DESC, p.Provider_ID DESC',
+            'earnings_asc' => 'p.Total_Earning ASC, p.Provider_ID DESC',
+            'earnings_desc' => 'p.Total_Earning DESC, p.Provider_ID DESC',
+        ];
+
+        return $map[$sort] ?? 'p.Provider_ID DESC';
+    }
+
+    private function bindDynamicParams(mysqli_stmt $stmt, string $types, array $params): void
+    {
+        if ($types === '' || empty($params)) {
+            return;
+        }
+
+        $bindArgs = [$types];
+        foreach ($params as $key => $value) {
+            $bindArgs[] = &$params[$key];
+        }
+
+        call_user_func_array([$stmt, 'bind_param'], $bindArgs);
+    }
+
     public function getUserCount()
     {
-        $result = $this->conn->query("SELECT COUNT(Provider_ID) AS Total_Providers FROM Provider WHERE Status <> 'Deleted'");
+        $result = $this->conn->query("SELECT COUNT(Provider_ID) AS Total_Providers FROM provider WHERE Status <> 'Deleted'");
         return $result->fetch_assoc()['Total_Providers'];
     }
 
 
-    public function updateProviderStatus($provider_id, $status)
+    public function updateProviderStatus($provider_id, $status, $reason_for_rejection = null)
     {
         // mark status as 'Deleted' instead of hard-deleting the row
-        $stmt = $this->conn->prepare("UPDATE Provider SET Status = ? WHERE Provider_ID = ?");
+        $stmt = $this->conn->prepare("UPDATE provider SET Status = ?, Reason_For_Rejection  = ? WHERE Provider_ID = ?");
         if (!$stmt) return false;
-        $stmt->bind_param("si", $status, $provider_id);
+        $stmt->bind_param("ssi", $status, $reason_for_rejection, $provider_id);
+        return $stmt->execute();
+    }
+
+    /**
+     * Get services (posts) for a provider
+     * These are posts where the provider is assigned (Provider_ID is set)
+     * Primarily completed/accepted projects
+     */
+    public function getProviderServices($providerId, $limit = 10, $offset = 0)
+    {
+        $stmt = $this->conn->prepare(
+            "SELECT p.Post_ID, p.Title, p.Description, p.Requesting_Price, 
+                    p.Price_Type, p.Category_ID, c.Name as CategoryName,
+                    p.Created_At
+             FROM post p
+             LEFT JOIN category c ON p.Category_ID = c.Category_ID
+             WHERE p.Provider_ID = ? AND p.Post_Status IN ('active', 'completed')
+             ORDER BY p.Created_At DESC
+             LIMIT ? OFFSET ?"
+        );
+
+        if (!$stmt) {
+            error_log('getProviderServices prepare error: ' . $this->conn->error);
+            return [];
+        }
+
+        $stmt->bind_param("iii", $providerId, $limit, $offset);
+        if (!$stmt->execute()) {
+            error_log('getProviderServices execute error: ' . $stmt->error);
+            $stmt->close();
+            return [];
+        }
+
+        $result = $stmt->get_result();
+        $services = $result->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+
+        return $services;
+    }
+
+    /**
+     * Get total count of provider services
+     */
+    public function getProviderServiceCount($providerId)
+    {
+        $stmt = $this->conn->prepare(
+            "SELECT COUNT(*) as total FROM post 
+             WHERE Provider_ID = ? AND Post_Status IN ('active', 'completed')"
+        );
+
+        if (!$stmt) {
+            return 0;
+        }
+
+        $stmt->bind_param("i", $providerId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        $stmt->close();
+
+        return (int)($row['total'] ?? 0);
+    }
+
+    public function removeService($serviceId)
+    {
+        $stmt = $this->conn->prepare("UPDATE provider_categories SET Status = 'Removed' WHERE ID = ?");
+
+        if (!$stmt) {
+            return false;
+        }
+
+        $stmt->bind_param("i", $serviceId);
         return $stmt->execute();
     }
 }

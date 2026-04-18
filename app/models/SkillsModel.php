@@ -7,7 +7,7 @@ class SkillsModel extends Database
 
     public function getSkillsByPostId($postId)
     {
-        $stmt = $this->conn->prepare("SELECT * FROM Post_Need_Skills WHERE Post_ID = ?");
+        $stmt = $this->conn->prepare("SELECT * FROM post_need_skills WHERE Post_ID = ?");
         $stmt->bind_param("i", $postId);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -18,13 +18,12 @@ class SkillsModel extends Database
     public function getByCategoryId(int $categoryId): array
     {
         $sql = "SELECT s.Skill_ID, s.Skill
-                FROM Skills s
-                INNER JOIN Category c ON c.Category_ID = s.Category_ID
+                FROM skills s
+                INNER JOIN category c ON c.Category_ID = s.Category_ID
                 WHERE c.Category_ID = ?
                 ORDER BY s.Skill";
         $stmt = $this->conn->prepare($sql);
-        if (!$stmt)
-            return [];
+        if (!$stmt) return [];
         $stmt->bind_param('i', $categoryId);
         $stmt->execute();
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC) ?: [];
@@ -32,7 +31,7 @@ class SkillsModel extends Database
 
     public function getAllSkills($SkillID)
     {
-        $stmt = $this->conn->prepare("SELECT * FROM Skills WHERE Skill_ID = ?");
+        $stmt = $this->conn->prepare("SELECT * FROM skills WHERE Skill_ID = ?");
         $stmt->bind_param("i", $SkillID);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -42,7 +41,7 @@ class SkillsModel extends Database
 
     public function getIdBySkill(string $skill): ?int
     {
-        $stmt = $this->conn->prepare("SELECT Skill_ID FROM Skills WHERE Skill = ? LIMIT 1");
+        $stmt = $this->conn->prepare("SELECT Skill_ID FROM skills WHERE Skill = ? LIMIT 1");
         if (!$stmt)
             return null;
         $stmt->bind_param("s", $skill);
@@ -65,7 +64,7 @@ class SkillsModel extends Database
             return 0;
 
         $stmt = $this->conn->prepare(
-            "INSERT INTO Post_Need_Skills (Post_ID, Skill_ID) VALUES (?, ?)"
+            "INSERT INTO post_need_skills (Post_ID, Skill_ID) VALUES (?, ?)"
         );
         if (!$stmt) {
             throw new RuntimeException("Prepare failed: " . $this->conn->error);
@@ -88,26 +87,46 @@ class SkillsModel extends Database
     }
 
 
-    public function getByProviderCategoryIds(array $categoryIds): array
+    public function getSkillsByProviderID(int $Provider_ID): array
     {
-        if (empty($categoryIds)) {
+
+        if (empty($Provider_ID)) {
             return [];
         }
 
-        $placeholders = implode(',', array_fill(0, count($categoryIds), '?'));
-        $types = str_repeat('i', count($categoryIds));
-
         $stmt = $this->conn->prepare(
-            "SELECT Provider_Categories_ID, Skill FROM Skills WHERE Provider_Categories_ID IN ($placeholders)"
+            "SELECT 
+                pc.ID,
+                s.Skill
+            FROM provider_categories pc
+            JOIN provider_categories_has_skills pchs 
+                ON pchs.Provider_Categories_ID = pc.ID
+            JOIN skills s 
+                ON s.Skill_ID = pchs.Skills_Skill_ID
+            WHERE pc.Provider_ID = ?
+            ORDER BY pc.ID"
         );
-        $stmt->bind_param($types, ...$categoryIds);
+
+        $stmt->bind_param("i", $Provider_ID);
         $stmt->execute();
 
-        $skills = [];
-        foreach ($stmt->get_result()->fetch_all(MYSQLI_ASSOC) as $row) {
-            $skills[$row['Provider_Categories_ID']][] = $row["Skill"];
+        $result = $stmt->get_result();
+
+        $data = [];
+
+        while ($row = $result->fetch_assoc()) {
+            $provcategoryId = $row['ID'];
+            $skill = $row['Skill'];
+
+            if (!isset($data[$provcategoryId])) {
+                $data[$provcategoryId] = [];
+            }
+
+            $data[$provcategoryId][] = $skill;
         }
 
-        return $skills;
+        $stmt->close();
+
+        return $data;
     }
 }

@@ -188,7 +188,7 @@ $TopBarHeader = "Providers";
 
             <div id="ViewProviderContent">
 
-                
+
 
             </div>
 
@@ -210,12 +210,70 @@ $TopBarHeader = "Providers";
         const modalBody = document.getElementById("ViewProviderContent");
         showLoadingOn("ViewProviderContent");
 
+
         fetch(`./providers/view/${Provider_ID}`)
             .then(res => res.text())
             .then(data => {
                 modalBody.innerHTML = data;
-
-                
+                document.getElementsByName("provider_id")[1].value = Provider_ID;
             });
     }
 </script>
+
+
+<div class="dialog-box-2" id="RejectProviderDialog">
+    <div class="dialog-content" style="width: 600px; overflow: unset;">
+        <div class="dialog-title">
+            <div class="title">Reject Service Provider</div>
+            <div>
+                <i class="fa-solid fa-xmark dialog-close-button-2"
+                    onclick="closeDialogBox('RejectProviderDialog')"></i>
+            </div>
+        </div>
+
+        <form action="./Providers/provider-review" method="post">
+
+            <div class="input-grid-1">
+
+                <div class="search-select-container add-option">
+
+                    <div class="text-container">
+                        <div class="label search-dropdown-label">Reason for Rejection</div>
+                        <input type="text" class="text-field-search-dropdown" name="reason_for_rejection" autocomplete="off" onkeydown="return false" required>
+                    </div>
+
+                    <div class="options">
+
+                        <span class="text-container">
+                            <input type="text" class="text-field-search">
+                        </span>
+
+                        <div class="option-list">
+                            <div> The information provided is incomplete or incorrect </div>
+                            <div> Submitted documents are unclear or unreadable </div>
+                            <div> The profile picture does not meet our requirements </div>
+                            <div> The registration appears suspicious or automated </div>
+                            <div> The selected service category is invalid </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <input type="text" name="provider_id">
+
+            <div style="display: flex; justify-content: end;">
+                <button name="reject" class="button" style="background-color: #dc2626;" type="submit">
+                    <i class="fa-solid fa-circle-xmark" style="margin-right: 10px;"></i>
+                    Reject Provider
+                </button>
+            </div>
+
+        </form>
+
+
+    </div>
+
+</div>
