@@ -10,7 +10,7 @@
 // | Ended_At       | datetime    | YES  |     | NULL    |       |
 // +----------------+-------------+------+-----+---------+-------+
 // TODO: Missing fields: Stage (project phase/sprint), Budget, Progress (percentage)
-// Budget can be derived from Post.Requesting_Price
+// Budget can be derived from post.Requesting_Price
 // Stage and Progress need to be added to schema or calculated differently
 
 require_once __DIR__ . '/../core/Database.php';
@@ -273,7 +273,7 @@ class ProjectModel extends Database {
   public function cancelProject(int $postId): bool
     {
         $sql = "UPDATE Project SET Project_Status = 'canceled' WHERE Post_ID = ?";
-        $sql2 = "UPDATE Post SET Request_Status = 'canceled' WHERE Post_ID = ?";
+        $sql2 = "UPDATE post SET Request_Status = 'canceled' WHERE Post_ID = ?";
         $stmt = $this->conn->prepare($sql);
         $stmt2 = $this->conn->prepare($sql2);
         if (!$stmt || !$stmt2) {
@@ -550,7 +550,7 @@ class ProjectModel extends Database {
 
     public function cancelRequest(int $postId): bool
     {
-        $sql = "UPDATE Post SET Request_Status = 'cancelled' WHERE Post_ID = ?";
+        $sql = "UPDATE post SET Request_Status = 'cancelled' WHERE Post_ID = ?";
 
         $stmt = $this->conn->prepare($sql);
         if (!$stmt) {
@@ -1217,7 +1217,7 @@ class ProjectModel extends Database {
                          proj.Project_ID,
                          proj.Project_Status
                   FROM project proj
-                  JOIN Post p ON p.Post_ID = proj.Post_ID
+                  JOIN post p ON p.Post_ID = proj.Post_ID
                   LEFT JOIN Provider pr ON p.Provider_ID = pr.Provider_ID
                   LEFT JOIN category cat ON p.Category_ID = cat.Category_ID
                   WHERE p.Client_ID = ? AND proj.Project_Status = ?";
