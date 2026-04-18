@@ -213,7 +213,7 @@ class PostModel extends Database
         
         switch ($sort) {
             case 'date_asc':
-                if ($status === 'pending') {
+                if ($status === 'ongoing' || $status === 'pending') {
                     $orderBy = 'Published_At ASC';
                 } elseif ($status === 'accepted') {
                     $orderBy = 'Created_At ASC';
@@ -222,7 +222,7 @@ class PostModel extends Database
                 }
                 break;
             case 'date_desc':
-                if ($status === 'pending') {
+                if ($status === 'ongoing' || $status === 'pending') {
                     $orderBy = 'Published_At DESC';
                 } elseif ($status === 'accepted') {
                     $orderBy = 'Created_At DESC';
@@ -555,7 +555,7 @@ class PostModel extends Database
                     End_At,
                     Published_At,
                     Request_Status
-                ) VALUES (NOW(), ?, 'direct', 'active', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), 'pending')";
+                ) VALUES (NOW(), ?, 'direct', 'active', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), 'ongoing')";
 
         $stmt = $this->conn->prepare($sql);
         if (!$stmt) {
@@ -590,7 +590,7 @@ class PostModel extends Database
             'success' => true,
             'message' => 'Service request sent successfully',
             'post_id' => $newPostId,
-            'request_status' => 'pending'
+            'request_status' => 'ongoing'
         ];
     }
 
@@ -845,6 +845,69 @@ class PostModel extends Database
         $stmt->close();
 
         return $affected > 0;
+    }
+
+    /**
+     * Get accepted requests for a provider (paginated).
+     * These are requests the provider has accepted but the client hasn't paid yet.
+     */
+    public function getAcceptedRequestsForProvider(int $providerId, int $page = 1, int $limit = 10): array
+    {
+        $page   = max(1, $page);
+        $limit  = max(1, min($limit, 100));
+        $offset = ($page - 1) * $limit;
+
+        $countSql = "SELECT COUNT(*) as total FROM post
+                     WHERE Post_Status = 'active' AND Request_Status = 'accepted' AND Provider_ID = ?";
+
+        $countStmt = $this->conn->prepare($countSql);
+        $countStmt->bind_param('i', $providerId);
+        $countStmt->execute();
+        $totalRecords = (int) ($countStmt->get_result()->fetch_assoc()['total'] ?? 0);
+        $countStmt->close();
+        $totalPages = $totalRecords > 0 ? (int) ceil($totalRecords / $limit) : 0;
+
+        $sql = "SELECT
+                    cl.Client_ID,
+                    p.Post_ID,
+                    p.Title,
+                    p.Description,
+                    p.Requesting_Price,
+                    p.Price_Type,
+                    p.Est_Date,
+                    p.Level,
+                    p.Created_At,
+                    p.Post_Type,
+                    p.Category_ID,
+                    c.Name as Category_Name,
+                    cl.First_Name,
+                    cl.Last_Name,
+                    cl.Profile_Picture,
+                    CONCAT(cl.First_Name, ' ', cl.Last_Name) as Client_Name
+                FROM post p
+                LEFT JOIN category c ON p.Category_ID = c.Category_ID
+                LEFT JOIN client cl ON p.Client_ID = cl.Client_ID
+                WHERE p.Post_Status = 'active' AND p.Request_Status = 'accepted' AND p.Provider_ID = ?
+                ORDER BY p.Created_At DESC
+                LIMIT ? OFFSET ?";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('getAcceptedRequestsForProvider prepare: ' . $this->conn->error);
+            return ['data' => [], 'total' => 0, 'pages' => 0, 'current_page' => $page];
+        }
+
+        $stmt->bind_param('iii', $providerId, $limit, $offset);
+        $stmt->execute();
+        $data = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+
+        return [
+            'data'         => $data,
+            'total'        => $totalRecords,
+            'pages'        => $totalPages,
+            'current_page' => $page,
+        ];
     }
 
     

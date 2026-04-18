@@ -48,6 +48,7 @@
                 <div class="container-changer">
                     <!--<div id="new-requests" class="buttons active" data-target="new-requests">New Requests</div>-->
                     <div id="pending-requests" class="buttons active" data-target="pending-requests">Incoming Requests</div>
+                    <div id="accepted-requests" class="buttons" data-target="accepted-requests">Accepted Requests</div>
                     <div id="in-progress-requests" class="buttons" data-target="in-progress-requests">Ongoing Projects</div>
                     <div id="pending-review" class="buttons" data-target="pending-review">Pending Review</div>
                     <div id="completed-jobs" class="buttons" data-target="completed-jobs">Completed</div>
@@ -68,6 +69,13 @@
                         <button class="page-btn">3</button>
                         <button class="page-btn next"><i class="fa-solid fa-chevron-right"></i></button>
                     </div>
+                </div>
+
+                <!-- Accepted Requests Section -->
+                <div class="accepted-requests requests-section" id="section-accepted">
+                    <p class="section-note">Accepted requests awaiting client payment.</p>
+                    <div class="item-list"></div>
+                    <div class="pagination" aria-label="Accepted Requests Pagination"></div>
                 </div>
 
                 <!-- Ongoing Section -->
@@ -95,32 +103,8 @@
                 <div class="completed-jobs requests-section" id="section-completed">
                     <p class="section-note">Successfully completed projects and delivered work.</p>
                     <div class="item-list">
-                        <div class="search-item" data-status="complete">
-                            <div class="item-head">
-                                <div class="item-main-dets">
-                                    <div class="item-name">Jennifer Lee</div>
-                                    <div class="item-title">Social Media Marketing Campaign</div>
-                                    <div class="item-district">
-                                        <span>Completed 01 Jul 2025</span>
-                                        <span>Earned: $1,500</span>
-                                    </div>
-                                </div>
-                                <div class="button">
-                                    <button class="btn-outline btn-view" title="View Project"><i class="fa-solid fa-eye"></i> View</button>
-                                    <button class="btn-outline" title="Download Files"><i class="fa-solid fa-download"></i> Files</button>
-                                </div>
-                            </div>
-                            <div class="item-description">30-day social media campaign with content creation and community management across 3 platforms.</div>
-                            <div class="status-bottom"><span class="status-chip status-complete"><i
-                                        class="fa-solid fa-circle-check"></i> Completed</span></div>
-                        </div>
                     </div>
                     <div class="pagination" aria-label="Completed Jobs Pagination">
-                        <button class="page-btn prev" disabled><i class="fa-solid fa-chevron-left"></i></button>
-                        <button class="page-btn active">1</button>
-                        <button class="page-btn">2</button>
-                        <button class="page-btn">3</button>
-                        <button class="page-btn next"><i class="fa-solid fa-chevron-right"></i></button>
                     </div>
                 </div>
             </div>
@@ -483,15 +467,69 @@
         </div>
     </div>
 
+    <!-- Provider Review Modal -->
+    <div class="pop-up-section provider-review-popup deactive">
+        <div class="pop-up deactive">
+            <div class="pop-up-header">
+                <div class="pop-up-title">Leave a Review</div>
+                <i class="fa-solid fa-xmark" id="provider-review-close"></i>
+            </div>
+            <hr>
+            <div class="pop-up-content">
+                <form id="provider-review-form" onsubmit="return false;">
+                    <input type="hidden" id="provider-review-post-id" value="">
+                    <input type="hidden" id="provider-review-rating" value="">
+
+                    <div class="form-group" style="margin-bottom:18px;">
+                        <label style="font-weight:600; margin-bottom:8px; display:block;">Rating <span style="color:#ef4444;">*</span></label>
+                        <div class="star-rating-input" style="font-size:28px; cursor:pointer; display:flex; gap:4px;">
+                            <i class="fa-regular fa-star" data-value="1"></i>
+                            <i class="fa-regular fa-star" data-value="2"></i>
+                            <i class="fa-regular fa-star" data-value="3"></i>
+                            <i class="fa-regular fa-star" data-value="4"></i>
+                            <i class="fa-regular fa-star" data-value="5"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom:18px;">
+                        <label for="provider-review-title" style="font-weight:600; margin-bottom:6px; display:block;">Title <span style="color:#94a3b8; font-weight:400;">(optional)</span></label>
+                        <input type="text" id="provider-review-title" class="form-control" placeholder="Brief summary of your experience" maxlength="100" style="width:100%; padding:10px 12px; border:1px solid #d1d5db; border-radius:8px; font-size:14px;">
+                    </div>
+
+                    <div class="form-group" style="margin-bottom:18px;">
+                        <label for="provider-review-description" style="font-weight:600; margin-bottom:6px; display:block;">Description <span style="color:#94a3b8; font-weight:400;">(optional)</span></label>
+                        <textarea id="provider-review-description" class="form-control" rows="4" placeholder="Share details about working with this client..." maxlength="512" style="width:100%; padding:10px 12px; border:1px solid #d1d5db; border-radius:8px; font-size:14px; resize:vertical;"></textarea>
+                    </div>
+
+                    <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+                        <button type="button" class="btn-primary btn-submit-review"><i class="fa-solid fa-paper-plane"></i> Submit Review</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script src="<?= BASE_URL ?>/assets/js/projectDetailView.js"></script>
     <script src="<?= BASE_URL ?>/assets/js/incomingRequests.js"></script>
+    <script src="<?= BASE_URL ?>/assets/js/acceptedRequests.js"></script>
     <script src="<?= BASE_URL ?>/assets/js/ongoingProjects.js"></script>
+    <script src="<?= BASE_URL ?>/assets/js/pendingReviewProjects.js"></script>
+    <script src="<?= BASE_URL ?>/assets/js/completedProjects.js"></script>
     <script>
         // Main functionality for provider interface
         document.addEventListener('DOMContentLoaded', function() {
             // Tab navigation
             const tabButtons = document.querySelectorAll('.container-changer .buttons');
             const tabSections = document.querySelectorAll('.requests-section');
+
+            // Maps data-target value → reload function
+            const tabReloaders = {
+                'pending-requests':    () => window.requestsManager?.loadRequests(1),
+                'accepted-requests':   () => window.acceptedRequestsManager?.loadRequests(1),
+                'in-progress-requests':() => window.ongoingProjectsManager?.loadProjects(1),
+                'pending-review':      () => window.pendingReviewProjectsManager?.loadProjects(1),
+                'completed-jobs':      () => window.completedProjectsManager?.loadProjects(1),
+            };
 
             tabButtons.forEach(button => {
                 button.addEventListener('click', function() {
@@ -508,6 +546,11 @@
                             section.classList.add('active');
                         }
                     });
+
+                    // Reload data for the activated tab
+                    if (tabReloaders[targetId]) {
+                        tabReloaders[targetId]();
+                    }
                 });
             });
 

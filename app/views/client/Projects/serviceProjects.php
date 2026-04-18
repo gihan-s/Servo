@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/elementStyles.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/gridTemplates.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/serviceProjects.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/incomingRequests.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/projectDetailView.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
@@ -38,8 +39,8 @@
                 <div id="pending" class="buttons active" data-target="pending">Pending Requests</div>
                 <div id="accepted" class="buttons" data-target="accepted">Approved Requests</div>
                 <div id="ongoing" class="buttons" data-target="ongoing">Ongoing Projects</div>
-                <div id="completed" class="buttons" data-target="completed">Completed Projects</div>
                 <div id="pending-review" class="buttons" data-target="pending-review">Pending Review</div>
+                <div id="completed" class="buttons" data-target="completed">Completed Projects</div>
             </div>
         </div>
         <div class="request-content">
@@ -248,21 +249,83 @@
     </div>
 </div>
 
-<div class="dialog-box-2" id="review-popup">
-    <div class="dialog-content">
+<div class="dialog-box-2" id="complete-project-popup">
+    <div class="dialog-content" style="width: 560px; max-width: 95vw;">
         <div class="dialog-title">
-            <div class="title">Leave a Review</div>
-        
+            <div class="title">Complete Project &amp; Leave Review</div>
             <div>
-                <i class="fa-solid fa-xmark dialog-close-button-2" onclick="closeDialogBox('review-popup')"></i>
+                <i class="fa-solid fa-xmark dialog-close-button-2" onclick="closeDialogBox('complete-project-popup')"></i>
             </div>
         </div>
-        <div class="dialog-body"></div>
-
+        <div class="dialog-body">
+            <p style="margin: 0 0 16px; color: #6b7280; font-size: 14px;">
+                Completing this project is permanent. Please rate your experience working with this provider.
+            </p>
+            <!-- Star Rating -->
+            <div class="req-form-group" style="margin-bottom: 16px;">
+                <label>Rating <span style="color:#ef4444;">*</span></label>
+                <div class="star-rating-input" id="starRatingInput">
+                    <i class="fa-regular fa-star" data-value="1"></i>
+                    <i class="fa-regular fa-star" data-value="2"></i>
+                    <i class="fa-regular fa-star" data-value="3"></i>
+                    <i class="fa-regular fa-star" data-value="4"></i>
+                    <i class="fa-regular fa-star" data-value="5"></i>
+                </div>
+                <input type="hidden" id="reviewRating" value="">
+                <div id="ratingError" style="color:#ef4444; font-size:12px; margin-top:4px; display:none;">Please select a rating before submitting.</div>
+            </div>
+            <!-- Title -->
+            <div class="req-form-group" style="margin-bottom: 12px;">
+                <label for="reviewTitle">Review Title <span style="color:#9ca3af; font-weight:400;">(optional)</span></label>
+                <input type="text" id="reviewTitle" placeholder="e.g. Great work!" maxlength="100">
+            </div>
+            <!-- Description -->
+            <div class="req-form-group" style="margin-bottom: 12px;">
+                <label for="reviewDescription">Comments <span style="color:#9ca3af; font-weight:400;">(optional)</span></label>
+                <textarea id="reviewDescription" rows="4" placeholder="Share your experience working with this provider..."></textarea>
+            </div>
+            <!-- Files -->
+            <div class="req-form-group">
+                <label for="reviewFiles">Attach Files <span style="color:#9ca3af; font-weight:400;">(optional)</span></label>
+                <input type="file" id="reviewFiles" name="review_files[]" multiple accept="image/*,.pdf,.zip,.txt">
+                <div style="font-size:12px; color:#6b7280; margin-top:4px;">Images, PDF, ZIP or TXT — max 10 MB each</div>
+            </div>
+        </div>
         <div class="modal-actions">
-            <button class="action-btn btn-delete" onclick="closeDialogBox('review-popup')">Cancel</button>
-            <button class="action-btn btn-edit" id="saveRequirementBtn">
-                <i class="fa-solid fa-check"></i> Submit
+            <button class="action-btn btn-delete" onclick="closeDialogBox('complete-project-popup')">Cancel</button>
+            <button class="action-btn btn-edit" id="btnConfirmCompleteProject">
+                <i class="fa-solid fa-circle-check"></i> Complete &amp; Submit Review
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="dialog-box-2" id="reopen-project-popup">
+    <div class="dialog-content" style="width: 560px; max-width: 95vw;">
+        <div class="dialog-title">
+            <div class="title">Request Changes</div>
+            <div>
+                <i class="fa-solid fa-xmark dialog-close-button-2" onclick="closeDialogBox('reopen-project-popup')"></i>
+            </div>
+        </div>
+        <div class="dialog-body">
+            <p style="margin: 0 0 12px; color: #6b7280; font-size: 14px;">
+                This will move the project back to ongoing. Add feedback for the provider.
+            </p>
+            <div class="req-form-group" style="margin-bottom: 12px;">
+                <label for="reopenReason">Reason <span style="color:#ef4444;">*</span></label>
+                <textarea id="reopenReason" rows="5" placeholder="Describe what needs to be revised..."></textarea>
+            </div>
+            <div class="req-form-group">
+                <label for="reopenFiles">Attach Files <span style="color:#9ca3af; font-weight:400;">(optional)</span></label>
+                <input type="file" id="reopenFiles" name="reopen_files[]" multiple accept="image/*,.pdf,.zip,.txt">
+                <div style="font-size:12px; color:#6b7280; margin-top:4px;">Images, PDF, ZIP or TXT — max 10 MB each</div>
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button class="action-btn btn-delete" onclick="closeDialogBox('reopen-project-popup')">Cancel</button>
+            <button class="action-btn btn-edit" id="btnConfirmReopenProject">
+                <i class="fa-solid fa-rotate-left"></i> Move to Ongoing
             </button>
         </div>
     </div>
@@ -363,8 +426,8 @@
         if (existing) existing.remove();
     }
 
-    function loadPosts(status = 'pending') {
-        const container = getListContainer(status);
+    function loadPosts(tab = 'ongoing') {
+        const container = getListContainer(tab);
         if (!container) return;
 
         container.innerHTML = `
@@ -373,12 +436,29 @@
             <p>Loading posts...</p>
         </div>
     `;
-        clearLoadMoreButton(status);
+        clearLoadMoreButton(tab);
 
-        console.log('Loading posts for status:', status);
+        console.log('Loading posts for tab:', tab);
 
-        // CHANGE THIS LINE - add /list to the URL
-        fetch(`${window.BASE_URL}/projects/list?status=${status}&sort=${currentSort}&search=${encodeURIComponent(currentSearch)}`)
+        // Build the correct API URL based on tab
+        let apiUrl;
+        if (tab === 'ongoing') {
+            // Ongoing projects come from the project table
+            apiUrl = `${window.BASE_URL}/projects/ongoing?sort=${currentSort}&search=${encodeURIComponent(currentSearch)}`;
+        } else if (tab === 'pending-review') {
+            // Pending-review projects also come from the project table
+            apiUrl = `${window.BASE_URL}/projects/pending-review?sort=${currentSort}&search=${encodeURIComponent(currentSearch)}`;
+        } else if (tab === 'completed') {
+            // Completed projects come from the project table
+            apiUrl = `${window.BASE_URL}/projects/completed?sort=${currentSort}&search=${encodeURIComponent(currentSearch)}`;
+        } else {
+            // Map tab name to actual Request_Status value
+            const statusMap = { 'pending': 'ongoing', 'accepted': 'accepted', 'completed': 'completed' };
+            const apiStatus = statusMap[tab] || tab;
+            apiUrl = `${window.BASE_URL}/projects/list?status=${apiStatus}&sort=${currentSort}&search=${encodeURIComponent(currentSearch)}`;
+        }
+
+        fetch(apiUrl)
             //.then(response => response.text())
             .then(response => {
                 console.log('Response status:', response.status);
@@ -397,15 +477,15 @@
             })
             .then(data => {
                 if (data.success && data.posts) {
-                    postsState[status].posts = data.posts;
-                    postsState[status].visibleCount = Math.min(PAGE_SIZE, data.posts.length);
-                    renderPosts(status);
+                    postsState[tab].posts = data.posts;
+                    postsState[tab].visibleCount = Math.min(PAGE_SIZE, data.posts.length);
+                    renderPosts(tab);
                     return;
                 }
 
-                postsState[status].posts = [];
-                postsState[status].visibleCount = 0;
-                showEmptyState(status, container);
+                postsState[tab].posts = [];
+                postsState[tab].visibleCount = 0;
+                showEmptyState(tab, container);
             })
             .catch(error => {
                 console.error('Error loading posts:', error);
@@ -414,10 +494,10 @@
                     <i class="fas fa-exclamation-circle"></i>
                     <p>Failed to load posts. Please try again.</p>
                     <p style="font-size: 12px; color: #999;">${error.message}</p>
-                    <button onclick="loadPosts('${status}')" class="retry-btn">Retry</button>
+                    <button onclick="loadPosts('${tab}')" class="retry-btn">Retry</button>
                 </div>
             `;
-                clearLoadMoreButton(status);
+                clearLoadMoreButton(tab);
             });
     }
 
@@ -468,11 +548,20 @@
         container.innerHTML = '';
         visiblePosts.forEach(item => {
             console.log('Rendering post:', item);
-            const postHTML = status === 'accepted'
-                ? createAcceptedCard(item.post, item.skills)
-                : status === 'ongoing'
-                    ? createOngoingCard(item.post, item.skills)
-                    : createPostCard(item.post, item.skills, status);
+            let postHTML;
+            if (status === 'pending') {
+                postHTML = createPendingCard(item.post, item.skills);
+            } else if (status === 'accepted') {
+                postHTML = createAcceptedCard(item.post, item.skills);
+            } else if (status === 'ongoing') {
+                postHTML = createOngoingCard(item.post, item.skills);
+            } else if (status === 'pending-review') {
+                postHTML = createPendingReviewCard(item.post, item.skills);
+            } else if (status === 'completed') {
+                postHTML = createCompletedCard(item.post, item.skills);
+            } else {
+                postHTML = createPostCard(item.post, item.skills, status);
+            }
             container.insertAdjacentHTML('beforeend', postHTML);
         });
 
@@ -738,6 +827,75 @@
         `;
     }
 
+    function createPendingCard(post, skills) {
+        const providerName = post.Provider_Name || 'Unassigned Provider';
+        const providerPicture = post.Provider_Picture
+            ? `${window.BASE_URL}/file/user-files/${post.Provider_Picture}`
+            : null;
+        const rating = post.Provider_Rating ? parseFloat(post.Provider_Rating).toFixed(1) : '0.0';
+        const category = post.Category_Name || 'N/A';
+        const estDate = formatEstDate(post.Est_Date);
+        const budget = `Rs. ${Number(post.Requesting_Price || 0).toLocaleString('en-US', {minimumFractionDigits:2})} (${post.Price_Type || 'Fixed'})`;
+        const description = post.Description || '';
+        const snippet = description.length > 200
+            ? escapeHtml(description.substring(0, 200)) + '...'
+            : escapeHtml(description);
+        const postedDate = formatDate(post.Created_At);
+        const postTypeLabel = post.Post_Type === 'direct' ? 'Direct' : 'Bid';
+
+        const avatarHTML = providerPicture
+            ? `<img src="${providerPicture}" alt="${escapeHtml(providerName)}" class="request-avatar" onerror="this.style.display='none'">`
+            : `<div class="request-avatar" style="width:56px;height:56px;border-radius:50%;background:#e5e7eb;display:flex;align-items:center;justify-content:center;"><i class="fas fa-user" style="color:#9ca3af;font-size:22px;"></i></div>`;
+
+        return `
+            <div class="search-item" data-post-id="${post.Post_ID}">
+                <input type="hidden" class="post-id" value="${post.Post_ID}">
+                <div class="request-header">
+                    <div class="request-client-section">
+                        ${avatarHTML}
+                        <div class="request-client-info">
+                            <div class="request-client-name">${escapeHtml(providerName)}</div>
+                            <div class="request-client-location">&#11088; ${rating} (0 reviews)</div>
+                        </div>
+                    </div>
+                    <div class="request-actions">
+                        <button class="btn-outline" onclick="viewPost(${post.Post_ID})" title="View Request">
+                            <i class="fa-solid fa-eye"></i> View
+                        </button>
+                        <a href="${window.BASE_URL}/messages?new=${post.Provider_ID}" style="text-decoration:none;">
+                            <button class="btn-outline" title="Message Provider">
+                                <i class="fa-solid fa-comments"></i> Message
+                            </button>
+                        </a>
+                        <button class="btn-primary btn-danger" onclick="cancelRequest(${post.Post_ID})" title="Cancel Request">
+                            <i class="fa-solid fa-circle-xmark"></i> Cancel
+                        </button>
+                    </div>
+                </div>
+                <div class="request-title">${escapeHtml(post.Title)}</div>
+                <div class="request-description">${snippet}</div>
+                <div class="request-details">
+                    <div class="request-detail-item">
+                        <span class="request-detail-label"><i class="fa-solid fa-coins"></i> Budget</span>
+                        <span class="request-detail-value">${budget}</span>
+                    </div>
+                    <div class="request-detail-item">
+                        <span class="request-detail-label"><i class="fa-solid fa-tag"></i> Category</span>
+                        <span class="request-detail-value">${escapeHtml(category)}</span>
+                    </div>
+                    <div class="request-detail-item">
+                        <span class="request-detail-label"><i class="fa-solid fa-calendar"></i> Est. Date</span>
+                        <span class="request-detail-value">${estDate}</span>
+                    </div>
+                </div>
+                <div class="request-footer">
+                    <span class="request-time">${postedDate}</span>
+                    <span class="status-chip status-pending">${postTypeLabel} Request</span>
+                </div>
+            </div>
+        `;
+    }
+
     function formatEstDate(estDate) {
         if (!estDate) return 'N/A';
         const end = new Date(estDate);
@@ -906,6 +1064,214 @@
                 </div>
             </div>
         `;
+    }
+
+    function createPendingReviewCard(post, skills) {
+        const providerName    = post.Provider_Name || 'Unassigned Provider';
+        const providerPicture = post.Provider_Picture
+            ? `${window.BASE_URL}/file/user-files/${post.Provider_Picture}`
+            : null;
+        const rating      = post.Provider_Rating ? parseFloat(post.Provider_Rating).toFixed(1) : '0.0';
+        const category    = post.Category_Name || 'N/A';
+        const progress    = parseInt(post.Progress) || 0;
+        const estDate     = formatEstDate(post.Est_Date);
+        const submittedAt = post.Ended_At ? formatDate(post.Ended_At) : formatDate(post.Created_At);
+        const budget      = `LKR ${post.Requesting_Price || 0}/= (${post.Price_Type || 'Fixed'})`;
+        const description = post.Description || '';
+        const snippet     = description.length > 300
+            ? escapeHtml(description.substring(0, 300)) + '...'
+            : escapeHtml(description);
+        const postTypeLabel = post.Post_Type === 'direct' ? 'Direct' : 'Bid';
+
+        const avatarImg = providerPicture
+            ? `<img src="${providerPicture}" alt="${escapeHtml(providerName)}" class="ongoing-avatar" onerror="this.remove()">`
+            : '';
+
+        return `
+            <div class="search-item ongoing-card">
+                <input type="hidden" class="post-id" value="${post.Post_ID}">
+                <div class="ongoing-header">
+                    <div class="ongoing-provider-section">
+                        <div class="ongoing-avatar-wrapper">
+                            <i class="fas fa-user"></i>
+                            ${avatarImg}
+                        </div>
+                        <div class="ongoing-provider-info">
+                            <div class="ongoing-provider-name">${escapeHtml(providerName)}</div>
+                            <div class="ongoing-provider-rating">&#11088; ${rating}</div>
+                        </div>
+                    </div>
+                    <div class="ongoing-actions">
+                        <a href="${window.BASE_URL}/messages?new=${post.Provider_ID}" class="action-btn btn-edit" aria-label="Messages">
+                            <i class="fas fa-comments"></i> Messages
+                        </a>
+                        <button class="action-btn btn-view" onclick="ProjectDetailView.open(${post.Post_ID}, { role: 'client' })">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <button class="action-btn btn-edit" onclick="completePendingReviewProject(${post.Post_ID})">
+                            <i class="fas fa-circle-check"></i> Complete
+                        </button>
+                        <button class="action-btn btn-delete" onclick="openReopenProjectModal(${post.Post_ID})">
+                            <i class="fas fa-rotate-left"></i> Request Changes
+                        </button>
+                    </div>
+                </div>
+                <div class="ongoing-title">${escapeHtml(post.Title)}</div>
+                <div class="ongoing-description">${snippet}</div>
+                <div class="ongoing-details">
+                    <div class="ongoing-detail-item">
+                        <span class="ongoing-detail-label"><i class="fa-solid fa-coins"></i> Budget</span>
+                        <span class="ongoing-detail-value">${budget}</span>
+                    </div>
+                    <div class="ongoing-detail-item">
+                        <span class="ongoing-detail-label"><i class="fa-solid fa-tag"></i> Category</span>
+                        <span class="ongoing-detail-value">${escapeHtml(category)}</span>
+                    </div>
+                    <div class="ongoing-detail-item">
+                        <span class="ongoing-detail-label"><i class="fa-solid fa-calendar"></i> Est. Date</span>
+                        <span class="ongoing-detail-value">${estDate}</span>
+                    </div>
+                    <div class="ongoing-detail-item">
+                        <span class="ongoing-detail-label"><i class="fa-solid fa-chart-line"></i> Progress</span>
+                        <span class="ongoing-detail-value" style="color:#f59e0b; font-weight:700;">${progress}%</span>
+                    </div>
+                </div>
+                <div class="progress-container" style="margin-top:12px;">
+                    <div class="progress-track">
+                        <div class="progress-fill" style="width:${progress}%; background:#f59e0b;"></div>
+                    </div>
+                </div>
+                <div class="ongoing-footer">
+                    <span class="ongoing-time">Submitted ${submittedAt}</span>
+                    <span class="status-chip" style="background:#fff7ed; color:#c2410c; border:1px solid #fed7aa;">${postTypeLabel} &middot; Pending Review</span>
+                </div>
+            </div>
+        `;
+    }
+
+    function createCompletedCard(post, skills) {
+        const providerName    = post.Provider_Name || 'Unassigned Provider';
+        const providerPicture = post.Provider_Picture
+            ? `${window.BASE_URL}/file/user-files/${post.Provider_Picture}`
+            : null;
+        const rating      = post.Provider_Rating ? parseFloat(post.Provider_Rating).toFixed(1) : '0.0';
+        const category    = post.Category_Name || 'N/A';
+        const completedAt = post.Ended_At ? formatDate(post.Ended_At) : formatDate(post.Created_At);
+        const startedAt   = post.Started_At ? formatDate(post.Started_At) : '—';
+        const budget      = `LKR ${post.Requesting_Price || 0}/= (${post.Price_Type || 'Fixed'})`;
+        const description = post.Description || '';
+        const snippet     = description.length > 300
+            ? escapeHtml(description.substring(0, 300)) + '...'
+            : escapeHtml(description);
+        const postTypeLabel = post.Post_Type === 'direct' ? 'Direct' : 'Bid';
+
+        const avatarImg = providerPicture
+            ? `<img src="${providerPicture}" alt="${escapeHtml(providerName)}" class="ongoing-avatar" onerror="this.remove()">`
+            : '';
+
+        // Build reviews HTML
+        let reviewsHTML = '';
+        if (post.reviews && post.reviews.length) {
+            const reviewCards = post.reviews.map(r => {
+                const starsHTML = renderStarsHTML(r.Rating || 0);
+                const reviewer = r.Rated_By === 'Client' ? 'Your Review' : 'Provider\'s Review';
+                const rDate = r.Left_At ? new Date(r.Left_At).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '';
+                const filesHTML = r.files && r.files.length
+                    ? `<div class="review-card-files">
+                        ${r.files.map(f => {
+                            const name = f.split('/').pop();
+                            const url  = `${window.BASE_URL}/file/review-files/${encodeURIComponent(f)}`;
+                            return `<a href="${url}" target="_blank" class="review-file-chip" title="${escapeHtml(name)}">
+                                <i class="fa-solid fa-paperclip"></i> ${escapeHtml(name)}
+                            </a>`;
+                        }).join('')}
+                    </div>`
+                    : '';
+                return `
+                    <div class="completed-review-card ${r.Rated_By === 'Client' ? 'review-own' : 'review-provider'}">
+                        <div class="review-card-header">
+                            <span class="review-card-label">${escapeHtml(reviewer)}</span>
+                            <span class="review-card-date">${escapeHtml(rDate)}</span>
+                        </div>
+                        <div class="review-card-stars">${starsHTML}</div>
+                        ${r.Title ? `<div class="review-card-title">${escapeHtml(r.Title)}</div>` : ''}
+                        ${r.Description ? `<div class="review-card-desc">${escapeHtml(r.Description)}</div>` : ''}
+                        ${filesHTML}
+                    </div>`;
+            }).join('');
+
+            reviewsHTML = `
+                <div class="completed-reviews-section">
+                    <div class="completed-reviews-title"><i class="fa-solid fa-star"></i> Reviews</div>
+                    ${reviewCards}
+                </div>`;
+        }
+
+        return `
+            <div class="search-item ongoing-card">
+                <input type="hidden" class="post-id" value="${post.Post_ID}">
+                <div class="ongoing-header">
+                    <div class="ongoing-provider-section">
+                        <div class="ongoing-avatar-wrapper">
+                            <i class="fas fa-user"></i>
+                            ${avatarImg}
+                        </div>
+                        <div class="ongoing-provider-info">
+                            <div class="ongoing-provider-name">${escapeHtml(providerName)}</div>
+                            <div class="ongoing-provider-rating">&#11088; ${rating}</div>
+                        </div>
+                    </div>
+                    <div class="ongoing-actions">
+                        <a href="${window.BASE_URL}/messages?new=${post.Provider_ID}" class="action-btn btn-edit" aria-label="Messages">
+                            <i class="fas fa-comments"></i> Messages
+                        </a>
+                        <button class="action-btn btn-view" onclick="ProjectDetailView.open(${post.Post_ID}, { role: 'client' })">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                    </div>
+                </div>
+                <div class="ongoing-title">${escapeHtml(post.Title)}</div>
+                <div class="ongoing-description">${snippet}</div>
+                <div class="ongoing-details">
+                    <div class="ongoing-detail-item">
+                        <span class="ongoing-detail-label"><i class="fa-solid fa-coins"></i> Budget</span>
+                        <span class="ongoing-detail-value">${budget}</span>
+                    </div>
+                    <div class="ongoing-detail-item">
+                        <span class="ongoing-detail-label"><i class="fa-solid fa-tag"></i> Category</span>
+                        <span class="ongoing-detail-value">${escapeHtml(category)}</span>
+                    </div>
+                    <div class="ongoing-detail-item">
+                        <span class="ongoing-detail-label"><i class="fa-solid fa-calendar"></i> Started</span>
+                        <span class="ongoing-detail-value">${startedAt}</span>
+                    </div>
+                    <div class="ongoing-detail-item">
+                        <span class="ongoing-detail-label"><i class="fa-solid fa-circle-check"></i> Completed</span>
+                        <span class="ongoing-detail-value">${completedAt}</span>
+                    </div>
+                </div>
+                <div class="progress-container" style="margin-top:12px;">
+                    <div class="progress-track">
+                        <div class="progress-fill" style="width:100%; background:#16a34a;"></div>
+                    </div>
+                </div>
+                ${reviewsHTML}
+                <div class="ongoing-footer">
+                    <span class="ongoing-time">Completed ${completedAt}</span>
+                    <span class="status-chip" style="background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0;">${postTypeLabel} &middot; Completed</span>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderStarsHTML(rating) {
+        let html = '';
+        for (let i = 1; i <= 5; i++) {
+            html += i <= rating
+                ? '<i class="fa-solid fa-star star-filled"></i>'
+                : '<i class="fa-regular fa-star star-empty"></i>';
+        }
+        return html;
     }
 
     function updateAsExpired(id) {
@@ -1575,70 +1941,144 @@
     });
 }
 
-function submitReview(id) {
-    //window.currentReviewPostId = postId;
+function completePendingReviewProject(postId) {
+    window._completeProjectPostId = postId;
 
-    viewDialogBox('review-popup');
+    // Reset form
+    document.getElementById('reviewRating').value = '';
+    const titleEl = document.getElementById('reviewTitle');
+    const descEl  = document.getElementById('reviewDescription');
+    const filesEl = document.getElementById('reviewFiles');
+    if (titleEl)  titleEl.value = '';
+    if (descEl)   descEl.value  = '';
+    if (filesEl)  filesEl.value = '';
+    document.getElementById('ratingError').style.display = 'none';
 
-    const container = document.querySelector("#review-popup .dialog-body");
+    // Reset star display
+    document.querySelectorAll('#starRatingInput i').forEach(s => {
+        s.className   = 'fa-regular fa-star';
+        s.style.color = '';
+    });
 
-    container.innerHTML = `
-        <div class="loading-state">
-            <i class="fas fa-spinner fa-spin"></i>
-            <p>Loading project...</p>
-        </div>
-    `;
+    // Wire confirm button (clone to prevent duplicate listeners)
+    const btn    = document.getElementById('btnConfirmCompleteProject');
+    const newBtn = btn.cloneNode(true);
+    btn.parentNode.replaceChild(newBtn, btn);
+    newBtn.addEventListener('click', submitCompleteProject);
 
-    fetch(window.BASE_URL + "/requests/view/" + id)
-        .then(res => {
-            console.log('view status:', res.status, res.url);
-            return res.text(); // text first, not json
+    viewDialogBox('complete-project-popup');
+}
+
+function submitCompleteProject() {
+    const postId = window._completeProjectPostId;
+    const rating = document.getElementById('reviewRating').value;
+
+    if (!rating) {
+        document.getElementById('ratingError').style.display = '';
+        return;
+    }
+    document.getElementById('ratingError').style.display = 'none';
+
+    const btn = document.getElementById('btnConfirmCompleteProject');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...'; }
+
+    const fd = new FormData();
+    fd.append('rating',      rating);
+    fd.append('title',       document.getElementById('reviewTitle')?.value.trim()       || '');
+    fd.append('description', document.getElementById('reviewDescription')?.value.trim() || '');
+    Array.from(document.getElementById('reviewFiles')?.files || []).forEach(f => fd.append('review_files[]', f));
+
+    fetch(`${window.BASE_URL}/project/complete/${postId}`, {
+        method: 'POST',
+        body: fd,
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                closeDialogBox('complete-project-popup');
+                window.showSuccessToast('Success!', 'Project completed and review submitted.');
+                loadPosts('pending-review');
+                loadPosts('completed');
+            } else {
+                window.showErrorToast('Error', data.error || 'Failed to complete project.');
+            }
         })
-        .then(text => {
-            console.log('view raw response:', text); // see what's actually returned
-            return JSON.parse(text); // then parse manually
+        .catch(error => {
+            console.error('submitCompleteProject error:', error);
+            window.showErrorToast('Error', 'An error occurred while completing the project.');
         })
-        .then(post => {
-            const providerName = post.Provider_Name || 'Unassigned provider';
-            container.innerHTML = `
-                <div class="post-view">
-                    <div class="post-view-title">${post.Title || 'Untitled'}</div>
-                    <div class="post-view-section">
-                        <div class="section-title">Description</div>
-                        <div class="section-body">${post.Description || 'No description provided'}</div>
-                    </div>
-                    <div class="post-view-section">
-                        <div class="section-title">Provider</div>
-                        <div class="post-provider">${providerName}</div>
-                    </div>
-                    <div class="post-view-section">
-                        <div class="section-title">Category</div>
-                        <div class="post-category">${post.CategoryName || 'No category specified'}</div>
-                    </div>
-                    <div class="post-view-section">
-                        <div class="section-title">Rating(1-5)</div>
-                        <div class="post-rating"><select id="reviewRating" class="text-field">
-                        <option value="5">5 - Excellent</option>
-                        <option value="4">4 - Good</option>
-                        <option value="3">3 - Average</option>
-                        <option value="2">2 - Poor</option>
-                        <option value="1">1 - Very Bad</option>
-                    </select></div>
-                    </div>
-                    <div class="post-view-section">
-                        <div class="section-title">Add Comments</div>
-                        <div class="post-comments">
-                            <textarea class="text-field" id="reviewComments" placeholder="Enter your comments..."></textarea>
-                        </div>
-                    </div>
-                    
-                </div>
-                
-            `;
+        .finally(() => {
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Complete &amp; Submit Review'; }
+        });
+}
+
+function openReopenProjectModal(postId) {
+    window._reopenProjectPostId = postId;
+    const reasonInput = document.getElementById('reopenReason');
+    const filesInput  = document.getElementById('reopenFiles');
+    if (reasonInput) reasonInput.value = '';
+    if (filesInput) filesInput.value = '';
+
+    const confirmBtn = document.getElementById('btnConfirmReopenProject');
+    if (confirmBtn) {
+        const newBtn = confirmBtn.cloneNode(true);
+        confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+        newBtn.addEventListener('click', submitReopenProject);
+    }
+
+    viewDialogBox('reopen-project-popup');
+}
+
+function submitReopenProject() {
+    const postId = window._reopenProjectPostId;
+    const reason = document.getElementById('reopenReason')?.value.trim() || '';
+    const files  = document.getElementById('reopenFiles')?.files || [];
+
+    if (!postId) {
+        window.showErrorToast('Error', 'Project not selected.');
+        return;
+    }
+
+    if (!reason) {
+        window.showErrorToast('Error', 'Please provide a reason before moving back to ongoing.');
+        document.getElementById('reopenReason')?.focus();
+        return;
+    }
+
+    const btn = document.getElementById('btnConfirmReopenProject');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    }
+
+    const fd = new FormData();
+    fd.append('reason', reason);
+    Array.from(files).forEach(file => fd.append('reopen_files[]', file));
+
+    fetch(`${window.BASE_URL}/project/reopen/${postId}`, {
+        method: 'POST',
+        body: fd,
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                closeDialogBox('reopen-project-popup');
+                window.showSuccessToast('Success!', 'Project moved back to ongoing.');
+                loadPosts('pending-review');
+                loadPosts('ongoing');
+            } else {
+                window.showErrorToast('Error', data.error || 'Failed to move project back to ongoing.');
+            }
         })
-        .catch(err => {
-            console.error(err);
-            container.innerHTML = `<p>Error loading project</p>`;
+        .catch(error => {
+            console.error('submitReopenProject error:', error);
+            window.showErrorToast('Error', 'An error occurred while saving your request.');
+        })
+        .finally(() => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-rotate-left"></i> Move to Ongoing';
+            }
         });
 }
 
@@ -1687,6 +2127,40 @@ function submitReview(id) {
                 }
             });
         }*/
+
+// Star rating interaction for complete-project modal
+document.addEventListener('DOMContentLoaded', function () {
+    const stars     = document.querySelectorAll('#starRatingInput i');
+    const ratingIn  = document.getElementById('reviewRating');
+
+    stars.forEach(star => {
+        star.addEventListener('click', function () {
+            const val = parseInt(this.dataset.value);
+            if (ratingIn) ratingIn.value = val;
+            updateStars(val);
+        });
+
+        star.addEventListener('mouseenter', function () {
+            const val = parseInt(this.dataset.value);
+            stars.forEach((s, i) => {
+                s.className   = i < val ? 'fa-solid fa-star' : 'fa-regular fa-star';
+                s.style.color = i < val ? '#f59e0b' : '#d1d5db';
+            });
+        });
+
+        star.addEventListener('mouseleave', function () {
+            const selected = parseInt(ratingIn?.value) || 0;
+            updateStars(selected);
+        });
+    });
+
+    function updateStars(val) {
+        stars.forEach((s, i) => {
+            s.className   = i < val ? 'fa-solid fa-star' : 'fa-regular fa-star';
+            s.style.color = i < val ? '#f59e0b' : '';
+        });
+    }
+});
 
 </script>
 

@@ -84,7 +84,7 @@ class ProjectController extends BaseController
         $this->ensureAuth();
 
         $userId = $_SESSION['user_id'];
-        $status = $_GET['status'] ?? 'pending'; // pending, accepted, ongoing
+        $status = $_GET['status'] ?? 'ongoing'; // ongoing, accepted, pending (legacy)
         $sort = $_GET['sort'] ?? 'date_desc'; // date_desc, date_asc, price_desc, price_asc, views_desc, views_asc
         $search = $_GET['search'] ?? ''; // search query
 
@@ -104,6 +104,148 @@ class ProjectController extends BaseController
                 'success' => false,
                 'message' => 'Failed to fetch posts'
             ]);
+        }
+    }
+
+    /**
+     * GET /projects/ongoing - Fetches ongoing projects for the client from the project table.
+     */
+    public function getOngoingProjects(): void
+    {
+        header('Content-Type: application/json');
+        $this->ensureAuth();
+
+        $userId = (int) $_SESSION['user_id'];
+        $sort   = $_GET['sort']   ?? 'date_desc';
+        $search = $_GET['search'] ?? '';
+
+        try {
+            $posts = $this->projectModel->getOngoingProjectsForClient($userId, $sort, $search);
+            $postsWithSkills = $this->assemblePostsWithSkills($posts);
+
+            echo json_encode([
+                'success' => true,
+                'posts'   => $postsWithSkills,
+            ]);
+        } catch (Exception $e) {
+            error_log('Error fetching ongoing projects: ' . $e->getMessage());
+            echo json_encode([
+                'success' => false,
+                'message' => 'Failed to fetch ongoing projects',
+            ]);
+        }
+    }
+
+    /**
+     * GET /projects/pending-review - Fetches pending-review projects for the client from the project table.
+     */
+    public function getPendingReviewProjects(): void
+    {
+        header('Content-Type: application/json');
+        $this->ensureAuth();
+
+        $userId = (int) $_SESSION['user_id'];
+        $sort   = $_GET['sort']   ?? 'date_desc';
+        $search = $_GET['search'] ?? '';
+
+        try {
+            $posts = $this->projectModel->getPendingReviewProjectsForClient($userId, $sort, $search);
+            $postsWithSkills = $this->assemblePostsWithSkills($posts);
+
+            echo json_encode([
+                'success' => true,
+                'posts'   => $postsWithSkills,
+            ]);
+        } catch (Exception $e) {
+            error_log('Error fetching pending review projects: ' . $e->getMessage());
+            echo json_encode([
+                'success' => false,
+                'message' => 'Failed to fetch pending review projects',
+            ]);
+        }
+    }
+
+    /**
+     * GET /projects/completed - Fetches completed projects for the client from the project table.
+     */
+    public function getCompletedProjects(): void
+    {
+        header('Content-Type: application/json');
+        $this->ensureAuth();
+
+        $userId = (int) $_SESSION['user_id'];
+        $sort   = $_GET['sort']   ?? 'date_desc';
+        $search = $_GET['search'] ?? '';
+
+        try {
+            $posts = $this->projectModel->getCompletedProjectsForClient($userId, $sort, $search);
+            $postsWithSkills = $this->assemblePostsWithSkills($posts);
+
+            // Attach reviews for each project
+            foreach ($postsWithSkills as &$item) {
+                if (!empty($item['post']['Project_ID'])) {
+                    $item['post']['reviews'] = $this->projectModel->getReviewsByProjectId((int) $item['post']['Project_ID']);
+                } else {
+                    $item['post']['reviews'] = [];
+                }
+            }
+            unset($item);
+
+            echo json_encode([
+                'success' => true,
+                'posts'   => $postsWithSkills,
+            ]);
+        } catch (Exception $e) {
+            error_log('Error fetching completed projects: ' . $e->getMessage());
+            echo json_encode([
+                'success' => false,
+                'message' => 'Failed to fetch completed projects',
+            ]);
+        }
+    }
+
+    /**
+     * GET /project/reviews/{postId} - Fetches reviews for a specific project.
+     */
+    public function getProjectReviews(int $postId): void
+    {
+        header('Content-Type: application/json');
+        $this->ensureAuth();
+
+        try {
+            $reviews = $this->projectModel->getReviewsByPostId($postId);
+            echo json_encode(['success' => true, 'reviews' => $reviews]);
+        } catch (Exception $e) {
+            error_log('Error fetching reviews: ' . $e->getMessage());
+            echo json_encode(['success' => false, 'message' => 'Failed to fetch reviews']);
+        }
+    }
+
+    /**
+     * POST /project/provider-review/{postId} - Provider submits a review for the client.
+     */
+    public function submitProviderReview(int $postId): void
+    {
+        header('Content-Type: application/json');
+        $this->ensureAuth();
+
+        $providerId = (int) $_SESSION['user_id'];
+        $rating     = (int) ($_POST['rating'] ?? 0);
+        $title      = trim($_POST['title'] ?? '');
+        $desc       = trim($_POST['description'] ?? '');
+
+        if ($rating < 1 || $rating > 5) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Rating must be between 1 and 5.']);
+            return;
+        }
+
+        try {
+            $this->projectModel->addProviderReview($providerId, $postId, $rating, $title, $desc);
+            echo json_encode(['success' => true, 'message' => 'Review submitted successfully.']);
+        } catch (Exception $e) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         }
     }
 
@@ -269,6 +411,108 @@ class ProjectController extends BaseController
         }
     }
 
+    public function completeProject(int $postId): void
+    {
+        header('Content-Type: application/json');
+        $this->ensureAuth();
+
+        $postId = (int) $postId;
+        if ($postId <= 0) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => 'Invalid post id']);
+            return;
+        }
+
+        $rating = (int) ($_POST['rating'] ?? 0);
+        if ($rating < 1 || $rating > 5) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => 'A rating between 1 and 5 is required']);
+            return;
+        }
+
+        $title       = trim((string) ($_POST['title']       ?? ''));
+        $description = trim((string) ($_POST['description'] ?? ''));
+
+        $reviewFileNames = [];
+        if (!empty($_FILES['review_files']['name'][0])) {
+            require_once __DIR__ . '/../../helpers/upload.php';
+            $uploadDir = __DIR__ . '/../../uploads/Projects/reviews/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+            $allowed = [
+                'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+                'application/pdf',
+                'application/zip', 'application/x-zip-compressed',
+                'text/plain',
+            ];
+            try {
+                $reviewFileNames = uploadFiles('review_files', $uploadDir, $allowed, 10 * 1024 * 1024);
+            } catch (Exception $e) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+                return;
+            }
+        }
+
+        $clientId = (int) ($_SESSION['user_id'] ?? 0);
+        $success = $this->projectModel->completeProjectByClient($clientId, $postId, $rating, $title, $description, $reviewFileNames);
+        if ($success) {
+            echo json_encode(['success' => true, 'message' => 'Project marked as completed']);
+        } else {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => 'Failed to complete project']);
+        }
+    }
+
+    public function reopenProject(int $postId): void
+    {
+        header('Content-Type: application/json');
+        $this->ensureAuth();
+
+        $postId = (int) $postId;
+        if ($postId <= 0) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => 'Invalid post id']);
+            return;
+        }
+
+        $reason = trim((string) ($_POST['reason'] ?? ''));
+        if ($reason === '') {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => 'Reason is required']);
+            return;
+        }
+
+        $fileNames = [];
+        if (!empty($_FILES['reopen_files']['name'][0])) {
+            require_once __DIR__ . '/../../helpers/upload.php';
+            $uploadDir = __DIR__ . '/../../uploads/Projects/updates/';
+            $allowed   = [
+                'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+                'application/pdf',
+                'application/zip', 'application/x-zip-compressed',
+                'text/plain',
+            ];
+            try {
+                $fileNames = uploadFiles('reopen_files', $uploadDir, $allowed, 10 * 1024 * 1024);
+            } catch (Exception $e) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+                return;
+            }
+        }
+
+        $clientId = (int) ($_SESSION['user_id'] ?? 0);
+        $success = $this->projectModel->moveProjectBackToOngoingByClient($clientId, $postId, $reason, $fileNames);
+        if ($success) {
+            echo json_encode(['success' => true, 'message' => 'Project moved back to ongoing']);
+        } else {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => 'Failed to move project back to ongoing']);
+        }
+    }
+
     // GET /dashboard
     public function index()
     {
@@ -329,6 +573,7 @@ class ProjectController extends BaseController
 
         $timeline        = $this->projectModel->getProjectTimeline($postId);
         $progressHistory = $this->projectModel->getProgressHistory($postId);
+        $deliverables    = $this->projectModel->getLastSubmissionDeliverables($postId);
 
         echo json_encode([
             'success' => true,
@@ -356,6 +601,7 @@ class ProjectController extends BaseController
                 'provider_picture' => $details['Provider_Picture'] ?? null,
                 'timeline'       => $timeline,
                 'progress_history' => $progressHistory,
+                'deliverables'   => $deliverables,
             ],
         ]);
     }

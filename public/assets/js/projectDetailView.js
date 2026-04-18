@@ -125,6 +125,41 @@ const ProjectDetailView = (function () {
                 </div>
             </div>`;
 
+        // Deliverables section — only when submission has files
+        if (d.deliverables && d.deliverables.files && d.deliverables.files.length > 0) {
+            const fileLinks = d.deliverables.files.map(f => {
+                const name = f.split('/').pop();
+                const url  = `${window.BASE_URL || ''}/file/project-updates/${_esc(f)}`;
+                const ext  = name.split('.').pop().toLowerCase();
+                const iconClass = ['jpg','jpeg','png','gif','webp'].includes(ext) ? 'fa-image'
+                    : ['pdf'].includes(ext) ? 'fa-file-pdf'
+                    : ['zip','rar','7z'].includes(ext) ? 'fa-file-zipper'
+                    : ['doc','docx'].includes(ext) ? 'fa-file-word'
+                    : ['xls','xlsx'].includes(ext) ? 'fa-file-excel'
+                    : 'fa-file';
+                return `<a href="${url}" target="_blank" class="pd-deliverable-file" title="${_esc(name)}">
+                    <i class="fa-solid ${iconClass}"></i>
+                    <span>${_esc(name)}</span>
+                </a>`;
+            }).join('');
+
+            const noteHtml = d.deliverables.note
+                ? `<div class="pd-deliverable-note">${_esc(d.deliverables.note)}</div>`
+                : '';
+
+            const dateHtml = d.deliverables.date
+                ? `<div class="pd-deliverable-date"><i class="fa-solid fa-calendar-check"></i> Submitted ${_fmtDate(d.deliverables.date)}</div>`
+                : '';
+
+            html += `
+            <div class="pd-deliverables-section">
+                <div class="pd-section-title"><i class="fa-solid fa-box-open"></i> Deliverables</div>
+                ${noteHtml}
+                ${dateHtml}
+                <div class="pd-deliverable-files">${fileLinks}</div>
+            </div>`;
+        }
+
         // Timeline section
         html += `
             <div class="pd-timeline-section">

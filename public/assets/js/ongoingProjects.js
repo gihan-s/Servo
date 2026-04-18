@@ -48,13 +48,15 @@ class OngoingProjectsManager {
     }
 
     async loadProjects(page = 1) {
-        this.showSkeleton();
+        this.showLoading();
         const data = await this.fetchProjects(page);
 
         if (!data) {
             this.showError('Failed to load projects. Please try again.');
             return;
         }
+
+        await new Promise(r => setTimeout(r, 300));
 
         this.currentPage = data.pagination.current_page;
         this.totalPages  = data.pagination.total_pages;
@@ -75,11 +77,11 @@ class OngoingProjectsManager {
 
         if (!projects.length) {
             container.innerHTML = `
-                <div class="no-results-state">
-                    <i class="fa-solid fa-briefcase no-results-icon"></i>
-                    <p class="no-results-title">No ongoing projects</p>
-                    <p class="no-results-sub">Projects will appear here once a request has been accepted and started.</p>
-                </div>`;
+                <section class="empty-state">
+                    <i class="fas fa-briefcase"></i>
+                    <h2>No ongoing projects right now</h2>
+                    <p>Projects will appear here once a request has been accepted and started.</p>
+                </section>`;
             return;
         }
 
@@ -497,30 +499,25 @@ class OngoingProjectsManager {
     /*  Helpers                                                             */
     /* ------------------------------------------------------------------ */
 
-    showSkeleton() {
+    showLoading() {
         const container = document.querySelector(this.itemListSelector);
         if (!container) return;
-        container.innerHTML = Array(3).fill(`
-            <div class="search-item skeleton-card" style="opacity:.5;">
-                <div class="request-header">
-                    <div class="request-client-section">
-                        <div style="width:56px;height:56px;border-radius:50%;background:#e5e7eb;"></div>
-                        <div style="flex:1;">
-                            <div style="height:14px;background:#e5e7eb;border-radius:4px;width:40%;margin-bottom:8px;"></div>
-                            <div style="height:12px;background:#e5e7eb;border-radius:4px;width:60%;"></div>
-                        </div>
-                    </div>
-                </div>
-                <div style="height:16px;background:#e5e7eb;border-radius:4px;width:70%;margin:12px 0 8px;"></div>
-                <div style="height:12px;background:#e5e7eb;border-radius:4px;width:90%;margin-bottom:6px;"></div>
-                <div style="height:12px;background:#e5e7eb;border-radius:4px;width:80%;"></div>
-            </div>`).join('');
+        container.innerHTML = `
+            <div class="loading-state">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading projects...</p>
+            </div>`;
     }
 
     showError(message) {
         const container = document.querySelector(this.itemListSelector);
         if (container) {
-            container.innerHTML = `<p class="error-message" style="color:#ef4444;padding:16px;">${this.escHtml(message)}</p>`;
+            container.innerHTML = `
+                <div class="error-state">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <p>${this.escHtml(message)}</p>
+                    <button class="retry-btn" onclick="window.ongoingProjectsManager && window.ongoingProjectsManager.loadProjects(1)">Retry</button>
+                </div>`;
         }
     }
 
