@@ -279,6 +279,12 @@
     border-color: #bfdbfe;
 }
 
+.status-chip.status-accepted-chip {
+    background: #ecfdf5;
+    color: #059669;
+    border-color: #a7f3d0;
+}
+
 /* Empty / error state */
 .no-results-state {
     display: flex;

@@ -492,3 +492,66 @@
         flex-wrap: wrap;
     }
 }
+
+/* ===== Deliverables Section ===== */
+.pd-deliverables-section {
+    padding: 20px;
+    border-bottom: 1px solid #f0f4f8;
+}
+
+.pd-deliverable-note {
+    font-size: 13px;
+    color: #4b5563;
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+.pd-deliverable-date {
+    font-size: 12px;
+    color: #9ca3af;
+    margin-bottom: 12px;
+}
+
+.pd-deliverable-date i {
+    margin-right: 4px;
+    color: #10b981;
+}
+
+.pd-deliverable-files {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.pd-deliverable-file {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    font-size: 12px;
+    color: #374151;
+    text-decoration: none;
+    transition: background 0.15s, border-color 0.15s;
+    max-width: 220px;
+}
+
+.pd-deliverable-file:hover {
+    background: #eef2ff;
+    border-color: #6366f1;
+    color: #4f46e5;
+}
+
+.pd-deliverable-file i {
+    font-size: 14px;
+    flex-shrink: 0;
+    color: #6366f1;
+}
+
+.pd-deliverable-file span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

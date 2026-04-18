@@ -650,6 +650,80 @@ class ProjectModel extends Database {
         ];
     }
 
+    public function getPendingReviewProjectsForProvider(int $providerId, int $page = 1, int $limit = 10): array
+    {
+        $page   = max(1, $page);
+        $limit  = max(1, min($limit, 100));
+        $offset = ($page - 1) * $limit;
+
+        $countSql = "SELECT COUNT(*) AS total
+                     FROM project proj
+                     JOIN post p ON p.Post_ID = proj.Post_ID
+                     WHERE proj.Project_Status = 'pending-review' AND p.Provider_ID = ?";
+
+        $countStmt = $this->conn->prepare($countSql);
+        if (!$countStmt) {
+            error_log('getPendingReviewProjectsForProvider count prepare: ' . $this->conn->error);
+            return ['data' => [], 'total' => 0, 'pages' => 0, 'current_page' => $page];
+        }
+
+        $countStmt->bind_param('i', $providerId);
+        $countStmt->execute();
+        $totalRecords = (int) ($countStmt->get_result()->fetch_assoc()['total'] ?? 0);
+        $countStmt->close();
+
+        $totalPages = $totalRecords > 0 ? (int) ceil($totalRecords / $limit) : 0;
+
+        $sql = "SELECT
+                    proj.Project_ID,
+                    proj.Project_Status,
+                    proj.Started_At,
+                    proj.Ended_At,
+                    COALESCE(proj.Progress, 0) AS Progress,
+                    p.Post_ID,
+                    p.Title,
+                    p.Description,
+                    p.Requesting_Price,
+                    p.Price_Type,
+                    p.Est_Date,
+                    p.Level,
+                    p.Post_Type,
+                    p.Client_ID,
+                    cat.Name AS Category_Name,
+                    CONCAT(cl.First_Name, ' ', cl.Last_Name) AS Client_Name,
+                    cl.Profile_Picture
+                FROM project proj
+                JOIN post p ON p.Post_ID = proj.Post_ID
+                LEFT JOIN category cat ON cat.Category_ID = p.Category_ID
+                LEFT JOIN client cl ON cl.Client_ID = p.Client_ID
+                WHERE proj.Project_Status = 'pending-review' AND p.Provider_ID = ?
+                ORDER BY proj.Ended_At DESC
+                LIMIT ? OFFSET ?";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('getPendingReviewProjectsForProvider prepare: ' . $this->conn->error);
+            return ['data' => [], 'total' => 0, 'pages' => 0, 'current_page' => $page];
+        }
+
+        $stmt->bind_param('iii', $providerId, $limit, $offset);
+        if (!$stmt->execute()) {
+            error_log('getPendingReviewProjectsForProvider exec: ' . $stmt->error);
+            $stmt->close();
+            return ['data' => [], 'total' => 0, 'pages' => 0, 'current_page' => $page];
+        }
+
+        $data = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+
+        return [
+            'data'         => $data,
+            'total'        => $totalRecords,
+            'pages'        => $totalPages,
+            'current_page' => $page,
+        ];
+    }
+
     public function createProject(int $postId): int
     {
         $sql = "INSERT INTO project (Post_ID, Project_Status, Started_At) VALUES (?, 'ongoing', NOW())";
@@ -1003,6 +1077,59 @@ class ProjectModel extends Database {
     }
 
     /**
+     * Get the most recent "submitted for review" log entry (with files) for a project.
+     * Returns null if no such entry exists or it has no files.
+     */
+    public function getLastSubmissionDeliverables(int $postId): ?array
+    {
+        $pidStmt = $this->conn->prepare('SELECT Project_ID FROM project WHERE Post_ID = ? LIMIT 1');
+        if (!$pidStmt) return null;
+        $pidStmt->bind_param('i', $postId);
+        $pidStmt->execute();
+        $proj = $pidStmt->get_result()->fetch_assoc();
+        $pidStmt->close();
+        if (!$proj) return null;
+
+        $projectId = (int) $proj['Project_ID'];
+
+        // Get most recent pending-review log entry
+        $stmt = $this->conn->prepare(
+            "SELECT ul.ID, ul.Title, ul.Description, ul.Date
+             FROM project_update_log ul
+             WHERE ul.Project_ID = ? AND ul.Project_Status_Update = 'pending-review'
+             ORDER BY ul.Date DESC
+             LIMIT 1"
+        );
+        if (!$stmt) return null;
+        $stmt->bind_param('i', $projectId);
+        $stmt->execute();
+        $log = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        if (!$log) return null;
+
+        $logId = (int) $log['ID'];
+
+        // Fetch associated files
+        $fStmt = $this->conn->prepare(
+            'SELECT File FROM project_update_log_files WHERE Update_Log_ID = ? ORDER BY id ASC'
+        );
+        if (!$fStmt) return null;
+        $fStmt->bind_param('i', $logId);
+        $fStmt->execute();
+        $files = array_column($fStmt->get_result()->fetch_all(MYSQLI_ASSOC), 'File');
+        $fStmt->close();
+
+        // Only return if there are files (nothing to show without deliverable files)
+        if (empty($files)) return null;
+
+        return [
+            'note'  => $log['Description'] ?? '',
+            'date'  => $log['Date'],
+            'files' => $files,
+        ];
+    }
+
+    /**
      * Submit a project for review: update status to 'pending-review', set Ended_At, and log the event.
      */
     public function submitForReview(
@@ -1061,6 +1188,498 @@ class ProjectModel extends Database {
         } catch (Throwable $e) {
             $this->conn->rollback();
             error_log('ProjectModel::submitForReview error: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Get projects for a client by project status from the project table (joined with post + provider + category).
+     * Returns rows in the same shape as PostModel::getRequestPosts() so existing JS card renderers work.
+     */
+    public function getClientProjectsByStatus(
+        int $clientId,
+        string $projectStatus,
+        string $sort = 'date_desc',
+        string $search = ''
+    ): array {
+        $allowed = ['ongoing', 'pending-review', 'completed'];
+        if (!in_array($projectStatus, $allowed, true)) {
+            return [];
+        }
+
+        $query = "SELECT p.*,
+                         CONCAT(pr.First_Name, ' ', pr.Last_Name) AS Provider_Name,
+                         pr.Profile_Picture AS Provider_Picture,
+                         pr.Rating AS Provider_Rating,
+                         COALESCE(proj.Progress, 0) AS Progress,
+                         proj.Started_At, proj.Ended_At,
+                         cat.Name AS Category_Name,
+                         proj.Project_ID,
+                         proj.Project_Status
+                  FROM project proj
+                  JOIN Post p ON p.Post_ID = proj.Post_ID
+                  LEFT JOIN Provider pr ON p.Provider_ID = pr.Provider_ID
+                  LEFT JOIN category cat ON p.Category_ID = cat.Category_ID
+                  WHERE p.Client_ID = ? AND proj.Project_Status = ?";
+        $types  = 'is';
+        $params = [$clientId, $projectStatus];
+
+        if (!empty($search)) {
+            $query .= " AND (p.Title LIKE ? OR p.Description LIKE ?)";
+            $types .= 'ss';
+            $searchTerm = "%$search%";
+            $params[] = $searchTerm;
+            $params[] = $searchTerm;
+        }
+
+        $orderBy = 'COALESCE(proj.Ended_At, proj.Started_At) DESC';
+        switch ($sort) {
+            case 'date_asc':
+                $orderBy = 'COALESCE(proj.Ended_At, proj.Started_At) ASC';
+                break;
+            case 'date_desc':
+                $orderBy = 'COALESCE(proj.Ended_At, proj.Started_At) DESC';
+                break;
+            case 'price_asc':
+                $orderBy = 'p.Requesting_Price ASC';
+                break;
+            case 'price_desc':
+                $orderBy = 'p.Requesting_Price DESC';
+                break;
+        }
+        $query .= " ORDER BY $orderBy";
+
+        $stmt = $this->conn->prepare($query);
+        if (!$stmt) {
+            error_log('getClientProjectsByStatus prepare: ' . $this->conn->error);
+            return [];
+        }
+        $stmt->bind_param($types, ...$params);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
+    public function getOngoingProjectsForClient(int $clientId, string $sort = 'date_desc', string $search = ''): array
+    {
+        return $this->getClientProjectsByStatus($clientId, 'ongoing', $sort, $search);
+    }
+
+    public function getPendingReviewProjectsForClient(int $clientId, string $sort = 'date_desc', string $search = ''): array
+    {
+        return $this->getClientProjectsByStatus($clientId, 'pending-review', $sort, $search);
+    }
+
+    public function getCompletedProjectsForClient(int $clientId, string $sort = 'date_desc', string $search = ''): array
+    {
+        return $this->getClientProjectsByStatus($clientId, 'completed', $sort, $search);
+    }
+
+    /* ------------------------------------------------------------------
+     *  Reviews
+     * ------------------------------------------------------------------ */
+
+    /**
+     * Fetch all reviews for a given project (both client and provider).
+     */
+    public function getReviewsByProjectId(int $projectId): array
+    {
+        $sql = "SELECT r.Review_ID, r.Title, r.Description, r.Rating, r.Left_At, r.Rated_By
+                FROM reviews r
+                WHERE r.Project_ID = ?
+                ORDER BY r.Left_At ASC";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('getReviewsByProjectId prepare: ' . $this->conn->error);
+            return [];
+        }
+
+        $stmt->bind_param('i', $projectId);
+        $stmt->execute();
+        $reviews = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+
+        if (empty($reviews)) return [];
+
+        // Attach files
+        $reviewIds = array_column($reviews, 'Review_ID');
+        $ph = implode(',', array_fill(0, count($reviewIds), '?'));
+        $fStmt = $this->conn->prepare("SELECT Review_ID, File FROM reviews_files WHERE Review_ID IN ($ph)");
+        $fileMap = [];
+        if ($fStmt) {
+            $fStmt->bind_param(str_repeat('i', count($reviewIds)), ...$reviewIds);
+            $fStmt->execute();
+            foreach ($fStmt->get_result()->fetch_all(MYSQLI_ASSOC) as $f) {
+                $fileMap[$f['Review_ID']][] = $f['File'];
+            }
+            $fStmt->close();
+        }
+        foreach ($reviews as &$r) {
+            $r['files'] = $fileMap[$r['Review_ID']] ?? [];
+        }
+        unset($r);
+        return $reviews;
+    }
+
+    /**
+     * Fetch all reviews for a project by Post_ID.
+     */
+    public function getReviewsByPostId(int $postId): array
+    {
+        $sql = "SELECT r.Review_ID, r.Title, r.Description, r.Rating, r.Left_At, r.Rated_By
+                FROM reviews r
+                JOIN project proj ON proj.Project_ID = r.Project_ID
+                WHERE proj.Post_ID = ?
+                ORDER BY r.Left_At ASC";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('getReviewsByPostId prepare: ' . $this->conn->error);
+            return [];
+        }
+
+        $stmt->bind_param('i', $postId);
+        $stmt->execute();
+        $reviews = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+
+        if (empty($reviews)) return [];
+
+        // Attach files
+        $reviewIds = array_column($reviews, 'Review_ID');
+        $ph = implode(',', array_fill(0, count($reviewIds), '?'));
+        $fStmt = $this->conn->prepare("SELECT Review_ID, File FROM reviews_files WHERE Review_ID IN ($ph)");
+        $fileMap = [];
+        if ($fStmt) {
+            $fStmt->bind_param(str_repeat('i', count($reviewIds)), ...$reviewIds);
+            $fStmt->execute();
+            foreach ($fStmt->get_result()->fetch_all(MYSQLI_ASSOC) as $f) {
+                $fileMap[$f['Review_ID']][] = $f['File'];
+            }
+            $fStmt->close();
+        }
+        foreach ($reviews as &$r) {
+            $r['files'] = $fileMap[$r['Review_ID']] ?? [];
+        }
+        unset($r);
+        return $reviews;
+    }
+
+    /**
+     * Provider leaves a review for the client on a completed project.
+     */
+    public function addProviderReview(int $providerId, int $postId, int $rating, string $title, string $description): bool
+    {
+        $this->conn->begin_transaction();
+
+        try {
+            // Verify: project is completed AND belongs to this provider
+            $chk = $this->conn->prepare(
+                'SELECT proj.Project_ID FROM project proj
+                 JOIN post p ON p.Post_ID = proj.Post_ID
+                 WHERE proj.Post_ID = ? AND proj.Project_Status = "completed" AND p.Provider_ID = ?
+                 LIMIT 1'
+            );
+            if (!$chk) throw new Exception('addProviderReview check prepare: ' . $this->conn->error);
+            $chk->bind_param('ii', $postId, $providerId);
+            $chk->execute();
+            $row = $chk->get_result()->fetch_assoc();
+            $chk->close();
+            if (!$row) throw new Exception('Project not found or not yours.');
+
+            $projectId = (int) $row['Project_ID'];
+
+            // Ensure provider hasn't already reviewed
+            $dupChk = $this->conn->prepare(
+                'SELECT Review_ID FROM reviews WHERE Project_ID = ? AND Rated_By = "Provider" LIMIT 1'
+            );
+            if (!$dupChk) throw new Exception('addProviderReview dup prepare: ' . $this->conn->error);
+            $dupChk->bind_param('i', $projectId);
+            $dupChk->execute();
+            $existing = $dupChk->get_result()->fetch_assoc();
+            $dupChk->close();
+            if ($existing) throw new Exception('You have already reviewed this project.');
+
+            // Get next Review_ID
+            $idStmt = $this->conn->prepare('SELECT COALESCE(MAX(Review_ID), 0) + 1 AS next_id FROM reviews FOR UPDATE');
+            if (!$idStmt) throw new Exception('addProviderReview id prepare: ' . $this->conn->error);
+            $idStmt->execute();
+            $reviewId = (int) $idStmt->get_result()->fetch_assoc()['next_id'];
+            $idStmt->close();
+
+            $titleVal = $title !== '' ? $title : null;
+            $descVal  = $description !== '' ? $description : null;
+            $ratedBy  = 'Provider';
+
+            $ins = $this->conn->prepare(
+                'INSERT INTO reviews (Review_ID, Title, Description, Rating, Left_At, Project_ID, Rated_By)
+                 VALUES (?, ?, ?, ?, NOW(), ?, ?)'
+            );
+            if (!$ins) throw new Exception('addProviderReview ins prepare: ' . $this->conn->error);
+            $ins->bind_param('ississ', $reviewId, $titleVal, $descVal, $rating, $projectId, $ratedBy);
+            if (!$ins->execute()) throw new Exception('addProviderReview ins exec: ' . $ins->error);
+            $ins->close();
+
+            $this->conn->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->conn->rollback();
+            error_log($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * Completed projects for provider — includes whether provider has reviewed.
+     */
+    public function getCompletedProjectsForProvider(int $providerId, int $page = 1, int $limit = 10): array
+    {
+        $page   = max(1, $page);
+        $limit  = max(1, min($limit, 100));
+        $offset = ($page - 1) * $limit;
+
+        $countSql = "SELECT COUNT(*) AS total
+                     FROM project proj
+                     JOIN post p ON p.Post_ID = proj.Post_ID
+                     WHERE proj.Project_Status = 'completed' AND p.Provider_ID = ?";
+
+        $countStmt = $this->conn->prepare($countSql);
+        if (!$countStmt) {
+            error_log('getCompletedProjectsForProvider count: ' . $this->conn->error);
+            return ['data' => [], 'total' => 0, 'pages' => 0, 'current_page' => $page];
+        }
+        $countStmt->bind_param('i', $providerId);
+        $countStmt->execute();
+        $totalRecords = (int) ($countStmt->get_result()->fetch_assoc()['total'] ?? 0);
+        $countStmt->close();
+
+        $totalPages = $totalRecords > 0 ? (int) ceil($totalRecords / $limit) : 0;
+
+        $sql = "SELECT
+                    proj.Project_ID,
+                    proj.Project_Status,
+                    proj.Started_At,
+                    proj.Ended_At,
+                    COALESCE(proj.Progress, 0) AS Progress,
+                    p.Post_ID,
+                    p.Title,
+                    p.Description,
+                    p.Requesting_Price,
+                    p.Price_Type,
+                    p.Est_Date,
+                    p.Level,
+                    p.Post_Type,
+                    p.Client_ID,
+                    cat.Name AS Category_Name,
+                    CONCAT(cl.First_Name, ' ', cl.Last_Name) AS Client_Name,
+                    cl.Profile_Picture,
+                    (SELECT COUNT(*) FROM reviews rv WHERE rv.Project_ID = proj.Project_ID AND rv.Rated_By = 'Provider') AS provider_has_reviewed
+                FROM project proj
+                JOIN post p ON p.Post_ID = proj.Post_ID
+                LEFT JOIN category cat ON cat.Category_ID = p.Category_ID
+                LEFT JOIN client cl ON cl.Client_ID = p.Client_ID
+                WHERE proj.Project_Status = 'completed' AND p.Provider_ID = ?
+                ORDER BY proj.Ended_At DESC
+                LIMIT ? OFFSET ?";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('getCompletedProjectsForProvider prepare: ' . $this->conn->error);
+            return ['data' => [], 'total' => 0, 'pages' => 0, 'current_page' => $page];
+        }
+        $stmt->bind_param('iii', $providerId, $limit, $offset);
+        if (!$stmt->execute()) {
+            error_log('getCompletedProjectsForProvider exec: ' . $stmt->error);
+            $stmt->close();
+            return ['data' => [], 'total' => 0, 'pages' => 0, 'current_page' => $page];
+        }
+
+        $data = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+
+        return [
+            'data'         => $data,
+            'total'        => $totalRecords,
+            'pages'        => $totalPages,
+            'current_page' => $page,
+        ];
+    }
+
+    /**
+     * Client approves final submission, marks project as completed, and saves review.
+     */
+    public function completeProjectByClient(int $clientId, int $postId, int $rating, string $title, string $description, array $reviewFileNames = []): bool
+    {
+        $idStmt = $this->conn->prepare(
+            'SELECT proj.Project_ID, COALESCE(proj.Progress, 0) AS Progress
+             FROM project proj
+             JOIN post p ON p.Post_ID = proj.Post_ID
+             WHERE proj.Post_ID = ? AND proj.Project_Status = "pending-review" AND p.Client_ID = ?
+             LIMIT 1'
+        );
+        if (!$idStmt) {
+            return false;
+        }
+        $idStmt->bind_param('ii', $postId, $clientId);
+        $idStmt->execute();
+        $row = $idStmt->get_result()->fetch_assoc();
+        $idStmt->close();
+        if (!$row) {
+            return false;
+        }
+
+        $projectId = (int) $row['Project_ID'];
+        $progress  = (int) $row['Progress'];
+
+        $this->conn->begin_transaction();
+        try {
+            // Mark project completed
+            $upStmt = $this->conn->prepare('UPDATE project SET Project_Status = "completed", Ended_At = COALESCE(Ended_At, NOW()) WHERE Post_ID = ?');
+            if (!$upStmt) {
+                throw new Exception('completeProjectByClient prepare status: ' . $this->conn->error);
+            }
+            $upStmt->bind_param('i', $postId);
+            if (!$upStmt->execute()) {
+                throw new Exception('completeProjectByClient exec status: ' . $upStmt->error);
+            }
+            $upStmt->close();
+
+            // Log the status change
+            $logStmt = $this->conn->prepare(
+                'INSERT INTO project_update_log (Title, Description, Date, Project_ID, Worked_Hours, Progress_Completed, Project_Status_Update)
+                 VALUES ("Project Completed by Client", "Client approved the final submission.", NOW(), ?, 0, ?, "completed")'
+            );
+            if (!$logStmt) {
+                throw new Exception('completeProjectByClient prepare log: ' . $this->conn->error);
+            }
+            $logStmt->bind_param('ii', $projectId, $progress);
+            if (!$logStmt->execute()) {
+                throw new Exception('completeProjectByClient exec log: ' . $logStmt->error);
+            }
+            $logStmt->close();
+
+            // Get next Review_ID (table has no AUTO_INCREMENT)
+            $idRow = $this->conn->query('SELECT COALESCE(MAX(Review_ID), 0) + 1 AS next_id FROM reviews FOR UPDATE');
+            if (!$idRow) {
+                throw new Exception('completeProjectByClient next review id: ' . $this->conn->error);
+            }
+            $reviewId = (int) ($idRow->fetch_assoc()['next_id'] ?? 1);
+
+            // Insert review
+            $ratedBy  = 'Client';
+            $revStmt  = $this->conn->prepare(
+                'INSERT INTO reviews (Review_ID, Title, Description, Rating, Left_At, Project_ID, Rated_By)
+                 VALUES (?, ?, ?, ?, NOW(), ?, ?)'
+            );
+            if (!$revStmt) {
+                throw new Exception('completeProjectByClient prepare review: ' . $this->conn->error);
+            }
+            $titleVal = $title !== '' ? $title : null;
+            $descVal  = $description !== '' ? $description : null;
+            $revStmt->bind_param('ississ', $reviewId, $titleVal, $descVal, $rating, $projectId, $ratedBy);
+            if (!$revStmt->execute()) {
+                throw new Exception('completeProjectByClient exec review: ' . $revStmt->error);
+            }
+            $revStmt->close();
+
+            // Insert review files
+            if (!empty($reviewFileNames)) {
+                $rfStmt = $this->conn->prepare('INSERT INTO reviews_files (Review_ID, File) VALUES (?, ?)');
+                if (!$rfStmt) {
+                    throw new Exception('completeProjectByClient prepare review_files: ' . $this->conn->error);
+                }
+                foreach ($reviewFileNames as $fileName) {
+                    $rfStmt->bind_param('is', $reviewId, $fileName);
+                    if (!$rfStmt->execute()) {
+                        throw new Exception('completeProjectByClient exec review_files: ' . $rfStmt->error);
+                    }
+                }
+                $rfStmt->close();
+            }
+
+            $this->conn->commit();
+            return true;
+        } catch (Throwable $e) {
+            $this->conn->rollback();
+            error_log('ProjectModel::completeProjectByClient error: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+
+    /**
+     * Client requests changes and moves project back to ongoing with an optional file set.
+     */
+    public function moveProjectBackToOngoingByClient(int $clientId, int $postId, string $reason, array $fileNames = []): bool
+    {
+        $idStmt = $this->conn->prepare(
+            'SELECT proj.Project_ID, COALESCE(proj.Progress, 0) AS Progress
+             FROM project proj
+             JOIN post p ON p.Post_ID = proj.Post_ID
+             WHERE proj.Post_ID = ? AND proj.Project_Status = "pending-review" AND p.Client_ID = ?
+             LIMIT 1'
+        );
+        if (!$idStmt) {
+            return false;
+        }
+        $idStmt->bind_param('ii', $postId, $clientId);
+        $idStmt->execute();
+        $row = $idStmt->get_result()->fetch_assoc();
+        $idStmt->close();
+        if (!$row) {
+            return false;
+        }
+
+        $projectId = (int) $row['Project_ID'];
+        $progress  = (int) $row['Progress'];
+
+        $this->conn->begin_transaction();
+        try {
+            $upStmt = $this->conn->prepare('UPDATE project SET Project_Status = "ongoing", Ended_At = NULL WHERE Post_ID = ?');
+            if (!$upStmt) {
+                throw new Exception('moveProjectBackToOngoingByClient prepare status: ' . $this->conn->error);
+            }
+            $upStmt->bind_param('i', $postId);
+            if (!$upStmt->execute()) {
+                throw new Exception('moveProjectBackToOngoingByClient exec status: ' . $upStmt->error);
+            }
+            $upStmt->close();
+
+            $logStmt = $this->conn->prepare(
+                'INSERT INTO project_update_log (Title, Description, Date, Project_ID, Worked_Hours, Progress_Completed, Project_Status_Update)
+                 VALUES ("Changes Requested by Client", ?, NOW(), ?, 0, ?, "ongoing")'
+            );
+            if (!$logStmt) {
+                throw new Exception('moveProjectBackToOngoingByClient prepare log: ' . $this->conn->error);
+            }
+            $logStmt->bind_param('sii', $reason, $projectId, $progress);
+            if (!$logStmt->execute()) {
+                throw new Exception('moveProjectBackToOngoingByClient exec log: ' . $logStmt->error);
+            }
+            $logId = (int) $this->conn->insert_id;
+            $logStmt->close();
+
+            if (!empty($fileNames)) {
+                $fStmt = $this->conn->prepare('INSERT INTO project_update_log_files (Update_Log_ID, File) VALUES (?, ?)');
+                if (!$fStmt) {
+                    throw new Exception('moveProjectBackToOngoingByClient prepare file insert: ' . $this->conn->error);
+                }
+                foreach ($fileNames as $fn) {
+                    $fStmt->bind_param('is', $logId, $fn);
+                    if (!$fStmt->execute()) {
+                        throw new Exception('moveProjectBackToOngoingByClient exec file insert: ' . $fStmt->error);
+                    }
+                }
+                $fStmt->close();
+            }
+
+            $this->conn->commit();
+            return true;
+        } catch (Throwable $e) {
+            $this->conn->rollback();
+            error_log('ProjectModel::moveProjectBackToOngoingByClient error: ' . $e->getMessage());
             return false;
         }
     }

@@ -101,4 +101,23 @@ class FileController
         exit;
     }
 
+    public function showReviewFile($filename)
+    {
+        $filename = urldecode($filename);
+        $filename = basename($filename);
+
+        $path = __DIR__ . '/../../uploads/Projects/reviews/' . $filename;
+
+        if (!file_exists($path)) {
+            http_response_code(404);
+            exit('File not found');
+        }
+
+        $mime = mime_content_type($path);
+        header('Content-Type: ' . $mime);
+        header('Content-Length: ' . filesize($path));
+        readfile($path);
+        exit;
+    }
+
 }

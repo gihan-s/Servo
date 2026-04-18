@@ -120,6 +120,11 @@ switch ($url) {
         $controller->showProjectRequirementFile($matches[1]);
         break;
 
+    case (preg_match('#^file/review-files/(.+)$#', $url, $matches) ? true : false):
+        $controller = new FileController();
+        $controller->showReviewFile($matches[1]);
+        break;
+
 
     case (preg_match('#^file/category-icons/(.+)$#', $url, $matches) ? true : false):
         $controller = new FileController();
@@ -216,6 +221,21 @@ switch ($url) {
         $controller->getPosts();
         break;
 
+    case 'projects/ongoing':
+        $controller = new ProjectController();
+        $controller->getOngoingProjects();
+        break;
+
+    case 'projects/pending-review':
+        $controller = new ProjectController();
+        $controller->getPendingReviewProjects();
+        break;
+
+    case 'projects/completed':
+        $controller = new ProjectController();
+        $controller->getCompletedProjects();
+        break;
+
     case 'project/submit-requirements-update': // legacy — keep for backwards compat
     case 'project/add-requirement':
         (new ProjectController())->addRequirementAction();
@@ -285,6 +305,22 @@ switch ($url) {
         (new ProjectController())->submitForReview((int)$m[1]);
         break;
 
+    case (preg_match('#^project/complete/(\d+)$#', $url, $m) ? true : false):
+        (new ProjectController())->completeProject((int)$m[1]);
+        break;
+
+    case (preg_match('#^project/reopen/(\d+)$#', $url, $m) ? true : false):
+        (new ProjectController())->reopenProject((int)$m[1]);
+        break;
+
+    case (preg_match('#^project/reviews/(\d+)$#', $url, $m) ? true : false):
+        (new ProjectController())->getProjectReviews((int)$m[1]);
+        break;
+
+    case (preg_match('#^project/provider-review/(\d+)$#', $url, $m) ? true : false):
+        (new ProjectController())->submitProviderReview((int)$m[1]);
+        break;
+
     case (preg_match('#^requests/update/(\d+)$#', $url, $m) ? true : false):
         (new PostController())->updatePost((int)$m[1]);
         break;
@@ -341,6 +377,11 @@ switch ($url) {
         $controller->getOngoingProjects();
         break;
 
+    case 'provider/pending-review-projects':
+        $controller = new ProviderController();
+        $controller->getPendingReviewProjects();
+        break;
+
     case 'provider/reject-request':
         $controller = new ProviderController();
         $controller->rejectRequest();
@@ -349,6 +390,16 @@ switch ($url) {
     case 'provider/accept-request':
         $controller = new ProviderController();
         $controller->acceptRequest();
+        break;
+
+    case 'provider/accepted-requests':
+        $controller = new ProviderController();
+        $controller->getAcceptedRequests();
+        break;
+
+    case 'provider/completed-projects':
+        $controller = new ProviderController();
+        $controller->getCompletedProjects();
         break;
 
     case 'earnings':

@@ -63,7 +63,12 @@ class IncomingRequestsManager {
         }
 
         if (requests.length === 0) {
-            container.innerHTML = '<p class="no-results">No incoming requests at the moment.</p>';
+            container.innerHTML = `
+                <section class="empty-state">
+                    <i class="fas fa-inbox"></i>
+                    <h2>No incoming requests right now</h2>
+                    <p>New service requests from clients will appear here.</p>
+                </section>`;
             return;
         }
 
@@ -243,12 +248,16 @@ class IncomingRequestsManager {
      * @param {number} page - Page number to load
      */
     async loadRequests(page = 1) {
+        this.showLoading();
         const data = await this.fetchRequests(page);
 
         if (!data) {
             this.showError('Failed to load requests. Please try again.');
             return;
         }
+
+        // Small delay so the spinner is visible (matches client side feel)
+        await new Promise(r => setTimeout(r, 300));
 
         this.currentPage = data.pagination.current_page;
         this.totalPages = data.pagination.total_pages;
@@ -604,10 +613,25 @@ class IncomingRequestsManager {
      * Show error message to user
      * @param {string} message - Error message
      */
+    showLoading() {
+        const container = document.querySelector(this.itemListSelector);
+        if (!container) return;
+        container.innerHTML = `
+            <div class="loading-state">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading requests...</p>
+            </div>`;
+    }
+
     showError(message) {
         const container = document.querySelector(this.itemListSelector);
         if (container) {
-            container.innerHTML = `<p class="error-message">${this.escapeHtml(message)}</p>`;
+            container.innerHTML = `
+                <div class="error-state">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <p>${this.escapeHtml(message)}</p>
+                    <button class="retry-btn" onclick="window.requestsManager && window.requestsManager.loadRequests(1)">Retry</button>
+                </div>`;
         }
     }
 

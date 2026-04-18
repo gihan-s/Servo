@@ -439,6 +439,139 @@ class ProviderController extends BaseController
         }
     }
 
+    // GET /provider/pending-review-projects - Fetch pending-review projects for the provider
+    public function getPendingReviewProjects()
+    {
+        header('Content-Type: application/json');
+
+        try {
+            $this->ensureAuth();
+
+            require_once __DIR__ . '/../models/ProjectModel.php';
+
+            $providerId = (int) $_SESSION['user_id'];
+            $page  = max(1, (int) ($_GET['page']  ?? 1));
+            $limit = max(1, min((int) ($_GET['limit'] ?? 10), 100));
+
+            $projectModel = new ProjectModel();
+            $result = $projectModel->getPendingReviewProjectsForProvider($providerId, $page, $limit);
+
+            $formattedData = [];
+            foreach ($result['data'] as $row) {
+                $priceType     = trim($row['Price_Type']) ?: 'Fixed';
+                $budgetDisplay = 'Rs. ' . number_format((float) $row['Requesting_Price'], 2) . ' (' . $priceType . ')';
+
+                $formattedData[] = [
+                    'Project_ID'     => (int) $row['Project_ID'],
+                    'Post_ID'        => (int) $row['Post_ID'],
+                    'Client_ID'      => (int) $row['Client_ID'],
+                    'title'          => $row['Title'],
+                    'description'    => mb_substr($row['Description'], 0, 150) . (mb_strlen($row['Description']) > 150 ? '...' : ''),
+                    'full_description' => $row['Description'],
+                    'budget'         => $row['Requesting_Price'],
+                    'price_type'     => $priceType,
+                    'budget_display' => $budgetDisplay,
+                    'timeline'       => $row['Est_Date'] ?? '—',
+                    'level'          => $row['Level'] ?? '—',
+                    'category'       => $row['Category_Name'] ?? '—',
+                    'post_type'      => ucfirst(strtolower($row['Post_Type'] ?? 'direct')),
+                    'client_name'    => $row['Client_Name'] ?? 'Unknown',
+                    'client_avatar'  => !empty($row['Profile_Picture'])
+                        ? BASE_URL . $row['Profile_Picture']
+                        : BASE_URL . '/assets/img/default-avatar.jpg',
+                    'started_date'   => $row['Started_At']  ? date('M d, Y', strtotime($row['Started_At']))  : '—',
+                    'submitted_date' => $row['Ended_At']    ? date('M d, Y', strtotime($row['Ended_At']))    : '—',
+                    'progress'       => (int) $row['Progress'],
+                ];
+            }
+
+            echo json_encode([
+                'success'    => true,
+                'data'       => $formattedData,
+                'pagination' => [
+                    'current_page'  => $result['current_page'],
+                    'total_pages'   => $result['pages'],
+                    'total_records' => $result['total'],
+                    'limit'         => $limit,
+                ],
+            ]);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    // GET /provider/completed-projects
+    public function getCompletedProjects()
+    {
+        header('Content-Type: application/json');
+
+        try {
+            $this->ensureAuth();
+
+            require_once __DIR__ . '/../models/ProjectModel.php';
+
+            $providerId = (int) $_SESSION['user_id'];
+            $page  = max(1, (int) ($_GET['page']  ?? 1));
+            $limit = max(1, min((int) ($_GET['limit'] ?? 10), 100));
+
+            $projectModel = new ProjectModel();
+            $result = $projectModel->getCompletedProjectsForProvider($providerId, $page, $limit);
+
+            $formattedData = [];
+            foreach ($result['data'] as $row) {
+                $priceType     = trim($row['Price_Type']) ?: 'Fixed';
+                $budgetDisplay = 'Rs. ' . number_format((float) $row['Requesting_Price'], 2) . ' (' . $priceType . ')';
+                $providerReviewed = ((int) ($row['provider_has_reviewed'] ?? 0)) > 0;
+
+                // If provider has reviewed, fetch both reviews
+                $reviews = [];
+                if ($providerReviewed) {
+                    $reviews = $projectModel->getReviewsByProjectId((int) $row['Project_ID']);
+                }
+
+                $formattedData[] = [
+                    'Project_ID'        => (int) $row['Project_ID'],
+                    'Post_ID'           => (int) $row['Post_ID'],
+                    'Client_ID'         => (int) $row['Client_ID'],
+                    'title'             => $row['Title'],
+                    'description'       => mb_substr($row['Description'], 0, 150) . (mb_strlen($row['Description']) > 150 ? '...' : ''),
+                    'full_description'  => $row['Description'],
+                    'budget'            => $row['Requesting_Price'],
+                    'price_type'        => $priceType,
+                    'budget_display'    => $budgetDisplay,
+                    'timeline'          => $row['Est_Date'] ?? '—',
+                    'level'             => $row['Level'] ?? '—',
+                    'category'          => $row['Category_Name'] ?? '—',
+                    'post_type'         => ucfirst(strtolower($row['Post_Type'] ?? 'direct')),
+                    'client_name'       => $row['Client_Name'] ?? 'Unknown',
+                    'client_avatar'     => !empty($row['Profile_Picture'])
+                        ? BASE_URL . $row['Profile_Picture']
+                        : BASE_URL . '/assets/img/default-avatar.jpg',
+                    'started_date'      => $row['Started_At']  ? date('M d, Y', strtotime($row['Started_At']))  : '—',
+                    'completed_date'    => $row['Ended_At']    ? date('M d, Y', strtotime($row['Ended_At']))    : '—',
+                    'progress'          => (int) $row['Progress'],
+                    'provider_reviewed' => $providerReviewed,
+                    'reviews'           => $reviews,
+                ];
+            }
+
+            echo json_encode([
+                'success'    => true,
+                'data'       => $formattedData,
+                'pagination' => [
+                    'current_page'  => $result['current_page'],
+                    'total_pages'   => $result['pages'],
+                    'total_records' => $result['total'],
+                    'limit'         => $limit,
+                ],
+            ]);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
     // POST /provider/accept-request - Accept an incoming request
     public function acceptRequest()
     {
@@ -478,6 +611,66 @@ class ProviderController extends BaseController
                 'success' => false,
                 'message' => $e->getMessage()
             ]);
+        }
+    }
+
+    // GET /provider/accepted-requests - Fetch accepted requests waiting for client payment
+    public function getAcceptedRequests()
+    {
+        header('Content-Type: application/json');
+
+        try {
+            $this->ensureAuth();
+
+            require_once __DIR__ . '/../models/PostModel.php';
+
+            $providerId = (int) $_SESSION['user_id'];
+            $page  = isset($_GET['page'])  ? max(1, (int) $_GET['page'])  : 1;
+            $limit = isset($_GET['limit']) ? max(1, min((int) $_GET['limit'], 100)) : 10;
+
+            $postModel = new PostModel();
+            $result = $postModel->getAcceptedRequestsForProvider($providerId, $page, $limit);
+
+            $formattedData = [];
+            foreach ($result['data'] as $request) {
+                $priceType     = trim($request['Price_Type']) ?: 'Fixed';
+                $budgetDisplay = 'Rs. ' . number_format((float) $request['Requesting_Price'], 2) . ' (' . $priceType . ')';
+
+                $formattedData[] = [
+                    'Post_ID'            => (int) $request['Post_ID'],
+                    'Client_ID'          => (int) $request['Client_ID'],
+                    'title'              => $request['Title'],
+                    'description'        => substr($request['Description'], 0, 150) . (strlen($request['Description']) > 150 ? '...' : ''),
+                    'full_description'   => $request['Description'],
+                    'budget'             => $request['Requesting_Price'],
+                    'price_type'         => $priceType,
+                    'budget_display'     => $budgetDisplay,
+                    'timeline'           => $request['Est_Date'],
+                    'level'              => $request['Level'],
+                    'category'           => $request['Category_Name'],
+                    'client_name'        => $request['Client_Name'],
+                    'request_type'       => ucfirst(strtolower($request['Post_Type'] ?? 'direct')),
+                    'client_avatar'      => !empty($request['Profile_Picture'])
+                        ? BASE_URL . $request['Profile_Picture']
+                        : BASE_URL . '/assets/img/default-avatar.jpg',
+                    'posted_date'        => date('M d, Y', strtotime($request['Created_At'])),
+                    'posted_date_relative' => $this->getTimeAgo($request['Created_At']),
+                ];
+            }
+
+            echo json_encode([
+                'success'    => true,
+                'data'       => $formattedData,
+                'pagination' => [
+                    'current_page'  => $result['current_page'],
+                    'total_pages'   => $result['pages'],
+                    'total_records' => $result['total'],
+                    'limit'         => $limit,
+                ],
+            ]);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         }
     }
 }
