@@ -266,6 +266,7 @@
                         <label for="proposalFiles">Attach Files (optional)</label>
                         <input type="file" id="proposalFiles" multiple>
                     </div>
+                    <?php endforeach; ?>
                 </div>
                 <div class="modal-actions">
                     <button class="btn-primary" id="btnSendProposal"><i class="fa-solid fa-paper-plane"></i> Send Proposal</button>

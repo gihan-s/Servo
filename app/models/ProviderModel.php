@@ -337,30 +337,27 @@ class ProviderModel extends Database
     }
 
 
-    public function getActiveProvidersForSearch($limit, $offset)
+    public function getActiveProvidersForSearch($limit, $offset, string $search = '', string $sort = '')
     {
-        $providers = $this->fetchProvidersForSearchByStatus('active', $limit, $offset);
+        $providers = $this->fetchProvidersForSearchByStatus('active', $limit, $offset, $search, $sort);
         if (!empty($providers)) {
             return $providers;
         }
 
-        return $this->fetchProvidersForSearchByStatus('fallback', $limit, $offset);
+        return $this->fetchProvidersForSearchByStatus('fallback', $limit, $offset, $search, $sort);
     }
 
 
-    public function getActiveProviderCount()
+    public function getActiveProviderCount(string $search = '')
     {
-        $result = $this->conn->query("SELECT COUNT(*) AS total FROM provider WHERE Status = 'active'");
-        $row = $result ? $result->fetch_assoc() : ['total' => 0];
-        $activeCount = (int)($row['total'] ?? 0);
+        $search = trim($search);
+        $activeCount = $this->getProviderCountByStatus('active', $search);
 
         if ($activeCount > 0) {
             return $activeCount;
         }
 
-        $fallbackResult = $this->conn->query("SELECT COUNT(*) AS total FROM provider WHERE Status <> 'Deleted'");
-        $fallbackRow = $fallbackResult ? $fallbackResult->fetch_assoc() : ['total' => 0];
-        return (int)($fallbackRow['total'] ?? 0);
+        return $this->getProviderCountByStatus('fallback', $search);
     }
 
 
@@ -392,9 +389,24 @@ class ProviderModel extends Database
     }
 
 
-    private function fetchProvidersForSearchByStatus($statusMode, $limit, $offset)
+    private function fetchProvidersForSearchByStatus($statusMode, $limit, $offset, string $search = '', string $sort = '')
     {
         $whereClause = $statusMode === 'active' ? "WHERE p.Status = 'active'" : "WHERE p.Status <> 'Deleted'";
+        $params = [];
+        $types = 'ii';
+
+        $search = trim($search);
+        if ($search !== '') {
+            $whereClause .= " AND (p.First_Name LIKE ? OR p.Last_Name LIKE ? OR CONCAT(p.First_Name, ' ', p.Last_Name) LIKE ? OR p.Email LIKE ?)";
+            $like = '%' . $search . '%';
+            $params[] = $like;
+            $params[] = $like;
+            $params[] = $like;
+            $params[] = $like;
+            $types = 'ssss' . $types;
+        }
+
+        $orderByClause = $this->getProviderSortClause($sort);
 
         $stmt = $this->conn->prepare(
             "SELECT p.*, 
@@ -405,7 +417,7 @@ class ProviderModel extends Database
              $whereClause
              AND pc.Status = 'Active'
              GROUP BY p.Provider_ID
-             ORDER BY p.Provider_ID DESC
+             ORDER BY $orderByClause
              LIMIT ? OFFSET ?"
         );
 
@@ -413,13 +425,81 @@ class ProviderModel extends Database
             return [];
         }
 
-        $stmt->bind_param("ii", $limit, $offset);
+        $params[] = $limit;
+        $params[] = $offset;
+        $this->bindDynamicParams($stmt, $types, $params);
         $stmt->execute();
         $result = $stmt->get_result();
         $providers = $result->fetch_all(MYSQLI_ASSOC);
         $stmt->close();
 
         return $providers;
+    }
+
+    private function getProviderCountByStatus(string $statusMode, string $search = ''): int
+    {
+        $whereClause = $statusMode === 'active' ? "WHERE p.Status = 'active'" : "WHERE p.Status <> 'Deleted'";
+        $params = [];
+        $types = '';
+
+        if ($search !== '') {
+            $whereClause .= " AND (p.First_Name LIKE ? OR p.Last_Name LIKE ? OR CONCAT(p.First_Name, ' ', p.Last_Name) LIKE ? OR p.Email LIKE ?)";
+            $like = '%' . $search . '%';
+            $params = [$like, $like, $like, $like];
+            $types = 'ssss';
+        }
+
+        $stmt = $this->conn->prepare(
+            "SELECT COUNT(*) AS total
+             FROM provider p
+             $whereClause"
+        );
+
+        if (!$stmt) {
+            return 0;
+        }
+
+        if (!empty($params)) {
+            $this->bindDynamicParams($stmt, $types, $params);
+        }
+
+        if (!$stmt->execute()) {
+            $stmt->close();
+            return 0;
+        }
+
+        $row = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+
+        return (int)($row['total'] ?? 0);
+    }
+
+    private function getProviderSortClause(string $sort): string
+    {
+        $map = [
+            'name_asc' => 'p.First_Name ASC, p.Last_Name ASC',
+            'name_desc' => 'p.First_Name DESC, p.Last_Name DESC',
+            'rating_asc' => 'p.Rating ASC, p.Provider_ID DESC',
+            'rating_desc' => 'p.Rating DESC, p.Provider_ID DESC',
+            'earnings_asc' => 'p.Total_Earning ASC, p.Provider_ID DESC',
+            'earnings_desc' => 'p.Total_Earning DESC, p.Provider_ID DESC',
+        ];
+
+        return $map[$sort] ?? 'p.Provider_ID DESC';
+    }
+
+    private function bindDynamicParams(mysqli_stmt $stmt, string $types, array $params): void
+    {
+        if ($types === '' || empty($params)) {
+            return;
+        }
+
+        $bindArgs = [$types];
+        foreach ($params as $key => $value) {
+            $bindArgs[] = &$params[$key];
+        }
+
+        call_user_func_array([$stmt, 'bind_param'], $bindArgs);
     }
 
     public function getUserCount()

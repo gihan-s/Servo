@@ -62,6 +62,7 @@ class PostModel extends Database
     public function getPosts($clientId, $status = null, $sort = 'date_desc', $search = '')
     {
         error_log("PostModel::getPosts - Client: $clientId, Status: $status, Sort: $sort, Search: '$search'");
+        $viewSortDirection = null;
         
         $query = "SELECT p.*
               FROM post p
@@ -120,10 +121,12 @@ class PostModel extends Database
                     $orderBy = 'p.Requesting_Price DESC';
                 break;
             case 'views_asc':
-                    $orderBy = 'p.Views ASC';
+                    $orderBy = 'p.Created_At DESC';
+                    $viewSortDirection = 'asc';
                 break;
             case 'views_desc':
-                    $orderBy = 'p.Views DESC';
+                    $orderBy = 'p.Created_At DESC';
+                    $viewSortDirection = 'desc';
                 break;
         }
         
@@ -145,6 +148,23 @@ class PostModel extends Database
         foreach ($posts as &$post) {
             $postId = (int) ($post['Post_ID'] ?? 0);
             $post['Proposal_Count'] = $bidCounts[$postId] ?? 0;
+        }
+
+        if ($viewSortDirection !== null) {
+            usort($posts, static function ($a, $b) use ($viewSortDirection) {
+                $aViews = (int) ($a['Views'] ?? ($a['View_Count'] ?? 0));
+                $bViews = (int) ($b['Views'] ?? ($b['View_Count'] ?? 0));
+
+                if ($aViews === $bViews) {
+                    $aCreated = strtotime((string) ($a['Created_At'] ?? '')) ?: 0;
+                    $bCreated = strtotime((string) ($b['Created_At'] ?? '')) ?: 0;
+                    return $bCreated <=> $aCreated;
+                }
+
+                return $viewSortDirection === 'asc'
+                    ? ($aViews <=> $bViews)
+                    : ($bViews <=> $aViews);
+            });
         }
 
         return $posts;
@@ -495,29 +515,6 @@ class PostModel extends Database
             return ['success' => false, 'message' => 'Missing required request data'];
         }
 
-        $checkStmt = $this->conn->prepare(
-            "SELECT Post_ID
-             FROM post
-             WHERE Client_ID = ?
-               AND Provider_Categories_ID = ?
-               AND Post_Type = 'direct'
-               AND Request_Status = 'ongoing'
-             LIMIT 1"
-        );
-
-        if (!$checkStmt) {
-            return ['success' => false, 'message' => 'Failed to prepare duplicate check'];
-        }
-
-        $checkStmt->bind_param('ii', $clientId, $providerCategoryId);
-        $checkStmt->execute();
-        $existing = $checkStmt->get_result()->fetch_assoc();
-        $checkStmt->close();
-
-        if ($existing) {
-            return ['success' => false, 'message' => 'You already have an ongoing request for this service'];
-        }
-
         $serviceStmt = $this->conn->prepare(
             "SELECT pc.Provider_ID, pc.Category_ID
              FROM provider_categories pc
@@ -558,7 +555,7 @@ class PostModel extends Database
                     End_At,
                     Published_At,
                     Request_Status
-                ) VALUES (NOW(), ?, 'direct', 'active', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), 'ongoing')";
+                ) VALUES (NOW(), ?, 'direct', 'active', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), 'pending')";
 
         $stmt = $this->conn->prepare($sql);
         if (!$stmt) {
@@ -593,7 +590,7 @@ class PostModel extends Database
             'success' => true,
             'message' => 'Service request sent successfully',
             'post_id' => $newPostId,
-            'request_status' => 'ongoing'
+            'request_status' => 'pending'
         ];
     }
 

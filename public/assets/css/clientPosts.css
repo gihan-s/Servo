@@ -615,6 +615,23 @@
   justify-content: center;
   flex: 0 0 38px;
 }
+.post-view .provider-avatar-img {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  flex: 0 0 38px;
+  border: 2px solid #e5e7eb;
+  background: #f8fafc;
+}
+
+/* Keep initials avatar and image avatar visually consistent */
+.post-view .provider-avatar,
+.post-view .provider-avatar-img {
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.12);
+}
 
 .post-view .provider-meta {
   min-width: 0;
@@ -894,6 +911,46 @@
   margin: 0 auto;
 }
 
+.empty-state.search-no-results {
+  border: 1px dashed #cbd5e1;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  padding: 52px 20px;
+  color: #475569;
+}
+
+.empty-state.search-no-results i {
+  font-size: 44px;
+  color: #008500;
+  opacity: 0.85;
+  margin-bottom: 14px;
+}
+
+.empty-state.search-no-results h3 {
+  margin: 0 0 8px;
+  color: #0f172a;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.empty-state.search-no-results p {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+  max-width: none;
+}
+
+.search-term-hint {
+  margin-top: 12px;
+  font-size: 13px;
+  color: #64748b;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  display: inline-block;
+  padding: 6px 12px;
+}
+
 /* No Skills Indicator */
 .no-skills {
   color: var(--textColorGray, #9ca3af);
@@ -940,5 +997,9 @@
   
   .empty-state p {
     font-size: 14px;
+  }
+
+  .empty-state.search-no-results h3 {
+    font-size: 18px;
   }
 }
