@@ -110,6 +110,17 @@ switch ($url) {
         $controller->showUserImage($matches[1]);
         break;
 
+    case (preg_match('#^file/project-updates/(.+)$#', $url, $matches) ? true : false):
+        $controller = new FileController();
+        $controller->showProjectUpdateFile($matches[1]);
+        break;
+
+    case (preg_match('#^file/project-requirements/(.+)$#', $url, $matches) ? true : false):
+        $controller = new FileController();
+        $controller->showProjectRequirementFile($matches[1]);
+        break;
+
+
     case (preg_match('#^file/category-icons/(.+)$#', $url, $matches) ? true : false):
         $controller = new FileController();
         $controller->getCategoryIcons($matches[1]);
@@ -200,6 +211,20 @@ switch ($url) {
         $controller->index();
         break;
 
+    case 'projects/list':
+        $controller = new ProjectController();
+        $controller->getPosts();
+        break;
+
+    case 'project/submit-requirements-update': // legacy — keep for backwards compat
+    case 'project/add-requirement':
+        (new ProjectController())->addRequirementAction();
+        break;
+
+    case 'project/update-requirement-status':
+        (new ProjectController())->updateRequirementStatusAction();
+        break;
+
     case 'requests':
         $controller = new PostController();
         $controller->index();
@@ -229,8 +254,35 @@ switch ($url) {
         (new PostController())->viewPost((int)$m[1]);
         break;
 
+    case (preg_match('#^/?project/getrequirements/(\d+)$#', $url, $m) ? true : false):
+        (new ProjectController())->getRequirementsByPost((int)$m[1]);
+        break;
+
+    case (preg_match('#^/?project/details/(\d+)$#', $url, $m) ? true : false):
+        (new ProjectController())->getProjectDetails((int)$m[1]);
+        break;
+
     case (preg_match('#^requests/delete/(\d+)$#', $url, $m) ? true : false):
         (new PostController())->deletePost((int)$m[1]);
+        break;
+
+    case (preg_match('#^requests/cancel/(\d+)$#', $url, $m) ? true : false):
+        (new ProjectController())->cancelRequest((int)$m[1]);
+        break;
+    case (preg_match('#^requests/payment/(\d+)$#', $url, $m) ? true : false):
+        (new ProjectController())->initiatePayment((int)$m[1]);
+        break;
+
+    case (preg_match('#^project/cancel/(\d+)$#', $url, $m) ? true : false):
+        (new ProjectController())->cancelProject((int)$m[1]);
+        break;
+
+    case (preg_match('#^project/update-progress/(\d+)$#', $url, $m) ? true : false):
+        (new ProjectController())->updateProgress((int)$m[1]);
+        break;
+
+    case (preg_match('#^project/submit-review/(\d+)$#', $url, $m) ? true : false):
+        (new ProjectController())->submitForReview((int)$m[1]);
         break;
 
     case (preg_match('#^requests/update/(\d+)$#', $url, $m) ? true : false):
@@ -277,6 +329,26 @@ switch ($url) {
     case 'providers/services':
         $controller = new ProviderController();
         $controller->getServices();
+        break;
+
+    case 'provider/incoming-requests':
+        $controller = new ProviderController();
+        $controller->getIncomingRequests();
+        break;
+
+    case 'provider/ongoing-projects':
+        $controller = new ProviderController();
+        $controller->getOngoingProjects();
+        break;
+
+    case 'provider/reject-request':
+        $controller = new ProviderController();
+        $controller->rejectRequest();
+        break;
+
+    case 'provider/accept-request':
+        $controller = new ProviderController();
+        $controller->acceptRequest();
         break;
 
     case 'earnings':
@@ -357,6 +429,13 @@ switch ($url) {
     case 'test/inputs':
         include '../inputs.html';
         break;
+
+    case (preg_match('#^payment-gateway/(.+)$#', $url, $matches) ? true : false):
+        $file = '../payment-gateway/' . $matches[1] . '.php';
+        if (file_exists($file)) {
+            include $file;
+            break;
+        }
 
     default:
         $controller = new NotFoundController();

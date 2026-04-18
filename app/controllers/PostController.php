@@ -122,6 +122,7 @@ class PostController extends BaseController
 
             $viewFile = __DIR__ . '/../views/client/Posts/index.php';
         } elseif ($role === 'Provider') {
+            
             $viewFile = __DIR__ . '/../views/provider/Posts/index.php';
         } else {
             http_response_code(403);
@@ -286,6 +287,8 @@ class PostController extends BaseController
             'Views' => $post['Views'] ?? ($post['View_Count'] ?? null),
             'Category_Name' => $post['CategoryName'] ?? '',
             'Category_ID' => $post['Category_ID'] ?? null,
+            'Provider_Name' => $post['Provider_Name'] ?? null,
+            'Request_Status' => $post['Request_Status'] ?? null,
             'skills' => array_column($skills, 'Skill'),
             'bids' => $bids,
         ];
