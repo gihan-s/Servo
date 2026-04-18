@@ -157,7 +157,7 @@ class PostModel extends Database
         $query = "SELECT p.*, CONCAT(pr.First_Name, ' ', pr.Last_Name) AS Provider_Name,
                          pr.Profile_Picture AS Provider_Picture, pr.Rating AS Provider_Rating,
                          COALESCE(proj.Progress, 0) AS Progress, proj.Started_At, proj.Ended_At,
-                         cat.Name AS Category_Name
+                         cat.Name AS Category_Name, proj.Project_ID
                   FROM Post p
                   LEFT JOIN Provider pr ON p.Provider_ID = pr.Provider_ID
                   LEFT JOIN project proj ON p.Post_ID = proj.Post_ID
@@ -816,22 +816,30 @@ class PostModel extends Database
      * @param string $reason Rejection reason
      * @return bool Success status
      */
-    public function rejectRequest(int $postId, string $reason = ''): bool
+    public function changePostRequestStatus(int $postId, string $status, string $reason = ''): bool
     {
+
+        $RejectReasonChange = ($status === 'rejected') ? ", Request_Reject_Reason = ?" : "";
+
         $sql = "UPDATE post 
-                SET Request_Status = 'rejected', Request_Reject_Reason = ? 
+                SET Request_Status = ? 
+                $RejectReasonChange
                 WHERE Post_ID = ?";
 
         $stmt = $this->conn->prepare($sql);
         if (!$stmt) {
-            error_log('rejectRequest prepare: ' . $this->conn->error);
+            error_log('changePostRequestStatus prepare: ' . $this->conn->error);
             return false;
         }
 
-        $stmt->bind_param('si', $reason, $postId);
+        if ($status === 'rejected') {
+            $stmt->bind_param('ssi', $status, $reason, $postId);
+        } else {
+            $stmt->bind_param('si', $status, $postId);
+        }
 
         if (!$stmt->execute()) {
-            error_log('rejectRequest exec: ' . $stmt->error);
+            error_log('changePostRequestStatus exec: ' . $stmt->error);
             $stmt->close();
             return false;
         }
@@ -842,35 +850,5 @@ class PostModel extends Database
         return $affected > 0;
     }
 
-    /**
-     * Accept an incoming request
-     * 
-     * @param int $postId Post ID
-     * @return bool Success status
-     */
-    public function acceptRequest(int $postId): bool
-    {
-        $sql = "UPDATE post 
-                SET Request_Status = 'accepted' 
-                WHERE Post_ID = ?";
-
-        $stmt = $this->conn->prepare($sql);
-        if (!$stmt) {
-            error_log('acceptRequest prepare: ' . $this->conn->error);
-            return false;
-        }
-
-        $stmt->bind_param('i', $postId);
-
-        if (!$stmt->execute()) {
-            error_log('acceptRequest exec: ' . $stmt->error);
-            $stmt->close();
-            return false;
-        }
-
-        $affected = $stmt->affected_rows;
-        $stmt->close();
-
-        return $affected > 0;
-    }
+    
 }

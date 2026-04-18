@@ -303,7 +303,7 @@ class ProviderController extends BaseController
             require_once __DIR__ . '/../models/PostModel.php';
 
             $postModel = new PostModel();
-            $success = $postModel->rejectRequest($postId, $reason);
+            $success = $postModel->changePostRequestStatus($postId, 'rejected', $reason);
 
             if ($success) {
                 echo json_encode([
@@ -326,6 +326,67 @@ class ProviderController extends BaseController
         }
     }
 
+    // GET /provider/ongoing-projects - Fetch ongoing projects for the provider
+    public function getOngoingProjects()
+    {
+        header('Content-Type: application/json');
+
+        try {
+            $this->ensureAuth();
+
+            require_once __DIR__ . '/../models/ProjectModel.php';
+
+            $providerId = (int) $_SESSION['user_id'];
+            $page  = max(1, (int) ($_GET['page']  ?? 1));
+            $limit = max(1, min((int) ($_GET['limit'] ?? 10), 100));
+
+            $projectModel = new ProjectModel();
+            $result = $projectModel->getOngoingProjectsForProvider($providerId, $page, $limit);
+
+            $formattedData = [];
+            foreach ($result['data'] as $row) {
+                $priceType     = trim($row['Price_Type']) ?: 'Fixed';
+                $budgetDisplay = 'Rs. ' . number_format((float) $row['Requesting_Price'], 2) . ' (' . $priceType . ')';
+
+                $formattedData[] = [
+                    'Project_ID'       => (int) $row['Project_ID'],
+                    'Post_ID'          => (int) $row['Post_ID'],
+                    'Client_ID'        => (int) $row['Client_ID'],
+                    'title'            => $row['Title'],
+                    'description'      => mb_substr($row['Description'], 0, 150) . (mb_strlen($row['Description']) > 150 ? '...' : ''),
+                    'full_description' => $row['Description'],
+                    'budget'           => $row['Requesting_Price'],
+                    'price_type'       => $priceType,
+                    'budget_display'   => $budgetDisplay,
+                    'timeline'         => $row['Est_Date'] ?? '—',
+                    'level'            => $row['Level'] ?? '—',
+                    'category'         => $row['Category_Name'] ?? '—',
+                    'post_type'        => ucfirst(strtolower($row['Post_Type'] ?? 'direct')),
+                    'client_name'      => $row['Client_Name'] ?? 'Unknown',
+                    'client_avatar'    => !empty($row['Profile_Picture'])
+                        ? BASE_URL . $row['Profile_Picture']
+                        : BASE_URL . '/assets/img/default-avatar.jpg',
+                    'started_date'     => $row['Started_At'] ? date('M d, Y', strtotime($row['Started_At'])) : '—',
+                    'progress'         => (int) $row['Progress'],
+                ];
+            }
+
+            echo json_encode([
+                'success'    => true,
+                'data'       => $formattedData,
+                'pagination' => [
+                    'current_page'  => $result['current_page'],
+                    'total_pages'   => $result['pages'],
+                    'total_records' => $result['total'],
+                    'limit'         => $limit,
+                ],
+            ]);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
     // POST /provider/accept-request - Accept an incoming request
     public function acceptRequest()
     {
@@ -345,7 +406,7 @@ class ProviderController extends BaseController
             require_once __DIR__ . '/../models/PostModel.php';
 
             $postModel = new PostModel();
-            $success = $postModel->acceptRequest($postId);
+            $success = $postModel->changePostRequestStatus($postId, 'accepted');
 
             if ($success) {
                 echo json_encode([

@@ -279,6 +279,8 @@ class IncomingRequestsManager {
                 const postId = parseInt(btn.getAttribute('data-post-id'), 10);
                 const request = requests.find(r => r.Post_ID === postId);
                 if (request) {
+                    console.log("Openning View Dialog");
+                    
                     this.openRequestModal(request);
                 }
             });
@@ -316,6 +318,7 @@ class IncomingRequestsManager {
      */
     openRequestModal(request) {
         const modal = document.getElementById('requestModalRoot');
+        console.log("Modal element:", modal);
         if (!modal) return;
 
         // Store current request for button actions

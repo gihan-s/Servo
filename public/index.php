@@ -108,6 +108,17 @@ switch ($url) {
         $controller->showUserImage($matches[1]);
         break;
 
+    case (preg_match('#^file/project-updates/(.+)$#', $url, $matches) ? true : false):
+        $controller = new FileController();
+        $controller->showProjectUpdateFile($matches[1]);
+        break;
+
+    case (preg_match('#^file/project-requirements/(.+)$#', $url, $matches) ? true : false):
+        $controller = new FileController();
+        $controller->showProjectRequirementFile($matches[1]);
+        break;
+
+
     case (preg_match('#^file/category-icons/(.+)$#', $url, $matches) ? true : false):
         $controller = new FileController();
         $controller->getCategoryIcons($matches[1]);
@@ -203,8 +214,13 @@ switch ($url) {
         $controller->getPosts();
         break;
 
-    case 'project/submit-requirements-update':
-        (new ProjectController())->submitRequirementsUpdate();
+    case 'project/submit-requirements-update': // legacy — keep for backwards compat
+    case 'project/add-requirement':
+        (new ProjectController())->addRequirementAction();
+        break;
+
+    case 'project/update-requirement-status':
+        (new ProjectController())->updateRequirementStatusAction();
         break;
 
     case 'requests':
@@ -240,6 +256,10 @@ switch ($url) {
         (new ProjectController())->getRequirementsByPost((int)$m[1]);
         break;
 
+    case (preg_match('#^/?project/details/(\d+)$#', $url, $m) ? true : false):
+        (new ProjectController())->getProjectDetails((int)$m[1]);
+        break;
+
     case (preg_match('#^requests/delete/(\d+)$#', $url, $m) ? true : false):
         (new PostController())->deletePost((int)$m[1]);
         break;
@@ -257,6 +277,10 @@ switch ($url) {
 
     case (preg_match('#^project/update-progress/(\d+)$#', $url, $m) ? true : false):
         (new ProjectController())->updateProgress((int)$m[1]);
+        break;
+
+    case (preg_match('#^project/submit-review/(\d+)$#', $url, $m) ? true : false):
+        (new ProjectController())->submitForReview((int)$m[1]);
         break;
 
     case (preg_match('#^requests/update/(\d+)$#', $url, $m) ? true : false):
@@ -308,6 +332,11 @@ switch ($url) {
     case 'provider/incoming-requests':
         $controller = new ProviderController();
         $controller->getIncomingRequests();
+        break;
+
+    case 'provider/ongoing-projects':
+        $controller = new ProviderController();
+        $controller->getOngoingProjects();
         break;
 
     case 'provider/reject-request':

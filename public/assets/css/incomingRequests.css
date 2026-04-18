@@ -237,3 +237,83 @@
         align-items: flex-start;
     }
 }
+
+/* ---------------------------------------- */
+/*  Ongoing Projects – Progress Bar          */
+/* ---------------------------------------- */
+
+.ongoing-progress-wrap {
+    margin: 14px 0 14px;
+}
+
+.ongoing-progress-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    color: #374151;
+    margin-bottom: 6px;
+}
+
+.ongoing-progress-pct {
+    font-size: 13px;
+}
+
+.ongoing-progress-track {
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.ongoing-progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.4s ease;
+}
+
+/* Status chip variants */
+.status-chip.status-progress {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border-color: #bfdbfe;
+}
+
+/* Empty / error state */
+.no-results-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 56px 24px;
+    text-align: center;
+    gap: 12px;
+}
+
+.no-results-icon {
+    font-size: 40px;
+    color: #d1d5db;
+}
+
+.no-results-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #374151;
+    margin: 0;
+}
+
+.no-results-sub {
+    font-size: 13px;
+    color: #9ca3af;
+    margin: 0;
+    max-width: 360px;
+}
+
+input[type="range"] {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+#progressModal .form-group label {
+    margin-top: 10px;
+}
