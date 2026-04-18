@@ -51,11 +51,13 @@ class ProviderController extends BaseController
             require_once __DIR__ . '/../models/ProviderModel.php';
             require_once __DIR__ . '/../models/ProviderSocialModel.php';
             require_once __DIR__ . '/../models/CategoryModel.php';
+            require_once __DIR__ . '/../models/LocationModel.php';
             require_once __DIR__ . '/../../helpers/socialmedia.php';
 
             $providerModel = new ProviderModel();
             $socialModel = new ProviderSocialModel();
             $categoryModel = new CategoryModel();
+            $locationModel = new LocationModel();
 
             // Get pagination parameters
             $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
@@ -72,13 +74,35 @@ class ProviderController extends BaseController
                 $providerSkills = $providerModel->getSkillsByProviderId($provider['Provider_ID']);
                 $providerCategoriesRaw = $categoryModel->getByProviderId((int) $provider['Provider_ID']);
                 $providerCategories = [];
+                $providerCategoryIds = [];
                 foreach ($providerCategoriesRaw as $categoryRow) {
                     $categoryName = trim((string) ($categoryRow['Category_Type'] ?? ''));
                     if ($categoryName !== '') {
                         $providerCategories[] = $categoryName;
                     }
+
+                    $providerCategoryId = (int) ($categoryRow['ID'] ?? 0);
+                    if ($providerCategoryId > 0) {
+                        $providerCategoryIds[] = $providerCategoryId;
+                    }
                 }
                 $providerCategories = array_values(array_unique($providerCategories));
+                $providerCategoryIds = array_values(array_unique($providerCategoryIds));
+
+                $providerLocations = [];
+                if (!empty($providerCategoryIds)) {
+                    $locationsByCategory = $locationModel->getByProviderCategoryIds($providerCategoryIds);
+                    foreach ($providerCategoryIds as $providerCategoryId) {
+                        if (!empty($locationsByCategory[$providerCategoryId]) && is_array($locationsByCategory[$providerCategoryId])) {
+                            $providerLocations = array_merge($providerLocations, $locationsByCategory[$providerCategoryId]);
+                        }
+                    }
+                }
+
+                $formattedLocation = '';
+                if (!empty($providerLocations)) {
+                    $formattedLocation = formatLocations($providerLocations);
+                }
 
                 // Get social media links
                 $socialLinks = $socialModel->getByProviderId($provider['Provider_ID']);
@@ -103,6 +127,7 @@ class ProviderController extends BaseController
                 $provider['categories'] = $providerCategories;
                 $provider['social_links'] = $formattedSocialLinks;
                 $provider['avatar'] = $provider['Profile_Picture'];
+                $provider['formatted_location'] = $formattedLocation;
                 $providerRatingPercentage = isset($provider['avg_rating']) ? (float) $provider['avg_rating'] : 0.0;
                 $provider['rating'] = round(max(0.0, min(5.0, $providerRatingPercentage / 20)), 1);
                 $provider['total_earning_formatted'] = $provider['Total_Earning'] > 0 ? 'LKR ' . number_format($provider['Total_Earning'], 2) : 'LKR 0.00';
@@ -164,10 +189,10 @@ class ProviderController extends BaseController
 
             $skillsByService = $providerCategoriesModel->getSkillsByProviderCategoryIds($serviceIds);
             $locationsByService = $providerCategoriesModel->getLocationsByProviderCategoryIds($serviceIds);
-            $ongoingServiceIds = [];
+            $latestRequestStatuses = [];
 
             if (!empty($_SESSION['user_id'])) {
-                $ongoingServiceIds = $providerCategoriesModel->getOngoingRequestServiceIds((int) $_SESSION['user_id'], $serviceIds);
+                $latestRequestStatuses = $providerCategoriesModel->getLatestRequestStatusesByServiceIds((int) $_SESSION['user_id'], $serviceIds);
             }
 
             foreach ($services as &$service) {
@@ -193,9 +218,8 @@ class ProviderController extends BaseController
                     'label' => 'Portfolio',
                     'url' => $service['portfolio_link']
                 ]] : [];
-                $service['request_status'] = in_array($serviceId, $ongoingServiceIds, true) ? 'ongoing' : '';
-
-                $service['Formatted_Location_String'] = formatLocations($service['locations']);
+                $service['request_status'] = $latestRequestStatuses[$serviceId] ?? '';
+                $service['formatted_location'] = !empty($service['locations']) ? formatLocations($service['locations']) : '';
                 
             }
 
