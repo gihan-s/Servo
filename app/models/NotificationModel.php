@@ -52,6 +52,17 @@ class NotificationModel extends Database {
             ]; // Placeholder
     }
 
+    public function getUnreadNotificationsCountByProviderId($providerId) {
+        // $stmt = $this->conn->prepare("SELECT COUNT(*) as count FROM Notification WHERE Provider_ID = ? AND Is_Read = 0");
+        // $stmt->bind_param("i", $providerId);
+        // $stmt->execute();
+        // $result = $stmt->get_result();
+        // $count = $result->fetch_assoc()['count'];
+        // $stmt->close();
+        // return $count;
+        return 5; // Placeholder
+    } 
+
     // direct method to get notifications for a provider
     public function getNotificationsByProviderId($providerId, $limit = 5, $beforeTimestamp = null) {
         // $stmt = $this->conn->prepare("SELECT * FROM notification WHERE Provider_ID = ? AND Created_At < ? ORDER BY Created_At DESC LIMIT ?");

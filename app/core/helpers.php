@@ -23,3 +23,28 @@ function timeLeft($date) {
     if ($diff < 2629746) return floor($diff / 604800) . ' weeks left';
     return date('M d, Y', $timestamp);
 }
+
+function formatDuration($date) {
+    if ($date == NULL) return NULL;
+    $timestamp = strtotime($date);
+    $diff = $timestamp - time();
+    if ($diff <= 0) return '0 days';
+    $days = floor($diff / 86400);
+    if ($days == 1) return '1 day';
+    if ($days < 7) return $days . ' days';
+    $weeks = floor($days / 7);
+    if ($weeks == 1) return '1 week';
+    if ($weeks < 4) return $weeks . ' weeks';
+    $months = floor($days / 30);
+    return $months . ' month' . ($months == 1 ? '' : 's');
+}
+
+function formatCurrency($amount) {
+    if ($amount === NULL) return NULL;
+    return '$' . number_format($amount, 0);
+}
+
+function formatFullName($firstName, $lastName) {
+    $parts = array_filter([trim($firstName), trim($lastName)]);
+    return implode(' ', $parts) ?: NULL;
+}

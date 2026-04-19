@@ -1,4 +1,135 @@
 /* Unified card styling to match servicePosts_client.php */
+
+/* Loading State — matches client side */
+.loading-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #6b7280;
+}
+
+.loading-state i {
+    font-size: 48px;
+    margin-bottom: 20px;
+    color: #008500;
+    opacity: 0.8;
+}
+
+.loading-state p {
+    font-size: 16px;
+    font-weight: 500;
+    color: #1f2937;
+}
+
+/* Error State */
+.error-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #6b7280;
+}
+
+.error-state i {
+    font-size: 48px;
+    margin-bottom: 20px;
+    color: #ef4444;
+    opacity: 0.8;
+}
+
+.error-state p {
+    font-size: 16px;
+    margin-bottom: 20px;
+    color: #1f2937;
+}
+
+.retry-btn {
+    margin-top: 15px;
+    padding: 12px 24px;
+    background-color: #008500;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.retry-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 133, 0, 0.3);
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    color: #6b7280;
+}
+
+.empty-state i {
+    font-size: 64px;
+    margin-bottom: 24px;
+    opacity: 0.4;
+    color: #9ca3af;
+}
+
+.empty-state h2 {
+    font-size: 22px;
+    margin-bottom: 12px;
+    color: #1f2937;
+    font-weight: 600;
+}
+
+.empty-state p {
+    font-size: 15px;
+    color: #6b7280;
+    line-height: 1.6;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* Smooth card entry animation — matches client side */
+.search-item {
+    animation: fadeInUp 0.3s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .loading-state,
+    .error-state,
+    .empty-state {
+        padding: 40px 15px;
+    }
+
+    .loading-state i,
+    .error-state i {
+        font-size: 36px;
+    }
+
+    .empty-state i {
+        font-size: 48px;
+    }
+
+    .empty-state h2 {
+        font-size: 18px;
+    }
+
+    .empty-state p {
+        font-size: 14px;
+    }
+}
+
 .main-content {
     max-width: 1400px;
     margin: 0 auto;
@@ -166,6 +297,17 @@
     border-color: #d4e6f6;
 }
 
+/* Pending Review chip used in pendingReviewProjects.js cards */
+.status-chip.status-review-chip {
+    background: #fffbeb;
+    color: #b45309;
+    border: 1px solid #fde68a;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
 /* Completed */
 .service-requests .status-chip.status-complete {
     background: #dcfce7;
@@ -230,6 +372,9 @@
     border: 1px solid #008500 !important;
     color: #fff !important;
     box-shadow: 0 4px 10px -2px rgba(0, 133, 0, .4);
+    border-radius: 6px;
+    padding: 10px 16px;
+    cursor: pointer;
 }
 
 .btn-primary:hover {
@@ -310,75 +455,6 @@
     }
 }
 
-.section-note {
-    font-size: 12px;
-    color: #64748b;
-    margin: 4px 0 14px;
-}
-
-/* Header and navigation styles */
-.header-requests h1 {
-    font-size: 28px;
-    font-weight: 800;
-    color: #1f2937;
-    margin-bottom: 20px;
-}
-
-.search-header {
-    display: flex;
-    width: 100%;
-    align-items: center;
-    margin-bottom: 2rem;
-    gap: 1rem;
-}
-
-.search-button {
-    display: flex;
-    align-items: center;
-    min-width: 250px;
-    width: 100%;
-    border-radius: 5rem 5rem 0 5rem;
-    border: 1px solid #333;
-    box-shadow: 0 0 5px 2px rgba(0, 0, 0, 0.1);
-}
-
-.search-button input {
-    border: none;
-    padding: 12px 16px;
-    font-size: 14px;
-    flex: 1;
-    outline: none;
-}
-
-.search-button button {
-    background: #333;
-    color: #fff;
-    height: 40px;
-    border: none;
-    padding: 0.5rem 1rem;
-    cursor: pointer;
-    font-size: 20px;
-    transition: background-color 0.3s ease, box-shadow 0.3s ease, outline 0.3s ease;
-}
-
-.filter {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: #fff;
-    border: 1px solid #e5e7eb;
-    border-radius: 10px;
-    padding: 12px 16px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all .2s ease;
-}
-
-.filter:hover {
-    border-color: #008500;
-    color: #008500;
-}
-
 .advance-search {
     display: flex;
     align-items: center;
@@ -428,32 +504,6 @@
 
 .selection-options .opt:hover {
     background: #f8fafc;
-}
-
-.container-changer {
-    display: flex;
-    gap: 0;
-    border-bottom: 1px solid #e5e7eb;
-    margin-bottom: 20px;
-}
-
-.buttons {
-    padding: 12px 24px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    transition: all .2s ease;
-    color: #64748b;
-}
-
-.buttons.active {
-    color: #008500;
-    border-bottom-color: #008500;
-}
-
-.buttons:hover {
-    color: #008500;
 }
 
 .requests-section {
@@ -813,20 +863,6 @@
         margin-left: 0;
     }
 
-    .search-header {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .search-button {
-        min-width: auto;
-    }
-
-    .container-changer {
-        overflow-x: auto;
-        white-space: nowrap;
-    }
-
     .modal-actions {
         justify-content: center !important;
     }
@@ -840,4 +876,162 @@
 
 .message-link{
     text-decoration: none;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Completed Projects — Reviews                                        */
+/* ------------------------------------------------------------------ */
+
+.completed-reviews-section {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.completed-reviews-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.completed-reviews-title i {
+    color: #f59e0b;
+}
+
+.completed-review-card {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+}
+
+.completed-review-card.review-own {
+    border-left: 3px solid #3b82f6;
+}
+
+.completed-review-card.review-client {
+    border-left: 3px solid #8b5cf6;
+}
+
+.review-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.review-card-label {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #6b7280;
+}
+
+.review-card-date {
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+.review-card-stars {
+    margin-bottom: 6px;
+}
+
+.review-card-stars .star-filled {
+    color: #f59e0b;
+    font-size: 14px;
+}
+
+.review-card-stars .star-empty {
+    color: #d1d5db;
+    font-size: 14px;
+}
+
+.review-card-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 4px;
+}
+
+.review-card-desc {
+    font-size: 13px;
+    color: #4b5563;
+    line-height: 1.5;
+}
+
+.review-card-files {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.review-file-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 5px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    font-size: 11px;
+    color: #374151;
+    text-decoration: none;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.review-file-chip:hover {
+    background: #eef2ff;
+    border-color: #6366f1;
+    color: #4f46e5;
+}
+
+.review-file-chip i {
+    flex-shrink: 0;
+    font-size: 11px;
+}
+.status-complete-chip {
+    background: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+}
+
+/* Star rating input (provider review modal) */
+.star-rating-input .fa-star {
+    color: #d1d5db;
+    transition: color 0.15s, transform 0.15s;
+}
+
+.star-rating-input .fa-star.active,
+.star-rating-input .fa-star.fa-solid {
+    color: #f59e0b;
+}
+
+.star-rating-input .fa-star.hover {
+    color: #fbbf24;
+    transform: scale(1.15);
+}
+
+.star-rating-input .fa-star:hover {
+    transform: scale(1.15);
+}
+
+/* Leave Review button */
+.btn-leave-review {
+    color: #f59e0b !important;
+    border-color: #f59e0b !important;
+}
+
+.btn-leave-review:hover {
+    background: #fffbeb !important;
 }
