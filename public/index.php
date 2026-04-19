@@ -17,6 +17,8 @@ require_once '../app/controllers/NotificationController.php';
 require_once '../app/controllers/PaymentController.php';
 require_once '../app/controllers/ProviderController.php';
 require_once '../app/controllers/EarningsController.php';
+require_once '../app/controllers/FeedController.php';
+require_once '../app/controllers/BidController.php';
 
 require_once '../app/controllers/admin/AdminLoginController.php';
 require_once '../app/controllers/admin/AdminDashboardController.php';
@@ -107,6 +109,22 @@ switch ($url) {
         $controller = new FileController();
         $controller->showUserImage($matches[1]);
         break;
+
+    case (preg_match('#^file/project-updates/(.+)$#', $url, $matches) ? true : false):
+        $controller = new FileController();
+        $controller->showProjectUpdateFile($matches[1]);
+        break;
+
+    case (preg_match('#^file/project-requirements/(.+)$#', $url, $matches) ? true : false):
+        $controller = new FileController();
+        $controller->showProjectRequirementFile($matches[1]);
+        break;
+
+    case (preg_match('#^file/review-files/(.+)$#', $url, $matches) ? true : false):
+        $controller = new FileController();
+        $controller->showReviewFile($matches[1]);
+        break;
+
 
     case (preg_match('#^file/category-icons/(.+)$#', $url, $matches) ? true : false):
         $controller = new FileController();
@@ -203,8 +221,28 @@ switch ($url) {
         $controller->getPosts();
         break;
 
-    case 'project/submit-requirements-update':
-        (new ProjectController())->submitRequirementsUpdate();
+    case 'projects/ongoing':
+        $controller = new ProjectController();
+        $controller->getOngoingProjects();
+        break;
+
+    case 'projects/pending-review':
+        $controller = new ProjectController();
+        $controller->getPendingReviewProjects();
+        break;
+
+    case 'projects/completed':
+        $controller = new ProjectController();
+        $controller->getCompletedProjects();
+        break;
+
+    case 'project/submit-requirements-update': // legacy — keep for backwards compat
+    case 'project/add-requirement':
+        (new ProjectController())->addRequirementAction();
+        break;
+
+    case 'project/update-requirement-status':
+        (new ProjectController())->updateRequirementStatusAction();
         break;
 
     case 'requests':
@@ -235,9 +273,13 @@ switch ($url) {
     case (preg_match('#^requests/view/(\d+)$#', $url, $m) ? true : false):
         (new PostController())->viewPost((int)$m[1]);
         break;
-    
+
     case (preg_match('#^/?project/getrequirements/(\d+)$#', $url, $m) ? true : false):
         (new ProjectController())->getRequirementsByPost((int)$m[1]);
+        break;
+
+    case (preg_match('#^/?project/details/(\d+)$#', $url, $m) ? true : false):
+        (new ProjectController())->getProjectDetails((int)$m[1]);
         break;
 
     case (preg_match('#^requests/delete/(\d+)$#', $url, $m) ? true : false):
@@ -257,6 +299,26 @@ switch ($url) {
 
     case (preg_match('#^project/update-progress/(\d+)$#', $url, $m) ? true : false):
         (new ProjectController())->updateProgress((int)$m[1]);
+        break;
+
+    case (preg_match('#^project/submit-review/(\d+)$#', $url, $m) ? true : false):
+        (new ProjectController())->submitForReview((int)$m[1]);
+        break;
+
+    case (preg_match('#^project/complete/(\d+)$#', $url, $m) ? true : false):
+        (new ProjectController())->completeProject((int)$m[1]);
+        break;
+
+    case (preg_match('#^project/reopen/(\d+)$#', $url, $m) ? true : false):
+        (new ProjectController())->reopenProject((int)$m[1]);
+        break;
+
+    case (preg_match('#^project/reviews/(\d+)$#', $url, $m) ? true : false):
+        (new ProjectController())->getProjectReviews((int)$m[1]);
+        break;
+
+    case (preg_match('#^project/provider-review/(\d+)$#', $url, $m) ? true : false):
+        (new ProjectController())->submitProviderReview((int)$m[1]);
         break;
 
     case (preg_match('#^requests/update/(\d+)$#', $url, $m) ? true : false):
@@ -310,13 +372,53 @@ switch ($url) {
         $controller->getIncomingRequests();
         break;
 
+    case 'provider/ongoing-projects':
+        $controller = new ProviderController();
+        $controller->getOngoingProjects();
+        break;
+
+    case 'provider/pending-review-projects':
+        $controller = new ProviderController();
+        $controller->getPendingReviewProjects();
+        break;
+
     case 'provider/reject-request':
         $controller = new ProviderController();
         $controller->rejectRequest();
         break;
 
+    case 'provider/accept-request':
+        $controller = new ProviderController();
+        $controller->acceptRequest();
+        break;
+
+    case 'provider/accepted-requests':
+        $controller = new ProviderController();
+        $controller->getAcceptedRequests();
+        break;
+
+    case 'provider/completed-projects':
+        $controller = new ProviderController();
+        $controller->getCompletedProjects();
+        break;
+
     case 'earnings':
         $controller = new EarningsController();
+        $controller->index();
+        break;
+
+    case 'feed':
+        $controller = new FeedController();
+        $controller->index();
+        break;
+
+    case 'feed/submit-bid':
+        $controller = new FeedController();
+        $controller->submitBid();
+        break;
+
+    case 'bids':
+        $controller = new BidsController();
         $controller->index();
         break;
 
@@ -378,6 +480,13 @@ switch ($url) {
     case 'test/inputs':
         include '../inputs.html';
         break;
+
+    case (preg_match('#^payment-gateway/(.+)$#', $url, $matches) ? true : false):
+        $file = '../payment-gateway/' . $matches[1] . '.php';
+        if (file_exists($file)) {
+            include $file;
+            break;
+        }
 
     default:
         $controller = new NotFoundController();

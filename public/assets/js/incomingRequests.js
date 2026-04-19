@@ -63,7 +63,12 @@ class IncomingRequestsManager {
         }
 
         if (requests.length === 0) {
-            container.innerHTML = '<p class="no-results">No incoming requests at the moment.</p>';
+            container.innerHTML = `
+                <section class="empty-state">
+                    <i class="fas fa-inbox"></i>
+                    <h2>No incoming requests right now</h2>
+                    <p>New service requests from clients will appear here.</p>
+                </section>`;
             return;
         }
 
@@ -96,8 +101,13 @@ class IncomingRequestsManager {
                                 <i class="fa-solid fa-comments"></i> Message
                             </button>
                         </a>
-                        <button class="btn-primary btn-propose" title="Send Proposal">
-                            <i class="fa-solid fa-paper-plane"></i> Propose
+                        
+                        <button class="btn-primary btn-reject btn-danger" title="Reject Request" data-post-id="${request.Post_ID}">
+                            <i class="fa-solid fa-circle-xmark"></i> Reject
+                        </button>
+                        
+                        <button class="btn-primary btn-accept" title="Accept Request" data-post-id="${request.Post_ID}">
+                            <i class="fa-solid fa-circle-check"></i> Accept
                         </button>
                     </div>
                 </div>
@@ -238,12 +248,16 @@ class IncomingRequestsManager {
      * @param {number} page - Page number to load
      */
     async loadRequests(page = 1) {
+        this.showLoading();
         const data = await this.fetchRequests(page);
 
         if (!data) {
             this.showError('Failed to load requests. Please try again.');
             return;
         }
+
+        // Small delay so the spinner is visible (matches client side feel)
+        await new Promise(r => setTimeout(r, 300));
 
         this.currentPage = data.pagination.current_page;
         this.totalPages = data.pagination.total_pages;
@@ -274,7 +288,35 @@ class IncomingRequestsManager {
                 const postId = parseInt(btn.getAttribute('data-post-id'), 10);
                 const request = requests.find(r => r.Post_ID === postId);
                 if (request) {
+                    console.log("Openning View Dialog");
+                    
                     this.openRequestModal(request);
+                }
+            });
+        });
+
+        // Accept buttons on cards
+        container.querySelectorAll('.btn-accept').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const postId = parseInt(btn.getAttribute('data-post-id'), 10);
+                const request = requests.find(r => r.Post_ID === postId);
+                if (request) {
+                    this.currentRequest = request;
+                    this.showAcceptConfirmDialog();
+                }
+            });
+        });
+
+        // Reject buttons on cards
+        container.querySelectorAll('.btn-reject').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const postId = parseInt(btn.getAttribute('data-post-id'), 10);
+                const request = requests.find(r => r.Post_ID === postId);
+                if (request) {
+                    this.currentRequest = request;
+                    this.showRejectReasonDialog();
                 }
             });
         });
@@ -285,6 +327,7 @@ class IncomingRequestsManager {
      */
     openRequestModal(request) {
         const modal = document.getElementById('requestModalRoot');
+        console.log("Modal element:", modal);
         if (!modal) return;
 
         // Store current request for button actions
@@ -311,6 +354,7 @@ class IncomingRequestsManager {
      */
     setupModalButtonListeners() {
         const btnMessage = document.getElementById('btnMessage');
+        const btnAccept = document.getElementById('btnAccept');
         const btnDecline = document.getElementById('btnDecline');
 
         // Message button
@@ -319,6 +363,13 @@ class IncomingRequestsManager {
                 if (this.currentRequest) {
                     window.location.href = `/messages?new=${this.currentRequest.Client_ID}`;
                 }
+            };
+        }
+
+        // Accept button
+        if (btnAccept) {
+            btnAccept.onclick = () => {
+                this.showAcceptConfirmDialog();
             };
         }
 
@@ -391,8 +442,64 @@ class IncomingRequestsManager {
     }
 
     /**
-     * Close modal
+     * Show accept confirmation dialog
      */
+    showAcceptConfirmDialog() {
+        const modal = document.getElementById('acceptModalRoot');
+        if (!modal) {
+            alert('Accept confirmation modal not found');
+            return;
+        }
+
+        // Show modal
+        modal.classList.remove('deactive');
+        document.body.style.overflow = 'hidden';
+    }
+
+    /**
+     * Handle accept form submission
+     */
+    handleAcceptSubmission() {
+        if (this.currentRequest) {
+            this.acceptRequest(this.currentRequest.Post_ID);
+        }
+    }
+
+    /**
+     * Accept a request
+     */
+    async acceptRequest(postId) {
+        try {
+            const formData = new FormData();
+            formData.append('post_id', postId);
+
+            const response = await fetch(`${BASE_URL || ''}/provider/accept-request`, {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (!data.success) {
+                alert('Error accepting request: ' + (data.message || 'Unknown error'));
+                return;
+            }
+
+            showToast('success', 'Request accepted successfully');
+            
+            // Close both modals
+            const requestModal = document.getElementById('requestModalRoot');
+            const acceptModal = document.getElementById('acceptModalRoot');
+            this.closeModal(requestModal);
+            this.closeModal(acceptModal);
+
+            // Reload requests
+            await this.loadRequests(this.currentPage);
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error accepting request');
+        }
+    }
     closeModal(modal) {
         if (modal) {
             modal.classList.add('deactive');
@@ -447,13 +554,40 @@ class IncomingRequestsManager {
             });
         }
 
+        // Accept confirmation modal listeners
+        const acceptModalRoot = document.getElementById('acceptModalRoot');
+        const acceptModalClose = document.getElementById('acceptModalClose');
+        const btnCancelAccept = document.getElementById('btnCancelAccept');
+        const btnConfirmAccept = document.getElementById('btnConfirmAccept');
+
+        if (acceptModalRoot && acceptModalClose) {
+            acceptModalClose.addEventListener('click', () => this.closeModal(acceptModalRoot));
+            acceptModalRoot.addEventListener('click', (e) => {
+                if (e.target === acceptModalRoot) this.closeModal(acceptModalRoot);
+            });
+        }
+
+        if (btnCancelAccept) {
+            btnCancelAccept.addEventListener('click', () => {
+                this.closeModal(acceptModalRoot);
+            });
+        }
+
+        if (btnConfirmAccept) {
+            btnConfirmAccept.addEventListener('click', () => {
+                this.handleAcceptSubmission();
+            });
+        }
+
         // Close on Escape
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 const modal = document.getElementById('requestModalRoot');
                 const rejectionModal = document.getElementById('rejectionModalRoot');
+                const acceptModal = document.getElementById('acceptModalRoot');
                 if (modal) this.closeModal(modal);
                 if (rejectionModal) this.closeModal(rejectionModal);
+                if (acceptModal) this.closeModal(acceptModal);
             }
         });
     }
@@ -479,10 +613,25 @@ class IncomingRequestsManager {
      * Show error message to user
      * @param {string} message - Error message
      */
+    showLoading() {
+        const container = document.querySelector(this.itemListSelector);
+        if (!container) return;
+        container.innerHTML = `
+            <div class="loading-state">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading requests...</p>
+            </div>`;
+    }
+
     showError(message) {
         const container = document.querySelector(this.itemListSelector);
         if (container) {
-            container.innerHTML = `<p class="error-message">${this.escapeHtml(message)}</p>`;
+            container.innerHTML = `
+                <div class="error-state">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <p>${this.escapeHtml(message)}</p>
+                    <button class="retry-btn" onclick="window.requestsManager && window.requestsManager.loadRequests(1)">Retry</button>
+                </div>`;
         }
     }
 

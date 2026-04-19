@@ -62,6 +62,7 @@ class PostModel extends Database
     public function getPosts($clientId, $status = null, $sort = 'date_desc', $search = '')
     {
         error_log("PostModel::getPosts - Client: $clientId, Status: $status, Sort: $sort, Search: '$search'");
+        $viewSortDirection = null;
         
         $query = "SELECT p.*
               FROM post p
@@ -120,10 +121,12 @@ class PostModel extends Database
                     $orderBy = 'p.Requesting_Price DESC';
                 break;
             case 'views_asc':
-                    $orderBy = 'p.Views ASC';
+                    $orderBy = 'p.Created_At DESC';
+                    $viewSortDirection = 'asc';
                 break;
             case 'views_desc':
-                    $orderBy = 'p.Views DESC';
+                    $orderBy = 'p.Created_At DESC';
+                    $viewSortDirection = 'desc';
                 break;
         }
         
@@ -147,6 +150,23 @@ class PostModel extends Database
             $post['Proposal_Count'] = $bidCounts[$postId] ?? 0;
         }
 
+        if ($viewSortDirection !== null) {
+            usort($posts, static function ($a, $b) use ($viewSortDirection) {
+                $aViews = (int) ($a['Views'] ?? ($a['View_Count'] ?? 0));
+                $bViews = (int) ($b['Views'] ?? ($b['View_Count'] ?? 0));
+
+                if ($aViews === $bViews) {
+                    $aCreated = strtotime((string) ($a['Created_At'] ?? '')) ?: 0;
+                    $bCreated = strtotime((string) ($b['Created_At'] ?? '')) ?: 0;
+                    return $bCreated <=> $aCreated;
+                }
+
+                return $viewSortDirection === 'asc'
+                    ? ($aViews <=> $bViews)
+                    : ($bViews <=> $aViews);
+            });
+        }
+
         return $posts;
     }
 
@@ -154,12 +174,15 @@ class PostModel extends Database
     {
         error_log("PostModel::getPosts - Client: $clientId, Status: $status, Sort: $sort, Search: '$search'");
         
-        $query = "SELECT p.*, CONCAT(pr.First_Name, ' ', pr.Last_Name) AS Provider_Name, 
-                         COALESCE(proj.Progress, 0) AS Progress, proj.Started_At, proj.Ended_At
-                  FROM Post p  
-                  LEFT JOIN Provider pr ON p.Provider_ID = pr.Provider_ID
+        $query = "SELECT p.*, CONCAT(pr.First_Name, ' ', pr.Last_Name) AS Provider_Name,
+                         pr.Profile_Picture AS Provider_Picture, pr.Rating AS Provider_Rating,
+                         COALESCE(proj.Progress, 0) AS Progress, proj.Started_At, proj.Ended_At,
+                         cat.Name AS Category_Name, proj.Project_ID
+                  FROM post p
+                  LEFT JOIN provider pr ON p.Provider_ID = pr.Provider_ID
                   LEFT JOIN project proj ON p.Post_ID = proj.Post_ID
-                  WHERE p.Client_ID = ? AND p.Post_Type = 'post'";
+                  LEFT JOIN category cat ON p.Category_ID = cat.Category_ID
+                  WHERE p.Client_ID = ? AND (p.Post_Type = 'post' OR p.Post_Type = 'direct')";
         $types = "i";
         $params = [$clientId];
 
@@ -190,7 +213,7 @@ class PostModel extends Database
         
         switch ($sort) {
             case 'date_asc':
-                if ($status === 'pending') {
+                if ($status === 'ongoing' || $status === 'pending') {
                     $orderBy = 'Published_At ASC';
                 } elseif ($status === 'accepted') {
                     $orderBy = 'Created_At ASC';
@@ -199,7 +222,7 @@ class PostModel extends Database
                 }
                 break;
             case 'date_desc':
-                if ($status === 'pending') {
+                if ($status === 'ongoing' || $status === 'pending') {
                     $orderBy = 'Published_At DESC';
                 } elseif ($status === 'accepted') {
                     $orderBy = 'Created_At DESC';
@@ -382,9 +405,9 @@ class PostModel extends Database
                 p.Request_Status,
                 CONCAT(pr.First_Name, ' ', pr.Last_Name) AS Provider_Name,
                 c.Name AS CategoryName
-            FROM Post p
-            LEFT JOIN Category c ON c.Category_ID = p.Category_ID
-            LEFT JOIN Post_Need_Skills sk ON sk.Post_ID = p.Post_ID
+            FROM post p
+            LEFT JOIN category c ON c.Category_ID = p.Category_ID
+            LEFT JOIN post_need_skills sk ON sk.Post_ID = p.Post_ID
             LEFT JOIN provider pr ON pr.Provider_ID = p.Provider_ID
             WHERE p.Post_ID = ?
             LIMIT 1";
@@ -490,29 +513,6 @@ class PostModel extends Database
 
         if ($clientId <= 0 || $providerCategoryId <= 0 || $title === '' || $description === '' || $estDate === '') {
             return ['success' => false, 'message' => 'Missing required request data'];
-        }
-
-        $checkStmt = $this->conn->prepare(
-            "SELECT Post_ID
-             FROM post
-             WHERE Client_ID = ?
-               AND Provider_Categories_ID = ?
-               AND Post_Type = 'direct'
-               AND Request_Status = 'ongoing'
-             LIMIT 1"
-        );
-
-        if (!$checkStmt) {
-            return ['success' => false, 'message' => 'Failed to prepare duplicate check'];
-        }
-
-        $checkStmt->bind_param('ii', $clientId, $providerCategoryId);
-        $checkStmt->execute();
-        $existing = $checkStmt->get_result()->fetch_assoc();
-        $checkStmt->close();
-
-        if ($existing) {
-            return ['success' => false, 'message' => 'You already have an ongoing request for this service'];
         }
 
         $serviceStmt = $this->conn->prepare(
@@ -813,22 +813,30 @@ class PostModel extends Database
      * @param string $reason Rejection reason
      * @return bool Success status
      */
-    public function rejectRequest(int $postId, string $reason = ''): bool
+    public function changePostRequestStatus(int $postId, string $status, string $reason = ''): bool
     {
+
+        $RejectReasonChange = ($status === 'rejected') ? ", Request_Reject_Reason = ?" : "";
+
         $sql = "UPDATE post 
-                SET Request_Status = 'rejected', Request_Reject_Reason = ? 
+                SET Request_Status = ? 
+                $RejectReasonChange
                 WHERE Post_ID = ?";
 
         $stmt = $this->conn->prepare($sql);
         if (!$stmt) {
-            error_log('rejectRequest prepare: ' . $this->conn->error);
+            error_log('changePostRequestStatus prepare: ' . $this->conn->error);
             return false;
         }
 
-        $stmt->bind_param('si', $reason, $postId);
+        if ($status === 'rejected') {
+            $stmt->bind_param('ssi', $status, $reason, $postId);
+        } else {
+            $stmt->bind_param('si', $status, $postId);
+        }
 
         if (!$stmt->execute()) {
-            error_log('rejectRequest exec: ' . $stmt->error);
+            error_log('changePostRequestStatus exec: ' . $stmt->error);
             $stmt->close();
             return false;
         }
@@ -838,4 +846,69 @@ class PostModel extends Database
 
         return $affected > 0;
     }
+
+    /**
+     * Get accepted requests for a provider (paginated).
+     * These are requests the provider has accepted but the client hasn't paid yet.
+     */
+    public function getAcceptedRequestsForProvider(int $providerId, int $page = 1, int $limit = 10): array
+    {
+        $page   = max(1, $page);
+        $limit  = max(1, min($limit, 100));
+        $offset = ($page - 1) * $limit;
+
+        $countSql = "SELECT COUNT(*) as total FROM post
+                     WHERE Post_Status = 'active' AND Request_Status = 'accepted' AND Provider_ID = ?";
+
+        $countStmt = $this->conn->prepare($countSql);
+        $countStmt->bind_param('i', $providerId);
+        $countStmt->execute();
+        $totalRecords = (int) ($countStmt->get_result()->fetch_assoc()['total'] ?? 0);
+        $countStmt->close();
+        $totalPages = $totalRecords > 0 ? (int) ceil($totalRecords / $limit) : 0;
+
+        $sql = "SELECT
+                    cl.Client_ID,
+                    p.Post_ID,
+                    p.Title,
+                    p.Description,
+                    p.Requesting_Price,
+                    p.Price_Type,
+                    p.Est_Date,
+                    p.Level,
+                    p.Created_At,
+                    p.Post_Type,
+                    p.Category_ID,
+                    c.Name as Category_Name,
+                    cl.First_Name,
+                    cl.Last_Name,
+                    cl.Profile_Picture,
+                    CONCAT(cl.First_Name, ' ', cl.Last_Name) as Client_Name
+                FROM post p
+                LEFT JOIN category c ON p.Category_ID = c.Category_ID
+                LEFT JOIN client cl ON p.Client_ID = cl.Client_ID
+                WHERE p.Post_Status = 'active' AND p.Request_Status = 'accepted' AND p.Provider_ID = ?
+                ORDER BY p.Created_At DESC
+                LIMIT ? OFFSET ?";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('getAcceptedRequestsForProvider prepare: ' . $this->conn->error);
+            return ['data' => [], 'total' => 0, 'pages' => 0, 'current_page' => $page];
+        }
+
+        $stmt->bind_param('iii', $providerId, $limit, $offset);
+        $stmt->execute();
+        $data = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+
+        return [
+            'data'         => $data,
+            'total'        => $totalRecords,
+            'pages'        => $totalPages,
+            'current_page' => $page,
+        ];
+    }
+
+    
 }

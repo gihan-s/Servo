@@ -3,8 +3,9 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>404 Not Found</title>
-    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/notfound.css">
+    <title>Sorry something unexpected happened</title>
+    <?php $publicBase = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? '/'), '/\\'); ?>
+    <link rel="stylesheet" href="<?= ($publicBase === '' ? '' : $publicBase) ?>/assets/css/notfound.css">
 </head>
 
 <body>
@@ -14,13 +15,13 @@
                 <div class="col-sm-12 ">
                     <div class="col-sm-10 col-sm-offset-1 text-center">
                         <div class="four_zero_four_bg">
-                            <h1 class="text-center">404</h1>
+                            <h1 class="text-center">500</h1>
                         </div>
 
                         <div class="contant_box_404">
-                            <h3 class="h2">Looks like you're lost</h3>
-                            <p>the page you are looking for is not available!</p>
-                            <a href="<?= (isset($_ENV['BASE_URL']) ? $_ENV['BASE_URL'] : '/') . '/' ?>" class="link_404">Go to Home</a>
+                            <h3 class="h2">Looks like something went wrong</h3>
+                            <p>Please try again later.</p>
+                            <a href="<?= '/' ?>" class="link_404">Go to Home</a>
                         </div>
                     </div>
                 </div>
