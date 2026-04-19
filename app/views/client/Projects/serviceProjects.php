@@ -46,8 +46,6 @@
                     <input type="text" id="searchInput" placeholder="Search my service requests...">
                     <button id="searchButton"><i class="fa-solid fa-magnifying-glass"></i></button>
                 </div>
-                <button class="filter" id="filter-pop-up"><i class="fa-solid fa-filter"
-                        onclick="window.showSuccessToast('Test','Test Message')"></i><span>filter</span></button>
 
                 <div class="advance-search">
                     <span>Sort By: </span>
@@ -223,7 +221,7 @@
 
         <div class="modal-actions">
             <button class="action-btn btn-delete" onclick="closeDialogBox('review-popup')">Cancel</button>
-            <button class="action-btn btn-edit" id="saveRequirementBtn">
+            <button class="action-btn btn-edit" id="saveReviewCommentsBtn" onclick="addReviewComments()">
                 <i class="fa-solid fa-check"></i> Submit
             </button>
         </div>
@@ -342,6 +340,7 @@
         // CHANGE THIS LINE - add /list to the URL
         fetch(`${window.BASE_URL}/projects/list?status=${status}&sort=${currentSort}&search=${encodeURIComponent(currentSearch)}`)
             //.then(response => response.text())
+            
             .then(response => {
                 console.log('Response status:', response.status);
                 console.log('Response headers:', response.headers.get('content-type'));
@@ -561,6 +560,9 @@
                 <button class="action-btn btn-view" onclick="viewPost(${post.Post_ID})">
                     <i class="fas fa-eye"></i> View
                 </button>
+                <button class="action-btn btn-view" onclick="Complete(${post.Post_ID})">
+                    <i class="fas fa-check"></i> Complete
+                </button>
             `;
         }
 
@@ -775,39 +777,7 @@
         return `${diffDays} days left`;
     }
 
-    loadPosts('pending');
-
-    const tabButtons = {
-            'pending': document.getElementById('pending'),
-            'accepted': document.getElementById('accepted'),
-            'ongoing': document.getElementById('ongoing'),
-            'pending-review': document.getElementById('pending-review'),
-            'completed': document.getElementById('completed')
-        };
-
-        const sections = {
-            'pending': document.querySelector('.pending'),
-            'accepted': document.querySelector('.accepted'),
-            'ongoing': document.querySelector('.ongoing'),
-            'pending-review': document.querySelector('.pending-review'),
-            'completed': document.querySelector('.completed')     
-        };
-
-        /*Object.keys(tabButtons).forEach(key => {
-            tabButtons[key].addEventListener('click', function () {
-                // Remove active class from all buttons
-                Object.values(tabButtons).forEach(btn => btn.classList.remove('active'));
-                this.classList.add('active');
-
-                // Hide all sections
-                Object.values(sections).forEach(section => section.style.display = 'none');
-
-                // Show selected section and load posts
-                const status = key.replace('-posts', '');
-                sections[key].style.display = 'block';
-                loadPosts(status);
-            });
-        });*/
+    
 
         document.addEventListener('DOMContentLoaded', function () {
             const tabButtons = document.querySelectorAll('.tab-buttons .buttons');
@@ -1367,10 +1337,10 @@ function addRequirement() {
         })
     })
     .then(res => res.text())
-.then(text => {
-    console.log("RAW RESPONSE:", text);
-    return JSON.parse(text);
-})
+    .then(text => {
+        console.log("RAW RESPONSE:", text);
+        return JSON.parse(text);
+    })
     .then(data => {
         if (data.success) {
             window.showSuccessToast("Success!", "Requirement added successfully.");
@@ -1463,6 +1433,8 @@ function submitReview(id) {
             return JSON.parse(text); // then parse manually
         })
         .then(post => {
+            window.currentProjectId = post.Project_ID; // Store project ID for later use
+            console.log('currentProjectId set to:', window.currentProjectId);
             const providerName = post.Provider_Name || 'Unassigned provider';
             container.innerHTML = `
                 <div class="post-view">
@@ -1491,9 +1463,7 @@ function submitReview(id) {
                     </div>
                     <div class="post-view-section">
                         <div class="section-title">Add Comments</div>
-                        <div class="post-comments">
-                            <textarea class="text-field" id="reviewComments" placeholder="Enter your comments..."></textarea>
-                        </div>
+                        <textarea class="text-field" id="reviewComments" placeholder="Enter your comments..."></textarea>
                     </div>
                     
                 </div>
@@ -1506,7 +1476,88 @@ function submitReview(id) {
         });
 }
 
-    /*document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener("click", function (e) {
+    if (e.target.closest("#saveReviewBtn")) {
+        addReviewComments();
+    }
+});
+
+function addReviewComments() {
+    const text = document.getElementById("reviewComments").value;
+    const projectId = window.currentProjectId;
+    console.log("Adding review comments:", { projectId, text });
+    if (!text.trim()) {
+        window.showErrorToast("Error", "Please enter review comments");
+        return;
+    }
+
+    if (projectId < 0) {
+        window.showErrorToast("Error", "No project selected. Please refresh and try again.");
+        return;
+    }
+
+    fetch(window.BASE_URL + "/project/submit-review-comments", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            project_id: projectId,
+            review_comments: text
+        })
+    })
+    .then(res => res.text())
+    .then(text => {
+        console.log("RAW RESPONSE:", text);
+        return JSON.parse(text);
+    })
+    .then(data => {
+        console.log("submitReviewComments response:", data);
+        if (data.success) {
+            window.showSuccessToast("Success!", "Review comments added successfully.");
+            document.getElementById("reviewComments").value = "";
+            closeDialogBox('review-popup');
+        } else {
+            window.showErrorToast("Error", "Failed to add review comments");
+        }
+    })
+    .catch(err => {
+        console.error("Error:", err);
+        window.showErrorToast("Error", "Error adding review comments: " + err.message);
+    });
+}
+
+    function Complete(id) {
+        fetch(window.BASE_URL + "/project/complete/" + id, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ id: id })
+        })
+            
+        
+        .then(response => response.text())
+        .then(text => {
+            console.log('Complete response:', text);
+            return JSON.parse(text); // return raw text for now
+        });
+        // .then(response => response.json())
+        // .then(data => {
+        //     if (data.success) {
+        //         window.showSuccessToast("Success!", "Project marked as completed.");
+        //         // Optionally, you can remove the project from the list or update its status in the UI here
+        //     } else {
+        //         window.showErrorToast("Error", data.error || 'Failed to complete project');
+        //     }
+        // })
+        // .catch(error => {
+        //     console.log('Complete error:', error);
+        //     window.showErrorToast("Error", 'An error occurred while completing the project.');
+        // });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
         // Setup search input handler with debouncing
         document.getElementById('searchInput').addEventListener('change', handleSearch);
         document.getElementById('searchButton').addEventListener('click', handleSearch);
@@ -1523,7 +1574,9 @@ function submitReview(id) {
                 // Reload posts with search filter
                 const activeSection = document.querySelector('.requests-section:not([style*="display: none"])');
                 const status = activeSection.classList.contains('pending') ? 'pending' :
-                        activeSection.classList.contains('accepted') ? 'accepted' : 'ongoing';
+                        activeSection.classList.contains('accepted') ? 'accepted' : 
+                        activeSection.classList.contains('ongoing') ? 'ongoing' : 
+                        activeSection.classList.contains('completed') ? 'completed' : pending-review;
                 loadPosts(status);
             }, 300);
         }
@@ -1536,12 +1589,12 @@ function submitReview(id) {
                 if (option) {
                     const sortValue = option.dataset.sort;
                     const sortText = option.textContent;
-
+                    const providerName = post.Provider_Name || 'Unassigned provider';
                     // Update dropdown display
                     document.getElementById('sortDropdown').value = sortText;
 
                     // Update global sort variable
-                    currentSort = sortValue;                    const providerName = post.Provider_Name || 'Unassigned provider';                    const providerName = post.Provider_Name || 'Unassigned provider';
+                    currentSort = sortValue;                                        
 
                     // Reload posts with new sort
                     const activeSection = document.querySelector('.requests-section:not([style*="display: none"])');
@@ -1550,7 +1603,41 @@ function submitReview(id) {
                     loadPosts(status);
                 }
             });
-        }*/
+        }});
+
+        loadPosts('pending');
+
+    const tabButtons = {
+            'pending': document.getElementById('pending'),
+            'accepted': document.getElementById('accepted'),
+            'ongoing': document.getElementById('ongoing'),
+            'pending-review': document.getElementById('pending-review'),
+            'completed': document.getElementById('completed')
+        };
+
+        const sections = {
+            'pending': document.querySelector('.pending'),
+            'accepted': document.querySelector('.accepted'),
+            'ongoing': document.querySelector('.ongoing'),
+            'pending-review': document.querySelector('.pending-review'),
+            'completed': document.querySelector('.completed')     
+        };
+
+        /*Object.keys(tabButtons).forEach(key => {
+            tabButtons[key].addEventListener('click', function () {
+                // Remove active class from all buttons
+                Object.values(tabButtons).forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+
+                // Hide all sections
+                Object.values(sections).forEach(section => section.style.display = 'none');
+
+                // Show selected section and load posts
+                const status = key.replace('-posts', '');
+                sections[key].style.display = 'block';
+                loadPosts(status);
+            });
+        });*/
 
 </script>
 

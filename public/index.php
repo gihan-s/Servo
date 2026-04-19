@@ -207,6 +207,10 @@ switch ($url) {
         (new ProjectController())->submitRequirementsUpdate();
         break;
 
+    case 'project/submit-review-comments':
+        (new ProjectController())->submitReviewComments();
+        break;
+
     case 'requests':
         $controller = new PostController();
         $controller->index();
@@ -238,6 +242,10 @@ switch ($url) {
     
     case (preg_match('#^/?project/getrequirements/(\d+)$#', $url, $m) ? true : false):
         (new ProjectController())->getRequirementsByPost((int)$m[1]);
+        break;
+
+    case (preg_match('#^/?project/complete/(\d+)$#', $url, $m) ? true : false):
+        (new ProjectController())->completeProject((int)$m[1]);
         break;
 
     case (preg_match('#^requests/delete/(\d+)$#', $url, $m) ? true : false):

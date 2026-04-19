@@ -208,6 +208,7 @@ class PostController extends BaseController
             error_log("Creating post with data: " . print_r($postData, true));
 
             $postId = $this->postModel->createPost($postData);
+            error_log("Post creation result: " . ($postId ? "Success, ID: $postId" : "Failure"));
             error_log("createPost returned: " . var_export($postId, true));
 
             if (!$postId) {
@@ -291,6 +292,7 @@ class PostController extends BaseController
             'Request_Status' => $post['Request_Status'] ?? null,
             'skills' => array_column($skills, 'Skill'),
             'bids' => $bids,
+            'Project_ID' => $post['Project_ID'] ?? null
         ];
 
         echo json_encode($response);

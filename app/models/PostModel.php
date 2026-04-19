@@ -155,7 +155,7 @@ class PostModel extends Database
         error_log("PostModel::getPosts - Client: $clientId, Status: $status, Sort: $sort, Search: '$search'");
         
         $query = "SELECT p.*, CONCAT(pr.First_Name, ' ', pr.Last_Name) AS Provider_Name, 
-                         COALESCE(proj.Progress, 0) AS Progress, proj.Started_At, proj.Ended_At
+                         COALESCE(proj.Progress, 0) AS Progress, proj.Started_At, proj.Ended_At, proj.Project_ID
                   FROM Post p  
                   LEFT JOIN Provider pr ON p.Provider_ID = pr.Provider_ID
                   LEFT JOIN project proj ON p.Post_ID = proj.Post_ID
@@ -381,10 +381,12 @@ class PostModel extends Database
                 p.Provider_ID, 
                 p.Request_Status,
                 CONCAT(pr.First_Name, ' ', pr.Last_Name) AS Provider_Name,
-                c.Name AS CategoryName
+                c.Name AS CategoryName,
+                proj.Project_ID
             FROM Post p
             LEFT JOIN Category c ON c.Category_ID = p.Category_ID
             LEFT JOIN Post_Need_Skills sk ON sk.Post_ID = p.Post_ID
+            LEFT JOIN project proj ON proj.Post_ID = p.Post_ID
             LEFT JOIN provider pr ON pr.Provider_ID = p.Provider_ID
             WHERE p.Post_ID = ?
             LIMIT 1";
@@ -407,7 +409,7 @@ class PostModel extends Database
         $stmt->close();
 
         if ($row) {
-            $post['Proposal_Count'] = $this->bidModel ? $this->bidModel->countByPostId((int) $postId) : 0;
+            $row['Proposal_Count'] = $this->bidModel ? $this->bidModel->countByPostId((int) $postId) : 0;
         }
 
         return $row ?: null;
