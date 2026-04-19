@@ -213,7 +213,7 @@ class PostModel extends Database
         
         switch ($sort) {
             case 'date_asc':
-                if ($status === 'ongoing' || $status === 'pending') {
+                if ($status === 'pending') {
                     $orderBy = 'Published_At ASC';
                 } elseif ($status === 'accepted') {
                     $orderBy = 'Created_At ASC';
@@ -222,7 +222,7 @@ class PostModel extends Database
                 }
                 break;
             case 'date_desc':
-                if ($status === 'ongoing' || $status === 'pending') {
+                if ($status === 'pending') {
                     $orderBy = 'Published_At DESC';
                 } elseif ($status === 'accepted') {
                     $orderBy = 'Created_At DESC';

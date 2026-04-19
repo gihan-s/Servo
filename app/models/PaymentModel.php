@@ -1,93 +1,482 @@
 <?php
-// PAYMENT Table Format:
-// +------------+-------------+------+-----+---------+-------+
-// | Field      | Type        | Null | Key | Default | Extra |
-// +------------+-------------+------+-----+---------+-------+
-// | Payment_ID | int         | NO   | PRI | NULL    |       |
-// | Amount     | double      | YES  |     | NULL    |       |
-// | Status     | varchar(45) | YES  |     | NULL    |       |
-// | Hold_Time  | datetime    | YES  |     | NULL    |       |
-// | Paid_Time  | datetime    | YES  |     | NULL    |       |
-// | Commission | double      | YES  |     | NULL    |       |
-// | Project_ID | int         | NO   | MUL | NULL    |       |
-// +------------+-------------+------+-----+---------+-------+
-// needed columns: Method, Description, Due_Date
 
 require_once __DIR__ . '/../core/Database.php';
 
-class PaymentModel extends Database {
-    public function getPaymentsByClientId($clientId) {
-        // $stmt = $this->conn->prepare("SELECT * FROM payment WHERE Client_ID = ?");
-        // $stmt->bind_param("i", $clientId);
-        // $stmt->execute();
-        // $result = $stmt->get_result();
-        // $stmt->close();
-        // return $result->fetch_all(MYSQLI_ASSOC);
-        return null; // Placeholder
+class PaymentModel extends Database
+{
+    private const COMMISSION_RATE = 0.10;
+    public const PAGE_SIZE = 5;
+
+    public function ensureAwaitingRowsForClient(int $clientId): void
+    {
+        $sql = "SELECT pr.Project_ID, po.Requesting_Price
+                FROM project pr
+                JOIN post po ON pr.Post_ID = po.Post_ID
+                LEFT JOIN payment pay ON pay.Project_ID = pr.Project_ID
+                WHERE po.Client_ID = ?
+                  AND pay.Payment_ID IS NULL
+                  AND (pr.Project_Status IS NULL OR pr.Project_Status <> 'Cancelled')";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('PaymentModel::ensureAwaitingRowsForClient prepare: ' . $this->conn->error);
+            return;
+        }
+        $stmt->bind_param('i', $clientId);
+        if (!$stmt->execute()) {
+            error_log('PaymentModel::ensureAwaitingRowsForClient exec: ' . $stmt->error);
+            $stmt->close();
+            return;
+        }
+        $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+
+        if (empty($rows)) return;
+
+        $nextId = $this->nextPaymentId();
+
+        $ins = $this->conn->prepare(
+            "INSERT INTO payment (Payment_ID, Amount, Status, Hold_Time, Paid_Time, Commission, Project_ID)
+             VALUES (?, ?, 'Awaiting', NULL, NULL, ?, ?)"
+        );
+        if (!$ins) {
+            error_log('PaymentModel::ensureAwaitingRowsForClient insert prepare: ' . $this->conn->error);
+            return;
+        }
+
+        foreach ($rows as $row) {
+            $amount     = (float) ($row['Requesting_Price'] ?? 0);
+            $commission = round($amount * self::COMMISSION_RATE, 2);
+            $projectId  = (int) $row['Project_ID'];
+            $paymentId  = $nextId++;
+            $ins->bind_param('iddi', $paymentId, $amount, $commission, $projectId);
+            if (!$ins->execute()) {
+                error_log('PaymentModel::ensureAwaitingRowsForClient insert exec: ' . $ins->error);
+            }
+        }
+        $ins->close();
     }
 
-    public function getPaymentsCountByClientId($clientId, $status = null) {
-        // $query = "SELECT COUNT(*) as count FROM payment WHERE Client_ID = ?";
-        // if ($status) {
-        //     $query .= " AND Status = ?";
-        // }
-        // $stmt = $this->conn->prepare($query);
-        // if ($status) {
-        //     $stmt->bind_param("is", $clientId, $status);
-        // } else {
-        //     $stmt->bind_param("i", $clientId);
-        // }
-        // $stmt->execute();
-        // $result = $stmt->get_result();
-        // $count = $result->fetch_assoc()['count'];
-        // $stmt->close();
-        // return $count;
-        return 4; // Placeholder
-    } 
-
-    public function getTotalSpentByClientId($clientId) {
-        // $stmt = $this->conn->prepare("SELECT SUM(Amount) as total FROM payment WHERE Client_ID = ? AND Status = 'Paid'");
-        // $stmt->bind_param("i", $clientId);
-        // $stmt->execute();
-        // $result = $stmt->get_result();
-        // $total = $result->fetch_assoc()['total'];
-        // $stmt->close();
-        // return $total ?: 0;
-        return 3450; // Placeholder
+    // Payment_ID has no AUTO_INCREMENT in the current schema.
+    private function nextPaymentId(): int
+    {
+        $res = $this->conn->query("SELECT COALESCE(MAX(Payment_ID), 10500) + 1 AS next_id FROM payment");
+        if (!$res) {
+            error_log('PaymentModel::nextPaymentId: ' . $this->conn->error);
+            return 10501;
+        }
+        $row = $res->fetch_assoc();
+        return (int) ($row['next_id'] ?? 10501);
     }
 
-    public function getRecentPaymentsByClientId($clientId, $limit = 3) {
-        // $stmt = $this->conn->prepare("SELECT * FROM payment WHERE Client_ID = ? ORDER BY Date DESC LIMIT ?");
-        // $stmt->bind_param("ii", $clientId, $limit);
-        // $stmt->execute();
-        // $result = $stmt->get_result();
-        // $stmt->close();
-        // return $result->fetch_all(MYSQLI_ASSOC);
+    public function getAwaitingPaymentsByClientId(int $clientId, string $search = '', string $sort = 'recent', int $page = 1): array
+    {
+        return $this->fetchPaymentsByStatus($clientId, ['Awaiting'], $search, $sort, $page);
+    }
+
+    public function getPendingPaymentsByClientId(int $clientId, string $search = '', string $sort = 'recent', int $page = 1): array
+    {
+        return $this->fetchPaymentsByStatus($clientId, ['Pending', 'Hold'], $search, $sort, $page);
+    }
+
+    public function getCompletedPaymentsByClientId(int $clientId, string $search = '', string $sort = 'recent', int $page = 1): array
+    {
+        return $this->fetchPaymentsByStatus($clientId, ['Paid'], $search, $sort, $page);
+    }
+
+    public function getRefundedPaymentsByClientId(int $clientId, string $search = '', string $sort = 'recent', int $page = 1): array
+    {
+        return $this->fetchPaymentsByStatus($clientId, ['Refunded', 'Refund Requested'], $search, $sort, $page);
+    }
+
+    public function countAwaitingByClientId(int $clientId, string $search = ''): int
+    {
+        return $this->countPaymentsByStatus($clientId, ['Awaiting'], $search);
+    }
+
+    public function countPendingByClientId(int $clientId, string $search = ''): int
+    {
+        return $this->countPaymentsByStatus($clientId, ['Pending', 'Hold'], $search);
+    }
+
+    public function countCompletedByClientId(int $clientId, string $search = ''): int
+    {
+        return $this->countPaymentsByStatus($clientId, ['Paid'], $search);
+    }
+
+    public function countRefundedByClientId(int $clientId, string $search = ''): int
+    {
+        return $this->countPaymentsByStatus($clientId, ['Refunded', 'Refund Requested'], $search);
+    }
+
+    private function orderByClause(string $sort): string
+    {
+        return match ($sort) {
+            'oldest'      => 'COALESCE(pay.Paid_Time, pay.Hold_Time, pr.Started_At) ASC',
+            'amount-desc' => 'pay.Amount DESC',
+            'amount-asc'  => 'pay.Amount ASC',
+            default       => 'COALESCE(pay.Paid_Time, pay.Hold_Time, pr.Started_At) DESC',
+        };
+    }
+
+    private function fetchPaymentsByStatus(int $clientId, array $statuses, string $search, string $sort, int $page): array
+    {
+        if (empty($statuses)) return [];
+
+        $placeholders = implode(',', array_fill(0, count($statuses), '?'));
+        $orderBy = $this->orderByClause($sort);
+        $page = max(1, $page);
+        $offset = ($page - 1) * self::PAGE_SIZE;
+        $limit = self::PAGE_SIZE;
+
+        $searchClause = '';
+        $types  = 'i' . str_repeat('s', count($statuses));
+        $params = array_merge([$clientId], $statuses);
+
+        if ($search !== '') {
+            $searchClause = ' AND (po.Title LIKE ? OR po.Description LIKE ? OR CAST(pay.Payment_ID AS CHAR) LIKE ?) ';
+            $like = '%' . $search . '%';
+            $types .= 'sss';
+            $params[] = $like;
+            $params[] = $like;
+            $params[] = $like;
+        }
+
+        $types .= 'ii';
+        $params[] = $offset;
+        $params[] = $limit;
+
+        $sql = "SELECT
+                    pay.Payment_ID, pay.Amount, pay.Status, pay.Hold_Time, pay.Paid_Time,
+                    pay.Commission, pay.Project_ID,
+                    po.Title        AS Project_Title,
+                    po.Title        AS Project_Name,
+                    po.Description,
+                    po.End_At       AS Est_Delivery,
+                    po.End_At       AS Due_Date,
+                    po.Requesting_Price,
+                    po.Price_Type,
+                    po.Post_Type,
+                    pr.Started_At,
+                    pr.Project_Status,
+                    prov.Provider_ID,
+                    TRIM(CONCAT(COALESCE(prov.First_Name, ''), ' ', COALESCE(prov.Last_Name, ''))) AS Provider_Name
+                FROM payment pay
+                JOIN project pr ON pay.Project_ID = pr.Project_ID
+                JOIN post po    ON pr.Post_ID     = po.Post_ID
+                LEFT JOIN provider prov ON po.Provider_ID = prov.Provider_ID
+                WHERE po.Client_ID = ?
+                  AND pay.Status IN ($placeholders)
+                  $searchClause
+                ORDER BY $orderBy
+                LIMIT ?, ?";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('PaymentModel::fetchPaymentsByStatus prepare: ' . $this->conn->error);
+            return [];
+        }
+
+        $stmt->bind_param($types, ...$params);
+
+        if (!$stmt->execute()) {
+            error_log('PaymentModel::fetchPaymentsByStatus exec: ' . $stmt->error);
+            $stmt->close();
+            return [];
+        }
+
+        $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+        return $rows;
+    }
+
+    public function getReportSummary(int $clientId, string $from, string $to): array
+    {
+        $sql = "SELECT
+                    COALESCE(SUM(CASE WHEN pay.Status = 'Paid'                                 THEN pay.Amount END), 0) AS total_paid,
+                    COALESCE(SUM(CASE WHEN pay.Status IN ('Pending','Hold','Awaiting')         THEN pay.Amount END), 0) AS total_pending,
+                    COALESCE(SUM(CASE WHEN pay.Status IN ('Refunded','Refund Requested')       THEN pay.Amount END), 0) AS total_refunded,
+                    COUNT(*) AS txn_count
+                FROM payment pay
+                JOIN project pr ON pay.Project_ID = pr.Project_ID
+                JOIN post po    ON pr.Post_ID     = po.Post_ID
+                WHERE po.Client_ID = ?
+                  AND DATE(COALESCE(pay.Paid_Time, pay.Hold_Time, pr.Started_At)) BETWEEN ? AND ?";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('PaymentModel::getReportSummary prepare: ' . $this->conn->error);
+            return ['total_paid' => 0, 'total_pending' => 0, 'total_refunded' => 0, 'txn_count' => 0];
+        }
+        $stmt->bind_param('iss', $clientId, $from, $to);
+        if (!$stmt->execute()) {
+            error_log('PaymentModel::getReportSummary exec: ' . $stmt->error);
+            $stmt->close();
+            return ['total_paid' => 0, 'total_pending' => 0, 'total_refunded' => 0, 'txn_count' => 0];
+        }
+        $row = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+
         return [
-          [
-              'Payment_ID' => 'INV-10452',
-              'Description' => 'Sprint 3 Development',
-              'Status' => 'Pending',
-              'Due_Date' => 'Sep 02, 2025',
-              'Amount' => 1200.00,
-              'Method' => 'Visa'
-          ],
-          [
-              'Payment_ID' => 'INV-10398',
-              'Description' => 'Brand Pack Delivery',
-              'Status' => 'Paid',
-              'Due_Date' => 'Aug 28, 2025',
-              'Amount' => 950.00,
-              'Method' => 'Stripe'
-          ],
-          [
-              'Payment_ID' => 'INV-10321',
-              'Description' => 'QA Cycle Refund',
-              'Status' => 'Refunded',
-              'Due_Date' => 'Aug 30, 2025',
-              'Amount' => 420.00,
-              'Method' => 'Stripe'
-          ]
-        ]; // Placeholder
+            'total_paid'     => (float) ($row['total_paid']     ?? 0),
+            'total_pending'  => (float) ($row['total_pending']  ?? 0),
+            'total_refunded' => (float) ($row['total_refunded'] ?? 0),
+            'txn_count'      => (int)   ($row['txn_count']      ?? 0),
+        ];
+    }
+
+    public function getPaymentOwnerClientId(int $paymentId): ?int
+    {
+        $sql = "SELECT po.Client_ID
+                FROM payment pay
+                JOIN project pr ON pay.Project_ID = pr.Project_ID
+                JOIN post po    ON pr.Post_ID     = po.Post_ID
+                WHERE pay.Payment_ID = ?
+                LIMIT 1";
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('PaymentModel::getPaymentOwnerClientId prepare: ' . $this->conn->error);
+            return null;
+        }
+        $stmt->bind_param('i', $paymentId);
+        if (!$stmt->execute()) {
+            error_log('PaymentModel::getPaymentOwnerClientId exec: ' . $stmt->error);
+            $stmt->close();
+            return null;
+        }
+        $row = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        return $row ? (int) $row['Client_ID'] : null;
+    }
+
+    public function capturePayment(int $paymentId): bool
+    {
+        // TODO: sandbox gateway integration hook — swap Status='Paid' for a real capture
+        //       (e.g., Stripe test mode) once the gateway is added. Paid_Time should be
+        //       stamped from the gateway response, not NOW(), when real.
+        $sql = "UPDATE payment
+                SET Status = 'Paid', Paid_Time = NOW(),
+                    Hold_Time = COALESCE(Hold_Time, NOW())
+                WHERE Payment_ID = ? AND Status IN ('Awaiting', 'Pending', 'Hold')";
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('PaymentModel::capturePayment prepare: ' . $this->conn->error);
+            return false;
+        }
+        $stmt->bind_param('i', $paymentId);
+        $ok = $stmt->execute() && $stmt->affected_rows > 0;
+        if (!$ok) error_log('PaymentModel::capturePayment exec: ' . $stmt->error);
+        $stmt->close();
+        return $ok;
+    }
+
+    public function cancelPaymentAndProject(int $paymentId): bool
+    {
+        $this->conn->begin_transaction();
+        try {
+            $projectIdStmt = $this->conn->prepare("SELECT Project_ID FROM payment WHERE Payment_ID = ? LIMIT 1");
+            $projectIdStmt->bind_param('i', $paymentId);
+            $projectIdStmt->execute();
+            $res = $projectIdStmt->get_result()->fetch_assoc();
+            $projectIdStmt->close();
+            if (!$res) throw new RuntimeException('Payment not found');
+            $projectId = (int) $res['Project_ID'];
+
+            $payStmt = $this->conn->prepare(
+                "UPDATE payment SET Status = 'Cancelled' WHERE Payment_ID = ? AND Status NOT IN ('Paid', 'Refunded')"
+            );
+            $payStmt->bind_param('i', $paymentId);
+            $payStmt->execute();
+            $payStmt->close();
+
+            $prjStmt = $this->conn->prepare(
+                "UPDATE project SET Project_Status = 'Cancelled' WHERE Project_ID = ?"
+            );
+            $prjStmt->bind_param('i', $projectId);
+            $prjStmt->execute();
+            $prjStmt->close();
+
+            $this->conn->commit();
+            return true;
+        } catch (Throwable $e) {
+            $this->conn->rollback();
+            error_log('PaymentModel::cancelPaymentAndProject: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function requestRefund(int $paymentId): bool
+    {
+        // TODO: AdminPaymentController::approveRefund will flip this to 'Refunded'
+        //       once admin-side approval is implemented.
+        $sql = "UPDATE payment SET Status = 'Refund Requested' WHERE Payment_ID = ? AND Status = 'Paid'";
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('PaymentModel::requestRefund prepare: ' . $this->conn->error);
+            return false;
+        }
+        $stmt->bind_param('i', $paymentId);
+        $ok = $stmt->execute() && $stmt->affected_rows > 0;
+        if (!$ok) error_log('PaymentModel::requestRefund exec: ' . $stmt->error);
+        $stmt->close();
+        return $ok;
+    }
+
+    public function getInvoiceById(int $paymentId): ?array
+    {
+        $sql = "SELECT
+                    pay.Payment_ID, pay.Amount, pay.Status, pay.Hold_Time, pay.Paid_Time,
+                    pay.Commission, pay.Project_ID,
+                    po.Title        AS Project_Title,
+                    po.Description,
+                    po.End_At       AS Est_Delivery,
+                    po.Requesting_Price,
+                    po.Price_Type,
+                    po.Post_Type,
+                    po.Client_ID,
+                    pr.Started_At,
+                    pr.Project_Status,
+                    prov.Provider_ID,
+                    TRIM(CONCAT(COALESCE(prov.First_Name, ''), ' ', COALESCE(prov.Last_Name, ''))) AS Provider_Name,
+                    prov.Email       AS Provider_Email,
+                    TRIM(CONCAT(COALESCE(c.First_Name, ''), ' ', COALESCE(c.Last_Name, ''))) AS Client_Name,
+                    c.Email          AS Client_Email
+                FROM payment pay
+                JOIN project pr ON pay.Project_ID = pr.Project_ID
+                JOIN post po    ON pr.Post_ID     = po.Post_ID
+                LEFT JOIN provider prov ON po.Provider_ID = prov.Provider_ID
+                LEFT JOIN client   c    ON po.Client_ID   = c.Client_ID
+                WHERE pay.Payment_ID = ?
+                LIMIT 1";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('PaymentModel::getInvoiceById prepare: ' . $this->conn->error);
+            return null;
+        }
+        $stmt->bind_param('i', $paymentId);
+        if (!$stmt->execute()) {
+            error_log('PaymentModel::getInvoiceById exec: ' . $stmt->error);
+            $stmt->close();
+            return null;
+        }
+        $row = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        return $row ?: null;
+    }
+
+    private function countPaymentsByStatus(int $clientId, array $statuses, string $search): int
+    {
+        if (empty($statuses)) return 0;
+
+        $placeholders = implode(',', array_fill(0, count($statuses), '?'));
+        $types  = 'i' . str_repeat('s', count($statuses));
+        $params = array_merge([$clientId], $statuses);
+        $searchClause = '';
+
+        if ($search !== '') {
+            $searchClause = ' AND (po.Title LIKE ? OR po.Description LIKE ? OR CAST(pay.Payment_ID AS CHAR) LIKE ?) ';
+            $like = '%' . $search . '%';
+            $types .= 'sss';
+            $params[] = $like;
+            $params[] = $like;
+            $params[] = $like;
+        }
+
+        $sql = "SELECT COUNT(*) AS total
+                FROM payment pay
+                JOIN project pr ON pay.Project_ID = pr.Project_ID
+                JOIN post po    ON pr.Post_ID     = po.Post_ID
+                WHERE po.Client_ID = ?
+                  AND pay.Status IN ($placeholders)
+                  $searchClause";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('PaymentModel::countPaymentsByStatus prepare: ' . $this->conn->error);
+            return 0;
+        }
+        $stmt->bind_param($types, ...$params);
+        if (!$stmt->execute()) {
+            error_log('PaymentModel::countPaymentsByStatus exec: ' . $stmt->error);
+            $stmt->close();
+            return 0;
+        }
+        $row = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        return (int) ($row['total'] ?? 0);
+    }
+
+    public function getPaymentsCountByClientId(int $clientId, string $status): int
+    {
+        $statuses = match ($status) {
+            'Pending'   => ['Pending', 'Hold'],
+            'Completed' => ['Paid'],
+            'Refunded'  => ['Refunded', 'Refund Requested'],
+            'Awaiting'  => ['Awaiting'],
+            default     => [$status],
+        };
+        return $this->countPaymentsByStatus($clientId, $statuses, '');
+    }
+
+    public function getTotalSpentByClientId(int $clientId): float
+    {
+        $sql = "SELECT COALESCE(SUM(pay.Amount), 0) AS total
+                FROM payment pay
+                JOIN project pr ON pay.Project_ID = pr.Project_ID
+                JOIN post po    ON pr.Post_ID     = po.Post_ID
+                WHERE po.Client_ID = ?
+                  AND pay.Status = 'Paid'";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('PaymentModel::getTotalSpentByClientId prepare: ' . $this->conn->error);
+            return 0.0;
+        }
+        $stmt->bind_param('i', $clientId);
+        if (!$stmt->execute()) {
+            error_log('PaymentModel::getTotalSpentByClientId exec: ' . $stmt->error);
+            $stmt->close();
+            return 0.0;
+        }
+        $row = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        return (float) ($row['total'] ?? 0);
+    }
+
+    public function getRecentPaymentsByClientId(int $clientId, int $limit = 3): array
+    {
+        $limit = max(1, $limit);
+        $sql = "SELECT
+                    pay.Payment_ID,
+                    pay.Amount,
+                    pay.Status,
+                    pay.Hold_Time,
+                    pay.Paid_Time,
+                    po.Title        AS Project_Title,
+                    po.Description,
+                    po.End_At       AS Due_Date,
+                    'Card'          AS Method
+                FROM payment pay
+                JOIN project pr ON pay.Project_ID = pr.Project_ID
+                JOIN post po    ON pr.Post_ID     = po.Post_ID
+                WHERE po.Client_ID = ?
+                ORDER BY COALESCE(pay.Paid_Time, pay.Hold_Time, pr.Started_At) DESC
+                LIMIT ?";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('PaymentModel::getRecentPaymentsByClientId prepare: ' . $this->conn->error);
+            return [];
+        }
+        $stmt->bind_param('ii', $clientId, $limit);
+        if (!$stmt->execute()) {
+            error_log('PaymentModel::getRecentPaymentsByClientId exec: ' . $stmt->error);
+            $stmt->close();
+            return [];
+        }
+        $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+        return $rows;
     }
 }

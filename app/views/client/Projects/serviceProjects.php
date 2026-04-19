@@ -1412,6 +1412,10 @@
             // Initial load
             showSection('pending');
         });
+    }
+
+    function payPayment(id) {
+        viewDialogBox('confirm-payment');
 
     function viewPost(id) {
         viewDialogBox('view-post-popup');

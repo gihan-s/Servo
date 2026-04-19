@@ -44,7 +44,7 @@ $TopBarHeader = "Providers";
                 <span>Total Providers in System</span>
             </div>
 
-            <img src="<?= BASE_URL ?>/assets/img/admin-icon/customers.jpg" alt="">
+            <img src="/assets/img/admin-icon/customers.jpg" alt="">
 
         </div>
 
@@ -56,7 +56,7 @@ $TopBarHeader = "Providers";
                 <span>Pending for Approval</span>
             </div>
 
-            <img src="<?= BASE_URL ?>/assets/img/admin-icon/softwares.jpg" alt="">
+            <img src="/assets/img/admin-icon/softwares.jpg" alt="">
 
         </div>
 
@@ -68,7 +68,7 @@ $TopBarHeader = "Providers";
                 <span>Currently Providing Service</span>
             </div>
 
-            <img src="<?= BASE_URL ?>/assets/img/admin-icon/websites.jpg" alt="">
+            <img src="/assets/img/admin-icon/websites.jpg" alt="">
 
         </div>
 
@@ -81,7 +81,7 @@ $TopBarHeader = "Providers";
                 <span>Banned by System</span>
             </div>
 
-            <img src="<?= BASE_URL ?>/assets/img/admin-icon/pendingImp.webp" alt="">
+            <img src="/assets/img/admin-icon/pendingImp.webp" alt="">
 
         </div>
 
