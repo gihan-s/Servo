@@ -5,13 +5,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Global variables for JavaScript -->
+    <script>
+        window.BASE_URL = "<?= BASE_URL ?>";
+        window.currentProjectId = null;
+        let requirementList = [];
+        let removedRequirements = [];
+    </script>
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/cardList.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/clientPosts.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/elementStyles.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/gridTemplates.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/serviceProjects.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/incomingRequests.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/projectDetailView.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 
     <script src="<?= BASE_URL ?>/assets/js/elementScript.js" defer></script>
+    <script src="<?= BASE_URL ?>/assets/js/projectDetailView.js" defer></script>
     <script src="<?= BASE_URL ?>/assets/js/cardList.js" defer></script>
 </head>
 
@@ -27,8 +39,8 @@
                 <div id="pending" class="buttons active" data-target="pending">Pending Requests</div>
                 <div id="accepted" class="buttons" data-target="accepted">Approved Requests</div>
                 <div id="ongoing" class="buttons" data-target="ongoing">Ongoing Projects</div>
-                <div id="completed" class="buttons" data-target="completed">Completed Projects</div>
                 <div id="pending-review" class="buttons" data-target="pending-review">Pending Review</div>
+                <div id="completed" class="buttons" data-target="completed">Completed Projects</div>
             </div>
         </div>
         <div class="request-content">
@@ -182,6 +194,143 @@
 
 </div>
 
+<div class="dialog-box-2" id="update-requirements-popup">
+    <div class="dialog-content" style="width:720px; max-width:95vw; display:flex; flex-direction:column; max-height:88vh;">
+        <div class="dialog-title">
+            <div class="title">Project Requirements</div>
+            <div>
+                <i class="fa-solid fa-xmark dialog-close-button-2" onclick="closeDialogBox('update-requirements-popup')"></i>
+            </div>
+        </div>
+
+        <!-- Tab strip -->
+        <div class="req-tabs" style="display:flex; gap:0; border-bottom:2px solid #e5e7eb; margin-bottom:16px; flex-shrink:0;">
+            <button class="req-tab active" data-tab="req-list-pane">
+                <i class="fa-solid fa-list-check"></i> Current Requirements
+            </button>
+            <button class="req-tab" data-tab="req-add-pane">
+                <i class="fa-solid fa-plus"></i> Add New
+            </button>
+        </div>
+
+        <!-- Current requirements pane -->
+        <div id="req-list-pane" class="req-pane" style="flex:1; overflow-y:auto; min-height:0;">
+            <div class="loading-state" id="req-loading">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading requirements…</p>
+            </div>
+            <div id="req-list-body" style="display:none;"></div>
+        </div>
+
+        <!-- Add new requirement pane -->
+        <div id="req-add-pane" class="req-pane" style="display:none; flex:1; overflow-y:auto; min-height:0;">
+            <form id="req-add-form" onsubmit="return false;" style="display:flex; flex-direction:column; gap:14px; padding:2px 0 8px;">
+                <div class="req-form-group">
+                    <label for="reqTitle">Title <span style="color:#ef4444;">*</span></label>
+                    <input type="text" id="reqTitle" maxlength="200" placeholder="e.g. Add dark mode support">
+                </div>
+                <div class="req-form-group">
+                    <label for="reqDescription">Description <span style="color:#9ca3af; font-weight:400;">(optional)</span></label>
+                    <textarea id="reqDescription" rows="4" placeholder="Describe the requirement in detail…"></textarea>
+                </div>
+                <div class="req-form-group">
+                    <label for="reqFiles">Attach Files <span style="color:#9ca3af; font-weight:400;">(optional)</span></label>
+                    <input type="file" id="reqFiles" name="req_files[]" multiple accept="image/*,.pdf,.zip,.txt">
+                    <div style="font-size:12px; color:#6b7280; margin-top:4px;">Images, PDF, ZIP or TXT — max 10 MB each</div>
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:8px; padding-top:4px;">
+                    <button type="button" class="action-btn btn-delete" onclick="document.getElementById('req-add-form').reset()">Reset</button>
+                    <button type="button" class="action-btn btn-edit" id="btnSubmitReq">
+                        <i class="fa-solid fa-paper-plane"></i> Submit Requirement
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="dialog-box-2" id="complete-project-popup">
+    <div class="dialog-content" style="width: 560px; max-width: 95vw;">
+        <div class="dialog-title">
+            <div class="title">Complete Project &amp; Leave Review</div>
+            <div>
+                <i class="fa-solid fa-xmark dialog-close-button-2" onclick="closeDialogBox('complete-project-popup')"></i>
+            </div>
+        </div>
+        <div class="dialog-body">
+            <p style="margin: 0 0 16px; color: #6b7280; font-size: 14px;">
+                Completing this project is permanent. Please rate your experience working with this provider.
+            </p>
+            <!-- Star Rating -->
+            <div class="req-form-group" style="margin-bottom: 16px;">
+                <label>Rating <span style="color:#ef4444;">*</span></label>
+                <div class="star-rating-input" id="starRatingInput">
+                    <i class="fa-regular fa-star" data-value="1"></i>
+                    <i class="fa-regular fa-star" data-value="2"></i>
+                    <i class="fa-regular fa-star" data-value="3"></i>
+                    <i class="fa-regular fa-star" data-value="4"></i>
+                    <i class="fa-regular fa-star" data-value="5"></i>
+                </div>
+                <input type="hidden" id="reviewRating" value="">
+                <div id="ratingError" style="color:#ef4444; font-size:12px; margin-top:4px; display:none;">Please select a rating before submitting.</div>
+            </div>
+            <!-- Title -->
+            <div class="req-form-group" style="margin-bottom: 12px;">
+                <label for="reviewTitle">Review Title <span style="color:#9ca3af; font-weight:400;">(optional)</span></label>
+                <input type="text" id="reviewTitle" placeholder="e.g. Great work!" maxlength="100">
+            </div>
+            <!-- Description -->
+            <div class="req-form-group" style="margin-bottom: 12px;">
+                <label for="reviewDescription">Comments <span style="color:#9ca3af; font-weight:400;">(optional)</span></label>
+                <textarea id="reviewDescription" rows="4" placeholder="Share your experience working with this provider..."></textarea>
+            </div>
+            <!-- Files -->
+            <div class="req-form-group">
+                <label for="reviewFiles">Attach Files <span style="color:#9ca3af; font-weight:400;">(optional)</span></label>
+                <input type="file" id="reviewFiles" name="review_files[]" multiple accept="image/*,.pdf,.zip,.txt">
+                <div style="font-size:12px; color:#6b7280; margin-top:4px;">Images, PDF, ZIP or TXT — max 10 MB each</div>
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button class="action-btn btn-delete" onclick="closeDialogBox('complete-project-popup')">Cancel</button>
+            <button class="action-btn btn-edit" id="btnConfirmCompleteProject">
+                <i class="fa-solid fa-circle-check"></i> Complete &amp; Submit Review
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="dialog-box-2" id="reopen-project-popup">
+    <div class="dialog-content" style="width: 560px; max-width: 95vw;">
+        <div class="dialog-title">
+            <div class="title">Request Changes</div>
+            <div>
+                <i class="fa-solid fa-xmark dialog-close-button-2" onclick="closeDialogBox('reopen-project-popup')"></i>
+            </div>
+        </div>
+        <div class="dialog-body">
+            <p style="margin: 0 0 12px; color: #6b7280; font-size: 14px;">
+                This will move the project back to ongoing. Add feedback for the provider.
+            </p>
+            <div class="req-form-group" style="margin-bottom: 12px;">
+                <label for="reopenReason">Reason <span style="color:#ef4444;">*</span></label>
+                <textarea id="reopenReason" rows="5" placeholder="Describe what needs to be revised..."></textarea>
+            </div>
+            <div class="req-form-group">
+                <label for="reopenFiles">Attach Files <span style="color:#9ca3af; font-weight:400;">(optional)</span></label>
+                <input type="file" id="reopenFiles" name="reopen_files[]" multiple accept="image/*,.pdf,.zip,.txt">
+                <div style="font-size:12px; color:#6b7280; margin-top:4px;">Images, PDF, ZIP or TXT — max 10 MB each</div>
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button class="action-btn btn-delete" onclick="closeDialogBox('reopen-project-popup')">Cancel</button>
+            <button class="action-btn btn-edit" id="btnConfirmReopenProject">
+                <i class="fa-solid fa-rotate-left"></i> Move to Ongoing
+            </button>
+        </div>
+    </div>
+</div>
+
 <div class="dialog-box-2" id="create-post-popup">
     <div class="dialog-content">
         <div class="dialog-title">
@@ -277,8 +426,8 @@
         if (existing) existing.remove();
     }
 
-    function loadPosts(status = 'pending') {
-        const container = getListContainer(status);
+    function loadPosts(tab = 'ongoing') {
+        const container = getListContainer(tab);
         if (!container) return;
 
         container.innerHTML = `
@@ -287,12 +436,29 @@
             <p>Loading posts...</p>
         </div>
     `;
-        clearLoadMoreButton(status);
+        clearLoadMoreButton(tab);
 
-        console.log('Loading posts for status:', status);
+        console.log('Loading posts for tab:', tab);
 
-        // CHANGE THIS LINE - add /list to the URL
-        fetch(`<?= BASE_URL ?>/projects/list?status=${status}&sort=${currentSort}&search=${encodeURIComponent(currentSearch)}`)
+        // Build the correct API URL based on tab
+        let apiUrl;
+        if (tab === 'ongoing') {
+            // Ongoing projects come from the project table
+            apiUrl = `${window.BASE_URL}/projects/ongoing?sort=${currentSort}&search=${encodeURIComponent(currentSearch)}`;
+        } else if (tab === 'pending-review') {
+            // Pending-review projects also come from the project table
+            apiUrl = `${window.BASE_URL}/projects/pending-review?sort=${currentSort}&search=${encodeURIComponent(currentSearch)}`;
+        } else if (tab === 'completed') {
+            // Completed projects come from the project table
+            apiUrl = `${window.BASE_URL}/projects/completed?sort=${currentSort}&search=${encodeURIComponent(currentSearch)}`;
+        } else {
+            // Map tab name to actual Request_Status value
+            const statusMap = { 'pending': 'pending', 'accepted': 'accepted', 'completed': 'completed' };
+            const apiStatus = statusMap[tab] || tab;
+            apiUrl = `${window.BASE_URL}/projects/list?status=${apiStatus}&sort=${currentSort}&search=${encodeURIComponent(currentSearch)}`;
+        }
+
+        fetch(apiUrl)
             //.then(response => response.text())
             .then(response => {
                 console.log('Response status:', response.status);
@@ -311,15 +477,15 @@
             })
             .then(data => {
                 if (data.success && data.posts) {
-                    postsState[status].posts = data.posts;
-                    postsState[status].visibleCount = Math.min(PAGE_SIZE, data.posts.length);
-                    renderPosts(status);
+                    postsState[tab].posts = data.posts;
+                    postsState[tab].visibleCount = Math.min(PAGE_SIZE, data.posts.length);
+                    renderPosts(tab);
                     return;
                 }
 
-                postsState[status].posts = [];
-                postsState[status].visibleCount = 0;
-                showEmptyState(status, container);
+                postsState[tab].posts = [];
+                postsState[tab].visibleCount = 0;
+                showEmptyState(tab, container);
             })
             .catch(error => {
                 console.error('Error loading posts:', error);
@@ -328,10 +494,10 @@
                     <i class="fas fa-exclamation-circle"></i>
                     <p>Failed to load posts. Please try again.</p>
                     <p style="font-size: 12px; color: #999;">${error.message}</p>
-                    <button onclick="loadPosts('${status}')" class="retry-btn">Retry</button>
+                    <button onclick="loadPosts('${tab}')" class="retry-btn">Retry</button>
                 </div>
             `;
-                clearLoadMoreButton(status);
+                clearLoadMoreButton(tab);
             });
     }
 
@@ -381,7 +547,21 @@
 
         container.innerHTML = '';
         visiblePosts.forEach(item => {
-            const postHTML = createPostCard(item.post, item.skills, status);
+            console.log('Rendering post:', item);
+            let postHTML;
+            if (status === 'pending') {
+                postHTML = createPendingCard(item.post, item.skills);
+            } else if (status === 'accepted') {
+                postHTML = createAcceptedCard(item.post, item.skills);
+            } else if (status === 'ongoing') {
+                postHTML = createOngoingCard(item.post, item.skills);
+            } else if (status === 'pending-review') {
+                postHTML = createPendingReviewCard(item.post, item.skills);
+            } else if (status === 'completed') {
+                postHTML = createCompletedCard(item.post, item.skills);
+            } else {
+                postHTML = createPostCard(item.post, item.skills, status);
+            }
             container.insertAdjacentHTML('beforeend', postHTML);
         });
 
@@ -605,20 +785,20 @@
         }*/
 
         // Post type badge
-        const postTypeLabel = post.post_type === 'direct' ? 'Direct Request' : 'Bid Request';
+        console.log('Post :', post);
+        const postTypeLabel = post.Post_Type === 'direct' ? 'Direct Request' : 'Bid Request';
         const postTypeHTML = `
             <div class="post-type-badge">
-                <span class="badge-label ${post.post_type === 'direct' ? 'direct' : 'bid'}">${postTypeLabel}</span>
+                <span class="badge-label ${post.Post_Type === 'direct' ? 'direct' : 'bid'}">${postTypeLabel}</span>
             </div>
-            
         `;
 
         let progressHTML = '';
         if (status === 'ongoing') {
             const progress = post.Progress || 0;
-            const hoursWorked = Math.round((progress / 100) * 80);
+            // const hoursWorked = Math.round((progress / 100) * 80);
             progressHTML = `<div class="progress-container" aria-label="Project progress">
-                <div class="progress-label">Progress: <span class="progress-percent">${progress}%</span> <span class="progress-detail" style="color:#64748b;">(${hoursWorked}h of 80h)</span></div>
+                <div class="progress-label">Progress: <span class="progress-percent">${progress}%</span> </div>
                 <div class="progress-track"><div class="progress-fill" style="width: ${progress}%;"></div></div>
             </div>`;
         }
@@ -643,15 +823,455 @@
                 </div>
                 ${progressHTML}
                 ${postTypeHTML}
-                
-                
             </div>
         `;
-        
+    }
 
-            
-                    
-        
+    function createPendingCard(post, skills) {
+        const providerName = post.Provider_Name || 'Unassigned Provider';
+        const providerPicture = post.Provider_Picture
+            ? `${window.BASE_URL}/file/user-files/${post.Provider_Picture}`
+            : null;
+        const rating = post.Provider_Rating ? parseFloat(post.Provider_Rating).toFixed(1) : '0.0';
+        const category = post.Category_Name || 'N/A';
+        const estDate = formatEstDate(post.Est_Date);
+        const budget = `Rs. ${Number(post.Requesting_Price || 0).toLocaleString('en-US', {minimumFractionDigits:2})} (${post.Price_Type || 'Fixed'})`;
+        const description = post.Description || '';
+        const snippet = description.length > 200
+            ? escapeHtml(description.substring(0, 200)) + '...'
+            : escapeHtml(description);
+        const postedDate = formatDate(post.Created_At);
+        const postTypeLabel = post.Post_Type === 'direct' ? 'Direct' : 'Bid';
+
+        const avatarHTML = providerPicture
+            ? `<img src="${providerPicture}" alt="${escapeHtml(providerName)}" class="request-avatar" onerror="this.style.display='none'">`
+            : `<div class="request-avatar" style="width:56px;height:56px;border-radius:50%;background:#e5e7eb;display:flex;align-items:center;justify-content:center;"><i class="fas fa-user" style="color:#9ca3af;font-size:22px;"></i></div>`;
+
+        return `
+            <div class="search-item" data-post-id="${post.Post_ID}">
+                <input type="hidden" class="post-id" value="${post.Post_ID}">
+                <div class="request-header">
+                    <div class="request-client-section">
+                        ${avatarHTML}
+                        <div class="request-client-info">
+                            <div class="request-client-name">${escapeHtml(providerName)}</div>
+                            <div class="request-client-location">&#11088; ${rating} (0 reviews)</div>
+                        </div>
+                    </div>
+                    <div class="request-actions">
+                        <button class="btn-outline" onclick="viewPost(${post.Post_ID})" title="View Request">
+                            <i class="fa-solid fa-eye"></i> View
+                        </button>
+                        <a href="${window.BASE_URL}/messages?new=${post.Provider_ID}" style="text-decoration:none;">
+                            <button class="btn-outline" title="Message Provider">
+                                <i class="fa-solid fa-comments"></i> Message
+                            </button>
+                        </a>
+                        <button class="btn-primary btn-danger" onclick="cancelRequest(${post.Post_ID})" title="Cancel Request">
+                            <i class="fa-solid fa-circle-xmark"></i> Cancel
+                        </button>
+                    </div>
+                </div>
+                <div class="request-title">${escapeHtml(post.Title)}</div>
+                <div class="request-description">${snippet}</div>
+                <div class="request-details">
+                    <div class="request-detail-item">
+                        <span class="request-detail-label"><i class="fa-solid fa-coins"></i> Budget</span>
+                        <span class="request-detail-value">${budget}</span>
+                    </div>
+                    <div class="request-detail-item">
+                        <span class="request-detail-label"><i class="fa-solid fa-tag"></i> Category</span>
+                        <span class="request-detail-value">${escapeHtml(category)}</span>
+                    </div>
+                    <div class="request-detail-item">
+                        <span class="request-detail-label"><i class="fa-solid fa-calendar"></i> Est. Date</span>
+                        <span class="request-detail-value">${estDate}</span>
+                    </div>
+                </div>
+                <div class="request-footer">
+                    <span class="request-time">${postedDate}</span>
+                    <span class="status-chip status-pending">${postTypeLabel} Request</span>
+                </div>
+            </div>
+        `;
+    }
+
+    function formatEstDate(estDate) {
+        if (!estDate) return 'N/A';
+        const end = new Date(estDate);
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        end.setHours(0, 0, 0, 0);
+        const diffDays = Math.ceil((end - now) / (1000 * 60 * 60 * 24));
+        if (diffDays < 0) return `${Math.abs(diffDays)} days ago`;
+        if (diffDays === 0) return 'Today';
+        if (diffDays === 1) return 'Tomorrow';
+        return `in ${diffDays} days`;
+    }
+
+    function createAcceptedCard(post, skills) {
+        const providerName = post.Provider_Name || 'Unassigned Provider';
+        const providerPicture = post.Provider_Picture
+            ? `${window.BASE_URL}/file/user-files/${post.Provider_Picture}`
+            : null;
+        const rating = post.Provider_Rating ? parseFloat(post.Provider_Rating).toFixed(1) : '0.0';
+        const category = post.Category_Name || 'N/A';
+        const estDate = formatEstDate(post.Est_Date);
+        const budget = `LKR ${post.Requesting_Price || 0}/= (${post.Price_Type || 'Fixed'})`;
+        const description = post.Description || '';
+        const snippet = description.length > 300
+            ? escapeHtml(description.substring(0, 300)) + '...'
+            : escapeHtml(description);
+        const postedDate = formatDate(post.Created_At);
+        const postTypeLabel = post.Post_Type === 'direct' ? 'Direct' : 'Bid';
+
+        const avatarImg = providerPicture
+            ? `<img src="${providerPicture}" alt="${escapeHtml(providerName)}" class="accepted-avatar" onerror="this.remove()">`
+            : '';
+
+        return `
+            <div class="search-item accepted-card">
+                <input type="hidden" class="post-id" value="${post.Post_ID}">
+                <div class="accepted-header">
+                    <div class="accepted-provider-section">
+                        <div class="accepted-avatar-wrapper">
+                            <i class="fas fa-user"></i>
+                            ${avatarImg}
+                        </div>
+                        <div class="accepted-provider-info">
+                            <div class="accepted-provider-name">${escapeHtml(providerName)}</div>
+                            <div class="accepted-provider-rating">⭐ ${rating}</div>
+                        </div>
+                    </div>
+                    <div class="accepted-actions">
+                        <a href="${window.BASE_URL}/messages?new=${post.Provider_ID}" class="action-btn btn-edit" aria-label="Messages">
+                            <i class="fas fa-comments"></i> Messages
+                        </a>
+                        <button class="action-btn btn-edit" onclick="payPayment(${post.Post_ID})">
+                            <i class="fas fa-credit-card"></i> Pay
+                        </button>
+                        <button class="action-btn btn-view" onclick="viewPost(${post.Post_ID})">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <button class="action-btn btn-delete" onclick="cancelRequest(${post.Post_ID})">
+                            <i class="fas fa-trash"></i> Cancel
+                        </button>
+                    </div>
+                </div>
+                <div class="accepted-title">${escapeHtml(post.Title)}</div>
+                <div class="accepted-description">${snippet}</div>
+                <div class="accepted-details">
+                    <div class="accepted-detail-item">
+                        <span class="accepted-detail-label"><i class="fa-solid fa-coins"></i> Budget</span>
+                        <span class="accepted-detail-value">${budget}</span>
+                    </div>
+                    <div class="accepted-detail-item">
+                        <span class="accepted-detail-label"><i class="fa-solid fa-tag"></i> Category</span>
+                        <span class="accepted-detail-value">${escapeHtml(category)}</span>
+                    </div>
+                    <div class="accepted-detail-item">
+                        <span class="accepted-detail-label"><i class="fa-solid fa-calendar"></i> Est. Date</span>
+                        <span class="accepted-detail-value">${estDate}</span>
+                    </div>
+                </div>
+                <div class="accepted-footer">
+                    <span class="accepted-time">${postedDate}</span>
+                    <span class="status-chip status-accepted">${postTypeLabel} Request</span>
+                </div>
+            </div>
+        `;
+    }
+
+    function createOngoingCard(post, skills) {
+        const providerName    = post.Provider_Name || 'Unassigned Provider';
+        const providerPicture = post.Provider_Picture
+            ? `${window.BASE_URL}/file/user-files/${post.Provider_Picture}`
+            : null;
+        const rating      = post.Provider_Rating ? parseFloat(post.Provider_Rating).toFixed(1) : '0.0';
+        const category    = post.Category_Name || 'N/A';
+        const progress    = parseInt(post.Progress) || 0;
+        const estDate     = formatEstDate(post.Est_Date);
+        const startedDate = post.Started_At ? formatDate(post.Started_At) : formatDate(post.Created_At);
+        const budget      = `LKR ${post.Requesting_Price || 0}/= (${post.Price_Type || 'Fixed'})`;
+        const description = post.Description || '';
+        const snippet     = description.length > 300
+            ? escapeHtml(description.substring(0, 300)) + '...'
+            : escapeHtml(description);
+        const postTypeLabel = post.Post_Type === 'direct' ? 'Direct' : 'Bid';
+        const barColor = progress >= 75 ? '#008500' : progress >= 40 ? '#f59e0b' : '#3b82f6';
+
+        const avatarImg = providerPicture
+            ? `<img src="${providerPicture}" alt="${escapeHtml(providerName)}" class="ongoing-avatar" onerror="this.remove()">`
+            : '';
+
+        return `
+            <div class="search-item ongoing-card">
+                <input type="hidden" class="post-id" value="${post.Post_ID}">
+                <div class="ongoing-header">
+                    <div class="ongoing-provider-section">
+                        <div class="ongoing-avatar-wrapper">
+                            <i class="fas fa-user"></i>
+                            ${avatarImg}
+                        </div>
+                        <div class="ongoing-provider-info">
+                            <div class="ongoing-provider-name">${escapeHtml(providerName)}</div>
+                            <div class="ongoing-provider-rating">&#11088; ${rating}</div>
+                        </div>
+                    </div>
+                    <div class="ongoing-actions">
+                        <a href="${window.BASE_URL}/messages?new=${post.Provider_ID}" class="action-btn btn-edit" aria-label="Messages">
+                            <i class="fas fa-comments"></i> Messages
+                        </a>
+                        <button class="action-btn btn-view" onclick="ProjectDetailView.open(${post.Post_ID}, { role: 'client' })">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <button class="action-btn btn-edit" onclick="updateRequest(${post.Post_ID})">
+                            <i class="fas fa-file-alt"></i> Requirements
+                        </button>
+                        <button class="action-btn btn-delete" onclick="cancelOngoingProject(${post.Post_ID})">
+                            <i class="fas fa-trash"></i> Cancel
+                        </button>
+                    </div>
+                </div>
+                <div class="ongoing-title">${escapeHtml(post.Title)}</div>
+                <div class="ongoing-description">${snippet}</div>
+                <div class="ongoing-details">
+                    <div class="ongoing-detail-item">
+                        <span class="ongoing-detail-label"><i class="fa-solid fa-coins"></i> Budget</span>
+                        <span class="ongoing-detail-value">${budget}</span>
+                    </div>
+                    <div class="ongoing-detail-item">
+                        <span class="ongoing-detail-label"><i class="fa-solid fa-tag"></i> Category</span>
+                        <span class="ongoing-detail-value">${escapeHtml(category)}</span>
+                    </div>
+                    <div class="ongoing-detail-item">
+                        <span class="ongoing-detail-label"><i class="fa-solid fa-calendar"></i> Est. Date</span>
+                        <span class="ongoing-detail-value">${estDate}</span>
+                    </div>
+                    <div class="ongoing-detail-item">
+                        <span class="ongoing-detail-label"><i class="fa-solid fa-chart-line"></i> Progress</span>
+                        <span class="ongoing-detail-value" style="color:${barColor}; font-weight:700;">${progress}%</span>
+                    </div>
+                </div>
+                <div class="progress-container" style="margin-top:12px;">
+                    <div class="progress-track">
+                        <div class="progress-fill" style="width:${progress}%; background:${barColor};"></div>
+                    </div>
+                </div>
+                <div class="ongoing-footer">
+                    <span class="ongoing-time">${startedDate}</span>
+                    <span class="status-chip status-ongoing">${postTypeLabel} &middot; In Progress</span>
+                </div>
+            </div>
+        `;
+    }
+
+    function createPendingReviewCard(post, skills) {
+        const providerName    = post.Provider_Name || 'Unassigned Provider';
+        const providerPicture = post.Provider_Picture
+            ? `${window.BASE_URL}/file/user-files/${post.Provider_Picture}`
+            : null;
+        const rating      = post.Provider_Rating ? parseFloat(post.Provider_Rating).toFixed(1) : '0.0';
+        const category    = post.Category_Name || 'N/A';
+        const progress    = parseInt(post.Progress) || 0;
+        const estDate     = formatEstDate(post.Est_Date);
+        const submittedAt = post.Ended_At ? formatDate(post.Ended_At) : formatDate(post.Created_At);
+        const budget      = `LKR ${post.Requesting_Price || 0}/= (${post.Price_Type || 'Fixed'})`;
+        const description = post.Description || '';
+        const snippet     = description.length > 300
+            ? escapeHtml(description.substring(0, 300)) + '...'
+            : escapeHtml(description);
+        const postTypeLabel = post.Post_Type === 'direct' ? 'Direct' : 'Bid';
+
+        const avatarImg = providerPicture
+            ? `<img src="${providerPicture}" alt="${escapeHtml(providerName)}" class="ongoing-avatar" onerror="this.remove()">`
+            : '';
+
+        return `
+            <div class="search-item ongoing-card">
+                <input type="hidden" class="post-id" value="${post.Post_ID}">
+                <div class="ongoing-header">
+                    <div class="ongoing-provider-section">
+                        <div class="ongoing-avatar-wrapper">
+                            <i class="fas fa-user"></i>
+                            ${avatarImg}
+                        </div>
+                        <div class="ongoing-provider-info">
+                            <div class="ongoing-provider-name">${escapeHtml(providerName)}</div>
+                            <div class="ongoing-provider-rating">&#11088; ${rating}</div>
+                        </div>
+                    </div>
+                    <div class="ongoing-actions">
+                        <a href="${window.BASE_URL}/messages?new=${post.Provider_ID}" class="action-btn btn-edit" aria-label="Messages">
+                            <i class="fas fa-comments"></i> Messages
+                        </a>
+                        <button class="action-btn btn-view" onclick="ProjectDetailView.open(${post.Post_ID}, { role: 'client' })">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <button class="action-btn btn-edit" onclick="completePendingReviewProject(${post.Post_ID})">
+                            <i class="fas fa-circle-check"></i> Complete
+                        </button>
+                        <button class="action-btn btn-delete" onclick="openReopenProjectModal(${post.Post_ID})">
+                            <i class="fas fa-rotate-left"></i> Request Changes
+                        </button>
+                    </div>
+                </div>
+                <div class="ongoing-title">${escapeHtml(post.Title)}</div>
+                <div class="ongoing-description">${snippet}</div>
+                <div class="ongoing-details">
+                    <div class="ongoing-detail-item">
+                        <span class="ongoing-detail-label"><i class="fa-solid fa-coins"></i> Budget</span>
+                        <span class="ongoing-detail-value">${budget}</span>
+                    </div>
+                    <div class="ongoing-detail-item">
+                        <span class="ongoing-detail-label"><i class="fa-solid fa-tag"></i> Category</span>
+                        <span class="ongoing-detail-value">${escapeHtml(category)}</span>
+                    </div>
+                    <div class="ongoing-detail-item">
+                        <span class="ongoing-detail-label"><i class="fa-solid fa-calendar"></i> Est. Date</span>
+                        <span class="ongoing-detail-value">${estDate}</span>
+                    </div>
+                    <div class="ongoing-detail-item">
+                        <span class="ongoing-detail-label"><i class="fa-solid fa-chart-line"></i> Progress</span>
+                        <span class="ongoing-detail-value" style="color:#f59e0b; font-weight:700;">${progress}%</span>
+                    </div>
+                </div>
+                <div class="progress-container" style="margin-top:12px;">
+                    <div class="progress-track">
+                        <div class="progress-fill" style="width:${progress}%; background:#f59e0b;"></div>
+                    </div>
+                </div>
+                <div class="ongoing-footer">
+                    <span class="ongoing-time">Submitted ${submittedAt}</span>
+                    <span class="status-chip" style="background:#fff7ed; color:#c2410c; border:1px solid #fed7aa;">${postTypeLabel} &middot; Pending Review</span>
+                </div>
+            </div>
+        `;
+    }
+
+    function createCompletedCard(post, skills) {
+        const providerName    = post.Provider_Name || 'Unassigned Provider';
+        const providerPicture = post.Provider_Picture
+            ? `${window.BASE_URL}/file/user-files/${post.Provider_Picture}`
+            : null;
+        const rating      = post.Provider_Rating ? parseFloat(post.Provider_Rating).toFixed(1) : '0.0';
+        const category    = post.Category_Name || 'N/A';
+        const completedAt = post.Ended_At ? formatDate(post.Ended_At) : formatDate(post.Created_At);
+        const startedAt   = post.Started_At ? formatDate(post.Started_At) : '—';
+        const budget      = `LKR ${post.Requesting_Price || 0}/= (${post.Price_Type || 'Fixed'})`;
+        const description = post.Description || '';
+        const snippet     = description.length > 300
+            ? escapeHtml(description.substring(0, 300)) + '...'
+            : escapeHtml(description);
+        const postTypeLabel = post.Post_Type === 'direct' ? 'Direct' : 'Bid';
+
+        const avatarImg = providerPicture
+            ? `<img src="${providerPicture}" alt="${escapeHtml(providerName)}" class="ongoing-avatar" onerror="this.remove()">`
+            : '';
+
+        // Build reviews HTML
+        let reviewsHTML = '';
+        if (post.reviews && post.reviews.length) {
+            const reviewCards = post.reviews.map(r => {
+                const starsHTML = renderStarsHTML(r.Rating || 0);
+                const reviewer = r.Rated_By === 'Client' ? 'Your Review' : 'Provider\'s Review';
+                const rDate = r.Left_At ? new Date(r.Left_At).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '';
+                const filesHTML = r.files && r.files.length
+                    ? `<div class="review-card-files">
+                        ${r.files.map(f => {
+                            const name = f.split('/').pop();
+                            const url  = `${window.BASE_URL}/file/review-files/${encodeURIComponent(f)}`;
+                            return `<a href="${url}" target="_blank" class="review-file-chip" title="${escapeHtml(name)}">
+                                <i class="fa-solid fa-paperclip"></i> ${escapeHtml(name)}
+                            </a>`;
+                        }).join('')}
+                    </div>`
+                    : '';
+                return `
+                    <div class="completed-review-card ${r.Rated_By === 'Client' ? 'review-own' : 'review-provider'}">
+                        <div class="review-card-header">
+                            <span class="review-card-label">${escapeHtml(reviewer)}</span>
+                            <span class="review-card-date">${escapeHtml(rDate)}</span>
+                        </div>
+                        <div class="review-card-stars">${starsHTML}</div>
+                        ${r.Title ? `<div class="review-card-title">${escapeHtml(r.Title)}</div>` : ''}
+                        ${r.Description ? `<div class="review-card-desc">${escapeHtml(r.Description)}</div>` : ''}
+                        ${filesHTML}
+                    </div>`;
+            }).join('');
+
+            reviewsHTML = `
+                <div class="completed-reviews-section">
+                    <div class="completed-reviews-title"><i class="fa-solid fa-star"></i> Reviews</div>
+                    ${reviewCards}
+                </div>`;
+        }
+
+        return `
+            <div class="search-item ongoing-card">
+                <input type="hidden" class="post-id" value="${post.Post_ID}">
+                <div class="ongoing-header">
+                    <div class="ongoing-provider-section">
+                        <div class="ongoing-avatar-wrapper">
+                            <i class="fas fa-user"></i>
+                            ${avatarImg}
+                        </div>
+                        <div class="ongoing-provider-info">
+                            <div class="ongoing-provider-name">${escapeHtml(providerName)}</div>
+                            <div class="ongoing-provider-rating">&#11088; ${rating}</div>
+                        </div>
+                    </div>
+                    <div class="ongoing-actions">
+                        <a href="${window.BASE_URL}/messages?new=${post.Provider_ID}" class="action-btn btn-edit" aria-label="Messages">
+                            <i class="fas fa-comments"></i> Messages
+                        </a>
+                        <button class="action-btn btn-view" onclick="ProjectDetailView.open(${post.Post_ID}, { role: 'client' })">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                    </div>
+                </div>
+                <div class="ongoing-title">${escapeHtml(post.Title)}</div>
+                <div class="ongoing-description">${snippet}</div>
+                <div class="ongoing-details">
+                    <div class="ongoing-detail-item">
+                        <span class="ongoing-detail-label"><i class="fa-solid fa-coins"></i> Budget</span>
+                        <span class="ongoing-detail-value">${budget}</span>
+                    </div>
+                    <div class="ongoing-detail-item">
+                        <span class="ongoing-detail-label"><i class="fa-solid fa-tag"></i> Category</span>
+                        <span class="ongoing-detail-value">${escapeHtml(category)}</span>
+                    </div>
+                    <div class="ongoing-detail-item">
+                        <span class="ongoing-detail-label"><i class="fa-solid fa-calendar"></i> Started</span>
+                        <span class="ongoing-detail-value">${startedAt}</span>
+                    </div>
+                    <div class="ongoing-detail-item">
+                        <span class="ongoing-detail-label"><i class="fa-solid fa-circle-check"></i> Completed</span>
+                        <span class="ongoing-detail-value">${completedAt}</span>
+                    </div>
+                </div>
+                <div class="progress-container" style="margin-top:12px;">
+                    <div class="progress-track">
+                        <div class="progress-fill" style="width:100%; background:#16a34a;"></div>
+                    </div>
+                </div>
+                ${reviewsHTML}
+                <div class="ongoing-footer">
+                    <span class="ongoing-time">Completed ${completedAt}</span>
+                    <span class="status-chip" style="background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0;">${postTypeLabel} &middot; Completed</span>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderStarsHTML(rating) {
+        let html = '';
+        for (let i = 1; i <= 5; i++) {
+            html += i <= rating
+                ? '<i class="fa-solid fa-star star-filled"></i>'
+                : '<i class="fa-regular fa-star star-empty"></i>';
+        }
+        return html;
     }
 
     function updateAsExpired(id) {
@@ -792,6 +1412,10 @@
             // Initial load
             showSection('pending');
         });
+    }
+
+    function payPayment(id) {
+        viewDialogBox('confirm-payment');
 
     function viewPost(id) {
         viewDialogBox('view-post-popup');
@@ -824,6 +1448,7 @@
                     return;
                 }
                 const providerName = post.Provider_Name || 'Unassigned provider';
+                console.log('Fetched post details:', post);
                 // Format date
                 const publishDate = post.Published_At ?
                     new Date(post.Published_At).toLocaleDateString('en-US', {
@@ -834,7 +1459,7 @@
 
                 // Build skills HTML
                 const skillsHTML = post.skills && post.skills.length > 0
-                    ? post.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')
+                    ? post.skills.map(skill => `<span class="skill-tag">${escapeHtml(skill)}</span>`).join('')
                     : '<span>No skills specified</span>';
 
                 // Replace form content with a div wrapper for proper styling
@@ -850,7 +1475,7 @@
                     </div>
                     <div class="post-view-section">
                         <div class="section-title">Provider</div>
-                        <div class="post-provider">${providerName}</div>
+                        <div class="post-provider">${escapeHtml(providerName)}</div>
                     </div> 
                     <div class="post-view-section">
                         <div class="section-title">Required Skills</div>
@@ -1009,12 +1634,12 @@
                 </div>
             `;
             })
-            document.getElementById('confirmPaymentBtn').addEventListener('click', function () {
+            // document.getElementById('confirmPaymentBtn').addEventListener('click', function () {
                 
-                closeDialogBox('confirm-payment');
-                window.showSuccessToast("Payment Initiated", "You will be redirected to the payment gateway.");
-                console.log(`Redirecting to payment for Post ID: ${id}`);
-        })
+            //     closeDialogBox('confirm-payment');
+            //     window.showSuccessToast("Payment Initiated", "You will be redirected to the payment gateway.");
+            //     console.log(`Redirecting to payment for Post ID: ${id}`);
+        
             .catch(error => {
                 console.error('Error fetching post:', error);
                 formContainer.innerHTML = `
@@ -1025,135 +1650,252 @@
                     </div>
                 `;
             });
+
+        const confirmPaymentBtn = document.getElementById('confirmPaymentBtn');
+
+        // Remove previous event listeners to avoid multiple triggers
+        const newconfirmPaymentBtn = confirmPaymentBtn.cloneNode(true);
+        confirmPaymentBtn.parentNode.replaceChild(newconfirmPaymentBtn, confirmPaymentBtn);
+
+        newconfirmPaymentBtn.addEventListener('click', function () {
+            fetch("<?= BASE_URL ?>/requests/payment/" + id, {
+                method: 'POST'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        closeDialogBox('confirm-payment');
+                        window.showSuccessToast("Success!", "Payment initiated successfully");
+
+                        // Remove from DOM with animation
+                        const postElement = document.querySelector(`.search-item input[value="${id}"]`)?.closest('.search-item');
+                        if (postElement) {
+                            postElement.style.transition = 'all 0.3s ease';
+                            postElement.style.opacity = '0';
+                            postElement.style.transform = 'translateX(-20px)';
+
+                            setTimeout(() => {
+                                postElement.remove();
+
+                                // Check if section is now empty
+                                const activeSection = document.querySelector('.requests-section:not([style*="display: none"])');
+                                const itemList = activeSection?.querySelector('.item-list');
+                                const remainingPosts = itemList?.querySelectorAll('.search-item');
+
+                                if (remainingPosts && remainingPosts.length === 0) {
+                                    const status = activeSection.classList.contains('pending') ? 'pending' :
+                                        activeSection.classList.contains('accepted') ? 'accepted' : 'ongoing';
+                                    showEmptyState(status, itemList);
+                                }
+                            }, 300);
+                        }
+                    } else {
+                        window.showErrorToast("Error", data.error || 'Failed to initiate payment');
+                    }
+                })
+                .catch(error => {
+                    console.log('cancelRequest error:', error);
+                    console.error('Error:', error);
+                    showErrorToast("Error", 'An error occurred while cancelling the request. Please try again.');
+                });
+        });
     }
 
-    function updateRequest(id, mode = 'edit') {
-        viewDialogBox('create-post-popup');
+    function updateRequest(postId) {
+        window._reqCurrentProjectId = null;
+        window._reqCurrentPostId    = postId;
 
-        fetch("<?= BASE_URL ?>/requests/view/" + id)
-            .then(response => response.json())
-            .then(post => {
-                if (post.error) {
-                    console.error('Error fetching post:', post.error);
-                    return;
-                }
+        // Reset to list tab and show dialog
+        reqSwitchTab('req-list-pane');
+        viewDialogBox('update-requirements-popup');
 
-                const root = document.getElementById("create-post-popup");
-                root.querySelector(".title").innerText = "Update Request";
-                root.querySelectorAll(".label").forEach(label => {
-                    label.classList.add("label-float");
-                });
-                root.querySelector("#field-skill-label").classList.remove("label-float");
+        // Reset add-form
+        const form = document.getElementById('req-add-form');
+        if (form) form.reset();
 
-                //root.querySelector("input[name='title']").value = post.Title || '';
-                //root.querySelector("textarea[name='description']").value = post.Description || '';
-                //root.querySelector("input[name='category']").value = post.Category_Name || '';
-                //document.getElementById("Category_ID").value = post.Category_ID || '';
+        // Wire up the submit button (replace listener to avoid duplicates)
+        const submitBtn = document.getElementById('btnSubmitReq');
+        const newSubmitBtn = submitBtn.cloneNode(true);
+        submitBtn.parentNode.replaceChild(newSubmitBtn, submitBtn);
+        newSubmitBtn.addEventListener('click', () => submitNewRequirement());
 
-                //root.querySelector("input[name='price']").value = post.Requesting_Price || '';
-                //root.querySelector("input[name='pricetype']").value = post.Price_Type || '';
-                //root.querySelector("input[name='duration']").value = post.Duration || '';
-                //root.querySelector("input[name='durationtype']").value = post.Duration_Type || '';
-                //root.querySelector("input[name='level']").value = post.Level || '';
+        // Wire tab clicks
+        document.querySelectorAll('.req-tab').forEach(btn => {
+            const clone = btn.cloneNode(true);
+            btn.parentNode.replaceChild(clone, btn);
+            clone.addEventListener('click', () => reqSwitchTab(clone.dataset.tab));
+        });
 
-                const endAtInput = root.querySelector("input[name='endat']");
-                if (post.End_At) {
-                    // End_At might be "2025-12-31 00:00:00" or "2025-12-31"
-                    let dateValue = post.End_At.split(' ')[0]; // Get just the date part "2025-12-31"
+        // Load the requirements list
+        reqLoadRequirements(postId);
+    }
 
-                    // Verify it's a valid date and format is correct
-                    const dateObj = new Date(dateValue);
-                    if (!isNaN(dateObj.getTime())) {
-                        // Format as YYYY-MM-DD
-                        const year = dateObj.getFullYear();
-                        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-                        const day = String(dateObj.getDate()).padStart(2, '0');
-                        dateValue = `${year}-${month}-${day}`;
+    function reqSwitchTab(tabId) {
+        document.querySelectorAll('.req-tab').forEach(t => {
+            t.classList.toggle('active', t.dataset.tab === tabId);
+        });
+        document.querySelectorAll('.req-pane').forEach(p => {
+            p.style.display = p.id === tabId ? 'block' : 'none';
+        });
+    }
 
-                        console.log("Setting end date to:", dateValue);
-                        endAtInput.value = dateValue;
-                    } else {
-                        console.error("Invalid date:", post.End_At);
-                        endAtInput.value = '';
-                    }
-                } else {
-                    endAtInput.value = '';
-                }
+    function reqLoadRequirements(postId) {
+        const loading = document.getElementById('req-loading');
+        const body    = document.getElementById('req-list-body');
+        if (loading) loading.style.display = '';
+        if (body)    body.style.display    = 'none';
 
-                // Use selectCategory to load skills for the category
-                if (post.Category_ID) {
-                    const categoryOption = document.querySelector(`.search-select-container [data-id="${post.Category_ID}"]`);
-                    if (categoryOption) {
-                        // Call selectCategory with skipReset = true to not clear existing chips yet
-                        selectCategory({ target: categoryOption }, true);
-                    }
-                }
+        fetch(`${window.BASE_URL}/project/getrequirements/${postId}`)
+            .then(r => r.json())
+            .then(json => {
+                if (!json.success) throw new Error(json.error || 'Failed to load');
 
-                // Add skills after loading category skills
-                setTimeout(() => {
-                    const skillsChips = root.querySelector("#SkillsChips");
-                    skillsChips.innerHTML = '<input type="hidden" id="Skills" name="skills"><p>No skill selected</p>';
+                const { project_id, requirements } = json.data;
+                window._reqCurrentProjectId = project_id;
 
-                    if (post.skills && post.skills.length > 0) {
-                        post.skills.forEach(skill => {
-                            const skillOptions = document.getElementById("SkillsOptionList").querySelectorAll('[data-id]');
-                            const matchingOption = Array.from(skillOptions).find(opt => opt.textContent.trim() === skill);
-
-                            if (matchingOption) {
-                                addChip('SkillsChips', skill, matchingOption.dataset.id);
-                            }
-                        });
-                    }
-                }, 500);
-
-                // Change buttons
-                const saveDraftBtn = root.querySelector('[data-role="save-draft"]');
-                const publishBtn = root.querySelector('[data-role="publish"]');
-                const savePostBtn = root.querySelector('[data-role="save-post"]');
-
-                if (mode === 'repost') {
-                    // Repost flow: force date to today and use confirmation before publishing.
-                    root.querySelector("input[name='endat']").value = getTodayDateString();
-
-                    if (saveDraftBtn) saveDraftBtn.style.display = 'none';
-                    if (publishBtn) publishBtn.style.display = 'none';
-                    if (savePostBtn) {
-                        savePostBtn.style.display = '';
-                        savePostBtn.removeAttribute('data-post-id');
-                        savePostBtn.innerHTML = '<i class="fa-solid fa-rocket"></i> Repost Request';
-
-                        const newSaveBtn = savePostBtn.cloneNode(true);
-                        savePostBtn.parentNode.replaceChild(newSaveBtn, savePostBtn);
-                        newSaveBtn.onclick = function () {
-                            openPublishConfirmWithAction(function () {
-                                submitPost('publish');
-                            });
-                        };
-                    }
-                } else {
-                    if (saveDraftBtn) saveDraftBtn.style.display = 'none';
-                    if (publishBtn) publishBtn.style.display = 'none';
-                    if (savePostBtn) {
-                        savePostBtn.style.display = '';
-                        savePostBtn.setAttribute('data-post-id', post.Post_ID);
-                        savePostBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Request';
-
-                        // Remove old event listeners and add new one
-                        const newSaveBtn = savePostBtn.cloneNode(true);
-                        savePostBtn.parentNode.replaceChild(newSaveBtn, savePostBtn);
-                        newSaveBtn.onclick = saveEditedPost;
-                    }
+                if (loading) loading.style.display = 'none';
+                if (body) {
+                    body.innerHTML = reqBuildListHTML(requirements);
+                    body.style.display = '';
                 }
             })
-            .catch(error => {
-                console.error('Error fetching post:', error);
-                alert('Failed to load post details. Please try again.');
+            .catch(err => {
+                if (loading) loading.innerHTML = `
+                    <div class="error-state">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <p>Failed to load requirements.</p>
+                        <button onclick="reqLoadRequirements(${postId})" class="retry-btn">Retry</button>
+                    </div>`;
             });
+    }
+
+    function reqBuildListHTML(requirements) {
+        if (!requirements || requirements.length === 0) {
+            return `<div class="req-empty">
+                        <i class="fa-solid fa-clipboard-list"></i>
+                        <p>No requirements yet. Use the <strong>Add New</strong> tab to submit one.</p>
+                    </div>`;
+        }
+
+        return requirements.map(req => {
+            const statusMap = {
+                pending:  { cls: 'req-status-pending',  icon: 'fa-clock',        label: 'Pending' },
+                approved: { cls: 'req-status-approved', icon: 'fa-circle-check', label: 'Approved' },
+                rejected: { cls: 'req-status-rejected', icon: 'fa-circle-xmark', label: 'Rejected' },
+            };
+            const s = statusMap[req.Status] || statusMap['pending'];
+
+            const createdDate = req.Created_At
+                ? new Date(req.Created_At).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' })
+                : 'N/A';
+
+            let dateLine = `<span class="req-date-item"><i class="fa-solid fa-calendar-plus"></i> Requested: ${createdDate}</span>`;
+            if (req.Status === 'approved' && req.Approved_At) {
+                const d = new Date(req.Approved_At).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
+                dateLine += `<span class="req-date-item req-date-approved"><i class="fa-solid fa-calendar-check"></i> Approved: ${d}</span>`;
+            }
+            if (req.Status === 'rejected' && req.Rejected_At) {
+                const d = new Date(req.Rejected_At).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
+                dateLine += `<span class="req-date-item req-date-rejected"><i class="fa-solid fa-calendar-xmark"></i> Rejected: ${d}</span>`;
+            }
+
+            const filesHTML = req.files && req.files.length > 0
+                ? `<div class="req-files-block">
+                       <div class="req-files-label"><i class="fa-solid fa-paperclip"></i> Attachments</div>
+                       <div class="req-files">
+                           ${req.files.map(f => {
+                               const name = f.split('/').pop();
+                               const url  = `${window.BASE_URL}/file/project-requirements/${f}`;
+                               return `<a href="${url}" target="_blank" class="req-file-chip" title="${escapeHtml(name)}">
+                                           <i class="fa-solid fa-file"></i> ${escapeHtml(name)}
+                                       </a>`;
+                           }).join('')}
+                       </div>
+                   </div>`
+                : '';
+
+            const rejectionReasonHTML = (req.Status === 'rejected' && req.Rejection_Reason)
+                ? `<div class="req-rejection-banner">
+                       <i class="fa-solid fa-comment-slash"></i>
+                       <div><strong>Rejection Reason:</strong> ${escapeHtml(req.Rejection_Reason)}</div>
+                   </div>`
+                : '';
+
+            return `
+                <div class="req-card req-card-${req.Status || 'pending'}">
+                    <div class="req-card-stripe"></div>
+                    <div class="req-card-body">
+                        <div class="req-card-header">
+                            <div class="req-card-title">${escapeHtml(req.Requirement_Title || 'Untitled')}</div>
+                            <span class="req-status-chip ${s.cls}">
+                                <i class="fa-solid ${s.icon}"></i> ${s.label}
+                            </span>
+                        </div>
+                        ${req.Requirement_Description
+                            ? `<div class="req-card-desc">${escapeHtml(req.Requirement_Description)}</div>`
+                            : ''}
+                        ${filesHTML}
+                        ${rejectionReasonHTML}
+                    </div>
+                    <div class="req-card-footer">
+                        <div class="req-card-dates">${dateLine}</div>
+                    </div>
+                </div>`;
+        }).join('');
+    }
+
+    async function submitNewRequirement() {
+        const projectId   = window._reqCurrentProjectId;
+        const title       = document.getElementById('reqTitle')?.value.trim()       || '';
+        const description = document.getElementById('reqDescription')?.value.trim() || '';
+        const filesInput  = document.getElementById('reqFiles');
+
+        if (!projectId) {
+            window.showErrorToast('Error', 'Project not loaded. Please reopen the dialog.');
+            return;
+        }
+        if (!title) {
+            document.getElementById('reqTitle')?.focus();
+            window.showErrorToast('Error', 'Please enter a requirement title.');
+            return;
+        }
+
+        const btn = document.getElementById('btnSubmitReq');
+        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving…'; }
+
+        const fd = new FormData();
+        fd.append('project_id',   projectId);
+        fd.append('title',        title);
+        fd.append('description',  description);
+        if (filesInput && filesInput.files.length) {
+            Array.from(filesInput.files).forEach(f => fd.append('req_files[]', f));
+        }
+
+        try {
+            const res  = await fetch(`${window.BASE_URL}/project/add-requirement`, { method: 'POST', body: fd });
+            const data = await res.json();
+
+            if (!data.success) {
+                window.showErrorToast('Error', data.error || 'Failed to submit requirement.');
+                return;
+            }
+
+            window.showSuccessToast('Success!', 'Requirement submitted successfully.');
+            document.getElementById('req-add-form')?.reset();
+
+            // Switch back to list tab and refresh
+            reqSwitchTab('req-list-pane');
+            reqLoadRequirements(window._reqCurrentPostId);
+        } catch (err) {
+            window.showErrorToast('Error', 'An error occurred: ' + err.message);
+        } finally {
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Requirement'; }
+        }
     }
 
     function cancelOngoingProject(id) {
     viewDialogBox('cancel-ongoing-project');
-    const confirmCancelBtn = document.getElementById('cancel-ongoing-project');
+    const confirmCancelBtn = document.getElementById('confirmCancelBtn');
 
     // Remove previous event listeners
     const newConfirmCancelBtn = confirmCancelBtn.cloneNode(true);
@@ -1203,6 +1945,147 @@
     });
 }
 
+function completePendingReviewProject(postId) {
+    window._completeProjectPostId = postId;
+
+    // Reset form
+    document.getElementById('reviewRating').value = '';
+    const titleEl = document.getElementById('reviewTitle');
+    const descEl  = document.getElementById('reviewDescription');
+    const filesEl = document.getElementById('reviewFiles');
+    if (titleEl)  titleEl.value = '';
+    if (descEl)   descEl.value  = '';
+    if (filesEl)  filesEl.value = '';
+    document.getElementById('ratingError').style.display = 'none';
+
+    // Reset star display
+    document.querySelectorAll('#starRatingInput i').forEach(s => {
+        s.className   = 'fa-regular fa-star';
+        s.style.color = '';
+    });
+
+    // Wire confirm button (clone to prevent duplicate listeners)
+    const btn    = document.getElementById('btnConfirmCompleteProject');
+    const newBtn = btn.cloneNode(true);
+    btn.parentNode.replaceChild(newBtn, btn);
+    newBtn.addEventListener('click', submitCompleteProject);
+
+    viewDialogBox('complete-project-popup');
+}
+
+function submitCompleteProject() {
+    const postId = window._completeProjectPostId;
+    const rating = document.getElementById('reviewRating').value;
+
+    if (!rating) {
+        document.getElementById('ratingError').style.display = '';
+        return;
+    }
+    document.getElementById('ratingError').style.display = 'none';
+
+    const btn = document.getElementById('btnConfirmCompleteProject');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...'; }
+
+    const fd = new FormData();
+    fd.append('rating',      rating);
+    fd.append('title',       document.getElementById('reviewTitle')?.value.trim()       || '');
+    fd.append('description', document.getElementById('reviewDescription')?.value.trim() || '');
+    Array.from(document.getElementById('reviewFiles')?.files || []).forEach(f => fd.append('review_files[]', f));
+
+    fetch(`${window.BASE_URL}/project/complete/${postId}`, {
+        method: 'POST',
+        body: fd,
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                closeDialogBox('complete-project-popup');
+                window.showSuccessToast('Success!', 'Project completed and review submitted.');
+                loadPosts('pending-review');
+                loadPosts('completed');
+            } else {
+                window.showErrorToast('Error', data.error || 'Failed to complete project.');
+            }
+        })
+        .catch(error => {
+            console.error('submitCompleteProject error:', error);
+            window.showErrorToast('Error', 'An error occurred while completing the project.');
+        })
+        .finally(() => {
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Complete &amp; Submit Review'; }
+        });
+}
+
+function openReopenProjectModal(postId) {
+    window._reopenProjectPostId = postId;
+    const reasonInput = document.getElementById('reopenReason');
+    const filesInput  = document.getElementById('reopenFiles');
+    if (reasonInput) reasonInput.value = '';
+    if (filesInput) filesInput.value = '';
+
+    const confirmBtn = document.getElementById('btnConfirmReopenProject');
+    if (confirmBtn) {
+        const newBtn = confirmBtn.cloneNode(true);
+        confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+        newBtn.addEventListener('click', submitReopenProject);
+    }
+
+    viewDialogBox('reopen-project-popup');
+}
+
+function submitReopenProject() {
+    const postId = window._reopenProjectPostId;
+    const reason = document.getElementById('reopenReason')?.value.trim() || '';
+    const files  = document.getElementById('reopenFiles')?.files || [];
+
+    if (!postId) {
+        window.showErrorToast('Error', 'Project not selected.');
+        return;
+    }
+
+    if (!reason) {
+        window.showErrorToast('Error', 'Please provide a reason before moving back to ongoing.');
+        document.getElementById('reopenReason')?.focus();
+        return;
+    }
+
+    const btn = document.getElementById('btnConfirmReopenProject');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    }
+
+    const fd = new FormData();
+    fd.append('reason', reason);
+    Array.from(files).forEach(file => fd.append('reopen_files[]', file));
+
+    fetch(`${window.BASE_URL}/project/reopen/${postId}`, {
+        method: 'POST',
+        body: fd,
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                closeDialogBox('reopen-project-popup');
+                window.showSuccessToast('Success!', 'Project moved back to ongoing.');
+                loadPosts('pending-review');
+                loadPosts('ongoing');
+            } else {
+                window.showErrorToast('Error', data.error || 'Failed to move project back to ongoing.');
+            }
+        })
+        .catch(error => {
+            console.error('submitReopenProject error:', error);
+            window.showErrorToast('Error', 'An error occurred while saving your request.');
+        })
+        .finally(() => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-rotate-left"></i> Move to Ongoing';
+            }
+        });
+}
+
     /*document.addEventListener('DOMContentLoaded', function () {
         // Setup search input handler with debouncing
         document.getElementById('searchInput').addEventListener('change', handleSearch);
@@ -1248,6 +2131,40 @@
                 }
             });
         }*/
+
+// Star rating interaction for complete-project modal
+document.addEventListener('DOMContentLoaded', function () {
+    const stars     = document.querySelectorAll('#starRatingInput i');
+    const ratingIn  = document.getElementById('reviewRating');
+
+    stars.forEach(star => {
+        star.addEventListener('click', function () {
+            const val = parseInt(this.dataset.value);
+            if (ratingIn) ratingIn.value = val;
+            updateStars(val);
+        });
+
+        star.addEventListener('mouseenter', function () {
+            const val = parseInt(this.dataset.value);
+            stars.forEach((s, i) => {
+                s.className   = i < val ? 'fa-solid fa-star' : 'fa-regular fa-star';
+                s.style.color = i < val ? '#f59e0b' : '#d1d5db';
+            });
+        });
+
+        star.addEventListener('mouseleave', function () {
+            const selected = parseInt(ratingIn?.value) || 0;
+            updateStars(selected);
+        });
+    });
+
+    function updateStars(val) {
+        stars.forEach((s, i) => {
+            s.className   = i < val ? 'fa-solid fa-star' : 'fa-regular fa-star';
+            s.style.color = i < val ? '#f59e0b' : '';
+        });
+    }
+});
 
 </script>
 
