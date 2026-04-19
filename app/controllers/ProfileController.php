@@ -1,5 +1,12 @@
 <?php
 
+require_once __DIR__ . '/../../helpers/upload.php';
+require_once __DIR__ . '/../models/CategoryModel.php';
+require_once __DIR__ . '/../models/LocationModel.php';
+
+require_once __DIR__ . '/../services/provider.php';
+
+
 class ProfileController extends BaseController
 {
 
@@ -22,6 +29,14 @@ class ProfileController extends BaseController
             $viewFile = __DIR__ . '/../views/client/Profile/index.php';
         } elseif ($role === 'Provider') {
             $user = $this->providerModel->getProviderById($userId);
+
+
+            $model = new CategoryModel();
+            $Categories = $model->getCategories();
+            $model = new LocationModel();
+            $Districts = $model->getDistricts();
+
+
             $viewFile = __DIR__ . '/../views/provider/Profile/index.php';
         } else {
             $this->notFound();
@@ -51,23 +66,33 @@ class ProfileController extends BaseController
 
 
 
-        
+
         $ok = false;
         if ($role === 'Client') {
             $ok = $this->clientModel->updateProfile($userId, $firstName, $lastName, $contact, $gender, $website, $bio);
+
+            $_SESSION['user_name'] = $firstName . ' ' . $lastName; // Update session name for immediate UI update
         } elseif ($role === 'Provider') {
-            $ok = $this->providerModel->updateProfile($userId, $firstName, $lastName, $contact, $gender, $website, $bio);
+
+
+            $Resume = uploadFile("Resume",  __DIR__ . '/../../uploads/Users/', "application/pdf");
+
+            $ok = $this->providerModel->updateProfile($userId, $firstName, $lastName, $contact, $gender, $website, $bio, $Resume);
+
+            $_SESSION['user_name'] = $firstName . ' ' . $lastName; // Update session name for immediate UI update
         } else {
             $this->htmlError(403);
             return;
         }
 
-        $redirect = $_SERVER['HTTP_REFERER'] ?? "/profile";
-        $_SESSION['flash'] = $ok
+
+        $returnValue = $ok
             ? ['type' => 'success', 'message' => 'Profile saved']
             : ['type' => 'error',   'message' => 'Error updating profile'];
 
-        header("Location: " . $redirect);
+        header('Content-Type: application/json');
+        echo json_encode($returnValue);
+
         exit;
     }
 
@@ -222,6 +247,128 @@ class ProfileController extends BaseController
             $_SESSION['flash'] = ['type' => 'error', 'message' => 'Error deleting account'];
             header("Location: /profile");
             exit;
+        }
+    }
+
+    public function changeProfilePicture()
+    {
+        $this->ensureAuth();
+
+        $userId = $_SESSION['user_id'];
+        $role   = $_SESSION['role'];
+
+        if (!isset($_FILES['profile_pic']) || $_FILES['profile_pic']['error'] !== UPLOAD_ERR_OK) {
+            header('Content-Type: application/json');
+            echo json_encode(['ok' => false, 'message' => 'No file uploaded']);
+            return;
+        }
+
+        $profilePic = uploadFile('profile_pic', __DIR__ . '/../../uploads/Users/', 'image/*');
+        if (!$profilePic) {
+            header('Content-Type: application/json');
+            echo json_encode(['ok' => false, 'message' => 'File upload failed']);
+            return;
+        }
+
+        $ok = false;
+        if ($role === 'Client') {
+            $ok = $this->clientModel->updateProfilePicture($userId, $profilePic);
+            $_SESSION['user_image'] = $profilePic; // Update session image for immediate UI update
+        } elseif ($role === 'Provider') {
+            $ok = $this->providerModel->updateProfilePicture($userId, $profilePic);
+            $_SESSION['user_image'] = $profilePic; // Update session image for immediate UI update
+        } else {
+            $_SESSION['flash'] = ['type' => 'error', 'message' => 'Invalid user role'];
+            header("Location: /profile");
+            exit;
+        }
+
+        $return = $ok
+            ? ['type' => 'success', 'message' => 'Profile picture saved', 'Profile_Picture' =>  BASE_URL . '/file/user-files/' . $profilePic]
+            : ['type' => 'error',   'message' => 'Error updating profile picture'];
+
+        header('Content-Type: application/json');
+        echo json_encode($return);
+    }
+
+
+    public function changePassword()
+    {
+        if (!isset($_SESSION['user_id']) || !isset($_SESSION['role'])) {
+            header('Content-Type: application/json');
+            echo json_encode(['ok' => false, 'message' => 'Not authorized']);
+            return;
+        }
+
+        $userId = $_SESSION['user_id'];
+        $role   = $_SESSION['role'];
+        if ($role === 'Client') {
+            $model  = $this->clientModel;
+        } elseif ($role === 'Provider') {
+            $model  = $this->providerModel;
+        } else {
+            header('Content-Type: application/json');
+            echo json_encode(['ok' => false, 'message' => 'Invalid user role']);
+            return;
+        }
+
+        if (!$model) {
+            header('Content-Type: application/json');
+            echo json_encode(['ok' => false, 'message' => 'User not found']);
+            return;
+        }
+
+        $data = json_decode(file_get_contents("php://input"), true);
+
+        $CurrentPassword = $model->getCurrentPassword($userId);
+
+        if (password_verify($data["Old_Password"], $CurrentPassword)) {
+            $hashed = password_hash($data["New_Password"], PASSWORD_DEFAULT);
+            if ($model->updatePassword($userId, $hashed)) {
+                header('Content-Type: application/json');
+                echo json_encode(['ok' => true, 'message' => 'Password Change Successful']);
+            } else {
+                header('Content-Type: application/json');
+                echo json_encode(['ok' => false, 'message' => 'Error updating password']);
+            }
+        } else {
+            header('Content-Type: application/json');
+            echo json_encode(['ok' => false, 'message' => 'Old password is incorrect']);
+            return;
+        }
+    }
+
+
+    public function addService()
+    {
+        $this->ensureAuth();
+        if (addServicesToProvider($_POST, $_SESSION['user_id'])) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => true, 'message' => 'New service added successfully']);
+        } else {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Error adding service']);
+        }
+    }
+
+    public function removeService()
+    {
+        $this->ensureAuth();
+
+        $serviceId = $_POST['provider_category_id'] ?? null;
+
+        if (!$serviceId) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Service ID is required']);
+            return;
+        }
+
+        if ($this->providerModel->removeService($serviceId)) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => true, 'message' => 'Service removed successfully']);
+        } else {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Error removing service']);
         }
     }
 }

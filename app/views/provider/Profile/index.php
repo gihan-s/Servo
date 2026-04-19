@@ -17,37 +17,54 @@ require_once __DIR__ . '/../../../../config.php';
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
     <!--scripts-->
-    <script src="<?= BASE_URL ?>/assets/js/elementScript.js" defer></script>
     <script src="<?= BASE_URL ?>/assets/js/profile.js" defer></script>
+
+    <style>
+        #AddServiceDialog h5 {
+            text-align: center;
+            font-size: 0.9em;
+            margin-top: 35px;
+            margin-bottom: 15px;
+        }
+    </style>
 </head>
 
 <body>
     <?php include_once __DIR__ . '/../../includes/navbar.php'; ?>
     <main>
+
+        <input type="hidden" id="providerId" value="<?= htmlspecialchars($user['Provider_ID']) ?>" />
+
         <section class="profile-hero">
-            <div class="hero-inner">
-                <div class="hero-avatar-wrap">
-                    <img class="hero-avatar" id="avatarPublicPreview"
-                        src="<?= BASE_URL . htmlspecialchars($user['Profile_Picture']) ?>" alt="Avatar" />
-                    <button id="avatarSaveBtn" class="avatar-save-btn" style="display:none;" onclick="saveAvatar()"><i
-                            class="fa-solid fa-floppy-disk"></i> Save</button>
+            <div class="hero-container">
+                <div class="hero-avatar-section">
+                    <div class="hero-avatar-wrap">
+                        <img class="hero-avatar" id="avatarPublicPreview"
+                            src="<?= BASE_URL . '/file/user-files/' . $_SESSION['user_image'] ?>" />
+                        <button id="avatarSaveBtn" class="avatar-save-btn" style="display:none;" onclick="saveAvatar()"><i
+                                class="fa-solid fa-floppy-disk"></i> Save</button>
+                    </div>
+                    <div class="hero-actions">
+                        <button class="btn btn-primary" onclick="document.getElementById('avatarPublicInput').click()"><i
+                                class="fa-solid fa-camera"></i> Edit Photo</button>
+                        <input type="file" id="avatarPublicInput" accept="image/*" style="display:none" />
+                    </div>
                 </div>
-                <div class="hero-text">
+                <div class="hero-details">
                     <h1 id="publicSummaryName"><?= htmlspecialchars($user['First_Name']) ?>
                         <?= htmlspecialchars($user['Last_Name']) ?>
                     </h1>
                     <div class="muted"><i class="fa-solid fa-envelope"></i> <span
-                            id="publicSummaryEmail"><?= htmlspecialchars($user['Email']) ?></span> · <i
-                            class="fa-solid fa-id-card"></i>
-                        <span id="publicSummaryNIC"><?= htmlspecialchars($user['NIC_No']) ?></span> · <span
-                            class="status-badge"
-                            id="publicStatus"><?= htmlspecialchars($user['Status']) ?></span>
+                            id="publicSummaryEmail"><?= htmlspecialchars($user['Email']) ?></span>
                     </div>
-                </div>
-                <div class="hero-actions">
-                    <button class="btn btn-primary" onclick="document.getElementById('avatarPublicInput').click()"><i
-                            class="fa-solid fa-camera"></i> Edit Photo</button>
-                    <input type="file" id="avatarPublicInput" accept="image/*" style="display:none" />
+
+                    <div class="muted"><i class="fa-solid fa-id-card"></i> <span
+                            id="publicSummaryEmail"><?= htmlspecialchars($user['NIC_No']) ?></span>
+                    </div>
+
+                    <p class="hero-bio">
+                        <?= htmlspecialchars($user['Bio']) ?: 'No bio available.' ?>
+                    </p>
                 </div>
             </div>
         </section>
@@ -61,7 +78,7 @@ require_once __DIR__ . '/../../../../config.php';
                     <i class="fa-solid fa-briefcase"></i> Work <span class="count" id="countCategories">0</span>
                 </button>
                 <button class="pill" data-target="section-account" aria-current="false"><i
-                        class="fa-solid fa-shield-check"></i> Security <span class="count">Settings</span>
+                        class="fa-solid fa-lock"></i> Security <span class="count">Settings</span>
                 </button>
                 <a href="<?= BASE_URL ?>/logout" class="btn-logout pill">
                     <i class="fa-solid fa-right-from-bracket"></i> Logout
@@ -71,7 +88,7 @@ require_once __DIR__ . '/../../../../config.php';
                 <section id="section-personal" class="profile-section active" aria-label="Personal information">
                     <div class="card">
                         <h2 class="section-title"><i class="fa-solid fa-user"></i> Personal Information</h2>
-                        <form id="personalForm" onsubmit="savePersonal(event)">
+                        <form id="personalForm" enctype="multipart/form-data" onsubmit="savePersonal(event)">
                             <div class="input-grid-3">
                                 <div class="text-container">
                                     <div class="label text-label label-float">First Name</div>
@@ -99,22 +116,22 @@ require_once __DIR__ . '/../../../../config.php';
                             <div class="input-grid-3">
                                 <div class="text-container">
                                     <div class="label text-label label-float">Email</div>
-                                    <input type="email" class="text-field" name="email" value="<?= htmlspecialchars($user['Email']) ?>" required>
+                                    <input type="email" class="text-field" name="email" value="<?= htmlspecialchars($user['Email']) ?>" readonly>
                                 </div>
                                 <div class="text-container">
                                     <div class="label text-label label-float">NIC No</div>
-                                    <input type="text" class="text-field" name="nic" value="<?= htmlspecialchars($user['NIC_No']) ?>" required>
+                                    <input type="text" class="text-field" name="nic" value="<?= htmlspecialchars($user['NIC_No']) ?>" readonly>
                                 </div>
                                 <div class="text-container">
                                     <div class="label text-label label-float">Contact number</div>
-                                    <input type="text" class="text-field" name="contact_number" value="<?= htmlspecialchars($user['Contact_No']) ?>" required>
+                                    <input type="text" class="text-field" name="contact_no" value="<?= htmlspecialchars($user['Contact_No']) ?>" required>
                                 </div>
                             </div>
 
                             <div class="input-grid-1">
                                 <div class="text-container">
                                     <div class="label text-label label-float">Website</div>
-                                    <input type="text" class="text-field" name="website" value="<?= htmlspecialchars($user['Website']) ?>" required>
+                                    <input type="text" class="text-field" name="website" value="<?= htmlspecialchars($user['Website']) ?>">
                                 </div>
                             </div>
                             <div class="input-grid-1">
@@ -128,12 +145,12 @@ require_once __DIR__ . '/../../../../config.php';
                                 <div class="field" style="flex:1 1 300px;">
                                     <label>NIC - Front (read only)</label>
                                     <div class="card" style="padding:12px; border-radius:12px;">
-                                        <img src="<?= BASE_URL ?>/uploads/providers/0/nic_front.jpg" alt="NIC Front"
+                                        <img src="<?= BASE_URL . '/file/user-files/' . $user['NIC_Front'] ?>" alt="NIC Front"
                                             style="width:100%; height:180px; object-fit:cover; border-radius:10px; border:1px solid #e2e8f0;"
                                             onerror="this.style.display='none'">
                                         <div class="actions" style="margin-top:10px;">
                                             <a class="btn btn-ghost"
-                                                href="<?= BASE_URL ?>/uploads/providers/0/nic_front.jpg" target="_blank"
+                                                href="<?= BASE_URL . '/file/user-files/' . $user['NIC_Front'] ?>" target="_blank"
                                                 rel="noopener"><i class="fa-solid fa-eye"></i> View</a>
                                         </div>
                                     </div>
@@ -141,26 +158,100 @@ require_once __DIR__ . '/../../../../config.php';
                                 <div class="field" style="flex:1 1 300px;">
                                     <label>NIC - Back (read only)</label>
                                     <div class="card" style="padding:12px; border-radius:12px;">
-                                        <img src="<?= BASE_URL ?>/uploads/providers/0/nic_back.jpg" alt="NIC Back"
+                                        <img src="<?= BASE_URL . '/file/user-files/' . $user['NIC_Back'] ?>" alt="NIC Back"
                                             style="width:100%; height:180px; object-fit:cover; border-radius:10px; border:1px solid #e2e8f0;"
                                             onerror="this.style.display='none'">
                                         <div class="actions" style="margin-top:10px;">
                                             <a class="btn btn-ghost"
-                                                href="<?= BASE_URL ?>/uploads/providers/0/nic_back.jpg" target="_blank"
+                                                href="<?= BASE_URL . '/file/user-files/' . $user['NIC_Back'] ?>" target="_blank"
                                                 rel="noopener"><i class="fa-solid fa-eye"></i> View</a>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="field-row">
+                            <div class="field-row" style="margin-top: 25px;">
                                 <div class="field" style="flex:1 1 300px;">
-                                    <label>Resume (read only)</label>
+                                    <label>Resume</label>
                                     <div class="card"
-                                        style="padding:12px; border-radius:12px; display:flex; align-items:center; justify-content:space-between; gap:12px;">
-                                        <div class="small" style="flex:1;">Current resume on file.</div>
-                                        <a class="btn btn-outline" href="<?= BASE_URL ?>/uploads/providers/0/resume.pdf"
-                                            target="_blank" rel="noopener"><i class="fa-solid fa-download"></i>
-                                            Download</a>
+                                        style="padding:12px; border-radius:12px;">
+
+                                        <input type="file" name="Resume" accept="application/pdf" style="display: none;" />
+                                        <script>
+                                            window.addEventListener('DOMContentLoaded', () => {
+                                                const fileInput = document.getElementsByName('Resume')[0];
+                                                const viewer = document.getElementsByName('Resume')[0].parentElement.querySelector('iframe');
+
+                                                fileInput.addEventListener('change', function() {
+                                                    const file = this.files[0];
+
+                                                    if (file) {
+                                                        // Validate PDF type
+                                                        if (file.type !== "application/pdf") {
+                                                            alert("Only PDF files are allowed.");
+                                                            fileInput.value = "";
+                                                            return;
+                                                        }
+
+                                                        // Create a URL and show in iframe
+                                                        const fileURL = URL.createObjectURL(file);
+                                                        viewer.src = fileURL;
+                                                        viewer.style.display = "block";
+                                                    }
+                                                });
+                                            });
+                                        </script>
+
+
+                                        <?php
+                                        if ($user["Resume"] != '') {
+                                        ?>
+
+                                            <div style="display:flex; align-items:center; justify-content:end; gap:12px; margin-bottom: 10px;">
+
+                                                <button class="button outline" type="button" onclick="document.getElementsByName('Resume')[0].click()">
+                                                    <i class="fa-solid fa-upload" style="margin-right: 10px;"></i>
+                                                    Upload
+                                                </button>
+
+                                                <a class="btn btn-outline" href="<?= BASE_URL ?>/file/user-files/<?= urlencode($user["Resume"]) ?>"
+                                                    target="_blank" rel="noopener"><i class="fa-solid fa-download"></i>
+                                                    Download</a>
+
+                                            </div>
+
+                                            <iframe src="<?= BASE_URL ?>/file/user-files/<?= urlencode($user["Resume"]) ?>"
+                                                width="100%"
+                                                height="600px"
+                                                style="border:none;">
+                                            </iframe>
+
+
+                                        <?php
+                                        } else {
+                                        ?>
+
+                                            <div class="muted" id="NoResumeTag">No resume uploaded.</div>
+
+                                            <iframe
+                                                width="100%"
+                                                height="600px"
+                                                style="border:none; display: none;">
+                                            </iframe>
+
+
+                                            <div style="display:flex; align-items:center; justify-content:end; gap:12px; margin-top: 10px;">
+
+                                                <button class="button outline" type="button" onclick="document.getElementsByName('Resume')[0].click()">
+                                                    <i class="fa-solid fa-upload" style="margin-right: 10px;"></i>
+                                                    Upload
+                                                </button>
+
+                                            </div>
+
+                                        <?php
+                                        }
+                                        ?>
+
                                     </div>
                                 </div>
                             </div>
@@ -176,19 +267,19 @@ require_once __DIR__ . '/../../../../config.php';
 
                 <section id="section-work" class="profile-section" aria-label="Work information">
                     <div class="card">
-                        <h2 class="section-title"><i class="fa-solid fa-briefcase"></i> Categories</h2>
+                        <h2 class="section-title"><i class="fa-solid fa-briefcase"></i> Service Areas</h2>
                         <div class="field-row" style="align-items:center;">
                             <div class="field" style="flex:1 1 auto;">
                                 <label for="cat_search">Search</label>
                                 <input type="text" id="cat_search" placeholder="Search categories..." />
                             </div>
                             <div class="actions" style="margin-top: 18px;">
-                                <button class="btn btn-primary" type="button" onclick="openCategoryModal('add')"><i
-                                        class="fa-solid fa-plus"></i> Add Category</button>
+                                <button class="btn btn-primary" type="button" onclick="viewDialogBox('AddServiceDialog')"><i
+                                        class="fa-solid fa-plus"></i> Add Service</button>
                             </div>
                         </div>
                         <div class="divider"></div>
-                        <div id="categoryList"></div>
+                        <div id="service-card-wrapper"></div>
                     </div>
                 </section>
 
@@ -196,40 +287,22 @@ require_once __DIR__ . '/../../../../config.php';
                     <div class="card">
                         <h2 class="section-title"><i class="fa-solid fa-shield-keyhole"></i> Account & Security</h2>
                         <form id="accountForm" onsubmit="saveAccount(event)">
-                            <div class="field-row">
-                                <div class="field">
-                                    <label for="acc_email">Email</label>
-                                    <input type="email" id="acc_email" name="Email" value="john@example.com" readonly />
-                                </div>
-                                <div class="field">
-                                    <label for="acc_contact">Contact No</label>
-                                    <input type="text" id="acc_contact" name="Contact_No" value="+1 555 123 987" />
-                                </div>
-                                <div class="field">
-                                    <label for="acc_status">Status</label>
-                                    <select id="acc_status" name="Status">
-                                        <option value="Active" selected>Active</option>
-                                        <option value="Inactive">Inactive</option>
-                                    </select>
-                                </div>
-                            </div>
+
                             <div class="password-box">
                                 <h4><i class="fa-solid fa-lock"></i> Password & Recovery</h4>
                                 <div class="field-row">
+                                    <div class="field">
+                                        <label for="acc_old_pass">Old Password</label>
+                                        <input type="password" id="acc_old_pass" name="Old_Password"
+                                            placeholder="••••••••" />
+                                    </div>
                                     <div class="field">
                                         <label for="acc_new_pass">New Password</label>
                                         <input type="password" id="acc_new_pass" name="New_Password"
                                             placeholder="••••••••" />
                                     </div>
-                                    <div class="field">
-                                        <label for="acc_confirm_pass">Confirm Password</label>
-                                        <input type="password" id="acc_confirm_pass" name="Confirm_Password"
-                                            placeholder="••••••••" />
-                                    </div>
                                 </div>
-                                <div class="small">Leave password fields empty if you don't want to change it.</div>
-                                <button type="button" class="link-inline" onclick="forgotPassword()"><i
-                                        class="fa-solid fa-envelope"></i> Send forgot password email</button>
+
                             </div>
                             <div class="actions">
                                 <button class="btn btn-primary" type="submit"><i class="fa-solid fa-floppy-disk"></i>
@@ -257,87 +330,18 @@ require_once __DIR__ . '/../../../../config.php';
     <div class="toast" id="toast"><i class="fa-solid fa-circle-check" style="color:#008500;"></i><span
             id="toastMsg">Saved</span></div>
 
-    <!-- Forgot Password Modal -->
-    <div class="modal-overlay" id="fpOverlay" role="dialog" aria-modal="true" aria-labelledby="fpTitle">
-        <div class="modal">
-            <button class="close-btn" onclick="closeFP()" aria-label="Close"><i
-                    class="fa-solid fa-xmark"></i></button>
-            <h3 id="fpTitle">Reset Your Password</h3>
-            <p>Enter your account email below and we'll send a password reset link if it exists in our system.</p>
-            <form onsubmit="sendFP(event)">
-                <input type="email" name="fp_email" id="fp_email" placeholder="you@example.com" required />
-                <div class="actions" style="margin-top:4px;">
-                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Send
-                        Link</button>
-                    <button type="button" class="btn btn-ghost" onclick="closeFP()"><i class="fa-solid fa-xmark"></i>
-                        Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
 
-    <!-- Category Add/Edit Modal -->
-    <div class="modal-overlay" id="catOverlay" role="dialog" aria-modal="true" aria-labelledby="catTitle">
-        <div class="modal">
-            <button class="close-btn" onclick="closeCategoryModal()" aria-label="Close"><i
-                    class="fa-solid fa-xmark"></i></button>
-            <h3 id="catTitle">Add Category</h3>
-            <form id="catModalForm" onsubmit="saveCategoryModal(event)">
-                <div class="field-row">
-                    <div class="field">
-                        <label for="m_cat_select">Category</label>
-                        <select id="m_cat_select" name="Category_ID"></select>
-                    </div>
-                    <div class="field">
-                        <label for="m_cat_title">Title</label>
-                        <input type="text" id="m_cat_title" name="Title" placeholder="Custom title (optional)" />
-                    </div>
-                </div>
-                <div class="field-row">
-                    <div class="field">
-                        <label for="m_cat_price">Default Price</label>
-                        <input type="number" id="m_cat_price" name="Default_Price" placeholder="e.g. 1000" />
-                    </div>
-                    <div class="field" style="flex:1 1 100%;">
-                        <label for="m_cat_desc">Description</label>
-                        <textarea id="m_cat_desc" name="Description"
-                            placeholder="Describe what you provide in this category."></textarea>
-                    </div>
-                </div>
-                <div class="field-row">
-                    <div class="field">
-                        <label>Locations</label>
-                        <div id="m_cat_locations" class="chip-input"></div>
-                        <button class="btn btn-ghost" type="button" onclick="pickLocations(true)"><i
-                                class="fa-solid fa-location-dot"></i> Add Locations</button>
-                    </div>
-                    <div class="field">
-                        <label>Skills</label>
-                        <div id="m_cat_skills" class="chip-input"></div>
-                        <button class="btn btn-ghost" type="button" onclick="pickSkills(true)"><i
-                                class="fa-solid fa-wand-magic-sparkles"></i> Add Skills</button>
-                    </div>
-                </div>
-                <input type="hidden" id="m_cat_edit_index" value="" />
-                <div class="actions">
-                    <button class="btn btn-primary" type="submit"><i class="fa-solid fa-floppy-disk"></i>
-                        Save</button>
-                    <button class="btn btn-outline" type="button" onclick="closeCategoryModal()"><i
-                            class="fa-solid fa-xmark"></i> Cancel</button>
-                </div>
-            </form>
-        </div>
-    </div>
 
-    <!-- Category View Modal -->
-    <div class="modal-overlay" id="catViewOverlay" role="dialog" aria-modal="true" aria-labelledby="catViewTitle">
-        <div class="modal">
-            <button class="close-btn" onclick="closeCategoryView()" aria-label="Close"><i
-                    class="fa-solid fa-xmark"></i></button>
-            <h3 id="catViewTitle">Category Details</h3>
-            <div id="catViewBody" class="small"></div>
-        </div>
-    </div>
+
+    <?php include __DIR__ . '/../../register/addServiceDialog.php' ?>
+
+    <script>
+        const AddServiceCardTemplate = "provider-profile-template";
+    </script>
+    <script src="<?= BASE_URL ?>/assets/js/addServiceScript.js" defer></script>
+
+
+
 </body>
 
 </html>

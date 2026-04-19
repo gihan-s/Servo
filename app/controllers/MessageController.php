@@ -78,6 +78,7 @@ class MessageController extends BaseController
             'first_name' => $otherUser["First_Name"],
             'last_name' => $otherUser["Last_Name"],
             'profile_picture' => $otherUser["Profile_Picture"],
+            'online' => !empty($otherUser["Is_Online"])
         ]);
     }
 
@@ -110,6 +111,18 @@ class MessageController extends BaseController
             'first_name' => $user["First_Name"],
             'last_name' => $user["Last_Name"],
             'profile_picture' => $user["Profile_Picture"],
+            'online' => !empty($user["Is_Online"])
         ]);
+    }
+
+    public function getUnreadCount()
+    {
+        $userId = $_SESSION['user_id'];
+        $role = $_SESSION['role'];
+
+        $Model = new MessageModel;
+        $count = $Model->getUnreadMessageCount($userId, $role);
+
+        echo json_encode(['unread_count' => $count]);
     }
 }

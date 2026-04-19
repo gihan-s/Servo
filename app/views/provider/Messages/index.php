@@ -7,6 +7,7 @@
     <title>Servo | Messages</title>
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/cardList.css" />
     <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css" />
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/elementStyles.css" />
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/messages.css" />
     
 </head>

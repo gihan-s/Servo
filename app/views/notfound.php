@@ -20,7 +20,7 @@
                         <div class="contant_box_404">
                             <h3 class="h2">Looks like you're lost</h3>
                             <p>the page you are looking for is not available!</p>
-                            <a href="<?= $_ENV['BASE_URL'] ?? '/' ?>" class="link_404">Go to Home</a>
+                            <a href="<?= (isset($_ENV['BASE_URL']) ? $_ENV['BASE_URL'] : '/') . '/' ?>" class="link_404">Go to Home</a>
                         </div>
                     </div>
                 </div>

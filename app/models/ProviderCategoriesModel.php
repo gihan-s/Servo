@@ -15,7 +15,8 @@ class ProviderCategoriesModel extends Database
                     pc.Default_Price,
                     pc.Price_Type,
                     pc.Portfolio_Link,
-                                        c.Name AS Category_Name,
+                    c.Name AS Category_Name,
+                    c.Icon AS Category_Icon,
                                         p.First_Name,
                                         p.Last_Name,
                                         p.Profile_Picture,
@@ -25,8 +26,8 @@ class ProviderCategoriesModel extends Database
              FROM provider_categories pc
                          INNER JOIN provider p ON p.Provider_ID = pc.Provider_ID
              LEFT JOIN category c ON c.Category_ID = pc.Category_ID
-                         WHERE pc.Provider_ID = ?
-                             AND p.Status <> 'Deleted'
+             WHERE pc.Provider_ID = ?
+             AND pc.Status = 'Active'
              ORDER BY pc.ID DESC
              LIMIT ? OFFSET ?"
         );
@@ -100,7 +101,9 @@ class ProviderCategoriesModel extends Database
         $stmt = $this->conn->prepare(
             "SELECT COUNT(*) AS total
              FROM provider_categories
-             WHERE Provider_ID = ?"
+             WHERE Provider_ID = ?
+             AND Status = 'Active'
+             "
         );
 
         if (!$stmt) {
@@ -387,6 +390,7 @@ class ProviderCategoriesModel extends Database
              FROM provider_categories_has_skills pcs
              INNER JOIN skills s ON s.Skill_ID = pcs.Skills_Skill_ID
              WHERE pcs.Provider_Categories_ID IN ($placeholders)
+             
              ORDER BY s.Skill"
         );
 
@@ -460,47 +464,55 @@ class ProviderCategoriesModel extends Database
         return $locationsByCategory;
     }
 
-    public function getOngoingRequestServiceIds(int $clientId, array $providerCategoryIds): array
+    public function getLatestRequestStatusesByServiceIds(int $clientId, array $providerCategoryIds): array
     {
         if ($clientId <= 0 || empty($providerCategoryIds)) {
             return [];
         }
 
         $placeholders = implode(',', array_fill(0, count($providerCategoryIds), '?'));
-        $types = 'i' . str_repeat('i', count($providerCategoryIds));
+        $types = 'i' . str_repeat('i', count($providerCategoryIds)) . 'i';
 
         $stmt = $this->conn->prepare(
-            "SELECT DISTINCT Provider_Categories_ID
-             FROM post
-             WHERE Client_ID = ?
-               AND Post_Type = 'direct'
-               AND Request_Status = 'ongoing'
-               AND Provider_Categories_ID IN ($placeholders)"
+            "SELECT p.Provider_Categories_ID, p.Request_Status
+             FROM post p
+             INNER JOIN (
+                SELECT Provider_Categories_ID, MAX(Created_At) AS latest_created_at
+                FROM post
+                WHERE Client_ID = ?
+                  AND Post_Type = 'direct'
+                  AND Provider_Categories_ID IN ($placeholders)
+                GROUP BY Provider_Categories_ID
+             ) latest
+                ON latest.Provider_Categories_ID = p.Provider_Categories_ID
+               AND latest.latest_created_at = p.Created_At
+             WHERE p.Client_ID = ?
+               AND p.Post_Type = 'direct'"
         );
 
         if (!$stmt) {
-            error_log('ProviderCategoriesModel::getOngoingRequestServiceIds prepare: ' . $this->conn->error);
+            error_log('ProviderCategoriesModel::getLatestRequestStatusesByServiceIds prepare: ' . $this->conn->error);
             return [];
         }
 
-        $params = array_merge([$clientId], $providerCategoryIds);
+        $params = array_merge([$clientId], $providerCategoryIds, [$clientId]);
         $stmt->bind_param($types, ...$params);
 
         if (!$stmt->execute()) {
-            error_log('ProviderCategoriesModel::getOngoingRequestServiceIds exec: ' . $stmt->error);
+            error_log('ProviderCategoriesModel::getLatestRequestStatusesByServiceIds exec: ' . $stmt->error);
             $stmt->close();
             return [];
         }
 
-        $ids = [];
+        $statuses = [];
         foreach ($stmt->get_result()->fetch_all(MYSQLI_ASSOC) as $row) {
             $serviceId = (int) ($row['Provider_Categories_ID'] ?? 0);
             if ($serviceId > 0) {
-                $ids[] = $serviceId;
+                $statuses[$serviceId] = strtolower(trim((string) ($row['Request_Status'] ?? '')));
             }
         }
 
         $stmt->close();
-        return $ids;
+        return $statuses;
     }
 }
