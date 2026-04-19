@@ -212,11 +212,13 @@ class BidsController extends BaseController
         $postProviderRaw = $bid['Post_Provider_ID'] ?? null;
         $postProviderId = ($postProviderRaw === null || $postProviderRaw === '') ? null : (int) $postProviderRaw;
 
-        if ($postProviderId !== null && $postProviderId === $providerId && $requestStatus === 'accepted') {
+        if ($postProviderId !== null && $postProviderId === $providerId &&
+        in_array($requestStatus, ['pending', 'ongoing', 'accepted'], true)
+        ) {
             return 'accepted';
         }
 
-        if ($postProviderId === null && $requestStatus === 'pending') {
+        if ($postProviderId === null && $requestStatus === 'open') {
             return 'active';
         }
 
