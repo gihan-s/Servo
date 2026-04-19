@@ -354,7 +354,20 @@ class ProviderController extends BaseController
             require_once __DIR__ . '/../models/PostModel.php';
 
             $postModel = new PostModel();
-            $success = $postModel->changePostRequestStatus($postId, 'rejected', $reason);
+
+            $post = $postModel->getPostById($postId);
+            if (!$post) {
+                http_response_code(404);
+                echo json_encode(['success' => false, 'message' => 'Post not found']);
+                return;
+            }
+
+            // For public posts, reset to 'open' so other providers can still see it.
+            // For direct requests, mark as 'rejected'.
+            $newStatus = ($post['Post_Type'] === 'post') ? 'open' : 'rejected';
+            $rejectReason = ($newStatus === 'rejected') ? $reason : '';
+
+            $success = $postModel->changePostRequestStatus($postId, $newStatus, $rejectReason);
 
             if ($success) {
                 echo json_encode([

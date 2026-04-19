@@ -272,7 +272,7 @@ class ProjectModel extends Database {
 
   public function cancelProject(int $postId): bool
     {
-                $sql = "UPDATE project SET Project_Status = 'canceled' WHERE Post_ID = ?";
+        $sql = "UPDATE project SET Project_Status = 'canceled' WHERE Post_ID = ?";
         $sql2 = "UPDATE post SET Request_Status = 'canceled' WHERE Post_ID = ?";
         $stmt = $this->conn->prepare($sql);
         $stmt2 = $this->conn->prepare($sql2);

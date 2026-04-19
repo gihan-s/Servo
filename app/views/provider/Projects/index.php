@@ -63,11 +63,7 @@
 
                     </div>
                     <div class="pagination" aria-label="Pending Requests Pagination">
-                        <button class="page-btn prev" disabled><i class="fa-solid fa-chevron-left"></i></button>
-                        <button class="page-btn active">1</button>
-                        <button class="page-btn">2</button>
-                        <button class="page-btn">3</button>
-                        <button class="page-btn next"><i class="fa-solid fa-chevron-right"></i></button>
+                       
                     </div>
                 </div>
 

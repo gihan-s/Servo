@@ -220,7 +220,7 @@ class IncomingRequestsManager {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
                 const page = parseInt(btn.getAttribute('data-page'), 10);
-                this.loadRequests(page);
+                this.loadRequests(page, true);
             });
         });
 
@@ -229,7 +229,7 @@ class IncomingRequestsManager {
         if (prevBtn && this.currentPage > 1) {
             prevBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                this.loadRequests(this.currentPage - 1);
+                this.loadRequests(this.currentPage - 1, true);
             });
         }
 
@@ -238,7 +238,7 @@ class IncomingRequestsManager {
         if (nextBtn && this.currentPage < this.totalPages) {
             nextBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                this.loadRequests(this.currentPage + 1);
+                this.loadRequests(this.currentPage + 1, true);
             });
         }
     }
@@ -247,7 +247,7 @@ class IncomingRequestsManager {
      * Load requests for a specific page
      * @param {number} page - Page number to load
      */
-    async loadRequests(page = 1) {
+    async loadRequests(page = 1, scrollToTop = false) {
         this.showLoading();
         const data = await this.fetchRequests(page);
 
@@ -267,10 +267,12 @@ class IncomingRequestsManager {
         this.renderPagination(this.currentPage, this.totalPages);
         this.setupRequestListeners(data.data);
 
-        // Scroll to top of requests
-        const container = document.querySelector(this.itemListSelector);
-        if (container) {
-            container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Scroll to top of requests (only on pagination navigation, not initial load)
+        if (scrollToTop) {
+            const container = document.querySelector(this.itemListSelector);
+            if (container) {
+                container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         }
     }
 

@@ -352,6 +352,26 @@ switch ($url) {
         $controller->index();
         break;
 
+    case (preg_match('#^payments/invoice/(\d+)$#', $url, $m) ? true : false):
+        (new PaymentController())->invoice((int) $m[1]);
+        break;
+
+    case (preg_match('#^payments/pay/(\d+)$#', $url, $m) ? true : false):
+        (new PaymentController())->pay((int) $m[1]);
+        break;
+
+    case (preg_match('#^payments/cancel/(\d+)$#', $url, $m) ? true : false):
+        (new PaymentController())->cancel((int) $m[1]);
+        break;
+
+    case (preg_match('#^payments/refund/(\d+)$#', $url, $m) ? true : false):
+        (new PaymentController())->refund((int) $m[1]);
+        break;
+
+    case 'payments/report':
+        (new PaymentController())->report();
+        break;
+
     case 'providers':
         $controller = new ProviderController();
         $controller->index();
@@ -405,6 +425,14 @@ switch ($url) {
     case 'earnings':
         $controller = new EarningsController();
         $controller->index();
+        break;
+
+    case 'earnings/report':
+        (new EarningsController())->report();
+        break;
+
+    case (preg_match('#^earnings/receipt/(\d+)$#', $url, $m) ? true : false):
+        (new EarningsController())->receipt((int) $m[1]);
         break;
 
     case 'feed':

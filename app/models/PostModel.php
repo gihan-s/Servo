@@ -213,7 +213,7 @@ class PostModel extends Database
         
         switch ($sort) {
             case 'date_asc':
-                if ($status === 'ongoing' || $status === 'pending') {
+                if ($status === 'pending') {
                     $orderBy = 'Published_At ASC';
                 } elseif ($status === 'accepted') {
                     $orderBy = 'Created_At ASC';
@@ -222,7 +222,7 @@ class PostModel extends Database
                 }
                 break;
             case 'date_desc':
-                if ($status === 'ongoing' || $status === 'pending') {
+                if ($status === 'pending') {
                     $orderBy = 'Published_At DESC';
                 } elseif ($status === 'accepted') {
                     $orderBy = 'Created_At DESC';
@@ -556,7 +556,7 @@ class PostModel extends Database
                     End_At,
                     Published_At,
                     Request_Status
-                ) VALUES (NOW(), ?, 'direct', 'active', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), 'ongoing')";
+                ) VALUES (NOW(), ?, 'direct', 'active', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), 'pending')";
 
         $stmt = $this->conn->prepare($sql);
         if (!$stmt) {
@@ -737,7 +737,7 @@ class PostModel extends Database
 
         // Get total count
         $countSql = "SELECT COUNT(*) as total FROM post 
-                     WHERE Post_Status = 'active' AND Request_Status = 'ongoing' AND Provider_ID = ?";
+                     WHERE Post_Status = 'active' AND Request_Status = 'pending' AND Provider_ID = ?";
         
         $countStmt = $this->conn->prepare($countSql);
         $countStmt->bind_param('i', $providerId);
@@ -768,7 +768,7 @@ class PostModel extends Database
                 FROM post p
                 LEFT JOIN category c ON p.Category_ID = c.Category_ID
                 LEFT JOIN client cl ON p.Client_ID = cl.Client_ID
-                WHERE p.Post_Status = 'active' AND p.Request_Status = 'ongoing' AND p.Provider_ID = ?
+                WHERE p.Post_Status = 'active' AND p.Request_Status = 'pending' AND p.Provider_ID = ?
                 ORDER BY p.Created_At DESC
                 LIMIT ? OFFSET ?";
 
@@ -818,10 +818,12 @@ class PostModel extends Database
     {
 
         $RejectReasonChange = ($status === 'rejected') ? ", Request_Reject_Reason = ?" : "";
+        $clearProvider      = ($status === 'open')     ? ", Provider_ID = NULL"         : "";
 
         $sql = "UPDATE post 
                 SET Request_Status = ? 
                 $RejectReasonChange
+                $clearProvider
                 WHERE Post_ID = ?";
 
         $stmt = $this->conn->prepare($sql);

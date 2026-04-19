@@ -453,7 +453,7 @@
             apiUrl = `${window.BASE_URL}/projects/completed?sort=${currentSort}&search=${encodeURIComponent(currentSearch)}`;
         } else {
             // Map tab name to actual Request_Status value
-            const statusMap = { 'pending': 'ongoing', 'accepted': 'accepted', 'completed': 'completed' };
+            const statusMap = { 'pending': 'pending', 'accepted': 'accepted', 'completed': 'completed' };
             const apiStatus = statusMap[tab] || tab;
             apiUrl = `${window.BASE_URL}/projects/list?status=${apiStatus}&sort=${currentSort}&search=${encodeURIComponent(currentSearch)}`;
         }
@@ -1412,6 +1412,10 @@
             // Initial load
             showSection('pending');
         });
+    }
+
+    function payPayment(id) {
+        viewDialogBox('confirm-payment');
 
     function viewPost(id) {
         viewDialogBox('view-post-popup');

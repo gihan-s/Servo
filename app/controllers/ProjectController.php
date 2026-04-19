@@ -84,7 +84,7 @@ class ProjectController extends BaseController
         $this->ensureAuth();
 
         $userId = $_SESSION['user_id'];
-        $status = $_GET['status'] ?? 'ongoing'; // ongoing, accepted, pending (legacy)
+        $status = $_GET['status'] ?? 'pending'; // pending, accepted, ongoing
         $sort = $_GET['sort'] ?? 'date_desc'; // date_desc, date_asc, price_desc, price_asc, views_desc, views_asc
         $search = $_GET['search'] ?? ''; // search query
 
