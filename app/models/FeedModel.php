@@ -37,7 +37,7 @@ class FeedModel extends Database
                 AND p.Request_Status = 'open' -- NOTE: the status could change
                 AND p.Est_Date > NOW()
                 AND p.Category_ID IN (
-                    SELECT Category_ID FROM provider_category WHERE Provider_ID = ?
+                    SELECT Category_ID FROM provider_categories WHERE Provider_ID = ?
                 )
                 ORDER BY p.Created_At DESC";
         
@@ -75,55 +75,6 @@ class FeedModel extends Database
         unset($row);
 
         return $rows;
-
-        // Dummy data for testing
-        return [
-            [
-                'Post_ID' => 1,
-                'Title' => 'Build a Portfolio Website',
-                'Description' => 'Need a modern, responsive personal portfolio with project showcase and contact form.',
-                'Requesting_Price' => 600,
-                'Created_At' => date('Y-m-d H:i:s', strtotime('-2 hours')),
-                'Deadline' => date('Y-m-d', strtotime('+10 days')),
-                'Post_Status' => 'Published',
-                'Client_ID' => 1,
-                'Client_First_Name' => 'Nadia', // from database join with client table
-                'Client_Last_Name' => 'Perera', // from database join with client table
-                'Category_ID' => 1,
-                'Category_Name' => 'Web Development', // from database join with category table
-                'Request_Status' => 'Pending',
-            ],
-            [
-                'Post_ID' => 2,
-                'Title' => 'Logo + Brand Kit',
-                'Description' => 'Client is looking for a clean logo, color palette and typography suggestions for a new startup.',
-                'Requesting_Price' => 350,
-                'Created_At' => date('Y-m-d H:i:s', strtotime('-5 hours')),
-                'Deadline' => date('Y-m-d', strtotime('+5 days')),
-                'Post_Status' => 'Published',
-                'Request_Status' => 'open',
-                'Client_ID' => 2,
-                'Client_First_Name' => 'Isuru',
-                'Client_Last_Name' => 'Fernando',
-                'Category_Name' => 'Graphic Design',
-                'Category_ID' => 2,
-            ],
-            [
-                'Post_ID' => 3,
-                'Title' => 'WordPress SEO Optimization',
-                'Description' => 'On-page + technical SEO improvements for an e-commerce WordPress site to increase search visibility.',
-                'Requesting_Price' => 480,
-                'Created_At' => date('Y-m-d H:i:s', strtotime('-1 day')),
-                'Deadline' => date('Y-m-d', strtotime('+14 days')),
-                'Post_Status' => 'Published',
-                'Request_Status' => 'open',
-                'Client_ID' => 3,
-                'Client_First_Name' => 'Tharushi',
-                'Client_Last_Name' => 'De Silva',
-                'Category_Name' => 'SEO',
-                'Category_ID' => 3,
-            ],
-        ];
     }
 
     public function getPostById($postId)
