@@ -261,8 +261,8 @@ class PostModel extends Database
     {
         try {
             $query = "INSERT INTO post (Client_ID, Title, Description, Category_ID, Requesting_Price, 
-                Price_Type, Est_Date, Level, End_At, Post_Status, Created_At, Published_At, Post_Type) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, 'post')";
+                Price_Type, Est_Date, Level, End_At, Post_Status, Created_At, Published_At, Request_Status, Post_Type) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?, 'post')";
 
             $stmt = $this->conn->prepare($query);
 
@@ -272,7 +272,7 @@ class PostModel extends Database
             }
 
             $stmt->bind_param(
-                'issidssssss',  // i=integer, s=string, d=double
+                'issidsssssss',  // i=integer, s=string, d=double
                 $data['Client_ID'],
                 $data['Title'],
                 $data['Description'],
@@ -283,7 +283,8 @@ class PostModel extends Database
                 $data['Level'],
                 $data['End_At'],
                 $data['Status'],
-                $data['Published_At']
+                $data['Published_At'],
+                $data['Request_Status']
             );
 
             if (!$stmt->execute()) {
@@ -351,7 +352,7 @@ class PostModel extends Database
         }
 
         // Update to active status
-        $sql = "UPDATE post SET Post_Status = 'active', Published_At = NOW() WHERE Post_ID = ?";
+        $sql = "UPDATE post SET Post_Status = 'active', Published_At = NOW(), Request_Status = 'open' WHERE Post_ID = ?";
         error_log("Executing SQL: $sql with Post_ID = $postId");
 
         $stmt = $this->conn->prepare($sql);
