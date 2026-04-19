@@ -70,4 +70,36 @@ class BaseController
         }
         return;
     }
+
+    protected function jsonResponse(array $payload, int $statusCode = 200): void
+    {
+        http_response_code($statusCode);
+        header('Content-Type: application/json');
+        echo json_encode($payload);
+    }
+
+    protected function jsonError(string $message, int $statusCode = 400, ?string $errorCode = null, array $extra = []): void
+    {
+        $payload = array_merge([
+            'success' => false,
+            'message' => $message,
+        ], $extra);
+
+        if ($errorCode !== null && $errorCode !== '') {
+            $payload['errorCode'] = $errorCode;
+        }
+
+        $this->jsonResponse($payload, $statusCode);
+    }
+
+    protected function htmlError(int $statusCode = 500): void
+    {
+        http_response_code($statusCode);
+        include __DIR__ . '/../views/error.php';
+    }
+
+    protected function notFound(): void
+    {
+        include __DIR__ . '/../views/notfound.php';
+    }
 }

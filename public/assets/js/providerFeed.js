@@ -16,7 +16,8 @@ const bidPostId = document.getElementById('bidPostId');
 const bidProjectTitle = document.getElementById('bidProjectTitle');
 const bidClientName = document.getElementById('bidClientName');
 const bidAmount = document.getElementById('bidAmount');
-const bidTimeline = document.getElementById('bidTimeline');
+const bidDuration = document.getElementById('bidDuration');
+const bidDurationUnit = document.getElementById('bidDurationUnit');
 const searchInput = document.getElementById('feedSearchInput');
 const searchBtn = document.getElementById('feedSearchBtn');
 const filterRoot = document.getElementById('feedFilterRoot');
@@ -37,9 +38,9 @@ let selectedCategories = new Set();
 const viewFieldMap = [
 	{ key: 'category', label: 'Category' },
 	{ key: 'budget', label: 'Budget' },
-	{ key: 'timeline', label: 'Timeline' },
+	{ key: 'deadline', label: 'Deadline' },
 	{ key: 'posted', label: 'Posted' },
-	{ key: 'statusLabel', label: 'Status' },
+	{ key: 'status', label: 'Status' },
 	{ key: 'description', label: 'Description' }
 ];
 
@@ -49,7 +50,8 @@ function openBidModal(card) {
 	bidClientName.textContent = card.dataset.client || 'Client';
 	if (bidPostId) bidPostId.value = postId;
 	bidAmount.value = '';
-	bidTimeline.value = card.dataset.timeline || '';
+	bidDuration.value = '';
+	if (bidDurationUnit) bidDurationUnit.value = 'd';
 	openModal(bidModalRoot);
 	bidAmount.focus();
 }
@@ -66,7 +68,13 @@ function openViewModal(card) {
 	viewDetails.innerHTML = '';
 
 	viewFieldMap.forEach((field) => {
-		const value = card.dataset[field.key] || '-';
+		let value = card.dataset[field.key] || '-';
+
+		// Format deadline as calculated time remaining
+		if (field.key === 'deadline') {
+			value = calculateDeadline(card.dataset.deadline);
+		}
+
 		const row = document.createElement('div');
 		row.style.display = 'grid';
 		row.style.gridTemplateColumns = '140px 1fr';
@@ -98,6 +106,28 @@ function closeViewModal() {
 
 function applyFiltersWrapper() {
 	applyFilters(cards, searchInput, selectedCategories);
+}
+
+function formatDuration(diffMs) {
+	const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+	if (days < 1) return 'deadline has passed';
+	if (days < 7) return `in ${days} day${days > 1 ? 's' : ''}`;
+
+	const weeks = Math.floor(days / 7);
+	if (weeks < 4) return `in ${weeks} week${weeks > 1 ? 's' : ''}`;
+
+	const months = Math.floor(days / 30);
+	return `in ${months} month${months > 1 ? 's' : ''}`;
+}
+
+function calculateDeadline(dateStr) {
+	if (!dateStr) return 'N/A';
+	const now = new Date();
+	const deadline = new Date(dateStr);
+	const diffMs = deadline - now;
+	if (diffMs <= 0) return 'deadline has passed';
+	return formatDuration(diffMs);
 }
 
 // Bid-specific button handlers
@@ -175,3 +205,16 @@ setupEscapeKeyHandler([
 // Initialize
 populateCategoryFilters(categoryList, cards, 'feedCategory');
 applyFiltersWrapper();
+
+// Update deadline displays with calculated time remaining
+cards.forEach(card => {
+	const deadline = card.dataset.deadline;
+	if (deadline) {
+		const deadlineElements = card.querySelectorAll('div');
+		deadlineElements.forEach(el => {
+			if (el.textContent.startsWith('Deadline:')) {
+				el.innerHTML = `<i class="fa-solid fa-calendar-days"></i> Deadline: ${calculateDeadline(deadline)}`;
+			}
+		});
+	}
+});

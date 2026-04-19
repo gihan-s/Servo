@@ -1,5 +1,5 @@
 uploads
 vendor
 .env
-.claude/settings.local.json
+.claude/
 database.sql

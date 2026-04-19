@@ -57,7 +57,16 @@
 				<div class="requests-section active" style="display:block;">
 					<div class="item-list">
 						<?php foreach ($feedItems as $item): ?>
-							<article class="search-item" data-postid="<?= htmlspecialchars($item['Post_ID'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-client="<?= htmlspecialchars($item['Client_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-title="<?= htmlspecialchars($item['Title'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-category="<?= htmlspecialchars($item['Category_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-budget="<?= htmlspecialchars($item['Requesting_Price'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-timeline="<?= htmlspecialchars($item['Timeline'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-posted="<?= htmlspecialchars($item['Posted'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-description="<?= htmlspecialchars($item['Description'] ?? '', ENT_QUOTES, 'UTF-8') ?>" data-status="<?= htmlspecialchars($item['Post_Status'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+							<article class="search-item"
+							data-postid="<?= htmlspecialchars($item['Post_ID'] ?? '', ENT_QUOTES, 'UTF-8') ?>" 
+							data-client="<?= htmlspecialchars($item['Client_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?>" 
+							data-title="<?= htmlspecialchars($item['Title'] ?? '', ENT_QUOTES, 'UTF-8') ?>" 
+							data-category="<?= htmlspecialchars($item['Category_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?>" 
+							data-budget="<?= htmlspecialchars($item['Requesting_Price'] ?? '', ENT_QUOTES, 'UTF-8') ?>" 
+							data-deadline="<?= htmlspecialchars($item['Deadline'] ?? '', ENT_QUOTES, 'UTF-8') ?>" 
+							data-posted="<?= htmlspecialchars($item['Posted'] ?? '', ENT_QUOTES, 'UTF-8') ?>" 
+							data-description="<?= htmlspecialchars($item['Description'] ?? '', ENT_QUOTES, 'UTF-8') ?>" 
+							data-status="<?= htmlspecialchars($item['Post_Status'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
 								<div class="item-head">
 									<div class="item-main-dets">
 										<div class="item-name"><?= htmlspecialchars($item['Client_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
@@ -74,7 +83,7 @@
 									</div>
 								</div>
 								<div class="item-middle">
-									<div><i class="fa-solid fa-calendar-days"></i> Timeline: <?= htmlspecialchars($item['Timeline'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
+									<div><i class="fa-solid fa-calendar-days"></i> Deadline: <?= htmlspecialchars($item['Deadline'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
 									<div><i class="fa-solid fa-layer-group"></i> Category: <?= htmlspecialchars($item['Category_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
 								</div>
 								<div class="item-description"><?= htmlspecialchars($item['Description'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
@@ -104,8 +113,15 @@
 				<label for="bidAmount" style="font-weight:700; color:#111827;">Bid Amount</label>
 				<input id="bidAmount" name="bid_amount" type="number" min="1" step="1" placeholder="Enter your amount" style="width:100%; border:1px solid #e5e7eb; border-radius:10px; padding:10px; font-size:14px;" required>
 
-				<label for="bidTimeline" style="font-weight:700; color:#111827;">Delivery Timeline</label>
-				<input id="bidTimeline" name="bid_timeline" type="text" placeholder="e.g. 7 days" style="width:100%; border:1px solid #e5e7eb; border-radius:10px; padding:10px; font-size:14px;" required>
+				<label for="bidDuration" style="font-weight:700; color:#111827;">Duration</label>
+				<div style="display:grid; grid-template-columns:1fr 170px; gap:10px;">
+					<input id="bidDuration" name="bid_duration" type="number" min="1" step="1" placeholder="e.g. 7" style="width:100%; border:1px solid #e5e7eb; border-radius:10px; padding:10px; font-size:14px;" required>
+					<select id="bidDurationUnit" name="bid_duration_unit" style="width:100%; border:1px solid #e5e7eb; border-radius:10px; padding:10px; font-size:14px;" required>
+						<option value="d" selected>Days</option>
+						<option value="w">Weeks</option>
+						<option value="m">Months</option>
+					</select>
+				</div>
 
 				<label for="bidCover" style="font-weight:700; color:#111827;">Proposal Note</label>
 				<textarea id="bidCover" name="bid_message" rows="5" placeholder="Write a short proposal..." style="width:100%; border:1px solid #e5e7eb; border-radius:10px; padding:10px; font-size:14px; resize:vertical;" required></textarea>
@@ -144,7 +160,7 @@
 			<hr>
 			<div class="pop-up-content" style="display:flex; flex-direction:column; gap:12px;">
 				<!-- <div style="font-size:14px; color:#334155;">Project: <strong id="feedViewTitle">-</strong></div> -->
-				<div style="font-size:13px; color:#64748b;">Client: <strong id="feedViewClient">-</strong></div>
+				<div style="font-size:15px; color:#64748b;">Client: <strong id="feedViewClient">-</strong></div>
 				<div id="feedViewDetails" style="display:grid; gap:10px;"></div>
 			</div>
 		</div>
