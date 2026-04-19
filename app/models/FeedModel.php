@@ -31,20 +31,20 @@ class FeedModel extends Database
                 FROM post p
                 INNER JOIN client c ON p.Client_ID = c.Client_ID
                 INNER JOIN category cat ON p.Category_ID = cat.Category_ID
-                WHERE p.Post_Status = 'active'
+                WHERE p.Post_Status = 'published'
                 AND p.Post_Type = 'post'
-                AND p.Post_Status = 'published'
                 AND p.Request_Status = 'open' -- NOTE: the status could change
                 AND p.Est_Date > NOW()
                 AND p.Category_ID IN (
                     SELECT Category_ID FROM provider_categories WHERE Provider_ID = ?
                 )
-                ORDER BY p.Created_At DESC";
-        
+                ORDER BY p.Created_At DESC
+                ";
+
         if ($limit !== null) {
             $sql .= " LIMIT ?";
         }
-
+        
         $stmt = $this->conn->prepare($sql);
         if (!$stmt) {
             error_log('FeedModel::getFeedItemsForProvider prepare: ' . $this->conn->error);
@@ -52,7 +52,9 @@ class FeedModel extends Database
         }
 
         if ($limit !== null) {
-            $stmt->bind_param('i', $limit);
+            $stmt->bind_param('ii', $providerId, $limit);
+        } else {
+            $stmt->bind_param('i', $providerId);
         }
 
         if (!$stmt->execute()) {
@@ -68,7 +70,7 @@ class FeedModel extends Database
         foreach ($rows as &$row) {
             $row['Client_Name'] = formatFullName($row['Client_First_Name'], $row['Client_Last_Name']);
             $row['Budget'] = formatCurrency($row['Requesting_Price']);
-            $row['Deadline'] = formatDuration($row['Est_Date']);
+            $row['Deadline'] = formatDuration($row['Deadline']);
             $row['Posted'] = timeAgo($row['Created_At']);
             $row['Request_Status'] = $row['Request_Status'] ?? 'Pending';
         }
@@ -126,7 +128,7 @@ class FeedModel extends Database
         return $row;
     }
 
-    public function providerHasBidonPost($providerId, $postId)
+    public function providerHasBidOnPost($providerId, $postId)
     {
         $sql = "SELECT COUNT(*) FROM bids WHERE Provider_ID = ? AND Post_ID = ?";
         $stmt = $this->conn->prepare($sql);
@@ -152,12 +154,12 @@ class FeedModel extends Database
         $sql = "INSERT INTO bids (Provider_ID, Post_ID, Amount, Comment, Duration, Status, Created_At) VALUES (?, ?, ?, ?, ?, 'active', NOW())";
         $stmt = $this->conn->prepare($sql);
         if (!$stmt) {
-            error_log('BidModel::submitBid prepare: ' . $this->conn->error);
+            error_log('FeedModel::submitBid prepare: ' . $this->conn->error);
             return ['success' => false, 'error' => 'Database error'];
         }
         $stmt->bind_param('iidsi', $providerId, $postId, $amount, $comment, $duration);
         if (!$stmt->execute()) {
-            error_log('BidModel::submitBid exec: ' . $stmt->error);
+            error_log('FeedModel::submitBid exec: ' . $stmt->error);
             $stmt->close();
             return ['success' => false, 'error' => 'Database error'];
         }
