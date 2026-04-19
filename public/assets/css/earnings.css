@@ -457,6 +457,127 @@ h1 {
     color: #64748b;
 }
 
+/* Payment Type Labels */
+.payment-type-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-top: 6px;
+}
+
+.label-completed-project {
+    background: #dcfce7;
+    color: #047857;
+    border: 1px solid #bbf7d0;
+}
+
+.label-cancellation-penalty {
+    background: #fef3c7;
+    color: #b45309;
+    border: 1px solid #fde68a;
+}
+
+/* Chart Area */
+.chart-area {
+    height: 300px;
+    position: relative;
+}
+
+/* Report Section */
+.report-section {
+    margin-bottom: 40px;
+}
+
+.report-header {
+    margin-bottom: 20px;
+}
+
+.report-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.date-range {
+    display: flex;
+    gap: 16px;
+    align-items: flex-end;
+}
+
+.date-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.date-field label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.date-input {
+    padding: 10px 14px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 14px;
+    color: #111827;
+    background: #fff;
+    transition: border-color 0.2s ease;
+}
+
+.date-input:focus {
+    outline: none;
+    border-color: #008500;
+    box-shadow: 0 0 0 3px rgba(0, 133, 0, 0.1);
+}
+
+.report-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.report-preview {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.report-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+}
+
+.report-stat {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 18px;
+    text-align: center;
+}
+
+.report-stat-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+
+.report-stat-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: #111827;
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
     .metrics-grid {
@@ -498,5 +619,151 @@ h1 {
 
     .tax-summary {
         grid-template-columns: 1fr;
+    }
+
+    .report-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .date-range {
+        flex-direction: column;
+    }
+
+    .report-summary-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* ======================================================================
+   View All Transactions — Modal + Infinite Scroll
+   ====================================================================== */
+
+.earnings-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.earnings-modal.is-open {
+    display: flex;
+}
+
+.earnings-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(2px);
+}
+
+.earnings-modal-content {
+    position: relative;
+    width: 100%;
+    max-width: 1000px;
+    max-height: 85vh;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.35);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: earnings-modal-pop 0.18s ease-out;
+}
+
+@keyframes earnings-modal-pop {
+    from { transform: translateY(8px); opacity: 0; }
+    to   { transform: translateY(0);   opacity: 1; }
+}
+
+.earnings-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 28px;
+    border-bottom: 1px solid #e5e7eb;
+    background: #f8fafc;
+}
+
+.earnings-modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.earnings-modal-close {
+    background: transparent;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    font-size: 18px;
+    color: #475569;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.earnings-modal-close:hover {
+    background: #e5e7eb;
+    color: #111827;
+}
+
+.earnings-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: auto;
+    padding: 0;
+}
+
+.earnings-modal-body .transactions-table {
+    width: 100%;
+    min-width: 720px;
+    border-collapse: collapse;
+    table-layout: auto;
+}
+
+.earnings-modal-body .transactions-table th,
+.earnings-modal-body .transactions-table td {
+    padding: 14px 16px;
+    word-break: break-word;
+}
+
+.earnings-modal-body .transactions-table td .transaction-project,
+.earnings-modal-body .transactions-table td .transaction-client {
+    overflow-wrap: anywhere;
+}
+
+.earnings-modal-footer-note {
+    padding: 16px;
+    text-align: center;
+    color: #64748b;
+    font-size: 13px;
+    border-top: 1px solid #e5e7eb;
+    background: #f8fafc;
+}
+
+.report-preview-error {
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    font-size: 13px;
+}
+
+@media (max-width: 640px) {
+    .earnings-modal {
+        padding: 8px;
+    }
+    .earnings-modal-content {
+        max-height: 95vh;
+    }
+    .earnings-modal-header {
+        padding: 16px 18px;
     }
 }

@@ -84,7 +84,7 @@ class ProjectController extends BaseController
         $this->ensureAuth();
 
         $userId = $_SESSION['user_id'];
-        $status = $_GET['status'] ?? 'ongoing'; // ongoing, accepted, pending (legacy)
+        $status = $_GET['status'] ?? 'pending'; // pending, accepted, ongoing
         $sort = $_GET['sort'] ?? 'date_desc'; // date_desc, date_asc, price_desc, price_asc, views_desc, views_asc
         $search = $_GET['search'] ?? ''; // search query
 
@@ -252,20 +252,24 @@ class ProjectController extends BaseController
     public function cancelRequest($id): void
     {
         header('Content-Type: application/json');
-        $id = (int) $id;
+        $this->ensureAuth();
+
+        $id       = (int) $id;
+        $clientId = (int) ($_SESSION['user_id'] ?? 0);
+
         if ($id <= 0) {
             http_response_code(400);
             echo json_encode(['error' => 'Invalid post id']);
             return;
         }
 
-        $success = $this->projectModel->cancelRequest($id);
+        $result = $this->projectModel->cancelRequest($id, $clientId);
 
-        if ($success) {
-            echo json_encode(['success' => true, 'message' => 'Request cancelled successfully']);
+        if ($result['success']) {
+            echo json_encode(['success' => true, 'message' => $result['message']]);
         } else {
-            http_response_code(500);
-            echo json_encode(['success' => false, 'error' => 'Failed to cancel Request']);
+            http_response_code($result['code'] ?? 500);
+            echo json_encode(['success' => false, 'error' => $result['message']]);
         }
     }
 

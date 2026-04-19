@@ -272,7 +272,7 @@ class ProjectModel extends Database {
 
   public function cancelProject(int $postId): bool
     {
-                $sql = "UPDATE project SET Project_Status = 'canceled' WHERE Post_ID = ?";
+        $sql = "UPDATE project SET Project_Status = 'canceled' WHERE Post_ID = ?";
         $sql2 = "UPDATE post SET Request_Status = 'canceled' WHERE Post_ID = ?";
         $stmt = $this->conn->prepare($sql);
         $stmt2 = $this->conn->prepare($sql2);
@@ -548,25 +548,56 @@ class ProjectModel extends Database {
         return $stmt->get_result()->fetch_assoc();
     }
 
-    public function cancelRequest(int $postId): bool
+    public function cancelRequest(int $postId, int $clientId): array
     {
-        $sql = "UPDATE post SET Request_Status = 'cancelled' WHERE Post_ID = ?";
+        // Fetch the post to verify ownership, current status, and type
+        $checkSql = "SELECT Client_ID, Request_Status, Post_Type FROM post WHERE Post_ID = ? LIMIT 1";
+        $checkStmt = $this->conn->prepare($checkSql);
+        if (!$checkStmt) {
+            error_log('cancelRequest prepare check: ' . $this->conn->error);
+            return ['success' => false, 'message' => 'Server error', 'code' => 500];
+        }
+        $checkStmt->bind_param('i', $postId);
+        $checkStmt->execute();
+        $row = $checkStmt->get_result()->fetch_assoc();
+        $checkStmt->close();
 
-        $stmt = $this->conn->prepare($sql);
-        if (!$stmt) {
-            error_log('cancelRequest prepare: ' . $this->conn->error);
-            return false;
+        if (!$row) {
+            return ['success' => false, 'message' => 'Post not found', 'code' => 404];
         }
 
-        $stmt->bind_param('i', $postId);
+        if ((int) $row['Client_ID'] !== $clientId) {
+            return ['success' => false, 'message' => 'Unauthorized', 'code' => 403];
+        }
+
+        $current = strtolower(trim((string) ($row['Request_Status'] ?? '')));
+        $cancellable = ['', 'open', 'pending', 'accepted', 'declined'];
+        if (!in_array($current, $cancellable, true)) {
+            return ['success' => false, 'message' => 'Request cannot be cancelled in its current status', 'code' => 422];
+        }
+
+        // For public posts reset to 'open' so other providers can still bid;
+        // for direct requests mark as 'cancelled'.
+        $isPublicPost  = strtolower(trim((string) ($row['Post_Type'] ?? ''))) === 'post';
+        $newStatus     = $isPublicPost ? 'open' : 'cancelled';
+        $clearProvider = $isPublicPost ? ', Provider_ID = NULL' : '';
+
+        $sql = "UPDATE post SET Request_Status = ? {$clearProvider} WHERE Post_ID = ?";
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('cancelRequest prepare update: ' . $this->conn->error);
+            return ['success' => false, 'message' => 'Server error', 'code' => 500];
+        }
+        $stmt->bind_param('si', $newStatus, $postId);
 
         if (!$stmt->execute()) {
             error_log('cancelRequest exec: ' . $stmt->error);
-            return false;
+            $stmt->close();
+            return ['success' => false, 'message' => 'Failed to cancel request', 'code' => 500];
         }
-
         $stmt->close();
-        return true;
+
+        return ['success' => true, 'message' => 'Request cancelled successfully'];
     }
 
     /**

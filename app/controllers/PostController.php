@@ -154,7 +154,7 @@ class PostController extends BaseController
 
         header('Content-Type: application/json');
 
-        try {
+        // try {
             // Log received data
             error_log("Received POST data: " . print_r($_POST, true));
 
@@ -201,7 +201,8 @@ class PostController extends BaseController
                 'Level' => $level ?: 'Beginner',
                 'End_At' => $endAt ?: date('Y-m-d', strtotime('+30 days')),
                 'Status' => $status === 'publish' ? 'active' : 'draft',
-                'Published_At' => $publishedAt
+                'Published_At' => $publishedAt,
+                'Request_Status' => $status === 'publish' ? 'open' : 'draft'
             ];
 
             error_log("Creating post with data: " . print_r($postData, true));
@@ -235,14 +236,14 @@ class PostController extends BaseController
                 'post_id' => $postId
             ]);
 
-        } catch (Exception $e) {
-            error_log('Error creating post: ' . $e->getMessage());
-            error_log('Stack trace: ' . $e->getTraceAsString());
-            echo json_encode([
-                'success' => false,
-                'message' => 'An error occurred while creating the post'
-            ]);
-        }
+        // } catch (Exception $e) {
+        //     error_log('Error creating post: ' . $e->getMessage());
+        //     error_log('Stack trace: ' . $e->getTraceAsString());
+        //     echo json_encode([
+        //         'success' => false,
+        //         'message' => 'An error occurred while creating the post'
+        //     ]);
+        // }
     }
 
     public function viewPost($id): void

@@ -213,7 +213,7 @@ class PostModel extends Database
         
         switch ($sort) {
             case 'date_asc':
-                if ($status === 'ongoing' || $status === 'pending') {
+                if ($status === 'pending') {
                     $orderBy = 'Published_At ASC';
                 } elseif ($status === 'accepted') {
                     $orderBy = 'Created_At ASC';
@@ -222,7 +222,7 @@ class PostModel extends Database
                 }
                 break;
             case 'date_desc':
-                if ($status === 'ongoing' || $status === 'pending') {
+                if ($status === 'pending') {
                     $orderBy = 'Published_At DESC';
                 } elseif ($status === 'accepted') {
                     $orderBy = 'Created_At DESC';
@@ -259,10 +259,10 @@ class PostModel extends Database
 
     public function createPost($data)
     {
-        try {
+        // try {
             $query = "INSERT INTO post (Client_ID, Title, Description, Category_ID, Requesting_Price, 
-                Price_Type, Est_Date, Level, End_At, Post_Status, Created_At, Published_At, Post_Type) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, 'post')";
+                Price_Type, Est_Date, Level, End_At, Post_Status, Created_At, Published_At, Request_Status, Post_Type) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?, 'post')";
 
             $stmt = $this->conn->prepare($query);
 
@@ -272,7 +272,7 @@ class PostModel extends Database
             }
 
             $stmt->bind_param(
-                'issidssssss',  // i=integer, s=string, d=double
+                'issidsssssss',  // i=integer, s=string, d=double
                 $data['Client_ID'],
                 $data['Title'],
                 $data['Description'],
@@ -283,7 +283,8 @@ class PostModel extends Database
                 $data['Level'],
                 $data['End_At'],
                 $data['Status'],
-                $data['Published_At']
+                $data['Published_At'],
+                $data['Request_Status']
             );
 
             if (!$stmt->execute()) {
@@ -296,10 +297,10 @@ class PostModel extends Database
 
             return $postId;
 
-        } catch (Exception $e) {
-            error_log('Error in createPost: ' . $e->getMessage());
-            return false;
-        }
+        // } catch (Exception $e) {
+        //     error_log('Error in createPost: ' . $e->getMessage());
+        //     return false;
+        // }
     }
 
     public function publishPost($postId)
@@ -351,7 +352,7 @@ class PostModel extends Database
         }
 
         // Update to active status
-        $sql = "UPDATE post SET Post_Status = 'active', Published_At = NOW() WHERE Post_ID = ?";
+        $sql = "UPDATE post SET Post_Status = 'active', Published_At = NOW(), Request_Status = 'open' WHERE Post_ID = ?";
         error_log("Executing SQL: $sql with Post_ID = $postId");
 
         $stmt = $this->conn->prepare($sql);
@@ -471,16 +472,15 @@ class PostModel extends Database
         }
 
         $current = strtolower(trim((string) ($row['Request_Status'] ?? '')));
-        $canSend = ($current === '' || $current === 'declined');
+        $canSend = ($current === 'open');
         if (!$canSend) {
             return ['success' => false, 'message' => 'Cannot send request when status is ongoing or accepted'];
         }
 
         $updateSql = "UPDATE post
-            SET Provider_ID = ?, Request_Status = 'ongoing'
+            SET Provider_ID = ?, Request_Status = 'pending'
             WHERE Post_ID = ?
-              AND Client_ID = ?
-              AND (Request_Status IS NULL OR LOWER(Request_Status) = 'declined' OR Request_Status = '')";
+              AND Client_ID = ?";
 
         $updateStmt = $this->conn->prepare($updateSql);
         if (!$updateStmt) {
@@ -555,7 +555,7 @@ class PostModel extends Database
                     End_At,
                     Published_At,
                     Request_Status
-                ) VALUES (NOW(), ?, 'direct', 'active', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), 'ongoing')";
+                ) VALUES (NOW(), ?, 'direct', 'active', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), 'pending')";
 
         $stmt = $this->conn->prepare($sql);
         if (!$stmt) {
@@ -736,7 +736,7 @@ class PostModel extends Database
 
         // Get total count
         $countSql = "SELECT COUNT(*) as total FROM post 
-                     WHERE Post_Status = 'active' AND Request_Status = 'ongoing' AND Provider_ID = ?";
+                     WHERE Post_Status = 'active' AND Request_Status = 'pending' AND Provider_ID = ?";
         
         $countStmt = $this->conn->prepare($countSql);
         $countStmt->bind_param('i', $providerId);
@@ -767,7 +767,7 @@ class PostModel extends Database
                 FROM post p
                 LEFT JOIN category c ON p.Category_ID = c.Category_ID
                 LEFT JOIN client cl ON p.Client_ID = cl.Client_ID
-                WHERE p.Post_Status = 'active' AND p.Request_Status = 'ongoing' AND p.Provider_ID = ?
+                WHERE p.Post_Status = 'active' AND p.Request_Status = 'pending' AND p.Provider_ID = ?
                 ORDER BY p.Created_At DESC
                 LIMIT ? OFFSET ?";
 
@@ -817,10 +817,12 @@ class PostModel extends Database
     {
 
         $RejectReasonChange = ($status === 'rejected') ? ", Request_Reject_Reason = ?" : "";
+        $clearProvider      = ($status === 'open')     ? ", Provider_ID = NULL"         : "";
 
         $sql = "UPDATE post 
                 SET Request_Status = ? 
                 $RejectReasonChange
+                $clearProvider
                 WHERE Post_ID = ?";
 
         $stmt = $this->conn->prepare($sql);
