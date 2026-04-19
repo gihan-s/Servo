@@ -12,9 +12,6 @@ class FeedModel extends Database
 
     public function getFeedItemsForProvider($providerId = null, $limit = null)
     {
-        // Feed Items fetched should be under categories that the provider has selected in their profile.
-        // TODO: Uncomment when ready to use actual database
-        /*
         // Fetch posts that are open for bidding
         // Join with Client and Category tables to get full details
         $sql = "SELECT 
@@ -78,7 +75,6 @@ class FeedModel extends Database
         unset($row);
 
         return $rows;
-        */
 
         // Dummy data for testing
         return [
