@@ -201,7 +201,8 @@ class PostController extends BaseController
                 'Level' => $level ?: 'Beginner',
                 'End_At' => $endAt ?: date('Y-m-d', strtotime('+30 days')),
                 'Status' => $status === 'publish' ? 'active' : 'draft',
-                'Published_At' => $publishedAt
+                'Published_At' => $publishedAt,
+                'Request_Status' => $status === 'publish' ? 'open' : null
             ];
 
             error_log("Creating post with data: " . print_r($postData, true));
