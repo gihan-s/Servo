@@ -20,14 +20,18 @@ class FeedController extends BaseController
         $userId = $_SESSION['user_id'];
         $role   = $_SESSION['role'];
 
-        // Choose view by role
         if ($role === 'Provider') {
             $feedItems = $this->feedModel->getFeedItemsForProvider($userId);
             foreach ($feedItems as &$item) {
-                $item['Posted'] = timeAgo($item['Created_At']);
+                $item['Posted']      = timeAgo($item['Created_At']);
                 $item['Client_Name'] = $item['Client_First_Name'] . ' ' . $item['Client_Last_Name'];
             }
-            unset($item); // break reference
+            unset($item);
+
+            // Load all bids for every post in one query
+            $postIds   = array_column($feedItems, 'Post_ID');
+            $allBids   = $this->feedModel->getBidsForPosts($postIds);
+
             $viewFile = __DIR__ . '/../views/provider/Feed/index.php';
         } else {
             $this->notFound();
@@ -54,48 +58,124 @@ class FeedController extends BaseController
             return;
         }
 
-        $postId = $_POST['post_id'] ?? null;
-
+        $postId = isset($_POST['post_id']) ? (int) $_POST['post_id'] : 0;
         if (!$postId) {
             $this->htmlError(400);
             return;
         }
 
-        $providerHasBid = $this->feedModel->providerHasBidOnPost($userId, $postId);
-        if ($providerHasBid) {
-            $this->htmlError(400);
+        // Block duplicate bids
+        if ($this->feedModel->providerHasBidOnPost($userId, $postId)) {
+            $this->htmlError(409);
             return;
         }
 
         $bidAmount = $_POST['bid_amount'] ?? null;
-        $duration = $_POST['bid_duration'] ?? null;
+        $duration  = $_POST['bid_duration'] ?? null;
         if (!$bidAmount || !$duration) {
             $this->htmlError(400);
             return;
         }
-        $bidComment = $_POST['bid_message'] ?? null;
-        // calculate duration in days based on unit (d/w/m) and value from form
+        $bidComment      = $_POST['bid_message'] ?? null;
         $bidDurationUnit = $_POST['bid_duration_unit'] ?? 'd';
-        $allowedUnits = ['d', 'w', 'm'];
+        $allowedUnits    = ['d', 'w', 'm'];
         if (!in_array($bidDurationUnit, $allowedUnits, true)) {
             $this->htmlError(400);
             return;
         }
         switch ($bidDurationUnit) {
-            case 'd':
-                $durationDays = $duration;
-                break;
-            case 'w':
-                $durationDays = $duration * 7;
-                break;
-            case 'm':
-                $durationDays = $duration * 30;
-                break;
-            default:
-                $durationDays = $duration;
+            case 'd': $durationDays = (int) $duration; break;
+            case 'w': $durationDays = (int) $duration * 7; break;
+            case 'm': $durationDays = (int) $duration * 30; break;
+            default:  $durationDays = (int) $duration;
         }
 
-        $result = $this->feedModel->submitBid($userId, $postId, $bidAmount, $bidComment, $durationDays);
+        $result = $this->feedModel->submitBid($userId, $postId, (float) $bidAmount, $bidComment, $durationDays);
+
+        if ($result['success']) {
+            header('Location: ' . BASE_URL . '/feed');
+            exit();
+        } else {
+            $this->htmlError(500);
+            return;
+        }
+    }
+
+    public function editBid()
+    {
+        $this->ensureAuth();
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->htmlError(405);
+            return;
+        }
+
+        $userId = $_SESSION['user_id'];
+        $role   = $_SESSION['role'];
+
+        if ($role !== 'Provider') {
+            $this->htmlError(403);
+            return;
+        }
+
+        $bidId    = isset($_POST['bid_id'])    ? (int) $_POST['bid_id']    : 0;
+        $bidAmount = $_POST['bid_amount'] ?? null;
+        $duration  = $_POST['bid_duration'] ?? null;
+
+        if (!$bidId || !$bidAmount || !$duration) {
+            $this->htmlError(400);
+            return;
+        }
+
+        $bidComment      = $_POST['bid_message'] ?? null;
+        $bidDurationUnit = $_POST['bid_duration_unit'] ?? 'd';
+        $allowedUnits    = ['d', 'w', 'm'];
+        if (!in_array($bidDurationUnit, $allowedUnits, true)) {
+            $this->htmlError(400);
+            return;
+        }
+        switch ($bidDurationUnit) {
+            case 'd': $durationDays = (int) $duration; break;
+            case 'w': $durationDays = (int) $duration * 7; break;
+            case 'm': $durationDays = (int) $duration * 30; break;
+            default:  $durationDays = (int) $duration;
+        }
+
+        $result = $this->feedModel->updateBid($bidId, $userId, (float) $bidAmount, $bidComment, $durationDays);
+
+        if ($result['success']) {
+            header('Location: ' . BASE_URL . '/feed');
+            exit();
+        } else {
+            $this->htmlError(500);
+            return;
+        }
+    }
+
+    public function cancelBid()
+    {
+        $this->ensureAuth();
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->htmlError(405);
+            return;
+        }
+
+        $userId = $_SESSION['user_id'];
+        $role   = $_SESSION['role'];
+
+        if ($role !== 'Provider') {
+            $this->htmlError(403);
+            return;
+        }
+
+        $bidId = isset($_POST['bid_id']) ? (int) $_POST['bid_id'] : 0;
+        if (!$bidId) {
+            $this->htmlError(400);
+            return;
+        }
+
+        $result = $this->feedModel->cancelBid($bidId, $userId);
 
         if ($result['success']) {
             header('Location: ' . BASE_URL . '/feed');

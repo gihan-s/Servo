@@ -1036,7 +1036,7 @@
 
                 const requestStatus = (post.Request_Status || '').toLowerCase();
                 const postStatus = (post.Post_Status || '').toLowerCase();
-                const canSendRequest = postStatus === 'active' && (requestStatus === '' || requestStatus === 'declined');
+                const canSendRequest = postStatus === 'active' && (requestStatus === 'open');
                 const statusNote = document.getElementById('requestStatusNote');
                 const requestButtons = formContainer.querySelectorAll('.provider-request-btn');
 
@@ -1104,7 +1104,7 @@
                     return;
                 }
 
-                window.showSuccessToast('Request Sent', 'Provider request status is now ongoing.');
+                window.showSuccessToast('Request Sent', 'Request has been sent to the provider successfully!');
 
                 const allButtons = document.querySelectorAll('.provider-request-btn');
                 allButtons.forEach((btn) => {

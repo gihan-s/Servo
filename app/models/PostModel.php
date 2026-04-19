@@ -259,7 +259,7 @@ class PostModel extends Database
 
     public function createPost($data)
     {
-        try {
+        // try {
             $query = "INSERT INTO post (Client_ID, Title, Description, Category_ID, Requesting_Price, 
                 Price_Type, Est_Date, Level, End_At, Post_Status, Created_At, Published_At, Request_Status, Post_Type) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?, 'post')";
@@ -297,10 +297,10 @@ class PostModel extends Database
 
             return $postId;
 
-        } catch (Exception $e) {
-            error_log('Error in createPost: ' . $e->getMessage());
-            return false;
-        }
+        // } catch (Exception $e) {
+        //     error_log('Error in createPost: ' . $e->getMessage());
+        //     return false;
+        // }
     }
 
     public function publishPost($postId)
@@ -472,16 +472,15 @@ class PostModel extends Database
         }
 
         $current = strtolower(trim((string) ($row['Request_Status'] ?? '')));
-        $canSend = ($current === '' || $current === 'declined');
+        $canSend = ($current === 'open');
         if (!$canSend) {
             return ['success' => false, 'message' => 'Cannot send request when status is ongoing or accepted'];
         }
 
         $updateSql = "UPDATE post
-            SET Provider_ID = ?, Request_Status = 'ongoing'
+            SET Provider_ID = ?, Request_Status = 'pending'
             WHERE Post_ID = ?
-              AND Client_ID = ?
-              AND (Request_Status IS NULL OR LOWER(Request_Status) = 'declined' OR Request_Status = '')";
+              AND Client_ID = ?";
 
         $updateStmt = $this->conn->prepare($updateSql);
         if (!$updateStmt) {
