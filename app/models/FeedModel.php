@@ -201,14 +201,14 @@ class FeedModel extends Database
 
     public function submitBid($providerId, $postId, $amount, $comment, $duration)
     {
-        // add entry to database, bids table with status 'Active' and current timestamp for created_at
-        $sql = "INSERT INTO bids (Provider_ID, Post_ID, Amount, Comment, Duration, Status, Created_At) VALUES (?, ?, ?, ?, ?, 'Active', NOW())";
+        // add entry to database, bids table with status 'active' and current timestamp for created_at
+        $sql = "INSERT INTO bids (Provider_ID, Post_ID, Amount, Comment, Duration, Status, Created_At) VALUES (?, ?, ?, ?, ?, 'active', NOW())";
         $stmt = $this->conn->prepare($sql);
         if (!$stmt) {
             error_log('BidModel::submitBid prepare: ' . $this->conn->error);
             return ['success' => false, 'error' => 'Database error'];
         }
-        $stmt->bind_param('iiisi', $providerId, $postId, $amount, $comment, $duration);
+        $stmt->bind_param('iidsi', $providerId, $postId, $amount, $comment, $duration);
         if (!$stmt->execute()) {
             error_log('BidModel::submitBid exec: ' . $stmt->error);
             $stmt->close();

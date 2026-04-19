@@ -26,7 +26,7 @@ class BidModel extends Database
                 b.Comment,
                 b.Amount,
                 b.Created_At,
-                b.Est_Date,
+                b.Duration,
                 b.Status,
                 b.Post_ID,
                 b.Provider_ID,
@@ -203,16 +203,17 @@ class BidModel extends Database
         return ($bid['Status_Key'] ?? '') === self::STATUS_ACTIVE;
     }
 
-    public function submitBid($providerId, $postId, $amount, $comment, $estDate)
+    public function submitBid($providerId, $postId, $amount, $comment, $durationDays)
     {
-        // add entry to database, bids table with status 'Active' and current timestamp for created_at
-        $sql = "INSERT INTO bids (Provider_ID, Post_ID, Amount, Comment, Est_Date, Status, Created_At) VALUES (?, ?, ?, ?, ?, 'Active', NOW())";
+        // add entry to database, bids table with status 'active' and current timestamp for created_at
+        $sql = "INSERT INTO bids (Provider_ID, Post_ID, Amount, Comment, Duration, Status, Created_At) VALUES (?, ?, ?, ?, ?, 'active', NOW())";
         $stmt = $this->conn->prepare($sql);
         if (!$stmt) {
             error_log('BidModel::submitBid prepare: ' . $this->conn->error);
             return ['success' => false, 'error' => 'Database error'];
         }
-        $stmt->bind_param('iiiis', $providerId, $postId, $amount, $comment, $estDate);
+        $durationDays = (int) $durationDays;
+        $stmt->bind_param('iidsi', $providerId, $postId, $amount, $comment, $durationDays);
         if (!$stmt->execute()) {
             error_log('BidModel::submitBid exec: ' . $stmt->error);
             $stmt->close();
@@ -263,8 +264,7 @@ class BidModel extends Database
                 ];
             }
 
-            $estDate = date('Y-m-d H:i:s', strtotime('+' . $durationDays . ' days'));
-            $sql = 'UPDATE bids SET Amount = ?, Comment = ?, Est_Date = ? WHERE Bid_ID = ? AND Provider_ID = ?';
+            $sql = 'UPDATE bids SET Amount = ?, Comment = ?, Duration = ? WHERE Bid_ID = ? AND Provider_ID = ?';
             $stmt = $this->conn->prepare($sql);
             if (!$stmt) {
                 error_log('BidModel::updateBidForProvider prepare: ' . $this->conn->error);
@@ -275,7 +275,7 @@ class BidModel extends Database
                 ];
             }
 
-            $stmt->bind_param('dssii', $amount, $comment, $estDate, $bidId, $providerId);
+            $stmt->bind_param('dsiii', $amount, $comment, $durationDays, $bidId, $providerId);
             if (!$stmt->execute()) {
                 error_log('BidModel::updateBidForProvider exec: ' . $stmt->error);
                 $stmt->close();
@@ -410,13 +410,12 @@ class BidModel extends Database
     public function getProviderBids($providerId)
     {
         // TODO: Uncomment when ready to use actual database
-        /*
         $sql = "SELECT 
                     b.Bid_ID,
                     b.Comment,
                     b.Amount,
                     b.Created_At,
-                    b.Est_Date,
+                    b.Duration,
                     b.Status,
                     b.Post_ID,
                     p.Title,
@@ -455,7 +454,8 @@ class BidModel extends Database
         foreach ($rows as &$row) {
             $row['Client_Name'] = formatFullName($row['Client_First_Name'], $row['Client_Last_Name']);
             $row['Bid_Amount'] = formatCurrency($row['Amount']);
-            $row['Timeline'] = formatDuration($row['Est_Date']);
+            $durationDays = (int) ($row['Duration'] ?? 0);
+            $row['Timeline'] = $durationDays . ' day' . ($durationDays === 1 ? '' : 's');
             $row['Bid_Date'] = timeAgo($row['Created_At']);
             $row['Bid_Ref'] = 'BID-' . str_pad($row['Bid_ID'], 6, '0', STR_PAD_LEFT);
             
@@ -474,88 +474,87 @@ class BidModel extends Database
         unset($row);
 
         return $rows;
-        */
 
         // Dummy data for testing
-        return [
-            [
-                'Bid_ID' => 1,
-                'Comment' => 'Custom responsive portfolio with blog/case-study CMS and deployment support.',
-                'Amount' => 550,
-                'Created_At' => date('Y-m-d H:i:s', strtotime('-2 hours')),
-                'Est_Date' => date('Y-m-d', strtotime('+8 days')),
-                'Status' => 'active',
-                'Post_ID' => 1,
-                'Title' => 'Portfolio Website + CMS',
-                'Post_Description' => 'Need a professional portfolio website with CMS capabilities.',
-                'Category_ID' => 1,
-                'Post_Status' => 'published',
-                'Post_Request_Status' => 'pending',
-                'Post_Provider_ID' => null,
-                'Client_First_Name' => 'Nadia',
-                'Client_Last_Name' => 'Perera',
-                'Category_Name' => 'Web Development',
-                // data below is formatted will be formatted in the controller/view normally, but included here for testing purposes
-                'Duration' => 8,
-            ],
-            [
-                'Bid_ID' => 2,
-                'Comment' => 'Technical audit, on-page optimization and speed improvements for better rankings.',
-                'Amount' => 460,
-                'Created_At' => date('Y-m-d H:i:s', strtotime('-1 day')),
-                'Est_Date' => date('Y-m-d', strtotime('+12 days')),
-                'Status' => 'active',
-                'Post_ID' => 2,
-                'Title' => 'WordPress SEO Optimization',
-                'Post_Description' => 'Need SEO expert to optimize WordPress site.',
-                'Category_ID' => 2,
-                'Post_Status' => 'published',
-                'Post_Request_Status' => 'pending',
-                'Post_Provider_ID' => null,
-                'Client_First_Name' => 'Tharushi',
-                'Client_Last_Name' => 'De Silva',
-                'Category_Name' => 'SEO',
-                'Duration' => 12,
-            ],
-            [
-                'Bid_ID' => 3,
-                'Comment' => 'Logo, color system and typography package prepared for social and print use.',
-                'Amount' => 340,
-                'Created_At' => date('Y-m-d H:i:s', strtotime('-3 days')),
-                'Est_Date' => date('Y-m-d', strtotime('+5 days')),
-                'Status' => 'accepted',
-                'Post_ID' => 3,
-                'Title' => 'Brand Kit for Startup Launch',
-                'Post_Description' => 'Creating brand identity for new startup.',
-                'Category_ID' => 3,
-                'Post_Status' => 'published',
-                'Post_Request_Status' => 'accepted',
-                'Post_Provider_ID' => (int) $providerId,
-                'Client_First_Name' => 'Isuru',
-                'Client_Last_Name' => 'Fernando',
-                'Category_Name' => 'Graphic Design',
-                'Duration' => 5,
-            ],
-            [
-                'Bid_ID' => 4,
-                'Comment' => 'Conversion-focused rewrite for hero, services and CTA blocks.',
-                'Amount' => 190,
-                'Created_At' => date('Y-m-d H:i:s', strtotime('-4 days')),
-                'Est_Date' => date('Y-m-d', strtotime('+4 days')),
-                'Status' => 'closed',
-                'Post_ID' => 4,
-                'Title' => 'Landing Page Copy Refresh',
-                'Post_Description' => 'Need compelling copy for landing page.',
-                'Category_ID' => 4,
-                'Post_Status' => 'expired',
-                'Post_Request_Status' => 'accepted',
-                'Post_Provider_ID' => 9999,
-                'Client_First_Name' => 'Kavindu',
-                'Client_Last_Name' => 'Jayasekara',
-                'Category_Name' => 'Content Writing',
-                'Duration' => 4,
-            ],
-        ];
+        // return [
+        //     [
+        //         'Bid_ID' => 1,
+        //         'Comment' => 'Custom responsive portfolio with blog/case-study CMS and deployment support.',
+        //         'Amount' => 550,
+        //         'Created_At' => date('Y-m-d H:i:s', strtotime('-2 hours')),
+        //         'Est_Date' => date('Y-m-d', strtotime('+8 days')),
+        //         'Status' => 'active',
+        //         'Post_ID' => 1,
+        //         'Title' => 'Portfolio Website + CMS',
+        //         'Post_Description' => 'Need a professional portfolio website with CMS capabilities.',
+        //         'Category_ID' => 1,
+        //         'Post_Status' => 'published',
+        //         'Post_Request_Status' => 'pending',
+        //         'Post_Provider_ID' => null,
+        //         'Client_First_Name' => 'Nadia',
+        //         'Client_Last_Name' => 'Perera',
+        //         'Category_Name' => 'Web Development',
+        //         // data below is formatted will be formatted in the controller/view normally, but included here for testing purposes
+        //         'Duration' => 8,
+        //     ],
+        //     [
+        //         'Bid_ID' => 2,
+        //         'Comment' => 'Technical audit, on-page optimization and speed improvements for better rankings.',
+        //         'Amount' => 460,
+        //         'Created_At' => date('Y-m-d H:i:s', strtotime('-1 day')),
+        //         'Est_Date' => date('Y-m-d', strtotime('+12 days')),
+        //         'Status' => 'active',
+        //         'Post_ID' => 2,
+        //         'Title' => 'WordPress SEO Optimization',
+        //         'Post_Description' => 'Need SEO expert to optimize WordPress site.',
+        //         'Category_ID' => 2,
+        //         'Post_Status' => 'published',
+        //         'Post_Request_Status' => 'pending',
+        //         'Post_Provider_ID' => null,
+        //         'Client_First_Name' => 'Tharushi',
+        //         'Client_Last_Name' => 'De Silva',
+        //         'Category_Name' => 'SEO',
+        //         'Duration' => 12,
+        //     ],
+        //     [
+        //         'Bid_ID' => 3,
+        //         'Comment' => 'Logo, color system and typography package prepared for social and print use.',
+        //         'Amount' => 340,
+        //         'Created_At' => date('Y-m-d H:i:s', strtotime('-3 days')),
+        //         'Est_Date' => date('Y-m-d', strtotime('+5 days')),
+        //         'Status' => 'accepted',
+        //         'Post_ID' => 3,
+        //         'Title' => 'Brand Kit for Startup Launch',
+        //         'Post_Description' => 'Creating brand identity for new startup.',
+        //         'Category_ID' => 3,
+        //         'Post_Status' => 'published',
+        //         'Post_Request_Status' => 'accepted',
+        //         'Post_Provider_ID' => (int) $providerId,
+        //         'Client_First_Name' => 'Isuru',
+        //         'Client_Last_Name' => 'Fernando',
+        //         'Category_Name' => 'Graphic Design',
+        //         'Duration' => 5,
+        //     ],
+        //     [
+        //         'Bid_ID' => 4,
+        //         'Comment' => 'Conversion-focused rewrite for hero, services and CTA blocks.',
+        //         'Amount' => 190,
+        //         'Created_At' => date('Y-m-d H:i:s', strtotime('-4 days')),
+        //         'Est_Date' => date('Y-m-d', strtotime('+4 days')),
+        //         'Status' => 'closed',
+        //         'Post_ID' => 4,
+        //         'Title' => 'Landing Page Copy Refresh',
+        //         'Post_Description' => 'Need compelling copy for landing page.',
+        //         'Category_ID' => 4,
+        //         'Post_Status' => 'expired',
+        //         'Post_Request_Status' => 'accepted',
+        //         'Post_Provider_ID' => 9999,
+        //         'Client_First_Name' => 'Kavindu',
+        //         'Client_Last_Name' => 'Jayasekara',
+        //         'Category_Name' => 'Content Writing',
+        //         'Duration' => 4,
+        //     ],
+        // ];
     }
 
     private function getEditableBidRecord(int $providerId, int $bidId): ?array

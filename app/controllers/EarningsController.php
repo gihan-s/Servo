@@ -20,6 +20,7 @@ class EarningsController extends BaseController
             return;
         }
 
+        $viewFile = __DIR__ . '/../views/provider/Earnings/index.php';
         include $viewFile;
     }
 

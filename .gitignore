@@ -2,3 +2,4 @@ uploads
 vendor
 .env
 .claude/
+database.sql
