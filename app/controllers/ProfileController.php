@@ -39,7 +39,8 @@ class ProfileController extends BaseController
 
             $viewFile = __DIR__ . '/../views/provider/Profile/index.php';
         } else {
-            die("Invalid user role!");
+            $this->notFound();
+            return;
         }
 
         // Step 3: Pass data to the correct view
@@ -80,9 +81,8 @@ class ProfileController extends BaseController
 
             $_SESSION['user_name'] = $firstName . ' ' . $lastName; // Update session name for immediate UI update
         } else {
-            $_SESSION['flash'] = ['type' => 'error', 'message' => 'Invalid user role'];
-            header("Location: /profile");
-            exit;
+            $this->htmlError(403);
+            return;
         }
 
 

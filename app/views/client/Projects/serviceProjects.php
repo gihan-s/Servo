@@ -1,711 +1,2175 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Global variables for JavaScript -->
+    <script>
+        window.BASE_URL = "<?= BASE_URL ?>";
+        window.currentProjectId = null;
+        let requirementList = [];
+        let removedRequirements = [];
+    </script>
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/cardList.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/clientPosts.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/elementStyles.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/gridTemplates.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/serviceProjects.css">
-    
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/incomingRequests.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/projectDetailView.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+
+    <script src="<?= BASE_URL ?>/assets/js/elementScript.js" defer></script>
+    <script src="<?= BASE_URL ?>/assets/js/projectDetailView.js" defer></script>
     <script src="<?= BASE_URL ?>/assets/js/cardList.js" defer></script>
 </head>
 
 <body>
     <section class="service-requests">
         <div class="header-requests">
-            <h1>Service Requests & Projects</h1>
-            <div class="search-header">
-                <div class="search-button">
-                    <input type="text" placeholder="Search for Requests...">
-                    <button><i class="fa-solid fa-magnifying-glass"></i></button>
-                </div>
-                <button class="filter" id="filter-pop-up"><i
-                        class="fa-solid fa-filter"></i><span>Filter</span></button>
-                <div class="advance-search">
-                    <div class="sort-selection">
-                        <div class="selection-input-field">
-                            <input type="selection-input" id="selection-input" name="sort" value="Sort By Relevence"
-                                disabled><i class="fa-solid fa-chevron-down"></i>
-                        </div>
-                        <div class="selection-options" id="selection-options">
-                            <div class="opt">Sort By Relevence</div>
-                            <div class="opt">Sort By Price</div>
-                            <div class="opt">Sort By Rating</div>
-                        </div>
-                    </div>
-                </div>
+            <div class="header-top" style="display:flex; justify-content: space-between; align-items: center;">
+                <h1>Service Requests & Projects</h1>
             </div>
-            <div class="container-changer">
-                <div id="pending-requests" class="buttons active" data-target="pending-requests">Pending Requests</div>
-                <div id="in-progress-requests" class="buttons" data-target="in-progress-requests">Approved Requests
-                </div>
-                <div id="ongoing-projects" class="buttons" data-target="ongoing-projects">Ongoing Projects</div>
+        </div>
+        <div class="container-changer">
+            <div class="tab-buttons">
+                <div id="pending" class="buttons active" data-target="pending">Pending Requests</div>
+                <div id="accepted" class="buttons" data-target="accepted">Approved Requests</div>
+                <div id="ongoing" class="buttons" data-target="ongoing">Ongoing Projects</div>
                 <div id="pending-review" class="buttons" data-target="pending-review">Pending Review</div>
-                <div id="completed-jobs" class="buttons" data-target="completed-jobs">Completed</div>
+                <div id="completed" class="buttons" data-target="completed">Completed Projects</div>
             </div>
         </div>
         <div class="request-content">
-            <!-- Pending Requests Section -->
-            <div class="pending-requests active requests-section" id="section-pending">
-                <p class="section-note">Requests you sent to providers after reviewing proposals. Awaiting provider
-                    acceptance or action.</p>
-                <div class="item-list">
+            <div class="search-header">
 
-                    <?php foreach ($pendingRequestProjects as $request): ?>
-                    <div class="search-item" data-status="awaiting">
-                        <div class="item-head">
-                            <div class="item-main-dets">
-                                <div class="item-name"><?= htmlspecialchars($request['provider']); ?></div>
-                                <div class="item-title"><?= htmlspecialchars($request['title']); ?></div>
-                                <div class="item-district">
-                                    <span>Sent <?= htmlspecialchars($request['sentDate']); ?></span>
-                                </div>
-                            </div>
-                            <div class="button">
-                                <button class="btn-outline btn-view" title="View Request"><i
-                                        class="fa-solid fa-eye"></i> View</button>
-                                <button class="btn-outline" title="Message Provider" aria-label="Message"><i
-                                        class="fa-solid fa-messages"></i></button>
-                                <button class="btn-danger" title="Cancel Request"><i
-                                        class="fa-solid fa-circle-xmark"></i> Cancel</button>
-                            </div>
-                        </div>
-                        <div class="item-middle">
-                            <div><i class="fa-solid fa-tag"></i> Proposed: <?= htmlspecialchars($request['proposedRate']); ?></div>
-                        </div>
-                        <div class="item-description"><?= htmlspecialchars($request['description']); ?></div>
-                        <div class="status-bottom"><span class="status-chip status-awaiting"><?= htmlspecialchars($request['status']); ?></span></div>
-                    </div>
-                    <?php endforeach; ?>
-
+                <div class="search-button">
+                    <input type="text" id="searchInput" placeholder="Search my service requests...">
+                    <button id="searchButton"><i class="fa-solid fa-magnifying-glass"></i></button>
                 </div>
-                <div class="pagination" aria-label="Pending Requests Pagination">
-                    <button class="page-btn prev" disabled><i class="fa-solid fa-chevron-left"></i></button>
-                    <button class="page-btn active">1</button>
-                    <button class="page-btn">2</button>
-                    <button class="page-btn">3</button>
-                    <button class="page-btn next"><i class="fa-solid fa-chevron-right"></i></button>
+                <button class="filter" id="filter-pop-up"><i class="fa-solid fa-filter"
+                        onclick="window.showSuccessToast('Test','Test Message')"></i><span>filter</span></button>
+
+                <div class="advance-search">
+                    <span>Sort By: </span>
+                    <div class="select-container" style="width: 150px;">
+
+                        <div class="text-container">
+                                <div class="label dropdown-label" style="visibility: hidden;"></div>
+                                <input type="text" id="sortDropdown" class="text-field-dropdown"
+                                    style="padding: 10px; background-color: var(--containerColor);" value="Date (Newest)"
+                                    readonly>
+                        </div>
+
+                        <div class="options" id="sortOptions" style='max-height:none;'>
+                                <div data-sort="date_desc">Date (Newest)</div>
+                                <div data-sort="date_asc">Date (Oldest)</div>
+                                <div data-sort="price_desc">Price (High)</div>
+                                <div data-sort="price_asc">Price (Low)</div>
+                                <div data-sort="views_desc">Views (Most)</div>
+                                <div data-sort="views_asc">Views (Least)</div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <!-- Completed Projects Section -->
-            <div class="completed-jobs requests-section" id="section-completed">
-                <p class="section-note">Fully completed and confirmed projects. You can review and reference past work
-                    here.</p>
+            <!-- PENDING REQUESTS SECTION -->
+            <div class="pending requests-section">
                 <div class="item-list">
-
-                    <?php foreach ($completedProjects as $project): ?>
-                    <div class="search-item" data-status="complete">
-                        <div class="item-head">
-                            <div class="item-main-dets">
-                                <div class="item-title"><?= htmlspecialchars($project['title']); ?></div>
-                                <div class="item-district">
-                                    <span><?= htmlspecialchars($project['completedDate']); ?></span>
-                                    <span>Total Paid: <?= htmlspecialchars($project['totalPaid']); ?></span>
-                                    <span>Duration: <?= htmlspecialchars($project['duration']); ?></span>
-                                </div>
-                            </div>
-                            <div class="button">
-                                <button class="btn-outline"><i class="fa-solid fa-file"></i> Contract</button>
-                                <button class="btn-primary"><i class="fa-solid fa-stars"></i> Review</button>
-                            </div>
-                        </div>
-                        <div class="item-description"><?= htmlspecialchars($project['description']); ?></div>
-                        <div class="status-bottom"><span class="status-chip status-complete"><i
-                                    class="fa-solid fa-circle-check"></i> Completed</span></div>
-                    </div>
-                    <?php endforeach; ?>
-
-                </div>
-                <div class="pagination" aria-label="Completed Jobs Pagination">
-                    <button class="page-btn prev" disabled><i class="fa-solid fa-chevron-left"></i></button>
-                    <button class="page-btn active">1</button>
-                    <button class="page-btn">2</button>
-                    <button class="page-btn">3</button>
-                    <button class="page-btn next"><i class="fa-solid fa-chevron-right"></i></button>
                 </div>
             </div>
 
-            <div class="pending-review requests-section" id="section-review">
-                <p class="section-note">Providers marked these as finished. Review deliverables and release payment or
-                    request changes.</p>
+            <!-- ACCEPTED REQUESTS SECTION -->
+            <div class="accepted requests-section" style="display: none;">
                 <div class="item-list">
-
-                    <?php
-                    ?>
-
-                    <?php foreach ($pendingReviewProjects as $project): ?>
-                    <div class="search-item" data-status="review">
-                        <div class="item-head">
-                            <div class="item-main-dets">
-                                <div class="item-title"><?php echo htmlspecialchars($project['title']); ?></div>
-                                <div class="item-district">
-                                    <span>Submitted <?php echo htmlspecialchars($project['submittedDate']); ?></span>
-                                    <span>Milestone: <?php echo htmlspecialchars($project['milestoneAmount']); ?></span>
-                                </div>
-                            </div>
-                            <div class="button">
-                                <button class="btn-primary btn-approve"><i class="fa-solid fa-circle-check"></i> Approve</button>
-                                <button class="btn-outline btn-request-changes"><i class="fa-solid fa-rotate-left"></i> Request
-                                    Changes</button>
-                                <button class="btn-outline"><i class="fa-solid fa-messages"></i> Message</button>
-                            </div>
-                        </div>
-                        <div class="item-description"><?php echo htmlspecialchars($project['description']); ?></div>
-                        <div class="status-bottom"><span class="status-chip status-review"><i
-                                    class="fa-solid fa-clipboard-check"></i> Pending Review</span></div>
-                    </div>
-                    <?php endforeach; ?>
-
-                </div>
-                <div class="pagination" aria-label="Pending Review Pagination">
-                    <button class="page-btn prev" disabled><i class="fa-solid fa-chevron-left"></i></button>
-                    <button class="page-btn active">1</button>
-                    <button class="page-btn">2</button>
-                    <button class="page-btn">3</button>
-                    <button class="page-btn next"><i class="fa-solid fa-chevron-right"></i></button>
-                </div>
-            </div>
-            <!-- Approved Requests Section -->
-            <div class="in-progress-requests requests-section" id="section-progress">
-                <p class="section-note">Approved requests with providers. Fund milestones, communicate, or mark work
-                    ready for review.</p>
-                <div class="item-list">
-
-                    <?php foreach ($approvedRequestProjects as $project): ?>
-                    <div class="search-item" data-status="progress">
-                        <div class="item-head">
-                            <div class="item-main-dets">
-                                <div class="item-title"><?= htmlspecialchars($project['title']); ?></div>
-                                <div class="item-district">
-                                    <span>Started <?= htmlspecialchars($project['startedDate']); ?></span>
-                                    <span>Hourly: <?= htmlspecialchars($project['hourlyRate']); ?></span>
-                                </div>
-                            </div>
-                            <div class="button">
-                                <button class="btn-outline"><i class="fa-solid fa-messages"></i> Message</button>
-                                <button class="btn-primary btn-pay"><i class="fa-solid fa-dollar-sign"></i> Pay</button>
-                                <button class="btn-danger"><i class="fa-solid fa-circle-xmark"></i> Cancel</button>
-                            </div>
-                        </div>
-                        <div class="item-middle">
-                            <div><i class="fa-solid fa-hourglass"></i> Estimated Time <?= htmlspecialchars($project['estimatedTime']); ?></div>
-                        </div>
-                        <div class="item-description"><?= htmlspecialchars($project['description']); ?>
-                        </div>
-                        <div class="status-bottom"><span class="status-chip status-progress"><?= htmlspecialchars($project['status']); ?></span></div>
-                    </div>
-                    <?php endforeach; ?>
-
-                </div>
-                <div class="pagination" aria-label="Approved Requests Pagination">
-                    <button class="page-btn prev" disabled><i class="fa-solid fa-chevron-left"></i></button>
-                    <button class="page-btn active">1</button>
-                    <button class="page-btn">2</button>
-                    <button class="page-btn">3</button>
-                    <button class="page-btn next"><i class="fa-solid fa-chevron-right"></i></button>
                 </div>
             </div>
 
-            <!-- Ongoing Projects Section -->
-            <div class="ongoing-projects requests-section" id="section-progress">
-                <p class="section-note">Approved requests with providers. Fund milestones, communicate, or mark work
-                    ready for review.</p>
+            <!-- ONGOING PROJECTS SECTION -->
+            <div class="ongoing requests-section" style="display: none;">
                 <div class="item-list">
-
-                    <?php foreach ($ongoingProjects as $project): ?>
-                    <div class="search-item" data-status="progress">
-                        <div class="item-head">
-                            <div class="item-main-dets">
-                                <div class="item-title"><?= htmlspecialchars($project['title']); ?></div>
-                                <div class="item-district">
-                                    <span>Started <?= htmlspecialchars($project['startedDate']); ?></span>
-                                    <span>Hourly: <?= htmlspecialchars($project['hourlyRate']); ?></span>
-                                </div>
-                            </div>
-                            <div class="button">
-                                <button class="btn-outline btn-view" title="View Project"><i class="fa-solid fa-eye"></i> View</button>
-                                <button class="btn-outline" title="Message Provider"><i class="fa-solid fa-messages"></i> Message</button>
-                                <button class="btn-danger"><i class="fa-solid fa-circle-xmark"></i> Cancel</button>
-                            </div>
-                        </div>
-                        <div class="item-middle">
-                            <div><i class="fa-solid fa-hourglass"></i> ETA <?= htmlspecialchars($project['estimatedTime']); ?></div>
-                        </div>
-                        <div class="progress-container" aria-label="Project progress">
-                            <div class="progress-label">Progress: <span class="progress-percent"><?= htmlspecialchars($project['progress']); ?>%</span> <span class="progress-detail" style="color:#64748b;">(0h of 0h)</span></div>
-                            <div class="progress-track"><div class="progress-fill"></div></div>
-                        </div>
-                        <div class="item-description"><?= htmlspecialchars($project['description']); ?>
-                        </div>
-                        <div class="status-bottom"><span class="status-chip status-progress"><?= htmlspecialchars($project['status']); ?></span></div>
-                    </div>
-                    <?php endforeach; ?>
-
-                </div>
-                <div class="pagination" aria-label="Approved Requests Pagination">
-                    <button class="page-btn prev" disabled><i class="fa-solid fa-chevron-left"></i></button>
-                    <button class="page-btn active">1</button>
-                    <button class="page-btn">2</button>
-                    <button class="page-btn">3</button>
-                    <button class="page-btn next"><i class="fa-solid fa-chevron-right"></i></button>
                 </div>
             </div>
-        </div>
+
+             <!-- COMPLETED JOBS SECTION -->
+             <div class="completed requests-section" style="display: none;">
+                <div class="item-list">
+                </div>
+             </div>
+
+             <!-- PENDING REVIEW SECTION -->
+             <div class="pending-review requests-section" style="display: none;">
+                <div class="item-list">
+                </div>
+            </div>
+            
+
+        </div>   
     </section>
-
-
-    <div class="pop-up-section filter-pop-up deactive">
-        <div class="pop-up deactive">
-            <div class="pop-up-header">
-                <div class="pop-up-title">Add Filters</div>
-                <i class="fa-solid fa-xmark" id="filter-pop-up"></i>
-            </div>
-            <hr>
-            <div class="pop-up-content">
-                <div class="search-filters">
-                    <div class="filter-item">
-                        <div class="filter-title"><span>Hourly rate</span><i
-                                class="fa-solid fa-chevron-down rotated"></i>
-                        </div>
-                        <ul class="filter-options active radios">
-                            <li><input type="radio" name="rate" id="rate" checked>Any hourly rate</li>
-                            <li><input type="radio" name="rate" id="rate">Less than $10</li>
-                            <li><input type="radio" name="rate" id="rate">$10 - $30</li>
-                            <li><input type="radio" name="rate" id="rate">$30 - $60</li>
-                            <li><input type="radio" name="rate" id="rate">$60 & above</li>
-                        </ul>
-                    </div>
-                    <div class="filter-item">
-                        <div class="filter-title"><span>Project success</span><i class="fa-solid fa-chevron-down"></i>
-                        </div>
-                        <ul class="filter-options radios">
-                            <li><input type="radio" name="success" id="success" checked>Any success rate</li>
-                            <li><input type="radio" name="success" id="success">85% & up</li>
-                            <li><input type="radio" name="success" id="success">75% & up</li>
-                            <li><input type="radio" name="success" id="success">65% & up</li>
-                            <li><input type="radio" name="success" id="success">50% & up</li>
-                        </ul>
-                    </div>
-                    <!-- <div class="filter-item">
-                        <div class="filter-title"><span>Total Earnings</span><i class="fa-solid fa-chevron-down"></i>
-                        </div>
-                        <ul class="filter-options radios">
-                            <li><input type="radio" name="earnings" id="earnings" checked>Any amount earned</li>
-                            <li><input type="radio" name="earnings" id="earnings">$25+ earned</li>
-                            <li><input type="radio" name="earnings" id="earnings">$100+ earned</li>
-                            <li><input type="radio" name="earnings" id="earnings">$250+ earned</li>
-                            <li><input type="radio" name="earnings" id="earnings">$1000+ earned</li>
-                            <li><input type="radio" name="earnings" id="earnings">No earnings yet</li>
-                        </ul>
-                    </div> -->
-                    <!-- <div class="filter-item">
-                        <div class="filter-title"><span>Language</span><i class="fa-solid fa-chevron-down"></i></div>
-                        <ul class="filter-options checkboxes">
-                            <li><input type="checkbox" name="language" id="language" checked>English</li>
-                            <li><input type="checkbox" name="language" id="language">Sinhala</li>
-                            <li><input type="checkbox" name="language" id="language">Tamil</li>
-                            <li><input type="checkbox" name="language" id="language">Other</li>
-                        </ul>
-                    </div> -->
-                </div>
-
-            </div>
-            <div class="button-apply">
-                <button>Apply filters</button>
-            </div>
-        </div>
-    </div>
-
-    
-
-    <!-- Request Details Modal -->
-    <div class="pop-up-section request-modal deactive" id="requestModalRoot">
-        <div class="pop-up" id="requestModal" style="max-width:680px; border-radius:16px;">
-            <div class="pop-up-header" style="display:flex; align-items:center; justify-content:space-between;">
-                <div class="pop-up-title">Request Details</div>
-                <i class="fa-solid fa-xmark" id="requestModalClose" style="cursor:pointer;"></i>
-            </div>
-            <hr>
-            <div class="pop-up-content" style="display:flex; flex-direction:column; gap:12px;">
-                <div style="display:flex; gap:12px; align-items:center;">
-                    <div style="font-weight:700; color:#111827;" id="reqProvider">Provider Name</div>
-                    <span style="font-size:12px; color:#64748b;">•</span>
-                    <div style="font-size:13px; color:#475569;" id="reqDate">Requested —</div>
-                </div>
-                <div style="font-size:16px; font-weight:700; color:#111827;" id="reqTitle">Request Title</div>
-                <div style="font-size:14px; color:#475569; line-height:1.6;" id="reqDescription">Request description
-                    goes here.</div>
-                <div style="display:flex; gap:10px; align-items:center;">
-                    <span class="status-chip" style="background:#ecfdf5; color:#008500; border-color:#bbf7d0;">
-                        <i class="fa-solid fa-tag"></i>
-                        <span id="reqPrice">Proposed: $0</span>
-                    </span>
-                </div>
-                <!-- Modal Progress for Ongoing Projects -->
-                <div id="modalProgressSection" class="progress-container" style="display:none;">
-                    <div class="progress-label">Progress: <span id="modalProgressPercent">0%</span> <span id="modalProgressDetail" style="color:#64748b;">(0h of 0h)</span></div>
-                    <div class="progress-track"><div id="modalProgressFill" class="progress-fill"></div></div>
-                </div>
-                <!-- Provider Remarks (Ongoing Projects) -->
-                <div id="modalRemarksSection" class="modal-remarks" style="display:none;">
-                    <div style="font-weight:700; color:#111827; margin-top:4px;">Provider Remarks</div>
-                    <div id="reqRemarks" style="font-size:14px; color:#475569; line-height:1.6; margin-top:6px;">—</div>
-                </div>
-            </div>
-            <div class="modal-actions">
-                <button class="btn-primary" id="btnPay" style="display:none;"><i class="fa-solid fa-dollar-sign"></i> Pay</button>
-                <button class="btn-primary" id="btnApprove" style="display:none;"><i class="fa-solid fa-circle-check"></i> Approve</button>
-                <button class="btn-outline" id="btnRequestChanges" style="display:none;"><i class="fa-solid fa-rotate-left"></i> Request Changes</button>
-                <button class="btn-danger" id="btnDecline"><i class="fa-solid fa-circle-xmark"></i> Cancel</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Confirm Cancel Modal -->
-    <div class="pop-up-section confirm-modal deactive" id="confirmCancelRoot">
-        <div class="pop-up" id="confirmCancel">
-            <div class="pop-up-header" style="display:flex; align-items:center; justify-content:space-between;">
-                <div class="pop-up-title">
-                    Confirm Cancel
-                </div>
-                <i class="fa-solid fa-xmark" id="confirmCancelClose" style="cursor:pointer;"></i>
-            </div>
-            <hr>
-            <div class="pop-up-content">
-                Are you sure you want to cancel this request? This action cannot be undone.
-            </div>
-            <div class="modal-actions">
-                <button class="btn-secondary" id="btnKeep">Keep</button>
-                <button class="btn-danger" id="btnConfirmCancel"><i class="fa-solid fa-circle-xmark"></i> Yes,
-                    Cancel</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Request Changes Modal -->
-    <div class="pop-up-section request-modal deactive" id="requestChangesRoot">
-        <div class="pop-up" id="requestChangesModal" style="max-width:640px; border-radius:16px;">
-            <div class="pop-up-header" style="display:flex; align-items:center; justify-content:space-between;">
-                <div class="pop-up-title">Request Changes</div>
-                <i class="fa-solid fa-xmark" id="requestChangesClose" style="cursor:pointer;"></i>
-            </div>
-            <hr>
-            <div class="pop-up-content" style="display:flex; flex-direction:column; gap:12px;">
-                <label style="font-weight:700; color:#111827;" for="changesDescription">Describe changes</label>
-                <textarea id="changesDescription" rows="5" style="width:100%; border:1px solid #e5e7eb; border-radius:10px; padding:10px; font-size:14px; color:#111827;" placeholder="Add clear feedback and requested adjustments"></textarea>
-                <div>
-                    <label style="font-weight:700; color:#111827; display:block; margin-bottom:6px;">Attach files (optional)</label>
-                    <input id="changesFile" type="file" multiple style="display:block;">
-                </div>
-            </div>
-            <div class="modal-actions">
-                <button class="btn-primary" id="btnSubmitRequestChanges"><i class="fa-solid fa-paper-plane"></i> Request</button>
-            </div>
-        </div>
-    </div>
+        
 
 </body>
 
+<div class="dialog-box-2" id="view-post-popup">
+    <div class="dialog-content">
+        <div class="dialog-title">
+            <div class="title">Post Details</div>
 
-</html>
+            <div>
+                <i class="fa-solid fa-xmark dialog-close-button-2" onclick="closeDialogBox('view-post-popup')"></i>
+            </div>
+        </div>
+        <div class="dialog-body"></div>
+    </div>
+</div>
+
+<div class="dialog-box-2" id="confirm-payment">
+    <div class="dialog-content">
+        <div class="dialog-title">
+            <div class="title">Confirm Payment</div>
+
+            <div>
+                <i class="fa-solid fa-xmark dialog-close-button-2" onclick="closeDialogBox('confirm-payment')"></i>
+            </div>
+        </div>
+        <div class="dialog-body"></div>
+        <div class="pop-up-content">
+            Are you sure you want to confirm this payment?
+        </div>
+        <div class="modal-actions">
+            <button class="action-btn btn-delete" id="confirmKeep"
+                onclick="closeDialogBox('confirm-payment')">Cancel</button>
+            <button class="action-btn btn-edit" id="confirmPaymentBtn"><i class="fa-solid fa-check"></i> Confirm</button>
+        </div>
+
+    </div>
+
+</div>
+
+<div class="dialog-box-2" id="confirm-cancel">
+    <div class="dialog-content" style="width: 400px;">
+        <div class="dialog-title">
+            <div class="title">Confirm Cancel</div>
+
+            <div>
+                <i class="fa-solid fa-xmark dialog-close-button-2" onclick="closeDialogBox('confirm-cancel')"></i>
+            </div>
+        </div>
+        <div class="pop-up-content">
+            Are you sure you want to cancel this request? This action cannot be undone.
+        </div>
+        <div class="modal-actions">
+            <button class="action-btn btn-view" id="confirmKeep"
+                onclick="closeDialogBox('confirm-cancel')">Keep</button>
+            <button class="action-btn btn-delete" id="confirmCancelBtn"><i class="fa-solid fa-circle-xmark"></i> Yes,
+                Cancel</button>
+        </div>
+
+    </div>
+
+</div>
+
+<div class="dialog-box-2" id="cancel-ongoing-project">
+    <div class="dialog-content" style="width: 400px;">
+        <div class="dialog-title">
+            <div class="title">Confirm Cancel</div>
+
+            <div>
+                <i class="fa-solid fa-xmark dialog-close-button-2" onclick="closeDialogBox('cancel-ongoing-project')"></i>
+            </div>
+        </div>
+        <div class="pop-up-content">
+            Send Cancelling request to the provider. If project get cancelled you will charge additional amount and other amount will refunded to your account
+        </div>
+        <div class="modal-actions">
+            <button class="action-btn btn-view" id="confirmKeep"
+                onclick="closeDialogBox('cancel-ongoing-project')">Keep</button>
+            <button class="action-btn btn-delete" id="confirmCancelBtn"><i class="fa-solid fa-circle-xmark"></i> Yes,
+                Cancel</button>
+        </div>
+
+    </div>
+
+</div>
+
+<div class="dialog-box-2" id="update-requirements-popup">
+    <div class="dialog-content" style="width:720px; max-width:95vw; display:flex; flex-direction:column; max-height:88vh;">
+        <div class="dialog-title">
+            <div class="title">Project Requirements</div>
+            <div>
+                <i class="fa-solid fa-xmark dialog-close-button-2" onclick="closeDialogBox('update-requirements-popup')"></i>
+            </div>
+        </div>
+
+        <!-- Tab strip -->
+        <div class="req-tabs" style="display:flex; gap:0; border-bottom:2px solid #e5e7eb; margin-bottom:16px; flex-shrink:0;">
+            <button class="req-tab active" data-tab="req-list-pane">
+                <i class="fa-solid fa-list-check"></i> Current Requirements
+            </button>
+            <button class="req-tab" data-tab="req-add-pane">
+                <i class="fa-solid fa-plus"></i> Add New
+            </button>
+        </div>
+
+        <!-- Current requirements pane -->
+        <div id="req-list-pane" class="req-pane" style="flex:1; overflow-y:auto; min-height:0;">
+            <div class="loading-state" id="req-loading">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading requirements…</p>
+            </div>
+            <div id="req-list-body" style="display:none;"></div>
+        </div>
+
+        <!-- Add new requirement pane -->
+        <div id="req-add-pane" class="req-pane" style="display:none; flex:1; overflow-y:auto; min-height:0;">
+            <form id="req-add-form" onsubmit="return false;" style="display:flex; flex-direction:column; gap:14px; padding:2px 0 8px;">
+                <div class="req-form-group">
+                    <label for="reqTitle">Title <span style="color:#ef4444;">*</span></label>
+                    <input type="text" id="reqTitle" maxlength="200" placeholder="e.g. Add dark mode support">
+                </div>
+                <div class="req-form-group">
+                    <label for="reqDescription">Description <span style="color:#9ca3af; font-weight:400;">(optional)</span></label>
+                    <textarea id="reqDescription" rows="4" placeholder="Describe the requirement in detail…"></textarea>
+                </div>
+                <div class="req-form-group">
+                    <label for="reqFiles">Attach Files <span style="color:#9ca3af; font-weight:400;">(optional)</span></label>
+                    <input type="file" id="reqFiles" name="req_files[]" multiple accept="image/*,.pdf,.zip,.txt">
+                    <div style="font-size:12px; color:#6b7280; margin-top:4px;">Images, PDF, ZIP or TXT — max 10 MB each</div>
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:8px; padding-top:4px;">
+                    <button type="button" class="action-btn btn-delete" onclick="document.getElementById('req-add-form').reset()">Reset</button>
+                    <button type="button" class="action-btn btn-edit" id="btnSubmitReq">
+                        <i class="fa-solid fa-paper-plane"></i> Submit Requirement
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="dialog-box-2" id="complete-project-popup">
+    <div class="dialog-content" style="width: 560px; max-width: 95vw;">
+        <div class="dialog-title">
+            <div class="title">Complete Project &amp; Leave Review</div>
+            <div>
+                <i class="fa-solid fa-xmark dialog-close-button-2" onclick="closeDialogBox('complete-project-popup')"></i>
+            </div>
+        </div>
+        <div class="dialog-body">
+            <p style="margin: 0 0 16px; color: #6b7280; font-size: 14px;">
+                Completing this project is permanent. Please rate your experience working with this provider.
+            </p>
+            <!-- Star Rating -->
+            <div class="req-form-group" style="margin-bottom: 16px;">
+                <label>Rating <span style="color:#ef4444;">*</span></label>
+                <div class="star-rating-input" id="starRatingInput">
+                    <i class="fa-regular fa-star" data-value="1"></i>
+                    <i class="fa-regular fa-star" data-value="2"></i>
+                    <i class="fa-regular fa-star" data-value="3"></i>
+                    <i class="fa-regular fa-star" data-value="4"></i>
+                    <i class="fa-regular fa-star" data-value="5"></i>
+                </div>
+                <input type="hidden" id="reviewRating" value="">
+                <div id="ratingError" style="color:#ef4444; font-size:12px; margin-top:4px; display:none;">Please select a rating before submitting.</div>
+            </div>
+            <!-- Title -->
+            <div class="req-form-group" style="margin-bottom: 12px;">
+                <label for="reviewTitle">Review Title <span style="color:#9ca3af; font-weight:400;">(optional)</span></label>
+                <input type="text" id="reviewTitle" placeholder="e.g. Great work!" maxlength="100">
+            </div>
+            <!-- Description -->
+            <div class="req-form-group" style="margin-bottom: 12px;">
+                <label for="reviewDescription">Comments <span style="color:#9ca3af; font-weight:400;">(optional)</span></label>
+                <textarea id="reviewDescription" rows="4" placeholder="Share your experience working with this provider..."></textarea>
+            </div>
+            <!-- Files -->
+            <div class="req-form-group">
+                <label for="reviewFiles">Attach Files <span style="color:#9ca3af; font-weight:400;">(optional)</span></label>
+                <input type="file" id="reviewFiles" name="review_files[]" multiple accept="image/*,.pdf,.zip,.txt">
+                <div style="font-size:12px; color:#6b7280; margin-top:4px;">Images, PDF, ZIP or TXT — max 10 MB each</div>
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button class="action-btn btn-delete" onclick="closeDialogBox('complete-project-popup')">Cancel</button>
+            <button class="action-btn btn-edit" id="btnConfirmCompleteProject">
+                <i class="fa-solid fa-circle-check"></i> Complete &amp; Submit Review
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="dialog-box-2" id="reopen-project-popup">
+    <div class="dialog-content" style="width: 560px; max-width: 95vw;">
+        <div class="dialog-title">
+            <div class="title">Request Changes</div>
+            <div>
+                <i class="fa-solid fa-xmark dialog-close-button-2" onclick="closeDialogBox('reopen-project-popup')"></i>
+            </div>
+        </div>
+        <div class="dialog-body">
+            <p style="margin: 0 0 12px; color: #6b7280; font-size: 14px;">
+                This will move the project back to ongoing. Add feedback for the provider.
+            </p>
+            <div class="req-form-group" style="margin-bottom: 12px;">
+                <label for="reopenReason">Reason <span style="color:#ef4444;">*</span></label>
+                <textarea id="reopenReason" rows="5" placeholder="Describe what needs to be revised..."></textarea>
+            </div>
+            <div class="req-form-group">
+                <label for="reopenFiles">Attach Files <span style="color:#9ca3af; font-weight:400;">(optional)</span></label>
+                <input type="file" id="reopenFiles" name="reopen_files[]" multiple accept="image/*,.pdf,.zip,.txt">
+                <div style="font-size:12px; color:#6b7280; margin-top:4px;">Images, PDF, ZIP or TXT — max 10 MB each</div>
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button class="action-btn btn-delete" onclick="closeDialogBox('reopen-project-popup')">Cancel</button>
+            <button class="action-btn btn-edit" id="btnConfirmReopenProject">
+                <i class="fa-solid fa-rotate-left"></i> Move to Ongoing
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="dialog-box-2" id="create-post-popup">
+    <div class="dialog-content">
+        <div class="dialog-title">
+            <div class="title">Create A New Service Request</div>
+
+            <div>
+                <i class="fa-solid fa-xmark dialog-close-button-2" onclick="closeDialogBox('create-post-popup')"></i>
+            </div>
+        </div>
+        <form id="create-post-form" class="create-post-form" onsubmit="return false;">
+            
+            <div class="input-grid-1">
+                <div style="display: flex; gap: 15px; margin-bottom: 5px;">
+
+                    <div class="search-select-container add-option" style="width: 100%;">
+
+                        <div class="text-container">
+                            <div class="label search-dropdown-label" id="field-skill-label">Skill</div>
+                            <input type="text" class="text-field-search-dropdown" id="SkillAddInput" autocomplete="off"
+                                onkeydown="return false">
+                        </div>
+
+                        <div class="options">
+
+                            <span class="text-container">
+                                <input type="text" class="text-field-search" placeholder="Enter new skill to add">
+                            </span>
+
+                            <div class="option-list" id="SkillsOptionList">
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="button" style="white-space: nowrap;" onclick="addSkill();">
+                        <i class="fa-solid fa-plus" style="margin-right: 10px;"></i>Add
+                    </button>
+
+                </div>
+            </div>
+            <div class="chip-wrapper" id="SkillsChips" style="margin-bottom:20px">
+                <input type="hidden" id="Skills" name="skills">
+
+                <p>No skill selected</p>
+            </div>
+            
+
+            <div class="modal-actions">
+                <button type="reset" class="action-btn btn-delete" id="create-post-pop-up" data-role="cancel"
+                    onclick="inputReset('create-post-form')">Reset</button>
+                <button type="button" class="action-btn btn-view" onclick="submitPost('draft')" id="create-post-pop-up"
+                    data-role="save-draft">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    Save Draft
+                </button>
+                <button type="button" class="action-btn btn-edit" onclick="viewDialogBox('confirm-publish')"
+                    id="create-post-pop-up" data-role="publish">
+                    <i class="fa-solid fa-rocket"></i>
+                    Publish Request
+                </button>
+                <button type="button" class="action-btn btn-edit" onclick="saveEditedPost()" data-role="save-post"
+                    style="display:none;">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    Save Request
+                </button>
+            </div>
+        </form>
+    </div>
+
+</div>
+
 <script>
-    // Modal wiring for request details in Pending Requests and Pay flow in Approved Requests
-    (function () {
-        const root = document.getElementById('requestModalRoot');
-        const modal = document.getElementById('requestModal');
-        const closeBtn = document.getElementById('requestModalClose');
-        const btnAccept = document.getElementById('btnAccept');
-        const btnDecline = document.getElementById('btnDecline');
-        const btnPay = document.getElementById('btnPay');
-        const reqProvider = document.getElementById('reqProvider');
-        const reqTitle = document.getElementById('reqTitle');
-        const reqDescription = document.getElementById('reqDescription');
-        const reqPrice = document.getElementById('reqPrice');
-        const reqDate = document.getElementById('reqDate');
-        const modalProgressSection = document.getElementById('modalProgressSection');
-        const modalProgressFill = document.getElementById('modalProgressFill');
-        const modalProgressPercent = document.getElementById('modalProgressPercent');
-        const modalProgressDetail = document.getElementById('modalProgressDetail');
-        const modalRemarksSection = document.getElementById('modalRemarksSection');
-        const reqRemarks = document.getElementById('reqRemarks');
-
-    function openModal() {
-        root.classList.remove('deactive');
-        root.classList.add('active');
-        document.body.style.overflow = 'hidden';
+    let currentSort = 'date_desc';
+    let currentSearch = '';
+    let searchTimeout = null;
+    const PAGE_SIZE = 5;
+    const postsState = {
+        pending: { posts: [], visibleCount: 0 },
+        accepted: { posts: [], visibleCount: 0 },
+        ongoing: { posts: [], visibleCount: 0 },
+        'pending-review': { posts: [], visibleCount: 0 },
+        'completed': { posts: [], visibleCount: 0 }
     }
 
-    function closeModal() {
-        root.classList.remove('active');
-        root.classList.add('deactive');
-        document.body.style.overflow = '';
+    function getListContainer(status) {
+        return document.querySelector(`.${status} .item-list`);
     }
 
-    function extractText(el, selector) {
-        const node = el.querySelector(selector);
-        return node ? node.textContent.trim() : '';
+    function clearLoadMoreButton(status) {
+        const section = document.querySelector(`.${status}`);
+        if (!section) return;
+        const existing = section.querySelector('.load-more-wrap');
+        if (existing) existing.remove();
     }
 
-    const confirmRoot = document.getElementById('confirmCancelRoot');
-    const confirmClose = document.getElementById('confirmCancelClose');
-    const btnKeep = document.getElementById('btnKeep');
-    const btnConfirmCancel = document.getElementById('btnConfirmCancel');
+    function loadPosts(tab = 'ongoing') {
+        const container = getListContainer(tab);
+        if (!container) return;
 
-    function openConfirm() {
-        confirmRoot.classList.remove('deactive');
-        confirmRoot.classList.add('active');
-        document.body.style.overflow = 'hidden';
-    }
+        container.innerHTML = `
+        <div class="loading-state">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Loading posts...</p>
+        </div>
+    `;
+        clearLoadMoreButton(tab);
 
-    function closeConfirm() {
-        confirmRoot.classList.remove('active');
-        confirmRoot.classList.add('deactive');
-        document.body.style.overflow = '';
-    }
+        console.log('Loading posts for tab:', tab);
 
-    // Request Changes modal helpers
-    const reqChangesRoot = document.getElementById('requestChangesRoot');
-    const reqChangesClose = document.getElementById('requestChangesClose');
-    const btnSubmitRequestChanges = document.getElementById('btnSubmitRequestChanges');
-    function openRequestChanges() { reqChangesRoot.classList.remove('deactive'); reqChangesRoot.classList.add('active'); document.body.style.overflow = 'hidden'; }
-    function closeRequestChanges() { reqChangesRoot.classList.remove('active'); reqChangesRoot.classList.add('deactive'); document.body.style.overflow = ''; }
-
-        // Helper to extract a price/summary line from various card formats
-        function getPriceSummary(card) {
-            const middleTexts = Array.from(card.querySelectorAll('.item-middle div')).map(d => d.textContent.trim());
-            // Look for typical price markers
-            let match = middleTexts.find(t => /(Proposed:|Hourly:|Milestone:|Funded:)/i.test(t));
-            if (!match) {
-                // Fallback: look into item-district spans for price-like info
-                const districtTexts = Array.from(card.querySelectorAll('.item-district span')).map(s => s.textContent.trim());
-                match = districtTexts.find(t => /(Proposed:|Hourly:|Milestone:|Funded:|Price:)/i.test(t)) || '';
-            }
-            return match || '';
+        // Build the correct API URL based on tab
+        let apiUrl;
+        if (tab === 'ongoing') {
+            // Ongoing projects come from the project table
+            apiUrl = `${window.BASE_URL}/projects/ongoing?sort=${currentSort}&search=${encodeURIComponent(currentSearch)}`;
+        } else if (tab === 'pending-review') {
+            // Pending-review projects also come from the project table
+            apiUrl = `${window.BASE_URL}/projects/pending-review?sort=${currentSort}&search=${encodeURIComponent(currentSearch)}`;
+        } else if (tab === 'completed') {
+            // Completed projects come from the project table
+            apiUrl = `${window.BASE_URL}/projects/completed?sort=${currentSort}&search=${encodeURIComponent(currentSearch)}`;
+        } else {
+            // Map tab name to actual Request_Status value
+            const statusMap = { 'pending': 'pending', 'accepted': 'accepted', 'completed': 'completed' };
+            const apiStatus = statusMap[tab] || tab;
+            apiUrl = `${window.BASE_URL}/projects/list?status=${apiStatus}&sort=${currentSort}&search=${encodeURIComponent(currentSearch)}`;
         }
 
-        // Pending Requests: View opens modal with details; Pay is not shown in this context
-        document.querySelectorAll('.pending-requests .search-item').forEach(card => {
-            const viewBtn = card.querySelector('.btn-view');
-            const acceptBtn = card.querySelector('.btn-accept');
-            const cancelBtn = card.querySelector('.btn-danger');
-            if (viewBtn) {
-                viewBtn.addEventListener('click', () => {
-                    reqProvider.textContent = extractText(card, '.item-name') || 'Provider';
-                    reqTitle.textContent = extractText(card, '.item-title') || 'Request Title';
-                    reqDescription.textContent = extractText(card, '.item-description') || '';
-                    const priceLine = getPriceSummary(card);
-                    reqPrice.textContent = priceLine.replace(/\s+/g, ' ').trim() || 'Proposed: —';
-                    reqDate.textContent = (extractText(card, '.item-district span') || '').trim();
-                    // Hide Pay for pending view and hide progress/remarks by default
-                    if (btnPay) btnPay.style.display = 'none';
-                    // Ensure Cancel is visible in this context
-                    if (btnDecline) btnDecline.style.display = '';
-                    // Hide Approve/Request Changes in non-approve contexts
-                    (document.getElementById('btnApprove')||{}).style && (document.getElementById('btnApprove').style.display = 'none');
-                    (document.getElementById('btnRequestChanges')||{}).style && (document.getElementById('btnRequestChanges').style.display = 'none');
-                    if (modalProgressSection) modalProgressSection.style.display = 'none';
-                    if (modalRemarksSection) modalRemarksSection.style.display = 'none';
-                    openModal();
-                });
-            }
-            if (acceptBtn) {
-                acceptBtn.addEventListener('click', () => {
-                    // TODO: Hook to backend accept action
-                    alert('Accepted (demo)');
-                });
-            }
-            if (cancelBtn) {
-                cancelBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    openConfirm();
-                });
-            }
+        fetch(apiUrl)
+            //.then(response => response.text())
+            .then(response => {
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers.get('content-type'));
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Parsed data:', data);
+
+                // Add delay to make loading animation visible
+                return new Promise(resolve => setTimeout(() => resolve(data), 300));
+            })
+            .then(data => {
+                if (data.success && data.posts) {
+                    postsState[tab].posts = data.posts;
+                    postsState[tab].visibleCount = Math.min(PAGE_SIZE, data.posts.length);
+                    renderPosts(tab);
+                    return;
+                }
+
+                postsState[tab].posts = [];
+                postsState[tab].visibleCount = 0;
+                showEmptyState(tab, container);
+            })
+            .catch(error => {
+                console.error('Error loading posts:', error);
+                container.innerHTML = `
+                <div class="error-state">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <p>Failed to load posts. Please try again.</p>
+                    <p style="font-size: 12px; color: #999;">${error.message}</p>
+                    <button onclick="loadPosts('${tab}')" class="retry-btn">Retry</button>
+                </div>
+            `;
+                clearLoadMoreButton(tab);
+            });
+    }
+
+    function renderLoadMoreButton(status) {
+        const section = document.querySelector(`.${status}`);
+        const container = getListContainer(status);
+        if (!section || !container) return;
+
+        clearLoadMoreButton(status);
+
+        const state = postsState[status];
+        if (!state || state.visibleCount >= state.posts.length) {
+            return;
+        }
+
+        const wrap = document.createElement('div');
+        wrap.className = 'load-more-wrap';
+        wrap.style.display = 'flex';
+        wrap.style.justifyContent = 'center';
+        wrap.style.marginTop = '35px';
+
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'action-btn btn-view';
+        button.textContent = 'Load More';
+        button.addEventListener('click', function () {
+            state.visibleCount = Math.min(state.visibleCount + PAGE_SIZE, state.posts.length);
+            renderPosts(status);
         });
 
-        // Approved Requests: clicking Pay opens the same modal with Pay button visible
-        document.querySelectorAll('.in-progress-requests .search-item, .ongoing-projects .search-item').forEach(card => {
-            const payBtn = card.querySelector('.btn-pay');
-            const viewBtn = card.querySelector('.btn-view');
-            const cancelBtn = card.querySelector('.btn-danger');
-            if (payBtn) {
-                payBtn.addEventListener('click', () => {
-                    reqProvider.textContent = extractText(card, '.item-name') || extractText(card, '.item-provider') || 'Provider';
-                    reqTitle.textContent = extractText(card, '.item-title') || 'Request Title';
-                    reqDescription.textContent = extractText(card, '.item-description') || '';
-                    const priceLine = getPriceSummary(card);
-                    reqPrice.textContent = priceLine.replace(/\s+/g, ' ').trim() || 'Amount: —';
-                    // Prefer first two spans for date-like info
-                    const datespan = Array.from(card.querySelectorAll('.item-district span')).map(s => s.textContent.trim())[0] || '';
-                    reqDate.textContent = datespan;
-                    // Show Pay button in this context
-                    if (btnPay) btnPay.style.display = '';
-                    // Ensure Cancel is visible in this context
-                    if (btnDecline) btnDecline.style.display = '';
-                    // Hide Approve/Request Changes in non-approve contexts
-                    (document.getElementById('btnApprove')||{}).style && (document.getElementById('btnApprove').style.display = 'none');
-                    (document.getElementById('btnRequestChanges')||{}).style && (document.getElementById('btnRequestChanges').style.display = 'none');
-                    // For Approved Requests Pay popup: hide progress and provider remarks
-                    if (modalProgressSection) modalProgressSection.style.display = 'none';
-                    if (modalRemarksSection) modalRemarksSection.style.display = 'none';
-                    openModal();
-                });
+        wrap.appendChild(button);
+        section.appendChild(wrap);
+    }
+
+    function renderPosts(status) {
+        const container = getListContainer(status);
+        if (!container) return;
+
+        const state = postsState[status];
+        const visiblePosts = state.posts.slice(0, state.visibleCount);
+
+        if (visiblePosts.length === 0) {
+            showEmptyState(status, container);
+            clearLoadMoreButton(status);
+            return;
+        }
+
+        container.innerHTML = '';
+        visiblePosts.forEach(item => {
+            console.log('Rendering post:', item);
+            let postHTML;
+            if (status === 'pending') {
+                postHTML = createPendingCard(item.post, item.skills);
+            } else if (status === 'accepted') {
+                postHTML = createAcceptedCard(item.post, item.skills);
+            } else if (status === 'ongoing') {
+                postHTML = createOngoingCard(item.post, item.skills);
+            } else if (status === 'pending-review') {
+                postHTML = createPendingReviewCard(item.post, item.skills);
+            } else if (status === 'completed') {
+                postHTML = createCompletedCard(item.post, item.skills);
+            } else {
+                postHTML = createPostCard(item.post, item.skills, status);
             }
-            if (viewBtn) {
-                viewBtn.addEventListener('click', () => {
-                    // Populate modal the same way, but hide Pay for simple view
-                    reqProvider.textContent = extractText(card, '.item-name') || extractText(card, '.item-provider') || 'Provider';
-                    reqTitle.textContent = extractText(card, '.item-title') || 'Project Details';
-                    reqDescription.textContent = extractText(card, '.item-description') || '';
-                    const priceLine = getPriceSummary(card);
-                    reqPrice.textContent = priceLine.replace(/\s+/g, ' ').trim() || '';
-                    const datespan = Array.from(card.querySelectorAll('.item-district span')).map(s => s.textContent.trim())[0] || '';
-                    reqDate.textContent = datespan;
-                    if (btnPay) btnPay.style.display = 'none';
-                    // Ensure Cancel is visible in this context
-                    if (btnDecline) btnDecline.style.display = '';
-                    // Hide Approve/Request Changes in non-approve contexts
-                    (document.getElementById('btnApprove')||{}).style && (document.getElementById('btnApprove').style.display = 'none');
-                    (document.getElementById('btnRequestChanges')||{}).style && (document.getElementById('btnRequestChanges').style.display = 'none');
-                    // When viewing from ongoing projects, also show progress and remarks
-                    const etaText = Array.from(card.querySelectorAll('.item-middle div')).map(d => d.textContent.trim()).find(t => /ETA\s+/i.test(t)) || '';
-                    const loggedText = Array.from(card.querySelectorAll('.item-middle div')).map(d => d.textContent.trim()).find(t => /Logged\s+/i.test(t)) || '';
-                    const daysMatch = etaText.match(/ETA\s*(\d+)d/i);
-                    const hoursMatch = loggedText.match(/Logged\s*(\d+)h/i);
-                    const totalHours = daysMatch ? parseInt(daysMatch[1], 10) * 8 : 0;
-                    const spentHours = hoursMatch ? parseInt(hoursMatch[1], 10) : 0;
-                    const percent = totalHours > 0 ? Math.min(100, Math.round((spentHours / totalHours) * 100)) : 0;
-                    if (modalProgressSection) {
-                        modalProgressSection.style.display = '';
-                        if (modalProgressFill) modalProgressFill.style.width = percent + '%';
-                        if (modalProgressPercent) modalProgressPercent.textContent = percent + '%';
-                        if (modalProgressDetail) modalProgressDetail.textContent = `(${spentHours}h of ${totalHours}h)`;
+            container.insertAdjacentHTML('beforeend', postHTML);
+        });
+
+        renderLoadMoreButton(status);
+    }
+
+    function showEmptyState(status, container) {
+        let message = '';
+        let icon = 'fa-inbox';
+
+        if (status === 'pending') {
+            message = `
+                <h2>No pending requests right now</h2>
+                <p>Your pending requests will appear here.</p>
+            `;
+        } else if (status === 'accepted') {
+            message = `
+                <h2>No accepted requests right now</h2>
+                <p>Your accepted requests will appear here.</p>
+            `;
+        } else if (status === 'ongoing') {
+            message = `
+                <h2>No ongoing projects right now</h2>
+                <p>Your ongoing projects will appear here.</p>
+            `;
+        }
+        else if (status === 'pending-review') {
+            message = `
+                <h2>No pending reviews right now</h2>
+                <p>Your pending reviews will appear here.</p>
+            `;
+        } else if (status === 'completed') {
+            message = `
+                <h2>No completed projects right now</h2>
+                <p>Your completed projects will appear here.</p>
+            `;
+        }
+
+        container.innerHTML = `
+            <section class="empty-state">
+                <i class="fas ${icon}"></i>
+                ${message}
+            </section>
+        `;
+    }
+
+    function createPostCard(post, skills, status = 'pending') {
+        //const skillsHTML = skills && skills.length > 0
+        //    ? skills.map(skill => `<span class="skill-tag">${escapeHtml(skill)}</span>`).join('')
+        //    : '<span class="no-skills">---No skills specified---</span>';
+
+        const description = post.Description || '';
+        const snippet = description.length > 300
+            ? escapeHtml(description.substring(0, 300)) + '...'
+            : escapeHtml(description);
+
+        const providerName = post.Provider_Name || 'Unassigned provider';
+
+        //const publishedDate = formatDate(post.Published_At || post.Created_At);
+        //const daysLeft = calculateDaysLeft(post.End_At);
+        //if (daysLeft == 'Expired') {
+        //    updateAsExpired(post.Post_ID);
+        //}
+
+        // Different buttons based on status
+        let actionsHTML = '';
+        if (status === 'pending') {
+            actionsHTML = `
+                <a href="<?= $navRight[0]['href'] ?>" class="action-btn btn-edit <?= ('./' . basename( $_SERVER['REQUEST_URI'])) === $navRight[0]['href'] ? 'active' : '' ?>"
+                aria-label="Messages">
+                    <i class="fas fa-comments"></i>Messages
+                </a>
+                <button class="action-btn btn-view" onclick="viewPost(${post.Post_ID})">
+                    <i class="fas fa-eye"></i> View
+                </button>
+                <button class="action-btn btn-delete" onclick="cancelRequest(${post.Post_ID})">
+                    <i class="fas fa-trash"></i> Cancel
+                </button>
+            `;
+        } else if (status === 'accepted') {
+            actionsHTML = `
+                <a href="<?= $navRight[0]['href'] ?>" class="action-btn btn-edit <?= ('./' . basename( $_SERVER['REQUEST_URI'])) === $navRight[0]['href'] ? 'active' : '' ?>"
+                aria-label="Messages">
+                    <i class="fas fa-comments"></i>Messages
+                </a>
+                <button class="action-btn btn-edit" onclick="payPayment(${post.Post_ID})">
+                    <i class="fas fa-credit-card"></i> Pay
+                </button>
+                <button class="action-btn btn-view" onclick="viewPost(${post.Post_ID})">
+                    <i class="fas fa-eye"></i> View
+                </button>
+                <button class="action-btn btn-delete" onclick="cancelRequest(${post.Post_ID})">
+                    <i class="fas fa-trash"></i> Cancel
+                </button>
+            `;
+        } else if (status === 'ongoing') {
+            actionsHTML = `
+                <button class="action-btn btn-edit" onclick="updateRequest(${post.Post_ID})">
+                    <i class="fas fa-redo"></i> Update
+                </button>
+                <button class="action-btn btn-view" onclick="viewPost(${post.Post_ID})">
+                    <i class="fas fa-eye"></i> View
+                </button>
+                <button class="action-btn btn-delete" onclick="cancelOngoingProject(${post.Post_ID})">
+                    <i class="fas fa-trash"></i> Cancel
+                </button>
+            `;
+        }
+        else if (status === 'pending-review') {
+            actionsHTML = `
+                <button class="action-btn btn-edit" onclick="submitReview(${post.Post_ID})">
+                    <i class="fas fa-star"></i> Submit Review
+                </button>
+                <button class="action-btn btn-view" onclick="viewPost(${post.Post_ID})">
+                    <i class="fas fa-eye"></i> View
+                </button>
+            `;
+        }
+        else if (status === 'completed') {
+            actionsHTML = `
+                <a href="<?= $navRight[0]['href'] ?>" class="action-btn btn-edit <?= ('./' . basename( $_SERVER['REQUEST_URI'])) === $navRight[0]['href'] ? 'active' : '' ?>"
+                aria-label="Messages">
+                    <i class="fas fa-comments"></i>Messages
+                </a>
+                <button class="action-btn btn-edit" onclick="updateRequest(${post.Post_ID})">
+                    <i class="fas fa-redo"></i> Change Requirements
+                </button>
+                <button class="action-btn btn-view" onclick="viewPost(${post.Post_ID})">
+                    <i class="fas fa-eye"></i> View
+                </button>
+            `;
+        }
+
+
+        // Different date label based on status
+        //let dateLabel = '';
+        //if (status === 'draft') {
+        //    dateLabel = `Created ${publishedDate}`;
+        //} else if (status === 'expired') {
+        //    dateLabel = `Expired ${publishedDate}`;
+        //} else {
+        //    dateLabel = `Published ${publishedDate}`;
+        //}
+
+        // Different footer based on status
+        /*let footerHTML = '';
+        if (status === 'expired') {
+            footerHTML = `
+                <div class="post-footer">
+                    <div class="post-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Budget</span>
+                            <span class="detail-value budget-amount">LKR ${post.Requesting_Price || 0}/= (${post.Price_Type || 'Fixed'})</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Final Proposals</span>
+                            <span class="detail-value proposals-count">${post.Proposal_Count || post.ProposalsCount || 0}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Duration</span>
+                            <span class="detail-value project-duration">${post.Duration || 0} ${post.Duration_Type || 'Days'}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            footerHTML = `
+                <div class="post-footer">
+                    <div class="post-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Budget</span>
+                            <span class="detail-value budget-amount">LKR ${post.Requesting_Price || 0}/= (${post.Price_Type || 'Fixed'})</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Proposals Received</span>
+                            <span class="detail-value proposals-count">${post.Proposal_Count || post.ProposalsCount || 0}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Level</span>
+                            <span class="detail-value project-level">${post.Level || 'N/A'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Duration</span>
+                            <span class="detail-value project-duration">${post.Duration || 0} ${post.Duration_Type || 'Days'}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Different engagement stats based on status
+        let engagementHTML = '';
+        if (status === 'expired') { // Ensure post is marked as expired
+            engagementHTML = `
+                <div class="engagement-stats">
+                    <div class="stat-item">
+                        <i class="fas fa-eye"></i>
+                        <span>${post.Views || post.View_Count || 0} views</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-clock"></i>
+                        <span>Expired</span>
+                    </div>
+                </div>
+            `;
+        } else if (status === 'draft') {
+            engagementHTML = ''; // No engagement stats for drafts
+        } else {
+            engagementHTML = `
+                <div class="engagement-stats">
+                    <div class="stat-item">
+                        <i class="fas fa-eye"></i>
+                        <span>${post.Views || post.View_Count || 0} views</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-clock"></i>
+                        <span>${daysLeft}</span>
+                    </div>
+                </div>
+            `;
+        }*/
+
+        // Post type badge
+        console.log('Post :', post);
+        const postTypeLabel = post.Post_Type === 'direct' ? 'Direct Request' : 'Bid Request';
+        const postTypeHTML = `
+            <div class="post-type-badge">
+                <span class="badge-label ${post.Post_Type === 'direct' ? 'direct' : 'bid'}">${postTypeLabel}</span>
+            </div>
+        `;
+
+        let progressHTML = '';
+        if (status === 'ongoing') {
+            const progress = post.Progress || 0;
+            // const hoursWorked = Math.round((progress / 100) * 80);
+            progressHTML = `<div class="progress-container" aria-label="Project progress">
+                <div class="progress-label">Progress: <span class="progress-percent">${progress}%</span> </div>
+                <div class="progress-track"><div class="progress-fill" style="width: ${progress}%;"></div></div>
+            </div>`;
+        }
+
+        return `
+            <div class="search-item">
+                <input type="hidden" class="post-id" value="${post.Post_ID}">
+                <div class="item-head">
+                    <div class="item-main-dets">
+                        <div class="item-name"><i class="fas fa-user"></i><span>${escapeHtml(providerName)}</span></div>
+                        <div class="item-title">${escapeHtml(post.Title)}</div>
+                        <div class="item-description">
+                            ${snippet}
+                        </div>
+                    </div>
+                    <div class="post-actions">
+                         ${actionsHTML}
+                     </div>
+                </div>
+                <div class="item-middle">
+                    <div><i class="fa-solid fa-tag"></i> Proposed: LKR ${post.Requesting_Price || 0}/= (${post.Price_Type || 'Fixed'})</div>
+                </div>
+                ${progressHTML}
+                ${postTypeHTML}
+            </div>
+        `;
+    }
+
+    function createPendingCard(post, skills) {
+        const providerName = post.Provider_Name || 'Unassigned Provider';
+        const providerPicture = post.Provider_Picture
+            ? `${window.BASE_URL}/file/user-files/${post.Provider_Picture}`
+            : null;
+        const rating = post.Provider_Rating ? parseFloat(post.Provider_Rating).toFixed(1) : '0.0';
+        const category = post.Category_Name || 'N/A';
+        const estDate = formatEstDate(post.Est_Date);
+        const budget = `Rs. ${Number(post.Requesting_Price || 0).toLocaleString('en-US', {minimumFractionDigits:2})} (${post.Price_Type || 'Fixed'})`;
+        const description = post.Description || '';
+        const snippet = description.length > 200
+            ? escapeHtml(description.substring(0, 200)) + '...'
+            : escapeHtml(description);
+        const postedDate = formatDate(post.Created_At);
+        const postTypeLabel = post.Post_Type === 'direct' ? 'Direct' : 'Bid';
+
+        const avatarHTML = providerPicture
+            ? `<img src="${providerPicture}" alt="${escapeHtml(providerName)}" class="request-avatar" onerror="this.style.display='none'">`
+            : `<div class="request-avatar" style="width:56px;height:56px;border-radius:50%;background:#e5e7eb;display:flex;align-items:center;justify-content:center;"><i class="fas fa-user" style="color:#9ca3af;font-size:22px;"></i></div>`;
+
+        return `
+            <div class="search-item" data-post-id="${post.Post_ID}">
+                <input type="hidden" class="post-id" value="${post.Post_ID}">
+                <div class="request-header">
+                    <div class="request-client-section">
+                        ${avatarHTML}
+                        <div class="request-client-info">
+                            <div class="request-client-name">${escapeHtml(providerName)}</div>
+                            <div class="request-client-location">&#11088; ${rating} (0 reviews)</div>
+                        </div>
+                    </div>
+                    <div class="request-actions">
+                        <button class="btn-outline" onclick="viewPost(${post.Post_ID})" title="View Request">
+                            <i class="fa-solid fa-eye"></i> View
+                        </button>
+                        <a href="${window.BASE_URL}/messages?new=${post.Provider_ID}" style="text-decoration:none;">
+                            <button class="btn-outline" title="Message Provider">
+                                <i class="fa-solid fa-comments"></i> Message
+                            </button>
+                        </a>
+                        <button class="btn-primary btn-danger" onclick="cancelRequest(${post.Post_ID})" title="Cancel Request">
+                            <i class="fa-solid fa-circle-xmark"></i> Cancel
+                        </button>
+                    </div>
+                </div>
+                <div class="request-title">${escapeHtml(post.Title)}</div>
+                <div class="request-description">${snippet}</div>
+                <div class="request-details">
+                    <div class="request-detail-item">
+                        <span class="request-detail-label"><i class="fa-solid fa-coins"></i> Budget</span>
+                        <span class="request-detail-value">${budget}</span>
+                    </div>
+                    <div class="request-detail-item">
+                        <span class="request-detail-label"><i class="fa-solid fa-tag"></i> Category</span>
+                        <span class="request-detail-value">${escapeHtml(category)}</span>
+                    </div>
+                    <div class="request-detail-item">
+                        <span class="request-detail-label"><i class="fa-solid fa-calendar"></i> Est. Date</span>
+                        <span class="request-detail-value">${estDate}</span>
+                    </div>
+                </div>
+                <div class="request-footer">
+                    <span class="request-time">${postedDate}</span>
+                    <span class="status-chip status-pending">${postTypeLabel} Request</span>
+                </div>
+            </div>
+        `;
+    }
+
+    function formatEstDate(estDate) {
+        if (!estDate) return 'N/A';
+        const end = new Date(estDate);
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        end.setHours(0, 0, 0, 0);
+        const diffDays = Math.ceil((end - now) / (1000 * 60 * 60 * 24));
+        if (diffDays < 0) return `${Math.abs(diffDays)} days ago`;
+        if (diffDays === 0) return 'Today';
+        if (diffDays === 1) return 'Tomorrow';
+        return `in ${diffDays} days`;
+    }
+
+    function createAcceptedCard(post, skills) {
+        const providerName = post.Provider_Name || 'Unassigned Provider';
+        const providerPicture = post.Provider_Picture
+            ? `${window.BASE_URL}/file/user-files/${post.Provider_Picture}`
+            : null;
+        const rating = post.Provider_Rating ? parseFloat(post.Provider_Rating).toFixed(1) : '0.0';
+        const category = post.Category_Name || 'N/A';
+        const estDate = formatEstDate(post.Est_Date);
+        const budget = `LKR ${post.Requesting_Price || 0}/= (${post.Price_Type || 'Fixed'})`;
+        const description = post.Description || '';
+        const snippet = description.length > 300
+            ? escapeHtml(description.substring(0, 300)) + '...'
+            : escapeHtml(description);
+        const postedDate = formatDate(post.Created_At);
+        const postTypeLabel = post.Post_Type === 'direct' ? 'Direct' : 'Bid';
+
+        const avatarImg = providerPicture
+            ? `<img src="${providerPicture}" alt="${escapeHtml(providerName)}" class="accepted-avatar" onerror="this.remove()">`
+            : '';
+
+        return `
+            <div class="search-item accepted-card">
+                <input type="hidden" class="post-id" value="${post.Post_ID}">
+                <div class="accepted-header">
+                    <div class="accepted-provider-section">
+                        <div class="accepted-avatar-wrapper">
+                            <i class="fas fa-user"></i>
+                            ${avatarImg}
+                        </div>
+                        <div class="accepted-provider-info">
+                            <div class="accepted-provider-name">${escapeHtml(providerName)}</div>
+                            <div class="accepted-provider-rating">⭐ ${rating}</div>
+                        </div>
+                    </div>
+                    <div class="accepted-actions">
+                        <a href="${window.BASE_URL}/messages?new=${post.Provider_ID}" class="action-btn btn-edit" aria-label="Messages">
+                            <i class="fas fa-comments"></i> Messages
+                        </a>
+                        <button class="action-btn btn-edit" onclick="payPayment(${post.Post_ID})">
+                            <i class="fas fa-credit-card"></i> Pay
+                        </button>
+                        <button class="action-btn btn-view" onclick="viewPost(${post.Post_ID})">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <button class="action-btn btn-delete" onclick="cancelRequest(${post.Post_ID})">
+                            <i class="fas fa-trash"></i> Cancel
+                        </button>
+                    </div>
+                </div>
+                <div class="accepted-title">${escapeHtml(post.Title)}</div>
+                <div class="accepted-description">${snippet}</div>
+                <div class="accepted-details">
+                    <div class="accepted-detail-item">
+                        <span class="accepted-detail-label"><i class="fa-solid fa-coins"></i> Budget</span>
+                        <span class="accepted-detail-value">${budget}</span>
+                    </div>
+                    <div class="accepted-detail-item">
+                        <span class="accepted-detail-label"><i class="fa-solid fa-tag"></i> Category</span>
+                        <span class="accepted-detail-value">${escapeHtml(category)}</span>
+                    </div>
+                    <div class="accepted-detail-item">
+                        <span class="accepted-detail-label"><i class="fa-solid fa-calendar"></i> Est. Date</span>
+                        <span class="accepted-detail-value">${estDate}</span>
+                    </div>
+                </div>
+                <div class="accepted-footer">
+                    <span class="accepted-time">${postedDate}</span>
+                    <span class="status-chip status-accepted">${postTypeLabel} Request</span>
+                </div>
+            </div>
+        `;
+    }
+
+    function createOngoingCard(post, skills) {
+        const providerName    = post.Provider_Name || 'Unassigned Provider';
+        const providerPicture = post.Provider_Picture
+            ? `${window.BASE_URL}/file/user-files/${post.Provider_Picture}`
+            : null;
+        const rating      = post.Provider_Rating ? parseFloat(post.Provider_Rating).toFixed(1) : '0.0';
+        const category    = post.Category_Name || 'N/A';
+        const progress    = parseInt(post.Progress) || 0;
+        const estDate     = formatEstDate(post.Est_Date);
+        const startedDate = post.Started_At ? formatDate(post.Started_At) : formatDate(post.Created_At);
+        const budget      = `LKR ${post.Requesting_Price || 0}/= (${post.Price_Type || 'Fixed'})`;
+        const description = post.Description || '';
+        const snippet     = description.length > 300
+            ? escapeHtml(description.substring(0, 300)) + '...'
+            : escapeHtml(description);
+        const postTypeLabel = post.Post_Type === 'direct' ? 'Direct' : 'Bid';
+        const barColor = progress >= 75 ? '#008500' : progress >= 40 ? '#f59e0b' : '#3b82f6';
+
+        const avatarImg = providerPicture
+            ? `<img src="${providerPicture}" alt="${escapeHtml(providerName)}" class="ongoing-avatar" onerror="this.remove()">`
+            : '';
+
+        return `
+            <div class="search-item ongoing-card">
+                <input type="hidden" class="post-id" value="${post.Post_ID}">
+                <div class="ongoing-header">
+                    <div class="ongoing-provider-section">
+                        <div class="ongoing-avatar-wrapper">
+                            <i class="fas fa-user"></i>
+                            ${avatarImg}
+                        </div>
+                        <div class="ongoing-provider-info">
+                            <div class="ongoing-provider-name">${escapeHtml(providerName)}</div>
+                            <div class="ongoing-provider-rating">&#11088; ${rating}</div>
+                        </div>
+                    </div>
+                    <div class="ongoing-actions">
+                        <a href="${window.BASE_URL}/messages?new=${post.Provider_ID}" class="action-btn btn-edit" aria-label="Messages">
+                            <i class="fas fa-comments"></i> Messages
+                        </a>
+                        <button class="action-btn btn-view" onclick="ProjectDetailView.open(${post.Post_ID}, { role: 'client' })">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <button class="action-btn btn-edit" onclick="updateRequest(${post.Post_ID})">
+                            <i class="fas fa-file-alt"></i> Requirements
+                        </button>
+                        <button class="action-btn btn-delete" onclick="cancelOngoingProject(${post.Post_ID})">
+                            <i class="fas fa-trash"></i> Cancel
+                        </button>
+                    </div>
+                </div>
+                <div class="ongoing-title">${escapeHtml(post.Title)}</div>
+                <div class="ongoing-description">${snippet}</div>
+                <div class="ongoing-details">
+                    <div class="ongoing-detail-item">
+                        <span class="ongoing-detail-label"><i class="fa-solid fa-coins"></i> Budget</span>
+                        <span class="ongoing-detail-value">${budget}</span>
+                    </div>
+                    <div class="ongoing-detail-item">
+                        <span class="ongoing-detail-label"><i class="fa-solid fa-tag"></i> Category</span>
+                        <span class="ongoing-detail-value">${escapeHtml(category)}</span>
+                    </div>
+                    <div class="ongoing-detail-item">
+                        <span class="ongoing-detail-label"><i class="fa-solid fa-calendar"></i> Est. Date</span>
+                        <span class="ongoing-detail-value">${estDate}</span>
+                    </div>
+                    <div class="ongoing-detail-item">
+                        <span class="ongoing-detail-label"><i class="fa-solid fa-chart-line"></i> Progress</span>
+                        <span class="ongoing-detail-value" style="color:${barColor}; font-weight:700;">${progress}%</span>
+                    </div>
+                </div>
+                <div class="progress-container" style="margin-top:12px;">
+                    <div class="progress-track">
+                        <div class="progress-fill" style="width:${progress}%; background:${barColor};"></div>
+                    </div>
+                </div>
+                <div class="ongoing-footer">
+                    <span class="ongoing-time">${startedDate}</span>
+                    <span class="status-chip status-ongoing">${postTypeLabel} &middot; In Progress</span>
+                </div>
+            </div>
+        `;
+    }
+
+    function createPendingReviewCard(post, skills) {
+        const providerName    = post.Provider_Name || 'Unassigned Provider';
+        const providerPicture = post.Provider_Picture
+            ? `${window.BASE_URL}/file/user-files/${post.Provider_Picture}`
+            : null;
+        const rating      = post.Provider_Rating ? parseFloat(post.Provider_Rating).toFixed(1) : '0.0';
+        const category    = post.Category_Name || 'N/A';
+        const progress    = parseInt(post.Progress) || 0;
+        const estDate     = formatEstDate(post.Est_Date);
+        const submittedAt = post.Ended_At ? formatDate(post.Ended_At) : formatDate(post.Created_At);
+        const budget      = `LKR ${post.Requesting_Price || 0}/= (${post.Price_Type || 'Fixed'})`;
+        const description = post.Description || '';
+        const snippet     = description.length > 300
+            ? escapeHtml(description.substring(0, 300)) + '...'
+            : escapeHtml(description);
+        const postTypeLabel = post.Post_Type === 'direct' ? 'Direct' : 'Bid';
+
+        const avatarImg = providerPicture
+            ? `<img src="${providerPicture}" alt="${escapeHtml(providerName)}" class="ongoing-avatar" onerror="this.remove()">`
+            : '';
+
+        return `
+            <div class="search-item ongoing-card">
+                <input type="hidden" class="post-id" value="${post.Post_ID}">
+                <div class="ongoing-header">
+                    <div class="ongoing-provider-section">
+                        <div class="ongoing-avatar-wrapper">
+                            <i class="fas fa-user"></i>
+                            ${avatarImg}
+                        </div>
+                        <div class="ongoing-provider-info">
+                            <div class="ongoing-provider-name">${escapeHtml(providerName)}</div>
+                            <div class="ongoing-provider-rating">&#11088; ${rating}</div>
+                        </div>
+                    </div>
+                    <div class="ongoing-actions">
+                        <a href="${window.BASE_URL}/messages?new=${post.Provider_ID}" class="action-btn btn-edit" aria-label="Messages">
+                            <i class="fas fa-comments"></i> Messages
+                        </a>
+                        <button class="action-btn btn-view" onclick="ProjectDetailView.open(${post.Post_ID}, { role: 'client' })">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <button class="action-btn btn-edit" onclick="completePendingReviewProject(${post.Post_ID})">
+                            <i class="fas fa-circle-check"></i> Complete
+                        </button>
+                        <button class="action-btn btn-delete" onclick="openReopenProjectModal(${post.Post_ID})">
+                            <i class="fas fa-rotate-left"></i> Request Changes
+                        </button>
+                    </div>
+                </div>
+                <div class="ongoing-title">${escapeHtml(post.Title)}</div>
+                <div class="ongoing-description">${snippet}</div>
+                <div class="ongoing-details">
+                    <div class="ongoing-detail-item">
+                        <span class="ongoing-detail-label"><i class="fa-solid fa-coins"></i> Budget</span>
+                        <span class="ongoing-detail-value">${budget}</span>
+                    </div>
+                    <div class="ongoing-detail-item">
+                        <span class="ongoing-detail-label"><i class="fa-solid fa-tag"></i> Category</span>
+                        <span class="ongoing-detail-value">${escapeHtml(category)}</span>
+                    </div>
+                    <div class="ongoing-detail-item">
+                        <span class="ongoing-detail-label"><i class="fa-solid fa-calendar"></i> Est. Date</span>
+                        <span class="ongoing-detail-value">${estDate}</span>
+                    </div>
+                    <div class="ongoing-detail-item">
+                        <span class="ongoing-detail-label"><i class="fa-solid fa-chart-line"></i> Progress</span>
+                        <span class="ongoing-detail-value" style="color:#f59e0b; font-weight:700;">${progress}%</span>
+                    </div>
+                </div>
+                <div class="progress-container" style="margin-top:12px;">
+                    <div class="progress-track">
+                        <div class="progress-fill" style="width:${progress}%; background:#f59e0b;"></div>
+                    </div>
+                </div>
+                <div class="ongoing-footer">
+                    <span class="ongoing-time">Submitted ${submittedAt}</span>
+                    <span class="status-chip" style="background:#fff7ed; color:#c2410c; border:1px solid #fed7aa;">${postTypeLabel} &middot; Pending Review</span>
+                </div>
+            </div>
+        `;
+    }
+
+    function createCompletedCard(post, skills) {
+        const providerName    = post.Provider_Name || 'Unassigned Provider';
+        const providerPicture = post.Provider_Picture
+            ? `${window.BASE_URL}/file/user-files/${post.Provider_Picture}`
+            : null;
+        const rating      = post.Provider_Rating ? parseFloat(post.Provider_Rating).toFixed(1) : '0.0';
+        const category    = post.Category_Name || 'N/A';
+        const completedAt = post.Ended_At ? formatDate(post.Ended_At) : formatDate(post.Created_At);
+        const startedAt   = post.Started_At ? formatDate(post.Started_At) : '—';
+        const budget      = `LKR ${post.Requesting_Price || 0}/= (${post.Price_Type || 'Fixed'})`;
+        const description = post.Description || '';
+        const snippet     = description.length > 300
+            ? escapeHtml(description.substring(0, 300)) + '...'
+            : escapeHtml(description);
+        const postTypeLabel = post.Post_Type === 'direct' ? 'Direct' : 'Bid';
+
+        const avatarImg = providerPicture
+            ? `<img src="${providerPicture}" alt="${escapeHtml(providerName)}" class="ongoing-avatar" onerror="this.remove()">`
+            : '';
+
+        // Build reviews HTML
+        let reviewsHTML = '';
+        if (post.reviews && post.reviews.length) {
+            const reviewCards = post.reviews.map(r => {
+                const starsHTML = renderStarsHTML(r.Rating || 0);
+                const reviewer = r.Rated_By === 'Client' ? 'Your Review' : 'Provider\'s Review';
+                const rDate = r.Left_At ? new Date(r.Left_At).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '';
+                const filesHTML = r.files && r.files.length
+                    ? `<div class="review-card-files">
+                        ${r.files.map(f => {
+                            const name = f.split('/').pop();
+                            const url  = `${window.BASE_URL}/file/review-files/${encodeURIComponent(f)}`;
+                            return `<a href="${url}" target="_blank" class="review-file-chip" title="${escapeHtml(name)}">
+                                <i class="fa-solid fa-paperclip"></i> ${escapeHtml(name)}
+                            </a>`;
+                        }).join('')}
+                    </div>`
+                    : '';
+                return `
+                    <div class="completed-review-card ${r.Rated_By === 'Client' ? 'review-own' : 'review-provider'}">
+                        <div class="review-card-header">
+                            <span class="review-card-label">${escapeHtml(reviewer)}</span>
+                            <span class="review-card-date">${escapeHtml(rDate)}</span>
+                        </div>
+                        <div class="review-card-stars">${starsHTML}</div>
+                        ${r.Title ? `<div class="review-card-title">${escapeHtml(r.Title)}</div>` : ''}
+                        ${r.Description ? `<div class="review-card-desc">${escapeHtml(r.Description)}</div>` : ''}
+                        ${filesHTML}
+                    </div>`;
+            }).join('');
+
+            reviewsHTML = `
+                <div class="completed-reviews-section">
+                    <div class="completed-reviews-title"><i class="fa-solid fa-star"></i> Reviews</div>
+                    ${reviewCards}
+                </div>`;
+        }
+
+        return `
+            <div class="search-item ongoing-card">
+                <input type="hidden" class="post-id" value="${post.Post_ID}">
+                <div class="ongoing-header">
+                    <div class="ongoing-provider-section">
+                        <div class="ongoing-avatar-wrapper">
+                            <i class="fas fa-user"></i>
+                            ${avatarImg}
+                        </div>
+                        <div class="ongoing-provider-info">
+                            <div class="ongoing-provider-name">${escapeHtml(providerName)}</div>
+                            <div class="ongoing-provider-rating">&#11088; ${rating}</div>
+                        </div>
+                    </div>
+                    <div class="ongoing-actions">
+                        <a href="${window.BASE_URL}/messages?new=${post.Provider_ID}" class="action-btn btn-edit" aria-label="Messages">
+                            <i class="fas fa-comments"></i> Messages
+                        </a>
+                        <button class="action-btn btn-view" onclick="ProjectDetailView.open(${post.Post_ID}, { role: 'client' })">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                    </div>
+                </div>
+                <div class="ongoing-title">${escapeHtml(post.Title)}</div>
+                <div class="ongoing-description">${snippet}</div>
+                <div class="ongoing-details">
+                    <div class="ongoing-detail-item">
+                        <span class="ongoing-detail-label"><i class="fa-solid fa-coins"></i> Budget</span>
+                        <span class="ongoing-detail-value">${budget}</span>
+                    </div>
+                    <div class="ongoing-detail-item">
+                        <span class="ongoing-detail-label"><i class="fa-solid fa-tag"></i> Category</span>
+                        <span class="ongoing-detail-value">${escapeHtml(category)}</span>
+                    </div>
+                    <div class="ongoing-detail-item">
+                        <span class="ongoing-detail-label"><i class="fa-solid fa-calendar"></i> Started</span>
+                        <span class="ongoing-detail-value">${startedAt}</span>
+                    </div>
+                    <div class="ongoing-detail-item">
+                        <span class="ongoing-detail-label"><i class="fa-solid fa-circle-check"></i> Completed</span>
+                        <span class="ongoing-detail-value">${completedAt}</span>
+                    </div>
+                </div>
+                <div class="progress-container" style="margin-top:12px;">
+                    <div class="progress-track">
+                        <div class="progress-fill" style="width:100%; background:#16a34a;"></div>
+                    </div>
+                </div>
+                ${reviewsHTML}
+                <div class="ongoing-footer">
+                    <span class="ongoing-time">Completed ${completedAt}</span>
+                    <span class="status-chip" style="background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0;">${postTypeLabel} &middot; Completed</span>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderStarsHTML(rating) {
+        let html = '';
+        for (let i = 1; i <= 5; i++) {
+            html += i <= rating
+                ? '<i class="fa-solid fa-star star-filled"></i>'
+                : '<i class="fa-regular fa-star star-empty"></i>';
+        }
+        return html;
+    }
+
+    function updateAsExpired(id) {
+        fetch(`<?= BASE_URL ?>/requests/update-expired/${id}`, {
+            method: 'POST'
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Post marked as expired successfully');
+                } else {
+                    console.log('Error', data.message || 'Failed to mark post as expired');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text || '';
+        return div.innerHTML;
+    }
+
+    function formatDate(dateString) {
+        if (!dateString) return 'N/A';
+
+        const date = new Date(dateString);
+        const now = new Date();
+
+        // Reset time parts to compare only dates
+        const dateOnly = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        const nowOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+        // Calculate difference in days
+        const diffTime = nowOnly - dateOnly;
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+        console.log('Date comparison:', {
+            input: dateString,
+            parsed: date.toISOString(),
+            now: now.toISOString(),
+            dateOnly: dateOnly.toISOString(),
+            nowOnly: nowOnly.toISOString(),
+            diffDays: diffDays
+        });
+
+        if (diffDays === 0) return 'Today';
+        if (diffDays === 1) return 'Yesterday';
+        if (diffDays < 7) return `${diffDays} days ago`;
+        if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+    }
+
+    function calculateDaysLeft(endDate) {
+        if (!endDate) return 'N/A';
+
+        const end = new Date(endDate);
+        const now = new Date();
+        const diffTime = end - now;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays < 0) return 'Expired';
+        if (diffDays === 0) return 'Expires today';
+        if (diffDays === 1) return '1 day left';
+        return `${diffDays} days left`;
+    }
+
+    loadPosts('pending');
+
+    const tabButtons = {
+            'pending': document.getElementById('pending'),
+            'accepted': document.getElementById('accepted'),
+            'ongoing': document.getElementById('ongoing'),
+            'pending-review': document.getElementById('pending-review'),
+            'completed': document.getElementById('completed')
+        };
+
+        const sections = {
+            'pending': document.querySelector('.pending'),
+            'accepted': document.querySelector('.accepted'),
+            'ongoing': document.querySelector('.ongoing'),
+            'pending-review': document.querySelector('.pending-review'),
+            'completed': document.querySelector('.completed')     
+        };
+
+        /*Object.keys(tabButtons).forEach(key => {
+            tabButtons[key].addEventListener('click', function () {
+                // Remove active class from all buttons
+                Object.values(tabButtons).forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+
+                // Hide all sections
+                Object.values(sections).forEach(section => section.style.display = 'none');
+
+                // Show selected section and load posts
+                const status = key.replace('-posts', '');
+                sections[key].style.display = 'block';
+                loadPosts(status);
+            });
+        });*/
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const tabButtons = document.querySelectorAll('.tab-buttons .buttons');
+            const sections = document.querySelectorAll('.requests-section');
+
+            function showSection(status) {
+                // Remove active class from all buttons
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                const activeBtn = document.querySelector(`.tab-buttons .buttons[data-target="${status}"]`);
+                if (activeBtn) activeBtn.classList.add('active');
+
+                // Hide all sections
+                sections.forEach(section => section.style.display = 'none');
+
+                // Show selected section
+                const activeSection = document.querySelector(`.${status}`);
+                if (activeSection) activeSection.style.display = 'block';
+
+                // Load posts
+                loadPosts(status);
+            }
+
+            // Add click listeners
+            tabButtons.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const status = this.dataset.target;
+                    showSection(status);
+                });
+            });
+
+            // Initial load
+            showSection('pending');
+        });
+    }
+
+    function payPayment(id) {
+        viewDialogBox('confirm-payment');
+
+    function viewPost(id) {
+        viewDialogBox('view-post-popup');
+
+        // Show loading state
+        const formContainer = document.querySelector("#view-post-popup .dialog-body");
+        formContainer.innerHTML = `
+            <div class="loading-state">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading post details...</p>
+            </div>
+        `;
+
+        fetch("<?= BASE_URL ?>/requests/view/" + id)
+            .then(response => response.json())
+            .then(post => {
+                // Add delay to make loading animation visible
+                return new Promise(resolve => setTimeout(() => resolve(post), 300));
+            })
+            .then(post => {
+                if (post.error) {
+                    console.error('Error fetching post:', post.error);
+                    formContainer.innerHTML = `
+                        <div class="error-state">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <p>Failed to load post details</p>
+                            <button onclick="viewPost(${id})" class="retry-btn">Retry</button>
+                        </div>
+                    `;
+                    return;
+                }
+                const providerName = post.Provider_Name || 'Unassigned provider';
+                console.log('Fetched post details:', post);
+                // Format date
+                const publishDate = post.Published_At ?
+                    new Date(post.Published_At).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    }) : 'N/A';
+
+                // Build skills HTML
+                const skillsHTML = post.skills && post.skills.length > 0
+                    ? post.skills.map(skill => `<span class="skill-tag">${escapeHtml(skill)}</span>`).join('')
+                    : '<span>No skills specified</span>';
+
+                // Replace form content with a div wrapper for proper styling
+                formContainer.innerHTML = `
+                <div class="post-view">
+                    <div class="post-view-title">${post.Title || 'Untitled'}</div>
+                    <div class="post-view-meta">
+                        <span class="chip"><i class="fa-solid fa-calendar"></i><span>${publishDate}</span></span>
+                    </div>
+                    <div class="post-view-section">
+                        <div class="section-title">Description</div>
+                        <div class="section-body">${post.Description || 'No description provided'}</div>
+                    </div>
+                    <div class="post-view-section">
+                        <div class="section-title">Provider</div>
+                        <div class="post-provider">${escapeHtml(providerName)}</div>
+                    </div> 
+                    <div class="post-view-section">
+                        <div class="section-title">Required Skills</div>
+                        <div class="skills-row">${skillsHTML}</div>
+                    </div>
+                    <div class="post-view-section">
+                        <div class="section-title">Details</div>
+                        <div class="kv-grid">
+                            <div class="kv-item"><span class="kv-label">Budget:</span><span class="kv-value">LKR ${post.Requesting_Price || '0'}/= (${post.Price_Type || 'N/A'})</span></div>
+                            <div class="kv-item"><span class="kv-label">Level:</span><span class="kv-value">${post.Level || 'N/A'}</span></div>
+                            <div class="kv-item"><span class="kv-label">Duration:</span><span class="kv-value">${post.Duration || 'N/A'} ${post.Duration_Type || 'N/A'}</span></div>
+                            <div class="kv-item"><span class="kv-label">Proposals:</span><span class="kv-value">${post.Proposal_Count || '0'}</span></div>
+                        </div>
+                    </div>
+                    <div class="post-view-section">
+                        <div class="section-title">Engagement</div>
+                        <div class="engagement-row">
+                            <span class="chip"><i class="fa-solid fa-eye"></i> ${post.Views || '0'} views</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            })
+            .catch(error => {
+                console.error('Error fetching post:', error);
+                formContainer.innerHTML = `
+                    <div class="error-state">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <p>Failed to load post details. Please try again.</p>
+                        <button onclick="viewPost(${id})" class="retry-btn">Retry</button>
+                    </div>
+                `;
+            });
+    }
+
+    function cancelRequest(id) {
+        viewDialogBox('confirm-cancel');
+        const confirmCancelBtn = document.getElementById('confirmCancelBtn');
+
+        // Remove previous event listeners to avoid multiple triggers
+        const newconfirmCancelBtn = confirmCancelBtn.cloneNode(true);
+        confirmCancelBtn.parentNode.replaceChild(newconfirmCancelBtn, confirmCancelBtn);
+
+        newconfirmCancelBtn.addEventListener('click', function () {
+            fetch("<?= BASE_URL ?>/requests/cancel/" + id, {
+                method: 'POST'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        closeDialogBox('confirm-cancel');
+                        window.showSuccessToast("Success!", "Request cancelled successfully");
+
+                        // Remove from DOM with animation
+                        const postElement = document.querySelector(`.search-item input[value="${id}"]`)?.closest('.search-item');
+                        if (postElement) {
+                            postElement.style.transition = 'all 0.3s ease';
+                            postElement.style.opacity = '0';
+                            postElement.style.transform = 'translateX(-20px)';
+
+                            setTimeout(() => {
+                                postElement.remove();
+
+                                // Check if section is now empty
+                                const activeSection = document.querySelector('.requests-section:not([style*="display: none"])');
+                                const itemList = activeSection?.querySelector('.item-list');
+                                const remainingPosts = itemList?.querySelectorAll('.search-item');
+
+                                if (remainingPosts && remainingPosts.length === 0) {
+                                    const status = activeSection.classList.contains('pending') ? 'pending' :
+                                        activeSection.classList.contains('accepted') ? 'accepted' : 'ongoing';
+                                    showEmptyState(status, itemList);
+                                }
+                            }, 300);
+                        }
+                    } else {
+                        window.showErrorToast("Error", data.error || 'Failed to cancel post');
                     }
-                    const remarksEl = card.querySelector('.item-remarks');
-                    if (modalRemarksSection) {
-                        modalRemarksSection.style.display = '';
-                        reqRemarks.textContent = remarksEl ? remarksEl.textContent.trim() : 'No remarks from provider yet.';
+                })
+                .catch(error => {
+                    console.log('cancelRequest error:', error);
+                    console.error('Error:', error);
+                    showErrorToast("Error", 'An error occurred while cancelling the request. Please try again.');
+                });
+        });
+    }
+
+    function payPayment(id) {
+        viewDialogBox('confirm-payment');
+
+        const formContainer = document.querySelector("#confirm-payment .dialog-body");
+        formContainer.innerHTML = `
+            <div class="loading-state">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading post details...</p>
+            </div>
+        `;
+
+        fetch("<?= BASE_URL ?>/requests/view/" + id)
+            .then(response => response.json())
+            .then(post => {
+                // Add delay to make loading animation visible
+                return new Promise(resolve => setTimeout(() => resolve(post), 300));
+            })
+            .then(post => {
+                if (post.error) {
+                    console.error('Error fetching post:', post.error);
+                    formContainer.innerHTML = `
+                        <div class="error-state">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <p>Failed to load post details</p>
+                            <button onclick="payPayment(${id})" class="retry-btn">Retry</button>
+                        </div>
+                    `;
+                    return;
+                }
+                const providerName = post.Provider_Name || 'Unassigned provider';
+                // Format date
+               
+                // Build skills HTML
+                const skillsHTML = post.skills && post.skills.length > 0
+                    ? post.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')
+                    : '<span>No skills specified</span>';
+
+                // Replace form content with a div wrapper for proper styling
+                formContainer.innerHTML = `
+                <div class="post-view">
+                    <div class="post-view-title">${post.Title || 'Untitled'}</div>
+                    <div class="post-view-section">
+                        <div class="section-title">Description</div>
+                        <div class="section-body">${post.Description || 'No description provided'}</div>
+                    </div>
+                    <div class="post-view-section">
+                        <div class="section-title">Provider</div>
+                        <div class="post-provider">${providerName}</div>
+                    </div> 
+                    <div class="post-view-section">
+                        <div class="section-title">Required Skills</div>
+                        <div class="skills-row">${skillsHTML}</div>
+                    </div>
+                    <div class="post-view-section">
+                        <div class="section-title">Details</div>
+                        <div class="kv-grid">
+                            <div class="kv-item"><span class="kv-label">Budget:</span><span class="kv-value">LKR ${post.Requesting_Price || '0'}/= (${post.Price_Type || 'N/A'})</span></div>
+                            <div class="kv-item"><span class="kv-label">Level:</span><span class="kv-value">${post.Level || 'N/A'}</span></div>
+                            <div class="kv-item"><span class="kv-label">Duration:</span><span class="kv-value">${post.Duration || 'N/A'} ${post.Duration_Type || 'N/A'}</span></div>
+                            <div class="kv-item"><span class="kv-label">Proposals:</span><span class="kv-value">${post.Proposal_Count || '0'}</span></div>
+                        </div>
+                    </div>
+                    <div class="post-view-section">
+                        <div class="section-title">Engagement</div>
+                        <div class="engagement-row">
+                            <span class="chip"><i class="fa-solid fa-eye"></i> ${post.Views || '0'} views</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            })
+            // document.getElementById('confirmPaymentBtn').addEventListener('click', function () {
+                
+            //     closeDialogBox('confirm-payment');
+            //     window.showSuccessToast("Payment Initiated", "You will be redirected to the payment gateway.");
+            //     console.log(`Redirecting to payment for Post ID: ${id}`);
+        
+            .catch(error => {
+                console.error('Error fetching post:', error);
+                formContainer.innerHTML = `
+                    <div class="error-state">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <p>Failed to load post details. Please try again.</p>
+                        <button onclick="viewPost(${id})" class="retry-btn">Retry</button>
+                    </div>
+                `;
+            });
+
+        const confirmPaymentBtn = document.getElementById('confirmPaymentBtn');
+
+        // Remove previous event listeners to avoid multiple triggers
+        const newconfirmPaymentBtn = confirmPaymentBtn.cloneNode(true);
+        confirmPaymentBtn.parentNode.replaceChild(newconfirmPaymentBtn, confirmPaymentBtn);
+
+        newconfirmPaymentBtn.addEventListener('click', function () {
+            fetch("<?= BASE_URL ?>/requests/payment/" + id, {
+                method: 'POST'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        closeDialogBox('confirm-payment');
+                        window.showSuccessToast("Success!", "Payment initiated successfully");
+
+                        // Remove from DOM with animation
+                        const postElement = document.querySelector(`.search-item input[value="${id}"]`)?.closest('.search-item');
+                        if (postElement) {
+                            postElement.style.transition = 'all 0.3s ease';
+                            postElement.style.opacity = '0';
+                            postElement.style.transform = 'translateX(-20px)';
+
+                            setTimeout(() => {
+                                postElement.remove();
+
+                                // Check if section is now empty
+                                const activeSection = document.querySelector('.requests-section:not([style*="display: none"])');
+                                const itemList = activeSection?.querySelector('.item-list');
+                                const remainingPosts = itemList?.querySelectorAll('.search-item');
+
+                                if (remainingPosts && remainingPosts.length === 0) {
+                                    const status = activeSection.classList.contains('pending') ? 'pending' :
+                                        activeSection.classList.contains('accepted') ? 'accepted' : 'ongoing';
+                                    showEmptyState(status, itemList);
+                                }
+                            }, 300);
+                        }
+                    } else {
+                        window.showErrorToast("Error", data.error || 'Failed to initiate payment');
                     }
-                    openModal();
+                })
+                .catch(error => {
+                    console.log('cancelRequest error:', error);
+                    console.error('Error:', error);
+                    showErrorToast("Error", 'An error occurred while cancelling the request. Please try again.');
                 });
+        });
+    }
+
+    function updateRequest(postId) {
+        window._reqCurrentProjectId = null;
+        window._reqCurrentPostId    = postId;
+
+        // Reset to list tab and show dialog
+        reqSwitchTab('req-list-pane');
+        viewDialogBox('update-requirements-popup');
+
+        // Reset add-form
+        const form = document.getElementById('req-add-form');
+        if (form) form.reset();
+
+        // Wire up the submit button (replace listener to avoid duplicates)
+        const submitBtn = document.getElementById('btnSubmitReq');
+        const newSubmitBtn = submitBtn.cloneNode(true);
+        submitBtn.parentNode.replaceChild(newSubmitBtn, submitBtn);
+        newSubmitBtn.addEventListener('click', () => submitNewRequirement());
+
+        // Wire tab clicks
+        document.querySelectorAll('.req-tab').forEach(btn => {
+            const clone = btn.cloneNode(true);
+            btn.parentNode.replaceChild(clone, btn);
+            clone.addEventListener('click', () => reqSwitchTab(clone.dataset.tab));
+        });
+
+        // Load the requirements list
+        reqLoadRequirements(postId);
+    }
+
+    function reqSwitchTab(tabId) {
+        document.querySelectorAll('.req-tab').forEach(t => {
+            t.classList.toggle('active', t.dataset.tab === tabId);
+        });
+        document.querySelectorAll('.req-pane').forEach(p => {
+            p.style.display = p.id === tabId ? 'block' : 'none';
+        });
+    }
+
+    function reqLoadRequirements(postId) {
+        const loading = document.getElementById('req-loading');
+        const body    = document.getElementById('req-list-body');
+        if (loading) loading.style.display = '';
+        if (body)    body.style.display    = 'none';
+
+        fetch(`${window.BASE_URL}/project/getrequirements/${postId}`)
+            .then(r => r.json())
+            .then(json => {
+                if (!json.success) throw new Error(json.error || 'Failed to load');
+
+                const { project_id, requirements } = json.data;
+                window._reqCurrentProjectId = project_id;
+
+                if (loading) loading.style.display = 'none';
+                if (body) {
+                    body.innerHTML = reqBuildListHTML(requirements);
+                    body.style.display = '';
+                }
+            })
+            .catch(err => {
+                if (loading) loading.innerHTML = `
+                    <div class="error-state">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <p>Failed to load requirements.</p>
+                        <button onclick="reqLoadRequirements(${postId})" class="retry-btn">Retry</button>
+                    </div>`;
+            });
+    }
+
+    function reqBuildListHTML(requirements) {
+        if (!requirements || requirements.length === 0) {
+            return `<div class="req-empty">
+                        <i class="fa-solid fa-clipboard-list"></i>
+                        <p>No requirements yet. Use the <strong>Add New</strong> tab to submit one.</p>
+                    </div>`;
+        }
+
+        return requirements.map(req => {
+            const statusMap = {
+                pending:  { cls: 'req-status-pending',  icon: 'fa-clock',        label: 'Pending' },
+                approved: { cls: 'req-status-approved', icon: 'fa-circle-check', label: 'Approved' },
+                rejected: { cls: 'req-status-rejected', icon: 'fa-circle-xmark', label: 'Rejected' },
+            };
+            const s = statusMap[req.Status] || statusMap['pending'];
+
+            const createdDate = req.Created_At
+                ? new Date(req.Created_At).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' })
+                : 'N/A';
+
+            let dateLine = `<span class="req-date-item"><i class="fa-solid fa-calendar-plus"></i> Requested: ${createdDate}</span>`;
+            if (req.Status === 'approved' && req.Approved_At) {
+                const d = new Date(req.Approved_At).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
+                dateLine += `<span class="req-date-item req-date-approved"><i class="fa-solid fa-calendar-check"></i> Approved: ${d}</span>`;
             }
-            if (cancelBtn) {
-                cancelBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    openConfirm();
-                });
+            if (req.Status === 'rejected' && req.Rejected_At) {
+                const d = new Date(req.Rejected_At).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
+                dateLine += `<span class="req-date-item req-date-rejected"><i class="fa-solid fa-calendar-xmark"></i> Rejected: ${d}</span>`;
+            }
+
+            const filesHTML = req.files && req.files.length > 0
+                ? `<div class="req-files-block">
+                       <div class="req-files-label"><i class="fa-solid fa-paperclip"></i> Attachments</div>
+                       <div class="req-files">
+                           ${req.files.map(f => {
+                               const name = f.split('/').pop();
+                               const url  = `${window.BASE_URL}/file/project-requirements/${f}`;
+                               return `<a href="${url}" target="_blank" class="req-file-chip" title="${escapeHtml(name)}">
+                                           <i class="fa-solid fa-file"></i> ${escapeHtml(name)}
+                                       </a>`;
+                           }).join('')}
+                       </div>
+                   </div>`
+                : '';
+
+            const rejectionReasonHTML = (req.Status === 'rejected' && req.Rejection_Reason)
+                ? `<div class="req-rejection-banner">
+                       <i class="fa-solid fa-comment-slash"></i>
+                       <div><strong>Rejection Reason:</strong> ${escapeHtml(req.Rejection_Reason)}</div>
+                   </div>`
+                : '';
+
+            return `
+                <div class="req-card req-card-${req.Status || 'pending'}">
+                    <div class="req-card-stripe"></div>
+                    <div class="req-card-body">
+                        <div class="req-card-header">
+                            <div class="req-card-title">${escapeHtml(req.Requirement_Title || 'Untitled')}</div>
+                            <span class="req-status-chip ${s.cls}">
+                                <i class="fa-solid ${s.icon}"></i> ${s.label}
+                            </span>
+                        </div>
+                        ${req.Requirement_Description
+                            ? `<div class="req-card-desc">${escapeHtml(req.Requirement_Description)}</div>`
+                            : ''}
+                        ${filesHTML}
+                        ${rejectionReasonHTML}
+                    </div>
+                    <div class="req-card-footer">
+                        <div class="req-card-dates">${dateLine}</div>
+                    </div>
+                </div>`;
+        }).join('');
+    }
+
+    async function submitNewRequirement() {
+        const projectId   = window._reqCurrentProjectId;
+        const title       = document.getElementById('reqTitle')?.value.trim()       || '';
+        const description = document.getElementById('reqDescription')?.value.trim() || '';
+        const filesInput  = document.getElementById('reqFiles');
+
+        if (!projectId) {
+            window.showErrorToast('Error', 'Project not loaded. Please reopen the dialog.');
+            return;
+        }
+        if (!title) {
+            document.getElementById('reqTitle')?.focus();
+            window.showErrorToast('Error', 'Please enter a requirement title.');
+            return;
+        }
+
+        const btn = document.getElementById('btnSubmitReq');
+        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving…'; }
+
+        const fd = new FormData();
+        fd.append('project_id',   projectId);
+        fd.append('title',        title);
+        fd.append('description',  description);
+        if (filesInput && filesInput.files.length) {
+            Array.from(filesInput.files).forEach(f => fd.append('req_files[]', f));
+        }
+
+        try {
+            const res  = await fetch(`${window.BASE_URL}/project/add-requirement`, { method: 'POST', body: fd });
+            const data = await res.json();
+
+            if (!data.success) {
+                window.showErrorToast('Error', data.error || 'Failed to submit requirement.');
+                return;
+            }
+
+            window.showSuccessToast('Success!', 'Requirement submitted successfully.');
+            document.getElementById('req-add-form')?.reset();
+
+            // Switch back to list tab and refresh
+            reqSwitchTab('req-list-pane');
+            reqLoadRequirements(window._reqCurrentPostId);
+        } catch (err) {
+            window.showErrorToast('Error', 'An error occurred: ' + err.message);
+        } finally {
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Requirement'; }
+        }
+    }
+
+    function cancelOngoingProject(id) {
+    viewDialogBox('cancel-ongoing-project');
+    const confirmCancelBtn = document.getElementById('confirmCancelBtn');
+
+    // Remove previous event listeners
+    const newConfirmCancelBtn = confirmCancelBtn.cloneNode(true);
+    confirmCancelBtn.parentNode.replaceChild(newConfirmCancelBtn, confirmCancelBtn);
+
+    newConfirmCancelBtn.addEventListener('click', function () {
+        fetch("<?= BASE_URL ?>/project/cancel/" + id, {
+            method: 'POST'
+        })
+        /*.then(res => res.text()) // 👈 temporarily change
+        .then(data => {
+            console.log(data); // 🔥 see actual response
+        })*/
+        .then(response => response.json())
+        .then(data => {
+            console.log('cancelProject response:', data);
+            if (data.success) {
+                closeDialogBox('cancel-ongoing-project');
+                window.showSuccessToast("Success!", "Cancellation request sent to provider.");
+
+                // Remove from DOM
+                const projectElement = document.querySelector(`.search-item input[value="${id}"]`)?.closest('.search-item');
+                if (projectElement) {
+                    projectElement.style.transition = 'all 0.3s ease';
+                    projectElement.style.opacity = '0';
+                    projectElement.style.transform = 'translateX(-20px)';
+
+                    setTimeout(() => {
+                        projectElement.remove();
+                        const activeSection = document.querySelector('.ongoing');
+                        const itemList = activeSection?.querySelector('.item-list');
+                        const remainingProjects = itemList?.querySelectorAll('.search-item');
+
+                        if (remainingProjects && remainingProjects.length === 0) {
+                            showEmptyState('ongoing', itemList);
+                        }
+                    }, 300);
+                }
+            } else {
+                window.showErrorToast("Error", data.error || 'Failed to send cancellation request');
+            }
+        })
+        .catch(error => {
+            console.log('cancelOngoingProject error:', error);
+            window.showErrorToast("Error", 'An error occurred while sending the cancellation request.');
+        });
+    });
+}
+
+function completePendingReviewProject(postId) {
+    window._completeProjectPostId = postId;
+
+    // Reset form
+    document.getElementById('reviewRating').value = '';
+    const titleEl = document.getElementById('reviewTitle');
+    const descEl  = document.getElementById('reviewDescription');
+    const filesEl = document.getElementById('reviewFiles');
+    if (titleEl)  titleEl.value = '';
+    if (descEl)   descEl.value  = '';
+    if (filesEl)  filesEl.value = '';
+    document.getElementById('ratingError').style.display = 'none';
+
+    // Reset star display
+    document.querySelectorAll('#starRatingInput i').forEach(s => {
+        s.className   = 'fa-regular fa-star';
+        s.style.color = '';
+    });
+
+    // Wire confirm button (clone to prevent duplicate listeners)
+    const btn    = document.getElementById('btnConfirmCompleteProject');
+    const newBtn = btn.cloneNode(true);
+    btn.parentNode.replaceChild(newBtn, btn);
+    newBtn.addEventListener('click', submitCompleteProject);
+
+    viewDialogBox('complete-project-popup');
+}
+
+function submitCompleteProject() {
+    const postId = window._completeProjectPostId;
+    const rating = document.getElementById('reviewRating').value;
+
+    if (!rating) {
+        document.getElementById('ratingError').style.display = '';
+        return;
+    }
+    document.getElementById('ratingError').style.display = 'none';
+
+    const btn = document.getElementById('btnConfirmCompleteProject');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...'; }
+
+    const fd = new FormData();
+    fd.append('rating',      rating);
+    fd.append('title',       document.getElementById('reviewTitle')?.value.trim()       || '');
+    fd.append('description', document.getElementById('reviewDescription')?.value.trim() || '');
+    Array.from(document.getElementById('reviewFiles')?.files || []).forEach(f => fd.append('review_files[]', f));
+
+    fetch(`${window.BASE_URL}/project/complete/${postId}`, {
+        method: 'POST',
+        body: fd,
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                closeDialogBox('complete-project-popup');
+                window.showSuccessToast('Success!', 'Project completed and review submitted.');
+                loadPosts('pending-review');
+                loadPosts('completed');
+            } else {
+                window.showErrorToast('Error', data.error || 'Failed to complete project.');
+            }
+        })
+        .catch(error => {
+            console.error('submitCompleteProject error:', error);
+            window.showErrorToast('Error', 'An error occurred while completing the project.');
+        })
+        .finally(() => {
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Complete &amp; Submit Review'; }
+        });
+}
+
+function openReopenProjectModal(postId) {
+    window._reopenProjectPostId = postId;
+    const reasonInput = document.getElementById('reopenReason');
+    const filesInput  = document.getElementById('reopenFiles');
+    if (reasonInput) reasonInput.value = '';
+    if (filesInput) filesInput.value = '';
+
+    const confirmBtn = document.getElementById('btnConfirmReopenProject');
+    if (confirmBtn) {
+        const newBtn = confirmBtn.cloneNode(true);
+        confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+        newBtn.addEventListener('click', submitReopenProject);
+    }
+
+    viewDialogBox('reopen-project-popup');
+}
+
+function submitReopenProject() {
+    const postId = window._reopenProjectPostId;
+    const reason = document.getElementById('reopenReason')?.value.trim() || '';
+    const files  = document.getElementById('reopenFiles')?.files || [];
+
+    if (!postId) {
+        window.showErrorToast('Error', 'Project not selected.');
+        return;
+    }
+
+    if (!reason) {
+        window.showErrorToast('Error', 'Please provide a reason before moving back to ongoing.');
+        document.getElementById('reopenReason')?.focus();
+        return;
+    }
+
+    const btn = document.getElementById('btnConfirmReopenProject');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    }
+
+    const fd = new FormData();
+    fd.append('reason', reason);
+    Array.from(files).forEach(file => fd.append('reopen_files[]', file));
+
+    fetch(`${window.BASE_URL}/project/reopen/${postId}`, {
+        method: 'POST',
+        body: fd,
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                closeDialogBox('reopen-project-popup');
+                window.showSuccessToast('Success!', 'Project moved back to ongoing.');
+                loadPosts('pending-review');
+                loadPosts('ongoing');
+            } else {
+                window.showErrorToast('Error', data.error || 'Failed to move project back to ongoing.');
+            }
+        })
+        .catch(error => {
+            console.error('submitReopenProject error:', error);
+            window.showErrorToast('Error', 'An error occurred while saving your request.');
+        })
+        .finally(() => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-rotate-left"></i> Move to Ongoing';
             }
         });
+}
 
-        // Pending Review: Approve button opens modal with details, progress, remarks, and Approve/Request Changes actions
-        document.querySelectorAll('.pending-review .search-item').forEach(card => {
-            const approveBtn = card.querySelector('.btn-approve');
-            const requestBtn = card.querySelector('.btn-request-changes');
-            if (approveBtn) {
-                approveBtn.addEventListener('click', () => {
-                    reqProvider.textContent = extractText(card, '.item-name') || extractText(card, '.item-provider') || 'Provider';
-                    reqTitle.textContent = extractText(card, '.item-title') || 'Submission Details';
-                    reqDescription.textContent = extractText(card, '.item-description') || '';
-                    const priceLine = getPriceSummary(card);
-                    reqPrice.textContent = priceLine.replace(/\s+/g, ' ').trim() || '';
-                    const datespan = Array.from(card.querySelectorAll('.item-district span')).map(s => s.textContent.trim())[0] || '';
-                    reqDate.textContent = datespan;
-                    // Buttons visibility for approve context
-                    if (btnPay) btnPay.style.display = 'none';
-                    const btnApprove = document.getElementById('btnApprove');
-                    const btnRequestChanges = document.getElementById('btnRequestChanges');
-                    if (btnApprove) btnApprove.style.display = '';
-                    if (btnRequestChanges) btnRequestChanges.style.display = '';
-                    // Ensure only Approve and Request Changes are visible (hide Cancel)
-                    if (btnDecline) btnDecline.style.display = 'none';
-                    // Progress and remarks similar to ongoing
-                    const etaText = Array.from(card.querySelectorAll('.item-middle div')).map(d => d.textContent.trim()).find(t => /ETA\s+/i.test(t)) || '';
-                    const loggedText = Array.from(card.querySelectorAll('.item-middle div')).map(d => d.textContent.trim()).find(t => /Logged\s+/i.test(t)) || '';
-                    const daysMatch = etaText.match(/ETA\s*(\d+)d/i);
-                    const hoursMatch = loggedText.match(/Logged\s*(\d+)h/i);
-                    const totalHours = daysMatch ? parseInt(daysMatch[1], 10) * 8 : 0;
-                    const spentHours = hoursMatch ? parseInt(hoursMatch[1], 10) : 0;
-                    const percent = totalHours > 0 ? Math.min(100, Math.round((spentHours / totalHours) * 100)) : 0;
-                    if (modalProgressSection) {
-                        modalProgressSection.style.display = '';
-                        if (modalProgressFill) modalProgressFill.style.width = percent + '%';
-                        if (modalProgressPercent) modalProgressPercent.textContent = percent + '%';
-                        if (modalProgressDetail) modalProgressDetail.textContent = `(${spentHours}h of ${totalHours}h)`;
-                    }
-                    const remarksEl = card.querySelector('.item-remarks');
-                    if (modalRemarksSection) {
-                        modalRemarksSection.style.display = '';
-                        reqRemarks.textContent = remarksEl ? remarksEl.textContent.trim() : 'No remarks from provider yet.';
-                    }
-                    openModal();
-                });
+    /*document.addEventListener('DOMContentLoaded', function () {
+        // Setup search input handler with debouncing
+        document.getElementById('searchInput').addEventListener('change', handleSearch);
+        document.getElementById('searchButton').addEventListener('click', handleSearch);
+
+        function handleSearch() {
+            if (searchTimeout) {
+                clearTimeout(searchTimeout);
             }
-            if (requestBtn) {
-                requestBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    openRequestChanges();
-                });
-            }
+
+            // Set new timeout to debounce search (wait 300ms after user stops typing)
+            searchTimeout = setTimeout(() => {
+                currentSearch = document.getElementById('searchInput').value.trim();
+
+                // Reload posts with search filter
+                const activeSection = document.querySelector('.requests-section:not([style*="display: none"])');
+                const status = activeSection.classList.contains('pending') ? 'pending' :
+                        activeSection.classList.contains('accepted') ? 'accepted' : 'ongoing';
+                loadPosts(status);
+            }, 300);
+        }
+
+        // Setup sort dropdown handler
+        const sortOptions = document.getElementById('sortOptions');
+        if (sortOptions) {
+            sortOptions.addEventListener('click', function (e) {
+                const option = e.target.closest('[data-sort]');
+                if (option) {
+                    const sortValue = option.dataset.sort;
+                    const sortText = option.textContent;
+
+                    // Update dropdown display
+                    document.getElementById('sortDropdown').value = sortText;
+
+                    // Update global sort variable
+                    currentSort = sortValue;                    const providerName = post.Provider_Name || 'Unassigned provider';                    const providerName = post.Provider_Name || 'Unassigned provider';
+
+                    // Reload posts with new sort
+                    const activeSection = document.querySelector('.requests-section:not([style*="display: none"])');
+                    const status = activeSection.classList.contains('pending') ? 'pending' :
+                        activeSection.classList.contains('accepted') ? 'accepted' : 'ongoing';
+                    loadPosts(status);
+                }
+            });
+        }*/
+
+// Star rating interaction for complete-project modal
+document.addEventListener('DOMContentLoaded', function () {
+    const stars     = document.querySelectorAll('#starRatingInput i');
+    const ratingIn  = document.getElementById('reviewRating');
+
+    stars.forEach(star => {
+        star.addEventListener('click', function () {
+            const val = parseInt(this.dataset.value);
+            if (ratingIn) ratingIn.value = val;
+            updateStars(val);
         });
 
-        // Wire Request Changes in-modal button
-        const btnRequestChangesInModal = document.getElementById('btnRequestChanges');
-        btnRequestChangesInModal && btnRequestChangesInModal.addEventListener('click', (e) => {
-            e.preventDefault();
-            openRequestChanges();
+        star.addEventListener('mouseenter', function () {
+            const val = parseInt(this.dataset.value);
+            stars.forEach((s, i) => {
+                s.className   = i < val ? 'fa-solid fa-star' : 'fa-regular fa-star';
+                s.style.color = i < val ? '#f59e0b' : '#d1d5db';
+            });
         });
 
-        // Request Changes modal close + submit
-        reqChangesClose && reqChangesClose.addEventListener('click', closeRequestChanges);
-        reqChangesRoot && reqChangesRoot.addEventListener('click', (e) => { if (e.target === reqChangesRoot) closeRequestChanges(); });
-        btnSubmitRequestChanges && btnSubmitRequestChanges.addEventListener('click', () => {
-            // TODO: Send description + files to backend endpoint
-            alert('Changes requested (demo)');
-            closeRequestChanges();
-            closeModal();
+        star.addEventListener('mouseleave', function () {
+            const selected = parseInt(ratingIn?.value) || 0;
+            updateStars(selected);
         });
+    });
 
-        closeBtn && closeBtn.addEventListener('click', closeModal);
-        root && root.addEventListener('click', (e) => { if (e.target === root) closeModal(); });
-        window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
-
-        btnDecline && btnDecline.addEventListener('click', (e) => { e.preventDefault(); openConfirm(); });
-
-        // Confirm modal interactions
-        confirmClose && confirmClose.addEventListener('click', closeConfirm);
-        confirmRoot && confirmRoot.addEventListener('click', (e) => { if (e.target === confirmRoot) closeConfirm(); });
-        btnKeep && btnKeep.addEventListener('click', closeConfirm);
-        btnConfirmCancel && btnConfirmCancel.addEventListener('click', () => {
-            closeConfirm();
-            closeModal();
-            alert('Request cancelled (demo)');
+    function updateStars(val) {
+        stars.forEach((s, i) => {
+            s.className   = i < val ? 'fa-solid fa-star' : 'fa-regular fa-star';
+            s.style.color = i < val ? '#f59e0b' : '';
         });
-        btnAccept && btnAccept.addEventListener('click', () => { alert('Accepted (demo)'); closeModal(); });
-        // Stub for payment action
-        btnPay && btnPay.addEventListener('click', () => {
-            // TODO: Integrate with payment flow endpoint
-            alert('Proceed to payment (demo)');
-            closeModal();
-        });
+    }
+});
 
-        // Compute ongoing project progress bars (from item-middle ETA / Logged)
-        document.querySelectorAll('.ongoing-projects .search-item').forEach(card => {
-            const etaText = Array.from(card.querySelectorAll('.item-middle div')).map(d => d.textContent.trim()).find(t => /ETA\s+/i.test(t)) || '';
-            const loggedText = Array.from(card.querySelectorAll('.item-middle div')).map(d => d.textContent.trim()).find(t => /Logged\s+/i.test(t)) || '';
-            // Extract hours from patterns like "ETA 6d" or "Logged 12h"
-            const daysMatch = etaText.match(/ETA\s*(\d+)d/i);
-            const hoursMatch = loggedText.match(/Logged\s*(\d+)h/i);
-            const totalHours = daysMatch ? parseInt(daysMatch[1], 10) * 8 : 0; // assume 8h per day
-            const spentHours = hoursMatch ? parseInt(hoursMatch[1], 10) : 0;
-            const percent = totalHours > 0 ? Math.min(100, Math.round((spentHours / totalHours) * 100)) : 0;
-            const fill = card.querySelector('.progress-fill');
-            const pctEl = card.querySelector('.progress-percent');
-            const detailEl = card.querySelector('.progress-detail');
-            if (fill) fill.style.width = percent + '%';
-            if (pctEl) pctEl.textContent = percent + '%';
-            if (detailEl) detailEl.textContent = `(${spentHours}h of ${totalHours}h)`;
-        });
-    })();
 </script>
+
+
+</html>
+
 
 

@@ -21,8 +21,7 @@ class NotificationController extends BaseController
         } elseif ($role === 'Provider') {
             $viewFile = __DIR__ . '/../views/provider/Notification/index.php';
         } else {
-            http_response_code(403);
-            echo "Invalid role";
+            $this->notFound();
             return;
         }
 
@@ -42,18 +41,15 @@ class NotificationController extends BaseController
         } elseif ($role === 'Provider') {
             $unprocessedNotifications = $this->notificationModel->getNotificationsByProviderId($userId, 10, isset($_GET['offset']) ? intval($_GET['offset']) : 0);
         } else {
-            http_response_code(403);
-            echo "Invalid role";
+            $this->jsonError('Forbidden', 403, 'forbidden');
             return;
         }
 
         $notifications = [];
         $this->appendNotifications($unprocessedNotifications, $notifications);
-        $this->offset = count($notifications);
 
         // Return JSON response
-        header('Content-Type: application/json');
-        echo json_encode(['notifications' => $notifications]);
+        $this->jsonResponse(['notifications' => $notifications]);
 
         return;
     }
