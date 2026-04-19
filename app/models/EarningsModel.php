@@ -186,33 +186,45 @@ class EarningsModel extends Database
 
     private function getWeeklyChartData($providerId, $weeks)
     {
+        $days = $weeks * 7;
+
+        $stmt = $this->conn->prepare("
+            SELECT
+                FLOOR(DATEDIFF(CURDATE(), DATE(pay.Paid_Time)) / 7) AS weeks_ago,
+                COALESCE(SUM(pay.Amount - pay.Commission), 0) AS earnings,
+                COALESCE(SUM(pay.Commission), 0) AS fees
+            FROM payment pay
+            JOIN project proj ON pay.Project_ID = proj.Project_ID
+            JOIN post po ON proj.Post_ID = po.Post_ID
+            WHERE po.Provider_ID = ?
+              AND pay.Status = 'Paid'
+              AND pay.Paid_Time IS NOT NULL
+              AND pay.Paid_Time >= DATE_SUB(CURDATE(), INTERVAL ? DAY)
+              AND pay.Paid_Time <  DATE_ADD(CURDATE(), INTERVAL 1 DAY)
+            GROUP BY weeks_ago
+        ");
+        $stmt->bind_param("ii", $providerId, $days);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $bucket = [];
+        while ($row = $result->fetch_assoc()) {
+            $bucket[(int) $row['weeks_ago']] = [
+                'earnings' => (float) $row['earnings'],
+                'fees'     => (float) $row['fees'],
+            ];
+        }
+        $stmt->close();
+
         $labels   = [];
         $earnings = [];
         $fees     = [];
-
         for ($i = $weeks - 1; $i >= 0; $i--) {
-            $stmt = $this->conn->prepare("
-                SELECT
-                    COALESCE(SUM(pay.Amount - pay.Commission), 0) AS earnings,
-                    COALESCE(SUM(pay.Commission), 0) AS fees
-                FROM payment pay
-                JOIN project proj ON pay.Project_ID = proj.Project_ID
-                JOIN post po ON proj.Post_ID = po.Post_ID
-                WHERE po.Provider_ID = ?
-                  AND pay.Status = 'Paid'
-                  AND pay.Paid_Time >= DATE_SUB(CURDATE(), INTERVAL ? DAY)
-                  AND pay.Paid_Time <  DATE_SUB(CURDATE(), INTERVAL ? DAY)
-            ");
-            $from = ($i + 1) * 7;
-            $to   = $i * 7;
-            $stmt->bind_param("iii", $providerId, $from, $to);
-            $stmt->execute();
-            $row = $stmt->get_result()->fetch_assoc();
-            $stmt->close();
-
-            $labels[]   = 'Week ' . ($weeks - $i);
-            $earnings[] = (float) ($row['earnings'] ?? 0);
-            $fees[]     = (float) ($row['fees'] ?? 0);
+            $end   = date('M j', strtotime("-{$i} week -0 day"));
+            $start = date('M j', strtotime("-" . ($i + 1) . " week +1 day"));
+            $labels[]   = $start . '–' . $end;
+            $earnings[] = $bucket[$i]['earnings'] ?? 0.0;
+            $fees[]     = $bucket[$i]['fees']     ?? 0.0;
         }
 
         return ['labels' => $labels, 'earnings' => $earnings, 'fees' => $fees];
@@ -220,32 +232,44 @@ class EarningsModel extends Database
 
     private function getPeriodMonthlyChart($providerId, $months)
     {
+        $stmt = $this->conn->prepare("
+            SELECT
+                DATE_FORMAT(pay.Paid_Time, '%Y-%m') AS ym,
+                COALESCE(SUM(pay.Amount - pay.Commission), 0) AS earnings,
+                COALESCE(SUM(pay.Commission), 0) AS fees
+            FROM payment pay
+            JOIN project proj ON pay.Project_ID = proj.Project_ID
+            JOIN post po ON proj.Post_ID = po.Post_ID
+            WHERE po.Provider_ID = ?
+              AND pay.Status = 'Paid'
+              AND pay.Paid_Time IS NOT NULL
+              AND pay.Paid_Time >= DATE_SUB(DATE_FORMAT(CURDATE(), '%Y-%m-01'), INTERVAL ? MONTH)
+            GROUP BY ym
+        ");
+        $monthsBack = $months - 1;
+        $stmt->bind_param("ii", $providerId, $monthsBack);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $bucket = [];
+        while ($row = $result->fetch_assoc()) {
+            $bucket[$row['ym']] = [
+                'earnings' => (float) $row['earnings'],
+                'fees'     => (float) $row['fees'],
+            ];
+        }
+        $stmt->close();
+
         $labels   = [];
         $earnings = [];
         $fees     = [];
-
         for ($i = $months - 1; $i >= 0; $i--) {
-            $stmt = $this->conn->prepare("
-                SELECT
-                    DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL ? MONTH), '%b') AS label,
-                    COALESCE(SUM(pay.Amount - pay.Commission), 0) AS earnings,
-                    COALESCE(SUM(pay.Commission), 0) AS fees
-                FROM payment pay
-                JOIN project proj ON pay.Project_ID = proj.Project_ID
-                JOIN post po ON proj.Post_ID = po.Post_ID
-                WHERE po.Provider_ID = ?
-                  AND pay.Status = 'Paid'
-                  AND MONTH(pay.Paid_Time) = MONTH(DATE_SUB(CURDATE(), INTERVAL ? MONTH))
-                  AND YEAR(pay.Paid_Time)  = YEAR(DATE_SUB(CURDATE(), INTERVAL ? MONTH))
-            ");
-            $stmt->bind_param("iiii", $i, $providerId, $i, $i);
-            $stmt->execute();
-            $row = $stmt->get_result()->fetch_assoc();
-            $stmt->close();
-
-            $labels[]   = $row['label'] ?? '';
-            $earnings[] = (float) ($row['earnings'] ?? 0);
-            $fees[]     = (float) ($row['fees'] ?? 0);
+            $ts    = strtotime("first day of -{$i} month");
+            $key   = date('Y-m', $ts);
+            $label = ($months >= 12) ? date("M 'y", $ts) : date('M', $ts);
+            $labels[]   = $label;
+            $earnings[] = $bucket[$key]['earnings'] ?? 0.0;
+            $fees[]     = $bucket[$key]['fees']     ?? 0.0;
         }
 
         return ['labels' => $labels, 'earnings' => $earnings, 'fees' => $fees];
@@ -272,20 +296,38 @@ class EarningsModel extends Database
         $stmt->execute();
         $result = $stmt->get_result();
 
-        $labels   = [];
-        $earnings = [];
-        $fees     = [];
+        $bucket = [];
+        $minYr = null; $minQr = null; $maxYr = null; $maxQr = null;
         while ($row = $result->fetch_assoc()) {
-            $labels[]   = 'Q' . $row['qr'] . ' ' . substr($row['yr'], -2);
-            $earnings[] = (float) $row['earnings'];
-            $fees[]     = (float) $row['fees'];
+            $yr = (int) $row['yr'];
+            $qr = (int) $row['qr'];
+            $bucket[$yr . '-' . $qr] = [
+                'earnings' => (float) $row['earnings'],
+                'fees'     => (float) $row['fees'],
+            ];
+            if ($minYr === null || $yr < $minYr || ($yr === $minYr && $qr < $minQr)) {
+                $minYr = $yr; $minQr = $qr;
+            }
+            if ($maxYr === null || $yr > $maxYr || ($yr === $maxYr && $qr > $maxQr)) {
+                $maxYr = $yr; $maxQr = $qr;
+            }
         }
         $stmt->close();
 
-        if (empty($labels)) {
-            $labels   = ['—'];
-            $earnings = [0];
-            $fees     = [0];
+        if ($minYr === null) {
+            return ['labels' => ['—'], 'earnings' => [0], 'fees' => [0]];
+        }
+
+        $labels   = [];
+        $earnings = [];
+        $fees     = [];
+        $yr = $minYr; $qr = $minQr;
+        while ($yr < $maxYr || ($yr === $maxYr && $qr <= $maxQr)) {
+            $labels[]   = 'Q' . $qr . " '" . substr((string) $yr, -2);
+            $earnings[] = $bucket[$yr . '-' . $qr]['earnings'] ?? 0.0;
+            $fees[]     = $bucket[$yr . '-' . $qr]['fees']     ?? 0.0;
+            $qr++;
+            if ($qr > 4) { $qr = 1; $yr++; }
         }
 
         return ['labels' => $labels, 'earnings' => $earnings, 'fees' => $fees];

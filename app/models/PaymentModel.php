@@ -406,4 +406,77 @@ class PaymentModel extends Database
         $stmt->close();
         return (int) ($row['total'] ?? 0);
     }
+
+    public function getPaymentsCountByClientId(int $clientId, string $status): int
+    {
+        $statuses = match ($status) {
+            'Pending'   => ['Pending', 'Hold'],
+            'Completed' => ['Paid'],
+            'Refunded'  => ['Refunded', 'Refund Requested'],
+            'Awaiting'  => ['Awaiting'],
+            default     => [$status],
+        };
+        return $this->countPaymentsByStatus($clientId, $statuses, '');
+    }
+
+    public function getTotalSpentByClientId(int $clientId): float
+    {
+        $sql = "SELECT COALESCE(SUM(pay.Amount), 0) AS total
+                FROM payment pay
+                JOIN project pr ON pay.Project_ID = pr.Project_ID
+                JOIN post po    ON pr.Post_ID     = po.Post_ID
+                WHERE po.Client_ID = ?
+                  AND pay.Status = 'Paid'";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('PaymentModel::getTotalSpentByClientId prepare: ' . $this->conn->error);
+            return 0.0;
+        }
+        $stmt->bind_param('i', $clientId);
+        if (!$stmt->execute()) {
+            error_log('PaymentModel::getTotalSpentByClientId exec: ' . $stmt->error);
+            $stmt->close();
+            return 0.0;
+        }
+        $row = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        return (float) ($row['total'] ?? 0);
+    }
+
+    public function getRecentPaymentsByClientId(int $clientId, int $limit = 3): array
+    {
+        $limit = max(1, $limit);
+        $sql = "SELECT
+                    pay.Payment_ID,
+                    pay.Amount,
+                    pay.Status,
+                    pay.Hold_Time,
+                    pay.Paid_Time,
+                    po.Title        AS Project_Title,
+                    po.Description,
+                    po.End_At       AS Due_Date,
+                    'Card'          AS Method
+                FROM payment pay
+                JOIN project pr ON pay.Project_ID = pr.Project_ID
+                JOIN post po    ON pr.Post_ID     = po.Post_ID
+                WHERE po.Client_ID = ?
+                ORDER BY COALESCE(pay.Paid_Time, pay.Hold_Time, pr.Started_At) DESC
+                LIMIT ?";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('PaymentModel::getRecentPaymentsByClientId prepare: ' . $this->conn->error);
+            return [];
+        }
+        $stmt->bind_param('ii', $clientId, $limit);
+        if (!$stmt->execute()) {
+            error_log('PaymentModel::getRecentPaymentsByClientId exec: ' . $stmt->error);
+            $stmt->close();
+            return [];
+        }
+        $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+        return $rows;
+    }
 }
