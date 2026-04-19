@@ -15,15 +15,12 @@ class EarningsController extends BaseController
         $userId = $_SESSION['user_id'];
         $role   = $_SESSION['role'];
 
-        // Choose view by role
-        if ($role === 'Provider') {
-            $viewFile = __DIR__ . '/../views/provider/Earnings/index.php';
-        } else {
-            http_response_code(403);
-            echo "Invalid role";
+        if ($role !== 'Provider') {
+            $this->notFound();
             return;
         }
 
+        $viewFile = __DIR__ . '/../views/provider/Earnings/index.php';
         include $viewFile;
     }
 

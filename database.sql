@@ -57,7 +57,7 @@ CREATE TABLE `bids` (
   `Comment` varchar(256) DEFAULT NULL,
   `Amount` double DEFAULT NULL,
   `Created_At` datetime DEFAULT NULL,
-  `Est_Date` datetime DEFAULT NULL,
+  `Duration` datetime DEFAULT NULL,
   `Status` varchar(45) DEFAULT NULL,
   `Post_ID` int NOT NULL,
   `Provider_ID` int NOT NULL,

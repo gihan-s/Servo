@@ -12,6 +12,7 @@ class FeedModel extends Database
 
     public function getFeedItemsForProvider($providerId = null, $limit = null)
     {
+        // Feed Items fetched should be under categories that the provider has selected in their profile.
         // TODO: Uncomment when ready to use actual database
         /*
         // Fetch posts that are open for bidding
@@ -22,8 +23,9 @@ class FeedModel extends Database
                     p.Description,
                     p.Requesting_Price,
                     p.Created_At,
-                    p.Est_Date,
+                    p.Est_Date AS Deadline,
                     p.Post_Status,
+                    p.Request_Status,
                     p.Client_ID,
                     c.First_Name AS Client_First_Name,
                     c.Last_Name AS Client_Last_Name,
@@ -32,8 +34,14 @@ class FeedModel extends Database
                 FROM post p
                 INNER JOIN client c ON p.Client_ID = c.Client_ID
                 INNER JOIN category cat ON p.Category_ID = cat.Category_ID
-                WHERE p.Post_Status = 'active' 
+                WHERE p.Post_Status = 'active'
                 AND p.Post_Type = 'post'
+                AND p.Post_Status = 'published'
+                AND p.Request_Status = 'open' -- NOTE: the status could change
+                AND p.Est_Date > NOW()
+                AND p.Category_ID IN (
+                    SELECT Category_ID FROM provider_category WHERE Provider_ID = ?
+                )
                 ORDER BY p.Created_At DESC";
         
         if ($limit !== null) {
@@ -63,8 +71,9 @@ class FeedModel extends Database
         foreach ($rows as &$row) {
             $row['Client_Name'] = formatFullName($row['Client_First_Name'], $row['Client_Last_Name']);
             $row['Budget'] = formatCurrency($row['Requesting_Price']);
-            $row['Timeline'] = formatDuration($row['Est_Date']);
+            $row['Deadline'] = formatDuration($row['Est_Date']);
             $row['Posted'] = timeAgo($row['Created_At']);
+            $row['Request_Status'] = $row['Request_Status'] ?? 'Pending';
         }
         unset($row);
 
@@ -79,13 +88,14 @@ class FeedModel extends Database
                 'Description' => 'Need a modern, responsive personal portfolio with project showcase and contact form.',
                 'Requesting_Price' => 600,
                 'Created_At' => date('Y-m-d H:i:s', strtotime('-2 hours')),
-                'Est_Date' => date('Y-m-d', strtotime('+10 days')),
-                'Post_Status' => 'Open',
+                'Deadline' => date('Y-m-d', strtotime('+10 days')),
+                'Post_Status' => 'Published',
                 'Client_ID' => 1,
                 'Client_First_Name' => 'Nadia', // from database join with client table
                 'Client_Last_Name' => 'Perera', // from database join with client table
                 'Category_ID' => 1,
                 'Category_Name' => 'Web Development', // from database join with category table
+                'Request_Status' => 'Pending',
             ],
             [
                 'Post_ID' => 2,
@@ -93,8 +103,9 @@ class FeedModel extends Database
                 'Description' => 'Client is looking for a clean logo, color palette and typography suggestions for a new startup.',
                 'Requesting_Price' => 350,
                 'Created_At' => date('Y-m-d H:i:s', strtotime('-5 hours')),
-                'Est_Date' => date('Y-m-d', strtotime('+5 days')),
-                'Post_Status' => 'Open',
+                'Deadline' => date('Y-m-d', strtotime('+5 days')),
+                'Post_Status' => 'Published',
+                'Request_Status' => 'open',
                 'Client_ID' => 2,
                 'Client_First_Name' => 'Isuru',
                 'Client_Last_Name' => 'Fernando',
@@ -107,8 +118,9 @@ class FeedModel extends Database
                 'Description' => 'On-page + technical SEO improvements for an e-commerce WordPress site to increase search visibility.',
                 'Requesting_Price' => 480,
                 'Created_At' => date('Y-m-d H:i:s', strtotime('-1 day')),
-                'Est_Date' => date('Y-m-d', strtotime('+14 days')),
-                'Post_Status' => 'Open',
+                'Deadline' => date('Y-m-d', strtotime('+14 days')),
+                'Post_Status' => 'Published',
+                'Request_Status' => 'open',
                 'Client_ID' => 3,
                 'Client_First_Name' => 'Tharushi',
                 'Client_Last_Name' => 'De Silva',
@@ -126,8 +138,9 @@ class FeedModel extends Database
                     p.Description,
                     p.Requesting_Price,
                     p.Created_At,
-                    p.Est_Date,
+                    p.Est_Date AS Deadline,
                     p.Post_Status,
+                    p.Request_Status,
                     p.Price_Type,
                     p.Level,
                     p.Client_ID,
@@ -160,23 +173,42 @@ class FeedModel extends Database
         if ($row) {
             $row['Client_Name'] = formatFullName($row['Client_First_Name'], $row['Client_Last_Name']);
             $row['Budget'] = formatCurrency($row['Requesting_Price']);
-            $row['Timeline'] = formatDuration($row['Est_Date']);
             $row['Posted'] = timeAgo($row['Created_At']);
         }
 
         return $row;
     }
 
-    public function submitBid($providerId, $postId, $amount, $comment, $estDate)
+    public function providerHasBidonPost($providerId, $postId)
     {
-        // add entry to database, bids table with status 'Active' and current timestamp for created_at
-        $sql = "INSERT INTO bids (Provider_ID, Post_ID, Amount, Comment, Est_Date, Status, Created_At) VALUES (?, ?, ?, ?, ?, 'Active', NOW())";
+        $sql = "SELECT COUNT(*) FROM bids WHERE Provider_ID = ? AND Post_ID = ?";
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('FeedModel::providerHasBidOnPost prepare: ' . $this->conn->error);
+            return false;
+        }
+        $stmt->bind_param('ii', $providerId, $postId);
+        if (!$stmt->execute()) {
+            error_log('FeedModel::providerHasBidOnPost exec: ' . $stmt->error);
+            $stmt->close();
+            return false;
+        }
+        $stmt->bind_result($count);
+        $stmt->fetch();
+        $stmt->close();
+        return $count > 0;
+    }
+
+    public function submitBid($providerId, $postId, $amount, $comment, $duration)
+    {
+        // add entry to database, bids table with status 'active' and current timestamp for created_at
+        $sql = "INSERT INTO bids (Provider_ID, Post_ID, Amount, Comment, Duration, Status, Created_At) VALUES (?, ?, ?, ?, ?, 'active', NOW())";
         $stmt = $this->conn->prepare($sql);
         if (!$stmt) {
             error_log('BidModel::submitBid prepare: ' . $this->conn->error);
             return ['success' => false, 'error' => 'Database error'];
         }
-        $stmt->bind_param('iiiis', $providerId, $postId, $amount, $comment, $estDate);
+        $stmt->bind_param('iidsi', $providerId, $postId, $amount, $comment, $duration);
         if (!$stmt->execute()) {
             error_log('BidModel::submitBid exec: ' . $stmt->error);
             $stmt->close();
