@@ -31,7 +31,7 @@ class FeedModel extends Database
                 FROM post p
                 INNER JOIN client c ON p.Client_ID = c.Client_ID
                 INNER JOIN category cat ON p.Category_ID = cat.Category_ID
-                WHERE p.Post_Status = 'published'
+                WHERE p.Post_Status = 'active'
                 AND p.Post_Type = 'post'
                 AND p.Request_Status = 'open' -- NOTE: the status could change
                 AND p.Est_Date > NOW()
