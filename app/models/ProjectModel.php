@@ -57,21 +57,6 @@ class ProjectModel extends Database {
         return $result && $result->num_rows > 0;
     }
 
-    private function ensureProjectRatingColumn(): bool
-    {
-        if ($this->hasColumn('project', 'Rating')) {
-            return true;
-        }
-
-        $sql = 'ALTER TABLE project ADD COLUMN Rating DOUBLE DEFAULT NULL AFTER Progress';
-        if (!$this->conn->query($sql)) {
-            error_log('ProjectModel::ensureProjectRatingColumn alter failed: ' . $this->conn->error);
-            return false;
-        }
-
-        return true;
-    }
-
     private function getNextPaymentId(): int
     {
         $res = $this->conn->query('SELECT COALESCE(MAX(Payment_ID), 10500) + 1 AS next_id FROM payment');
@@ -160,9 +145,13 @@ class ProjectModel extends Database {
     private function refreshProviderRating(int $providerId): float
     {
         $stmt = $this->conn->prepare(
-            'SELECT COALESCE(AVG(pc.Rating), 0) AS avg_rating
-             FROM provider_categories pc
-             WHERE pc.Provider_ID = ? AND pc.Status = "Active"'
+                        'SELECT COALESCE(AVG(r.Rating), 0) AS avg_rating
+                         FROM reviews r
+                         JOIN project proj ON proj.Project_ID = r.Project_ID
+                         JOIN post p ON p.Post_ID = proj.Post_ID
+                         WHERE p.Provider_ID = ?
+                             AND proj.Project_Status = "completed"
+                             AND r.Rating IS NOT NULL'
         );
         if (!$stmt) {
             error_log('ProjectModel::refreshProviderRating prepare: ' . $this->conn->error);
@@ -1870,24 +1859,19 @@ class ProjectModel extends Database {
         $projectRating = max(0.5, min(5.0, $rating));
         $projectRatingPercent = round($projectRating * 20, 1);
 
-        if (!$this->ensureProjectRatingColumn()) {
-            return false;
-        }
-
         $this->conn->begin_transaction();
         try {
             // Mark project completed
             $upStmt = $this->conn->prepare(
                 'UPDATE project
                  SET Project_Status = "completed",
-                     Ended_At = COALESCE(Ended_At, NOW()),
-                     Rating = ?
+                     Ended_At = COALESCE(Ended_At, NOW())
                  WHERE Post_ID = ?'
             );
             if (!$upStmt) {
                 throw new Exception('completeProjectByClient prepare status: ' . $this->conn->error);
             }
-            $upStmt->bind_param('di', $projectRatingPercent, $postId);
+            $upStmt->bind_param('i', $postId);
             if (!$upStmt->execute()) {
                 throw new Exception('completeProjectByClient exec status: ' . $upStmt->error);
             }
