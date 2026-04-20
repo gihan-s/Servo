@@ -598,7 +598,7 @@ class PostModel extends Database
 
     public function countActiveRequests($clientId)
     {
-        $stmt = $this->conn->prepare("SELECT COUNT(*) as count FROM Post WHERE Client_ID = ? AND Post_Status = 'Published'");
+        $stmt = $this->conn->prepare("SELECT COUNT(*) as count FROM post WHERE Client_ID = ? AND Post_Status = 'Published'");
         $stmt->bind_param("i", $clientId);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -609,7 +609,7 @@ class PostModel extends Database
 
     public function getRecentRequests($clientId, $limit = 3)
     {
-        $stmt = $this->conn->prepare("SELECT * FROM Post WHERE Client_ID = ? ORDER BY Created_At DESC LIMIT ?");
+        $stmt = $this->conn->prepare("SELECT * FROM post WHERE Client_ID = ? ORDER BY Created_At DESC LIMIT ?");
         $stmt->bind_param("ii", $clientId, $limit);
         $stmt->execute();
         $result = $stmt->get_result();
