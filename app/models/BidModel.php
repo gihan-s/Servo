@@ -102,7 +102,7 @@ class BidModel extends Database
 
     public function countByPostId(int $postId): int
     {
-        $sql = "SELECT COUNT(*) AS bid_count FROM bids WHERE Post_ID = ?";
+        $sql = "SELECT COUNT(*) AS bid_count FROM bids WHERE Post_ID = ? AND Status IN ('active', 'accepted')";
 
         $stmt = $this->conn->prepare($sql);
         if (!$stmt) {
