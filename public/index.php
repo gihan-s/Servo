@@ -25,6 +25,8 @@ require_once '../app/controllers/admin/AdminLoginController.php';
 require_once '../app/controllers/admin/AdminDashboardController.php';
 require_once '../app/controllers/admin/AdminProviderController.php';
 require_once '../app/controllers/admin/AdminClientController.php';
+require_once '../app/controllers/admin/AdminCategoryController.php';
+require_once '../app/controllers/admin/AdminLocationController.php';
 
 // Get the URL path
 $url = $_GET['url'] ?? 'home';
@@ -561,6 +563,46 @@ switch ($url) {
     case 'admin/clients/unban':
         $controller = new AdminClientController();
         $controller->unban();
+        break;
+
+    case 'admin/categories':
+        $controller = new AdminCategoryController();
+        $controller->index();
+        break;
+
+    case 'admin/categories/create':
+        $controller = new AdminCategoryController();
+        $controller->create();
+        break;
+
+    case 'admin/categories/edit':
+        $controller = new AdminCategoryController();
+        $controller->edit();
+        break;
+
+    case 'admin/categories/delete':
+        $controller = new AdminCategoryController();
+        $controller->delete();
+        break;
+
+    case 'admin/locations':
+        $controller = new AdminLocationController();
+        $controller->index();
+        break;
+
+    case 'admin/locations/create':
+        $controller = new AdminLocationController();
+        $controller->create();
+        break;
+
+    case 'admin/locations/edit':
+        $controller = new AdminLocationController();
+        $controller->edit();
+        break;
+
+    case 'admin/locations/delete':
+        $controller = new AdminLocationController();
+        $controller->delete();
         break;
 
     case 'messages/get-messages':
