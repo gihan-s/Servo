@@ -65,10 +65,11 @@
 		.feed-card-actions button {
 			padding: 7px 12px;
 			font-size: 13px;
-			border-radius: 7px;
+			border-radius: 8px;
 			cursor: pointer;
 			display: inline-flex; align-items: center; gap: 6px;
 			white-space: nowrap;
+			font-weight: 600;
 		}
 		.feed-card-actions .btn-bid-placed {
 			background: #f3f4f6 !important; color: #6b7280 !important;
@@ -301,7 +302,7 @@
 										</span>
 									</div>
 								</div>
-								<span style="font-size:12px; color:#16a34a; font-weight:600;"><i class="fa-solid fa-circle-check"></i> Bid Submitted</span>
+								<span style="font-size:12px; color:#008500; font-weight:600;"><i class="fa-solid fa-circle-check"></i> Bid Submitted</span>
 							</div>
 							<?php endif; ?>
 
