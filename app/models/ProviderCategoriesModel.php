@@ -345,6 +345,52 @@ class ProviderCategoriesModel extends Database
             }
         }
 
+        $locationDistricts = $filters['location_districts'] ?? [];
+        if (is_string($locationDistricts)) {
+            $locationDistricts = array_filter(array_map('trim', explode(',', $locationDistricts)), static function ($value) {
+                return $value !== '';
+            });
+        }
+        $locationDistricts = array_values(array_unique(array_map('strval', (array) $locationDistricts)));
+
+        $locationCities = $filters['location_cities'] ?? [];
+        if (is_string($locationCities)) {
+            $locationCities = array_filter(array_map('trim', explode(',', $locationCities)), static function ($value) {
+                return $value !== '';
+            });
+        }
+        $locationCities = array_values(array_unique(array_map('strval', (array) $locationCities)));
+
+        $locationConditions = [];
+
+        if (!empty($locationDistricts)) {
+            $districtPlaceholders = implode(',', array_fill(0, count($locationDistricts), '?'));
+            $locationConditions[] = "loc.District IN ($districtPlaceholders)";
+            $types .= str_repeat('s', count($locationDistricts));
+            foreach ($locationDistricts as $district) {
+                $params[] = $district;
+            }
+        }
+
+        if (!empty($locationCities)) {
+            $cityPlaceholders = implode(',', array_fill(0, count($locationCities), '?'));
+            $locationConditions[] = "loc.City IN ($cityPlaceholders)";
+            $types .= str_repeat('s', count($locationCities));
+            foreach ($locationCities as $city) {
+                $params[] = $city;
+            }
+        }
+
+        if (!empty($locationConditions)) {
+            $where[] = 'EXISTS (
+                SELECT 1
+                FROM provider_categories_has_location pchl
+                INNER JOIN location loc ON loc.Location_ID = pchl.Location_Location_ID
+                WHERE pchl.Provider_Categories_ID = pc.ID
+                AND (' . implode(' OR ', $locationConditions) . ')
+            )';
+        }
+
         return ['WHERE ' . implode(' AND ', $where), $types, $params];
     }
 

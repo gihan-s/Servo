@@ -22,12 +22,39 @@ class ProviderController extends BaseController
         $userId = $_SESSION['user_id'];
         $role   = $_SESSION['role'];
         $categories = [];
+        $locationTree = [];
 
         // Choose view by role
         if ($role === 'Client') {
             require_once __DIR__ . '/../models/CategoryModel.php';
+            require_once __DIR__ . '/../models/LocationModel.php';
             $categoryModel = new CategoryModel();
+            $locationModel = new LocationModel();
             $categories = $categoryModel->getCategories();
+
+            $districtRows = $locationModel->getDistricts();
+            foreach ($districtRows as $districtRow) {
+                $district = trim((string) ($districtRow['District'] ?? ''));
+                if ($district === '' || strcasecmp($district, 'All') === 0) {
+                    continue;
+                }
+
+                $cityRows = $locationModel->getCities($district);
+                $cities = [];
+                foreach ($cityRows as $cityRow) {
+                    $city = trim((string) ($cityRow['City'] ?? ''));
+                    if ($city === '' || strcasecmp($city, 'All') === 0) {
+                        continue;
+                    }
+                    $cities[] = $city;
+                }
+
+                $locationTree[] = [
+                    'district' => $district,
+                    'cities' => array_values(array_unique($cities)),
+                ];
+            }
+
             $viewFile = __DIR__ . '/../views/client/Providers/index.php';
         }
         // elseif ($role === 'Provider') {
@@ -178,6 +205,8 @@ class ProviderController extends BaseController
                 'completion_range' => trim((string) ($_GET['completion_range'] ?? '')),
                 'price_types' => trim((string) ($_GET['price_types'] ?? '')),
                 'category_ids' => trim((string) ($_GET['category_ids'] ?? '')),
+                'location_districts' => trim((string) ($_GET['location_districts'] ?? '')),
+                'location_cities' => trim((string) ($_GET['location_cities'] ?? '')),
             ];
 
             $services = $providerCategoriesModel->getServicesForListing($providerId, $limit, $offset, $filters);

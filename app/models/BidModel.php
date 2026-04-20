@@ -33,7 +33,9 @@ class BidModel extends Database
                 p.First_Name,
                 p.Last_Name,
                 p.Profile_Picture,
-                pr.Provider_Rating
+                pr.Provider_Rating,
+                p.Rating AS Provider_Score,
+                COALESCE(pr.Provider_Rating, ROUND(p.Rating / 20, 1), 0) AS Provider_Star_Rating
             FROM bids b
             LEFT JOIN provider p
                 ON p.Provider_ID = b.Provider_ID
