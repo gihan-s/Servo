@@ -154,7 +154,7 @@ class PostController extends BaseController
 
         header('Content-Type: application/json');
 
-        try {
+        // try {
             // Log received data
             error_log("Received POST data: " . print_r($_POST, true));
 
@@ -202,7 +202,7 @@ class PostController extends BaseController
                 'End_At' => $endAt ?: date('Y-m-d', strtotime('+30 days')),
                 'Status' => $status === 'publish' ? 'active' : 'draft',
                 'Published_At' => $publishedAt,
-                'Request_Status' => $status === 'publish' ? 'open' : null
+                'Request_Status' => $status === 'publish' ? 'open' : 'draft'
             ];
 
             error_log("Creating post with data: " . print_r($postData, true));
@@ -236,14 +236,14 @@ class PostController extends BaseController
                 'post_id' => $postId
             ]);
 
-        } catch (Exception $e) {
-            error_log('Error creating post: ' . $e->getMessage());
-            error_log('Stack trace: ' . $e->getTraceAsString());
-            echo json_encode([
-                'success' => false,
-                'message' => 'An error occurred while creating the post'
-            ]);
-        }
+        // } catch (Exception $e) {
+        //     error_log('Error creating post: ' . $e->getMessage());
+        //     error_log('Stack trace: ' . $e->getTraceAsString());
+        //     echo json_encode([
+        //         'success' => false,
+        //         'message' => 'An error occurred while creating the post'
+        //     ]);
+        // }
     }
 
     public function viewPost($id): void
@@ -266,8 +266,18 @@ class PostController extends BaseController
             return;
         }
 
-        // Reuse existing helper to get skills for this post
-        $skills = $this->postSkillsModel->getPostSkills($id);
+        // Load skills from join table and normalize to names.
+        $skillRows = $this->postSkillsModel->getPostSkills($id);
+        $skills = [];
+        foreach ($skillRows as $row) {
+            $name = $row['Skill'] ?? $row['skill'] ?? $row['Name'] ?? null;
+            if (is_string($name) && trim($name) !== '') {
+                $skills[] = trim($name);
+            }
+        }
+        if (empty($skills)) {
+            $skills = $this->getSkillsForPost($post);
+        }
         $bids = $this->postModel->getBidsForPost($id);
 
         $response = [
@@ -288,8 +298,9 @@ class PostController extends BaseController
             'Category_Name' => $post['CategoryName'] ?? '',
             'Category_ID' => $post['Category_ID'] ?? null,
             'Provider_Name' => $post['Provider_Name'] ?? null,
-            'Request_Status' => $post['Request_Status'] ?? null,
-            'skills' => array_column($skills, 'Skill'),
+            'Provider_Picture' => $post['Provider_Picture'] ?? null,
+            'Provider_Rating' => $post['Provider_Rating'] ?? null,
+            'skills' => $skills,
             'bids' => $bids,
         ];
 

@@ -387,6 +387,11 @@ switch ($url) {
         $controller->getServices();
         break;
 
+    case 'providers/profile':
+        $controller = new ProviderController();
+        $controller->getProfile();
+        break;
+
     case 'provider/incoming-requests':
         $controller = new ProviderController();
         $controller->getIncomingRequests();
@@ -443,6 +448,16 @@ switch ($url) {
     case 'feed/submit-bid':
         $controller = new FeedController();
         $controller->submitBid();
+        break;
+
+    case 'feed/edit-bid':
+        $controller = new FeedController();
+        $controller->editBid();
+        break;
+
+    case 'feed/cancel-bid':
+        $controller = new FeedController();
+        $controller->cancelBid();
         break;
 
     case 'bids':

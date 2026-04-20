@@ -17,6 +17,252 @@ require_once __DIR__ . '/../core/Database.php';
 require_once __DIR__ . '/../core/helpers.php';
 
 class ProjectModel extends Database {
+    private const PAYMENT_COMMISSION_RATE = 0.10;
+
+    private function getRequirementFilesTableName(): ?string {
+        static $resolvedTable = null;
+        static $resolved = false;
+
+        if ($resolved) {
+            return $resolvedTable;
+        }
+
+        $resolved = true;
+        $candidates = ['project_requirements_files', 'project_requirement_files'];
+
+        foreach ($candidates as $tableName) {
+            $escaped = $this->conn->real_escape_string($tableName);
+            $check = $this->conn->query("SHOW TABLES LIKE '{$escaped}'");
+            if ($check && $check->num_rows > 0) {
+                $resolvedTable = $tableName;
+                return $resolvedTable;
+            }
+        }
+
+        return null;
+    }
+
+    private function hasColumn(string $tableName, string $columnName): bool
+    {
+        $tableName = $this->conn->real_escape_string($tableName);
+        $columnName = $this->conn->real_escape_string($columnName);
+        $result = $this->conn->query("SHOW COLUMNS FROM `{$tableName}` LIKE '{$columnName}'");
+        return $result && $result->num_rows > 0;
+    }
+
+    private function hasTable(string $tableName): bool
+    {
+        $tableName = $this->conn->real_escape_string($tableName);
+        $result = $this->conn->query("SHOW TABLES LIKE '{$tableName}'");
+        return $result && $result->num_rows > 0;
+    }
+
+    private function getNextPaymentId(): int
+    {
+        $res = $this->conn->query('SELECT COALESCE(MAX(Payment_ID), 10500) + 1 AS next_id FROM payment');
+        if (!$res) {
+            error_log('ProjectModel::getNextPaymentId: ' . $this->conn->error);
+            return 10501;
+        }
+
+        $row = $res->fetch_assoc();
+        return (int) ($row['next_id'] ?? 10501);
+    }
+
+    private function resolveProviderCategoryId(int $providerCategoryId, int $providerId, int $categoryId): int
+    {
+        if ($providerCategoryId > 0) {
+            return $providerCategoryId;
+        }
+
+        if ($providerId <= 0 || $categoryId <= 0) {
+            return 0;
+        }
+
+        $stmt = $this->conn->prepare(
+            'SELECT ID FROM provider_categories WHERE Provider_ID = ? AND Category_ID = ? AND Status = "Active" ORDER BY ID ASC LIMIT 1'
+        );
+        if (!$stmt) {
+            error_log('ProjectModel::resolveProviderCategoryId prepare: ' . $this->conn->error);
+            return 0;
+        }
+
+        $stmt->bind_param('ii', $providerId, $categoryId);
+        if (!$stmt->execute()) {
+            error_log('ProjectModel::resolveProviderCategoryId exec: ' . $stmt->error);
+            $stmt->close();
+            return 0;
+        }
+
+        $row = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        return (int) ($row['ID'] ?? 0);
+    }
+
+    private function refreshProviderCategoryRating(int $providerCategoryId): float
+    {
+        $stmt = $this->conn->prepare(
+                        'SELECT COALESCE(AVG(r.Rating), 0) AS avg_rating
+                         FROM reviews r
+                         JOIN project proj ON proj.Project_ID = r.Project_ID
+             JOIN post p ON p.Post_ID = proj.Post_ID
+             WHERE p.Provider_Categories_ID = ?
+               AND proj.Project_Status = "completed"
+                             AND r.Rating IS NOT NULL'
+        );
+        if (!$stmt) {
+            error_log('ProjectModel::refreshProviderCategoryRating prepare: ' . $this->conn->error);
+            return 0.0;
+        }
+
+        $stmt->bind_param('i', $providerCategoryId);
+        if (!$stmt->execute()) {
+            error_log('ProjectModel::refreshProviderCategoryRating exec: ' . $stmt->error);
+            $stmt->close();
+            return 0.0;
+        }
+
+        $row = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+
+        $percentage = round(max(0.0, min(100.0, (float) ($row['avg_rating'] ?? 0))), 1);
+
+        $update = $this->conn->prepare('UPDATE provider_categories SET Rating = ? WHERE ID = ?');
+        if (!$update) {
+            error_log('ProjectModel::refreshProviderCategoryRating update prepare: ' . $this->conn->error);
+            return $percentage;
+        }
+
+        $update->bind_param('di', $percentage, $providerCategoryId);
+        if (!$update->execute()) {
+            error_log('ProjectModel::refreshProviderCategoryRating update exec: ' . $update->error);
+        }
+        $update->close();
+
+        return $percentage;
+    }
+
+    private function refreshProviderRating(int $providerId): float
+    {
+        $stmt = $this->conn->prepare(
+                        'SELECT COALESCE(AVG(r.Rating), 0) AS avg_rating
+                         FROM reviews r
+                         JOIN project proj ON proj.Project_ID = r.Project_ID
+                         JOIN post p ON p.Post_ID = proj.Post_ID
+                         WHERE p.Provider_ID = ?
+                             AND proj.Project_Status = "completed"
+                             AND r.Rating IS NOT NULL'
+        );
+        if (!$stmt) {
+            error_log('ProjectModel::refreshProviderRating prepare: ' . $this->conn->error);
+            return 0.0;
+        }
+
+        $stmt->bind_param('i', $providerId);
+        if (!$stmt->execute()) {
+            error_log('ProjectModel::refreshProviderRating exec: ' . $stmt->error);
+            $stmt->close();
+            return 0.0;
+        }
+
+        $row = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+
+        $rating = round(max(0.0, min(100.0, (float) ($row['avg_rating'] ?? 0))), 1);
+
+        $update = $this->conn->prepare('UPDATE provider SET Rating = ? WHERE Provider_ID = ?');
+        if (!$update) {
+            error_log('ProjectModel::refreshProviderRating update prepare: ' . $this->conn->error);
+            return $rating;
+        }
+
+        $update->bind_param('di', $rating, $providerId);
+        if (!$update->execute()) {
+            error_log('ProjectModel::refreshProviderRating update exec: ' . $update->error);
+        }
+        $update->close();
+
+        return $rating;
+    }
+
+    private function releasePaymentForProject(int $projectId): bool
+    {
+        $stmt = $this->conn->prepare(
+            'SELECT pay.Payment_ID, pay.Status, po.Requesting_Price
+             FROM project proj
+             JOIN post po ON po.Post_ID = proj.Post_ID
+             LEFT JOIN payment pay ON pay.Project_ID = proj.Project_ID
+             WHERE proj.Project_ID = ?
+             LIMIT 1'
+        );
+        if (!$stmt) {
+            error_log('ProjectModel::releasePaymentForProject prepare: ' . $this->conn->error);
+            return false;
+        }
+
+        $stmt->bind_param('i', $projectId);
+        if (!$stmt->execute()) {
+            error_log('ProjectModel::releasePaymentForProject exec: ' . $stmt->error);
+            $stmt->close();
+            return false;
+        }
+
+        $row = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+
+        if (!$row) {
+            error_log('ProjectModel::releasePaymentForProject: project not found for payment release');
+            return false;
+        }
+
+        $paymentId = (int) ($row['Payment_ID'] ?? 0);
+        $amount = (float) ($row['Requesting_Price'] ?? 0);
+        $status = strtolower(trim((string) ($row['Status'] ?? '')));
+
+        if ($paymentId > 0) {
+            if ($status === 'paid') {
+                return true;
+            }
+
+            $update = $this->conn->prepare(
+                "UPDATE payment
+                 SET Status = 'Paid', Paid_Time = NOW(), Hold_Time = COALESCE(Hold_Time, NOW())
+                 WHERE Payment_ID = ?"
+            );
+            if (!$update) {
+                error_log('ProjectModel::releasePaymentForProject update prepare: ' . $this->conn->error);
+                return false;
+            }
+
+            $update->bind_param('i', $paymentId);
+            $ok = $update->execute();
+            if (!$ok) {
+                error_log('ProjectModel::releasePaymentForProject update exec: ' . $update->error);
+            }
+            $update->close();
+            return (bool) $ok;
+        }
+
+        $paymentId = $this->getNextPaymentId();
+        $commission = round($amount * self::PAYMENT_COMMISSION_RATE, 2);
+        $insert = $this->conn->prepare(
+            "INSERT INTO payment (Payment_ID, Amount, Status, Hold_Time, Paid_Time, Commission, Project_ID)
+             VALUES (?, ?, 'Paid', NOW(), NOW(), ?, ?)"
+        );
+        if (!$insert) {
+            error_log('ProjectModel::releasePaymentForProject insert prepare: ' . $this->conn->error);
+            return false;
+        }
+
+        $insert->bind_param('iddi', $paymentId, $amount, $commission, $projectId);
+        $ok = $insert->execute();
+        if (!$ok) {
+            error_log('ProjectModel::releasePaymentForProject insert exec: ' . $insert->error);
+        }
+        $insert->close();
+        return (bool) $ok;
+    }
+
   public function getByPostId(int $postId): ?array {
     $stmt = $this->conn->prepare("SELECT * FROM project WHERE Post_ID = ? LIMIT 1");
     if (!$stmt) {
@@ -412,16 +658,23 @@ class ProjectModel extends Database {
         $ids      = array_column($rows, 'Requirement_ID');
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
         $types    = str_repeat('i', count($ids));
-        $fileStmt = $this->conn->prepare(
-            "SELECT Requirement_ID, File FROM project_requirements_files WHERE Requirement_ID IN ($placeholders)"
-        );
-        if ($fileStmt) {
-            $fileStmt->bind_param($types, ...$ids);
-            $fileStmt->execute();
-            $fileRows = $fileStmt->get_result()->fetch_all(MYSQLI_ASSOC);
-            $fileStmt->close();
-        } else {
-            $fileRows = [];
+        $fileRows = [];
+        $filesTable = $this->getRequirementFilesTableName();
+        if ($filesTable !== null) {
+            $fileStmt = $this->conn->prepare(
+                "SELECT Requirement_ID, File FROM {$filesTable} WHERE Requirement_ID IN ($placeholders)"
+            );
+            if ($fileStmt) {
+                $bindArgs = [$types];
+                foreach ($ids as $idx => $id) {
+                    $ids[$idx] = (int) $id;
+                    $bindArgs[] = &$ids[$idx];
+                }
+                call_user_func_array([$fileStmt, 'bind_param'], $bindArgs);
+                $fileStmt->execute();
+                $fileRows = $fileStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+                $fileStmt->close();
+            }
         }
 
         // Group files by requirement
@@ -462,15 +715,20 @@ class ProjectModel extends Database {
             $insStmt->close();
 
             if (!empty($fileNames)) {
-                $fileStmt = $this->conn->prepare(
-                    'INSERT INTO project_requirements_files (Requirement_ID, File) VALUES (?, ?)'
-                );
-                if (!$fileStmt) throw new Exception('prepare file insert: ' . $this->conn->error);
-                foreach ($fileNames as $fileName) {
-                    $fileStmt->bind_param('is', $reqId, $fileName);
-                    if (!$fileStmt->execute()) throw new Exception('exec file insert: ' . $fileStmt->error);
+                $filesTable = $this->getRequirementFilesTableName();
+                if ($filesTable !== null) {
+                    $fileStmt = $this->conn->prepare(
+                        "INSERT INTO {$filesTable} (Requirement_ID, File) VALUES (?, ?)"
+                    );
+                    if (!$fileStmt) throw new Exception('prepare file insert: ' . $this->conn->error);
+                    foreach ($fileNames as $fileName) {
+                        $fileStmt->bind_param('is', $reqId, $fileName);
+                        if (!$fileStmt->execute()) throw new Exception('exec file insert: ' . $fileStmt->error);
+                    }
+                    $fileStmt->close();
+                } else {
+                    error_log('ProjectModel::addRequirement warning: requirement files table not found; skipping file records');
                 }
-                $fileStmt->close();
             }
 
             $this->conn->commit();
@@ -548,25 +806,56 @@ class ProjectModel extends Database {
         return $stmt->get_result()->fetch_assoc();
     }
 
-    public function cancelRequest(int $postId): bool
+    public function cancelRequest(int $postId, int $clientId): array
     {
-        $sql = "UPDATE post SET Request_Status = 'cancelled' WHERE Post_ID = ?";
+        // Fetch the post to verify ownership, current status, and type
+        $checkSql = "SELECT Client_ID, Request_Status, Post_Type FROM post WHERE Post_ID = ? LIMIT 1";
+        $checkStmt = $this->conn->prepare($checkSql);
+        if (!$checkStmt) {
+            error_log('cancelRequest prepare check: ' . $this->conn->error);
+            return ['success' => false, 'message' => 'Server error', 'code' => 500];
+        }
+        $checkStmt->bind_param('i', $postId);
+        $checkStmt->execute();
+        $row = $checkStmt->get_result()->fetch_assoc();
+        $checkStmt->close();
 
-        $stmt = $this->conn->prepare($sql);
-        if (!$stmt) {
-            error_log('cancelRequest prepare: ' . $this->conn->error);
-            return false;
+        if (!$row) {
+            return ['success' => false, 'message' => 'Post not found', 'code' => 404];
         }
 
-        $stmt->bind_param('i', $postId);
+        if ((int) $row['Client_ID'] !== $clientId) {
+            return ['success' => false, 'message' => 'Unauthorized', 'code' => 403];
+        }
+
+        $current = strtolower(trim((string) ($row['Request_Status'] ?? '')));
+        $cancellable = ['', 'open', 'pending', 'accepted', 'declined'];
+        if (!in_array($current, $cancellable, true)) {
+            return ['success' => false, 'message' => 'Request cannot be cancelled in its current status', 'code' => 422];
+        }
+
+        // For public posts reset to 'open' so other providers can still bid;
+        // for direct requests mark as 'cancelled'.
+        $isPublicPost  = strtolower(trim((string) ($row['Post_Type'] ?? ''))) === 'post';
+        $newStatus     = $isPublicPost ? 'open' : 'cancelled';
+        $clearProvider = $isPublicPost ? ', Provider_ID = NULL' : '';
+
+        $sql = "UPDATE post SET Request_Status = ? {$clearProvider} WHERE Post_ID = ?";
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('cancelRequest prepare update: ' . $this->conn->error);
+            return ['success' => false, 'message' => 'Server error', 'code' => 500];
+        }
+        $stmt->bind_param('si', $newStatus, $postId);
 
         if (!$stmt->execute()) {
             error_log('cancelRequest exec: ' . $stmt->error);
-            return false;
+            $stmt->close();
+            return ['success' => false, 'message' => 'Failed to cancel request', 'code' => 500];
         }
-
         $stmt->close();
-        return true;
+
+        return ['success' => true, 'message' => 'Request cancelled successfully'];
     }
 
     /**
@@ -1285,10 +1574,13 @@ class ProjectModel extends Database {
      */
     public function getReviewsByProjectId(int $projectId): array
     {
-        $sql = "SELECT r.Review_ID, r.Title, r.Description, r.Rating, r.Left_At, r.Rated_By
-                FROM reviews r
-                WHERE r.Project_ID = ?
-                ORDER BY r.Left_At ASC";
+        $hasRatedBy = $this->hasColumn('reviews', 'Rated_By');
+        $ratedBySelect = $hasRatedBy ? 'r.Rated_By' : 'NULL AS Rated_By';
+
+        $sql = "SELECT r.Review_ID, r.Title, r.Description, r.Rating, r.Left_At, {$ratedBySelect}
+            FROM reviews r
+            WHERE r.Project_ID = ?
+            ORDER BY r.Left_At ASC";
 
         $stmt = $this->conn->prepare($sql);
         if (!$stmt) {
@@ -1304,17 +1596,19 @@ class ProjectModel extends Database {
         if (empty($reviews)) return [];
 
         // Attach files
-        $reviewIds = array_column($reviews, 'Review_ID');
-        $ph = implode(',', array_fill(0, count($reviewIds), '?'));
-        $fStmt = $this->conn->prepare("SELECT Review_ID, File FROM reviews_files WHERE Review_ID IN ($ph)");
         $fileMap = [];
-        if ($fStmt) {
-            $fStmt->bind_param(str_repeat('i', count($reviewIds)), ...$reviewIds);
-            $fStmt->execute();
-            foreach ($fStmt->get_result()->fetch_all(MYSQLI_ASSOC) as $f) {
-                $fileMap[$f['Review_ID']][] = $f['File'];
+        if ($this->hasTable('reviews_files')) {
+            $reviewIds = array_column($reviews, 'Review_ID');
+            $ph = implode(',', array_fill(0, count($reviewIds), '?'));
+            $fStmt = $this->conn->prepare("SELECT Review_ID, File FROM reviews_files WHERE Review_ID IN ($ph)");
+            if ($fStmt) {
+                $fStmt->bind_param(str_repeat('i', count($reviewIds)), ...$reviewIds);
+                $fStmt->execute();
+                foreach ($fStmt->get_result()->fetch_all(MYSQLI_ASSOC) as $f) {
+                    $fileMap[$f['Review_ID']][] = $f['File'];
+                }
+                $fStmt->close();
             }
-            $fStmt->close();
         }
         foreach ($reviews as &$r) {
             $r['files'] = $fileMap[$r['Review_ID']] ?? [];
@@ -1328,11 +1622,14 @@ class ProjectModel extends Database {
      */
     public function getReviewsByPostId(int $postId): array
     {
-        $sql = "SELECT r.Review_ID, r.Title, r.Description, r.Rating, r.Left_At, r.Rated_By
-                FROM reviews r
-                JOIN project proj ON proj.Project_ID = r.Project_ID
-                WHERE proj.Post_ID = ?
-                ORDER BY r.Left_At ASC";
+        $hasRatedBy = $this->hasColumn('reviews', 'Rated_By');
+        $ratedBySelect = $hasRatedBy ? 'r.Rated_By' : 'NULL AS Rated_By';
+
+        $sql = "SELECT r.Review_ID, r.Title, r.Description, r.Rating, r.Left_At, {$ratedBySelect}
+            FROM reviews r
+            JOIN project proj ON proj.Project_ID = r.Project_ID
+            WHERE proj.Post_ID = ?
+            ORDER BY r.Left_At ASC";
 
         $stmt = $this->conn->prepare($sql);
         if (!$stmt) {
@@ -1348,17 +1645,19 @@ class ProjectModel extends Database {
         if (empty($reviews)) return [];
 
         // Attach files
-        $reviewIds = array_column($reviews, 'Review_ID');
-        $ph = implode(',', array_fill(0, count($reviewIds), '?'));
-        $fStmt = $this->conn->prepare("SELECT Review_ID, File FROM reviews_files WHERE Review_ID IN ($ph)");
         $fileMap = [];
-        if ($fStmt) {
-            $fStmt->bind_param(str_repeat('i', count($reviewIds)), ...$reviewIds);
-            $fStmt->execute();
-            foreach ($fStmt->get_result()->fetch_all(MYSQLI_ASSOC) as $f) {
-                $fileMap[$f['Review_ID']][] = $f['File'];
+        if ($this->hasTable('reviews_files')) {
+            $reviewIds = array_column($reviews, 'Review_ID');
+            $ph = implode(',', array_fill(0, count($reviewIds), '?'));
+            $fStmt = $this->conn->prepare("SELECT Review_ID, File FROM reviews_files WHERE Review_ID IN ($ph)");
+            if ($fStmt) {
+                $fStmt->bind_param(str_repeat('i', count($reviewIds)), ...$reviewIds);
+                $fStmt->execute();
+                foreach ($fStmt->get_result()->fetch_all(MYSQLI_ASSOC) as $f) {
+                    $fileMap[$f['Review_ID']][] = $f['File'];
+                }
+                $fStmt->close();
             }
-            $fStmt->close();
         }
         foreach ($reviews as &$r) {
             $r['files'] = $fileMap[$r['Review_ID']] ?? [];
@@ -1373,6 +1672,7 @@ class ProjectModel extends Database {
     public function addProviderReview(int $providerId, int $postId, int $rating, string $title, string $description): bool
     {
         $this->conn->begin_transaction();
+        $hasRatedBy = $this->hasColumn('reviews', 'Rated_By');
 
         try {
             // Verify: project is completed AND belongs to this provider
@@ -1392,9 +1692,10 @@ class ProjectModel extends Database {
             $projectId = (int) $row['Project_ID'];
 
             // Ensure provider hasn't already reviewed
-            $dupChk = $this->conn->prepare(
-                'SELECT Review_ID FROM reviews WHERE Project_ID = ? AND Rated_By = "Provider" LIMIT 1'
-            );
+            $dupSql = $hasRatedBy
+                ? 'SELECT Review_ID FROM reviews WHERE Project_ID = ? AND Rated_By = "Provider" LIMIT 1'
+                : 'SELECT Review_ID FROM reviews WHERE Project_ID = ? LIMIT 1';
+            $dupChk = $this->conn->prepare($dupSql);
             if (!$dupChk) throw new Exception('addProviderReview dup prepare: ' . $this->conn->error);
             $dupChk->bind_param('i', $projectId);
             $dupChk->execute();
@@ -1413,12 +1714,18 @@ class ProjectModel extends Database {
             $descVal  = $description !== '' ? $description : null;
             $ratedBy  = 'Provider';
 
-            $ins = $this->conn->prepare(
-                'INSERT INTO reviews (Review_ID, Title, Description, Rating, Left_At, Project_ID, Rated_By)
-                 VALUES (?, ?, ?, ?, NOW(), ?, ?)'
-            );
+            $insSql = $hasRatedBy
+                ? 'INSERT INTO reviews (Review_ID, Title, Description, Rating, Left_At, Project_ID, Rated_By)
+                   VALUES (?, ?, ?, ?, NOW(), ?, ?)'
+                : 'INSERT INTO reviews (Review_ID, Title, Description, Rating, Left_At, Project_ID)
+                   VALUES (?, ?, ?, ?, NOW(), ?)';
+            $ins = $this->conn->prepare($insSql);
             if (!$ins) throw new Exception('addProviderReview ins prepare: ' . $this->conn->error);
-            $ins->bind_param('ississ', $reviewId, $titleVal, $descVal, $rating, $projectId, $ratedBy);
+            if ($hasRatedBy) {
+                $ins->bind_param('ississ', $reviewId, $titleVal, $descVal, $rating, $projectId, $ratedBy);
+            } else {
+                $ins->bind_param('issii', $reviewId, $titleVal, $descVal, $rating, $projectId);
+            }
             if (!$ins->execute()) throw new Exception('addProviderReview ins exec: ' . $ins->error);
             $ins->close();
 
@@ -1457,6 +1764,11 @@ class ProjectModel extends Database {
 
         $totalPages = $totalRecords > 0 ? (int) ceil($totalRecords / $limit) : 0;
 
+        $hasRatedBy = $this->hasColumn('reviews', 'Rated_By');
+        $providerReviewedSelect = $hasRatedBy
+            ? "(SELECT COUNT(*) FROM reviews rv WHERE rv.Project_ID = proj.Project_ID AND rv.Rated_By = 'Provider') AS provider_has_reviewed"
+            : '0 AS provider_has_reviewed';
+
         $sql = "SELECT
                     proj.Project_ID,
                     proj.Project_Status,
@@ -1475,7 +1787,7 @@ class ProjectModel extends Database {
                     cat.Name AS Category_Name,
                     CONCAT(cl.First_Name, ' ', cl.Last_Name) AS Client_Name,
                     cl.Profile_Picture,
-                    (SELECT COUNT(*) FROM reviews rv WHERE rv.Project_ID = proj.Project_ID AND rv.Rated_By = 'Provider') AS provider_has_reviewed
+                    {$providerReviewedSelect}
                 FROM project proj
                 JOIN post p ON p.Post_ID = proj.Post_ID
                 LEFT JOIN category cat ON cat.Category_ID = p.Category_ID
@@ -1510,10 +1822,16 @@ class ProjectModel extends Database {
     /**
      * Client approves final submission, marks project as completed, and saves review.
      */
-    public function completeProjectByClient(int $clientId, int $postId, int $rating, string $title, string $description, array $reviewFileNames = []): bool
+    public function completeProjectByClient(int $clientId, int $postId, float $rating, string $title, string $description, array $reviewFileNames = []): bool
     {
+        $hasRatedBy = $this->hasColumn('reviews', 'Rated_By');
+        $hasReviewFilesTable = $this->hasTable('reviews_files');
+
         $idStmt = $this->conn->prepare(
-            'SELECT proj.Project_ID, COALESCE(proj.Progress, 0) AS Progress
+            'SELECT proj.Project_ID, COALESCE(proj.Progress, 0) AS Progress,
+                    COALESCE(p.Provider_ID, 0) AS Provider_ID,
+                    COALESCE(p.Provider_Categories_ID, 0) AS Provider_Categories_ID,
+                    COALESCE(p.Category_ID, 0) AS Category_ID
              FROM project proj
              JOIN post p ON p.Post_ID = proj.Post_ID
              WHERE proj.Post_ID = ? AND proj.Project_Status = "pending-review" AND p.Client_ID = ?
@@ -1532,11 +1850,24 @@ class ProjectModel extends Database {
 
         $projectId = (int) $row['Project_ID'];
         $progress  = (int) $row['Progress'];
+        $providerId = (int) ($row['Provider_ID'] ?? 0);
+        $providerCategoryId = $this->resolveProviderCategoryId(
+            (int) ($row['Provider_Categories_ID'] ?? 0),
+            $providerId,
+            (int) ($row['Category_ID'] ?? 0)
+        );
+        $projectRating = max(0.5, min(5.0, $rating));
+        $projectRatingPercent = round($projectRating * 20, 1);
 
         $this->conn->begin_transaction();
         try {
             // Mark project completed
-            $upStmt = $this->conn->prepare('UPDATE project SET Project_Status = "completed", Ended_At = COALESCE(Ended_At, NOW()) WHERE Post_ID = ?');
+            $upStmt = $this->conn->prepare(
+                'UPDATE project
+                 SET Project_Status = "completed",
+                     Ended_At = COALESCE(Ended_At, NOW())
+                 WHERE Post_ID = ?'
+            );
             if (!$upStmt) {
                 throw new Exception('completeProjectByClient prepare status: ' . $this->conn->error);
             }
@@ -1546,15 +1877,29 @@ class ProjectModel extends Database {
             }
             $upStmt->close();
 
+            if (!$this->releasePaymentForProject($projectId)) {
+                throw new Exception('completeProjectByClient payment release failed');
+            }
+
+            $this->refreshProviderCategoryRating($providerCategoryId);
+            if ($providerId > 0) {
+                $this->refreshProviderRating($providerId);
+            }
+
             // Log the status change
             $logStmt = $this->conn->prepare(
                 'INSERT INTO project_update_log (Title, Description, Date, Project_ID, Worked_Hours, Progress_Completed, Project_Status_Update)
-                 VALUES ("Project Completed by Client", "Client approved the final submission.", NOW(), ?, 0, ?, "completed")'
+                 VALUES (?, ?, NOW(), ?, 0, ?, "completed")'
             );
             if (!$logStmt) {
                 throw new Exception('completeProjectByClient prepare log: ' . $this->conn->error);
             }
-            $logStmt->bind_param('ii', $projectId, $progress);
+            $completionTitle = 'Payment Released & Project Completed';
+            $completionDescription = sprintf(
+                'Client approved the final submission, rated this project %.1f/5, and payment was released to the provider.',
+                $projectRating
+            );
+            $logStmt->bind_param('ssii', $completionTitle, $completionDescription, $projectId, $progress);
             if (!$logStmt->execute()) {
                 throw new Exception('completeProjectByClient exec log: ' . $logStmt->error);
             }
@@ -1569,23 +1914,29 @@ class ProjectModel extends Database {
 
             // Insert review
             $ratedBy  = 'Client';
-            $revStmt  = $this->conn->prepare(
-                'INSERT INTO reviews (Review_ID, Title, Description, Rating, Left_At, Project_ID, Rated_By)
-                 VALUES (?, ?, ?, ?, NOW(), ?, ?)'
-            );
+            $reviewInsertSql = $hasRatedBy
+                ? 'INSERT INTO reviews (Review_ID, Title, Description, Rating, Left_At, Project_ID, Rated_By)
+                   VALUES (?, ?, ?, ?, NOW(), ?, ?)'
+                : 'INSERT INTO reviews (Review_ID, Title, Description, Rating, Left_At, Project_ID)
+                   VALUES (?, ?, ?, ?, NOW(), ?)';
+            $revStmt  = $this->conn->prepare($reviewInsertSql);
             if (!$revStmt) {
                 throw new Exception('completeProjectByClient prepare review: ' . $this->conn->error);
             }
             $titleVal = $title !== '' ? $title : null;
             $descVal  = $description !== '' ? $description : null;
-            $revStmt->bind_param('ississ', $reviewId, $titleVal, $descVal, $rating, $projectId, $ratedBy);
+            if ($hasRatedBy) {
+                $revStmt->bind_param('issdis', $reviewId, $titleVal, $descVal, $projectRatingPercent, $projectId, $ratedBy);
+            } else {
+                $revStmt->bind_param('issdi', $reviewId, $titleVal, $descVal, $projectRatingPercent, $projectId);
+            }
             if (!$revStmt->execute()) {
                 throw new Exception('completeProjectByClient exec review: ' . $revStmt->error);
             }
             $revStmt->close();
 
             // Insert review files
-            if (!empty($reviewFileNames)) {
+            if (!empty($reviewFileNames) && $hasReviewFilesTable) {
                 $rfStmt = $this->conn->prepare('INSERT INTO reviews_files (Review_ID, File) VALUES (?, ?)');
                 if (!$rfStmt) {
                     throw new Exception('completeProjectByClient prepare review_files: ' . $this->conn->error);
@@ -1597,6 +1948,8 @@ class ProjectModel extends Database {
                     }
                 }
                 $rfStmt->close();
+            } elseif (!empty($reviewFileNames) && !$hasReviewFilesTable) {
+                error_log('ProjectModel::completeProjectByClient warning: reviews_files table not found; skipping review file records');
             }
 
             $this->conn->commit();

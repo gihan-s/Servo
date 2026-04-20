@@ -833,6 +833,18 @@
             return;
         }
 
+        if (isDateBeforeToday(est_date.value)) {
+            showValidationTooltip(est_date, "Estimated date must be today or a future date");
+            closeDialogBox('confirm-publish');
+            return;
+        }
+
+        if (isDateBeforeToday(end_at.value)) {
+            showValidationTooltip(end_at, "Post expired date must be today or a future date");
+            closeDialogBox('confirm-publish');
+            return;
+        }
+
         // Collect all form data manually
         const postData = {
             title: title.value.trim() || '',
@@ -959,15 +971,74 @@
                     : '<span>No skills specified</span>';
 
                 const bids = Array.isArray(post.bids) ? post.bids : [];
+                const proposalCount = bids.length > 0
+                    ? bids.length
+                    : Number(post.Proposal_Count || post.ProposalsCount || 0);
                 const providerBidsHTML = bids.length > 0
                     ? bids.map((bid) => {
                         const fullName = `${bid.First_Name || ''} ${bid.Last_Name || ''}`.trim() || 'Unknown Provider';
                         const initials = fullName.split(' ').map((n) => n.charAt(0)).join('').substring(0, 2).toUpperCase();
-                        const rating = bid.Provider_Rating ? Number(bid.Provider_Rating).toFixed(1) : 'N/A';
+                        const ratingSource = bid.Provider_Star_Rating ?? bid.Provider_Rating ?? bid.Provider_Score ?? 0;
+                        const ratingRaw = Number(ratingSource);
+                        const normalizedRating = Number.isNaN(ratingRaw)
+                            ? 0
+                            : (ratingRaw > 5 ? ratingRaw / 20 : ratingRaw);
+                        const rating = Math.max(0, Math.min(5, normalizedRating)).toFixed(1);
                         const imagePath = bid.Profile_Picture ? `<?= BASE_URL ?>/file/user-files/${bid.Profile_Picture}` : '';
                         const safeComment = bid.Comment ? bid.Comment : 'No comment provided';
                         const bidAmount = bid.Amount ? Number(bid.Amount).toLocaleString() : '0';
-                        const bidEstDate = bid.Est_Date ? String(bid.Est_Date).split(' ')[0] : 'N/A';
+                        const rawDuration = bid.Duration;
+                        let bidDuration = 'N/A';
+                        let bidEstimatedDate = 'N/A';
+                        if (rawDuration !== null && rawDuration !== undefined && rawDuration !== '') {
+                            const durationNum = Number(rawDuration);
+                            if (!Number.isNaN(durationNum)) {
+                                const totalHours = Math.max(0, Math.floor(durationNum));
+                                const hoursPerDay = 24;
+                                const daysPerWeek = 7;
+                                const daysPerMonth = 30;
+                                const hoursPerWeek = hoursPerDay * daysPerWeek;
+                                const hoursPerMonth = hoursPerDay * daysPerMonth;
+
+                                // Compare duration against current time and compute estimated completion date.
+                                const now = new Date();
+                                const etaDate = new Date(now.getTime() + (totalHours * 60 * 60 * 1000));
+                                bidEstimatedDate = etaDate.toLocaleDateString('en-US', {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric'
+                                });
+
+                                if (totalHours > hoursPerMonth) {
+                                    const months = Math.floor(totalHours / hoursPerMonth);
+                                    const remainingHours = totalHours % hoursPerMonth;
+                                    const remainingDays = Math.floor(remainingHours / hoursPerDay);
+                                    bidDuration = `${months} month${months === 1 ? '' : 's'}`;
+                                    if (remainingDays > 0) {
+                                        bidDuration += ` ${remainingDays} day${remainingDays === 1 ? '' : 's'}`;
+                                    }
+                                } else if (totalHours > hoursPerWeek) {
+                                    const totalDays = Math.floor(totalHours / hoursPerDay);
+                                    const weeks = Math.floor(totalDays / daysPerWeek);
+                                    const remainingDays = totalDays % daysPerWeek;
+                                    bidDuration = `${weeks} week${weeks === 1 ? '' : 's'}`;
+                                    if (remainingDays > 0) {
+                                        bidDuration += ` ${remainingDays} day${remainingDays === 1 ? '' : 's'}`;
+                                    }
+                                } else if (totalHours > hoursPerDay) {
+                                    const days = Math.floor(totalHours / hoursPerDay);
+                                    const remainingHours = totalHours % hoursPerDay;
+                                    bidDuration = `${days} day${days === 1 ? '' : 's'}`;
+                                    if (remainingHours > 0) {
+                                        bidDuration += ` ${remainingHours} hr${remainingHours === 1 ? '' : 's'}`;
+                                    }
+                                } else {
+                                    bidDuration = `${totalHours} hr${totalHours === 1 ? '' : 's'}`;
+                                }
+                            } else if (/[a-zA-Z]/.test(String(rawDuration))) {
+                                bidDuration = String(rawDuration);
+                            }
+                        }
 
                         return `
                             <article class="provider-bid-card">
@@ -983,7 +1054,8 @@
                                     <span class="provider-bid-price">LKR ${bidAmount}</span>
                                 </div>
                                 <div class="provider-bid-bottom">
-                                    <span><i class="fa-solid fa-calendar-days"></i> Est: ${bidEstDate}</span>
+                                    <span><i class="fa-solid fa-calendar-days"></i> Est: ${bidEstimatedDate}</span>
+                                    <span><i class="fa-solid fa-clock"></i> Duration: ${bidDuration}</span>
                                     <span><i class="fa-solid fa-message"></i> ${safeComment}</span>
                                 </div>
                                 <div class="provider-bid-actions">
@@ -994,49 +1066,88 @@
                     }).join('')
                     : '<div class="provider-bid-empty">No bids received for this post yet.</div>';
 
-                // Replace form content with a div wrapper for proper styling
+                // Replace form content with a richer interactive layout that keeps the current theme.
                 formContainer.innerHTML = `
                 <div class="post-view">
                     <div class="post-view-title">${post.Title || 'Untitled'}</div>
                     <div class="post-view-meta">
                         <span class="chip"><i class="fa-solid fa-calendar"></i><span>${publishDate}</span></span>
+                        <span class="chip"><i class="fa-solid fa-list-check"></i> ${proposalCount} proposals</span>
+                        <span class="chip"><i class="fa-solid fa-eye"></i> ${post.Views || '0'} views</span>
                     </div>
-                    <div class="post-view-section">
-                        <div class="section-title">Description</div>
-                        <div class="section-body">${post.Description || 'No description provided'}</div>
+
+                    <div class="post-quick-stats">
+                        <div class="post-quick-stat"><span class="label">Budget</span><span class="value">LKR ${post.Requesting_Price || '0'}/=</span></div>
+                        <div class="post-quick-stat"><span class="label">Level</span><span class="value">${post.Level || 'N/A'}</span></div>
+                        <div class="post-quick-stat"><span class="label">Estimated Date</span><span class="value">${post.Est_Date || 'N/A'}</span></div>
                     </div>
-                    <div class="post-view-section">
-                        <div class="section-title">Required Skills</div>
-                        <div class="skills-row">${skillsHTML}</div>
+
+                    <div class="post-view-tabs">
+                        <button type="button" class="post-view-tab active" data-pane="overview"><i class="fa-solid fa-circle-info"></i> Overview</button>
+                        <button type="button" class="post-view-tab" data-pane="bids"><i class="fa-solid fa-user-group"></i> Bids</button>
+                        <button type="button" class="post-view-tab" data-pane="engagement"><i class="fa-solid fa-chart-line"></i> Engagement</button>
                     </div>
-                    <div class="post-view-section">
-                        <div class="section-title">Details</div>
-                        <div class="kv-grid">
-                            <div class="kv-item"><span class="kv-label">Budget:</span><span class="kv-value">LKR ${post.Requesting_Price || '0'}/=</span></div>
-                            <div class="kv-item"><span class="kv-label">Level:</span><span class="kv-value">${post.Level || 'N/A'}</span></div>
-                            <div class="kv-item"><span class="kv-label">Estimated Date:</span><span class="kv-value">${post.Est_Date || 'N/A'}</span></div>
-                            <div class="kv-item"><span class="kv-label">Proposals:</span><span class="kv-value">${post.Proposal_Count || '0'}</span></div>
+
+                    <div class="post-view-pane active" data-pane="overview">
+                        <div class="post-view-section">
+                            <div class="section-title">Description</div>
+                            <div class="section-body">${post.Description || 'No description provided'}</div>
+                        </div>
+                        <div class="post-view-section">
+                            <div class="section-title">Required Skills</div>
+                            <div class="skills-row">${skillsHTML}</div>
+                        </div>
+                        <div class="post-view-section">
+                            <div class="section-title">Details</div>
+                            <div class="kv-grid">
+                                <div class="kv-item"><span class="kv-label">Budget:</span><span class="kv-value">LKR ${post.Requesting_Price || '0'}/=</span></div>
+                                <div class="kv-item"><span class="kv-label">Level:</span><span class="kv-value">${post.Level || 'N/A'}</span></div>
+                                <div class="kv-item"><span class="kv-label">Estimated Date:</span><span class="kv-value">${post.Est_Date || 'N/A'}</span></div>
+                                <div class="kv-item"><span class="kv-label">Proposals:</span><span class="kv-value">${proposalCount}</span></div>
+                            </div>
                         </div>
                     </div>
-                    <div class="post-view-section">
-                        <div class="section-title">Bidded Providers</div>
-                        <div class="request-status-note" id="requestStatusNote"></div>
-                        <div class="bidded-providers-grid">
-                            ${providerBidsHTML}
+
+                    <div class="post-view-pane" data-pane="bids">
+                        <div class="post-view-section">
+                            <div class="section-title">Bidded Providers</div>
+                            <div class="request-status-note" id="requestStatusNote"></div>
+                            <div class="bidded-providers-grid">
+                                ${providerBidsHTML}
+                            </div>
                         </div>
                     </div>
-                    <div class="post-view-section">
-                        <div class="section-title">Engagement</div>
-                        <div class="engagement-row">
-                            <span class="chip"><i class="fa-solid fa-eye"></i> ${post.Views || '0'} views</span>
+
+                    <div class="post-view-pane" data-pane="engagement">
+                        <div class="post-view-section">
+                            <div class="section-title">Engagement</div>
+                            <div class="engagement-row">
+                                <span class="chip"><i class="fa-solid fa-eye"></i> ${post.Views || '0'} views</span>
+                                <span class="chip"><i class="fa-solid fa-user-group"></i> ${proposalCount} proposals</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             `;
 
+                const tabButtons = formContainer.querySelectorAll('.post-view-tab');
+                const panes = formContainer.querySelectorAll('.post-view-pane');
+                tabButtons.forEach((tabButton) => {
+                    tabButton.addEventListener('click', function () {
+                        const targetPane = tabButton.dataset.pane;
+                        tabButtons.forEach(btn => btn.classList.remove('active'));
+                        panes.forEach(pane => pane.classList.remove('active'));
+                        tabButton.classList.add('active');
+                        const target = formContainer.querySelector(`.post-view-pane[data-pane="${targetPane}"]`);
+                        if (target) {
+                            target.classList.add('active');
+                        }
+                    });
+                });
+
                 const requestStatus = (post.Request_Status || '').toLowerCase();
                 const postStatus = (post.Post_Status || '').toLowerCase();
-                const canSendRequest = postStatus === 'active' && (requestStatus === '' || requestStatus === 'declined');
+                const canSendRequest = postStatus === 'active' && (requestStatus === 'open');
                 const statusNote = document.getElementById('requestStatusNote');
                 const requestButtons = formContainer.querySelectorAll('.provider-request-btn');
 
@@ -1052,15 +1163,19 @@
 
                 requestButtons.forEach((btn) => {
                     if (!canSendRequest) {
-                        btn.disabled = true;
-                        btn.textContent = requestStatus === 'accepted' ? 'Accepted' : 'Request Sent';
+                        btn.dataset.locked = '1';
+                        btn.setAttribute('aria-disabled', 'true');
+                        btn.style.opacity = '0.65';
+                        btn.style.cursor = 'not-allowed';
                         btn.classList.remove('btn-edit');
                         btn.classList.add('btn-view');
                     }
 
                     if ((requestStatus === 'ongoing' || requestStatus === 'accepted') && post.Provider_ID && Number(btn.dataset.providerId) === Number(post.Provider_ID)) {
-                        btn.disabled = true;
-                        btn.textContent = requestStatus === 'accepted' ? 'Accepted' : 'Request Sent';
+                        btn.dataset.locked = '1';
+                        btn.setAttribute('aria-disabled', 'true');
+                        btn.style.opacity = '0.65';
+                        btn.style.cursor = 'not-allowed';
                         btn.classList.remove('btn-edit');
                         btn.classList.add('btn-view');
                     }
@@ -1084,6 +1199,11 @@
             return;
         }
 
+        if (button && button.dataset && button.dataset.locked === '1') {
+            window.showWarningToast('Already Selected', 'Already selected a bid for this post');
+            return;
+        }
+
         button.disabled = true;
         const originalText = button.textContent;
         button.textContent = 'Sending...';
@@ -1104,12 +1224,14 @@
                     return;
                 }
 
-                window.showSuccessToast('Request Sent', 'Provider request status is now ongoing.');
+                window.showSuccessToast('Request Sent', 'Request has been sent to the provider successfully!');
 
                 const allButtons = document.querySelectorAll('.provider-request-btn');
                 allButtons.forEach((btn) => {
-                    btn.disabled = true;
-                    btn.textContent = 'Request Sent';
+                    btn.dataset.locked = '1';
+                    btn.setAttribute('aria-disabled', 'true');
+                    btn.style.opacity = '0.65';
+                    btn.style.cursor = 'not-allowed';
                     btn.classList.remove('btn-edit');
                     btn.classList.add('btn-view');
                 });
@@ -1170,6 +1292,16 @@
         // Validation
         if (!title.value.trim() || !description.value.trim() || !categoryId.value) {
             window.showWarningToast("Validation Error", "Please fill all required fields");
+            return;
+        }
+
+        if (isDateBeforeToday(est_date.value)) {
+            showValidationTooltip(est_date, "Estimated date must be today or a future date");
+            return;
+        }
+
+        if (isDateBeforeToday(endDateValue)) {
+            showValidationTooltip(end_at, "Post expired date must be today or a future date");
             return;
         }
 
@@ -1258,6 +1390,24 @@
         return `${year}-${month}-${day}`;
     }
 
+    function applyMinDateConstraints(root = document) {
+        const today = getTodayDateString();
+        const estDateInput = root.querySelector("input[name='estdate']");
+        const endAtInput = root.querySelector("input[name='endat']");
+
+        if (estDateInput) {
+            estDateInput.setAttribute('min', today);
+        }
+        if (endAtInput) {
+            endAtInput.setAttribute('min', today);
+        }
+    }
+
+    function isDateBeforeToday(dateValue) {
+        if (!dateValue) return false;
+        return dateValue < getTodayDateString();
+    }
+
     function openPublishConfirmWithAction(onConfirm) {
         viewDialogBox('confirm-publish');
 
@@ -1271,6 +1421,9 @@
     function editPost(id, mode = 'edit') {
         viewDialogBox('create-post-popup');
 
+        const root = document.getElementById("create-post-popup");
+        applyMinDateConstraints(root);
+
         fetch("<?= BASE_URL ?>/requests/view/" + id)
             .then(response => response.json())
             .then(post => {
@@ -1279,7 +1432,6 @@
                     return;
                 }
 
-                const root = document.getElementById("create-post-popup");
                 root.querySelector(".title").innerText = "Edit Post";
                 root.querySelectorAll(".label").forEach(label => {
                     label.classList.add("label-float");
@@ -1501,6 +1653,7 @@
     function openCreateForm(id) {
         const root = document.getElementById(id);
         root.querySelector(".title").innerText = "Create A New Service Request";
+        applyMinDateConstraints(root);
         // Change buttons: hide draft/publish, show save button
         const saveDraftBtn = root.querySelector('[data-role="save-draft"]');
         const publishBtn = root.querySelector('[data-role="publish"]');
@@ -1518,6 +1671,8 @@
      * Initialize on page load
      */
     document.addEventListener('DOMContentLoaded', function () {
+        applyMinDateConstraints(document.getElementById('create-post-popup'));
+
         // Setup search input handler with debouncing
         document.getElementById('searchInput').addEventListener('input', handleSearch);
         document.getElementById('searchButton').addEventListener('click', handleSearch);

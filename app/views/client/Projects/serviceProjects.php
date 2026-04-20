@@ -94,6 +94,36 @@
             </div>
         </div>
         <div class="dialog-body"></div>
+        <div class="modal-actions">
+            <button class="action-btn btn-delete" onclick="closeDialogBox('view-post-popup')">Close</button>
+        </div>
+    </div>
+</div>
+
+<div class="dialog-box-2" id="provider-profile-modal">
+    <div class="dialog-content" style="width: 980px; max-width: calc(100vw - 32px); overflow: hidden;">
+        <div class="dialog-title" style="margin-bottom: 0;">
+            <div class="title">Provider Profile</div>
+            <div>
+                <i class="fa-solid fa-xmark dialog-close-button-2" onclick="closeProjectProviderProfileModal()"></i>
+            </div>
+        </div>
+        <div id="provider-profile-content" style="padding: 20px;"></div>
+    </div>
+</div>
+
+<div class="dialog-box-2" id="provider-services-modal">
+    <div class="dialog-content" style="width: 700px;">
+        <div class="dialog-title">
+            <div class="title">Services by <span id="modal-provider-name"></span></div>
+            <div>
+                <i class="fa-solid fa-xmark dialog-close-button-2" onclick="closeProjectProviderServicesModal()"></i>
+            </div>
+        </div>
+        <div id="modal-services-content" style="padding: 20px 0;"></div>
+        <div class="modal-actions" style="padding: 0 20px 20px; justify-content: flex-end;">
+            <button type="button" class="action-btn btn-delete" onclick="closeProjectProviderServicesModal()">Close</button>
+        </div>
     </div>
 </div>
 
@@ -386,6 +416,228 @@
         'pending-review': { posts: [], visibleCount: 0 },
         'completed': { posts: [], visibleCount: 0 }
     }
+    const providerProfileCache = {};
+    const providerServiceCache = {};
+
+    function normalizeProviderProfile(providerId, providerName, providerPicture, providerRating) {
+        const normalizedId = Number(providerId) || 0;
+        const normalizedName = providerName || 'Provider';
+        const normalizedPicture = providerPicture || '';
+        const ratingValue = Number(providerRating || 0);
+
+        return {
+            Provider_ID: normalizedId,
+            First_Name: normalizedName,
+            Last_Name: '',
+            avatar: normalizedPicture,
+            rating: Math.max(0, Math.min(5, ratingValue > 5 ? ratingValue / 20 : ratingValue)).toFixed(1),
+            skills: [],
+            categories: [],
+            social_links: [],
+            Bio: 'View the provider services below.',
+            formatted_location: ''
+        };
+    }
+
+    function getProviderProfileImage(provider) {
+        const raw = provider?.avatar || provider?.Profile_Picture || '';
+        if (!raw) return '';
+        if (/^(https?:)?\/\//.test(raw) || raw.startsWith('/')) return raw;
+        return `${window.BASE_URL}/file/user-files/${raw}`;
+    }
+
+    function renderProjectProviderNameLink(providerId, providerName, className = '') {
+        const numericId = Number(providerId) || 0;
+        return `<a href="#" class="${className}" style="background:none; border:none; padding:0; font:inherit; color:inherit; font-weight:700; text-decoration:none; text-align:left; cursor:pointer;" onclick="openProjectProviderProfileModal(${numericId}); return false;">${escapeHtml(providerName || 'Provider')}</a>`;
+    }
+
+    function renderProjectProviderProfileContent(provider, fallbackName = 'Provider') {
+        const numericId = Number(provider?.Provider_ID) || 0;
+        const displayName = `${provider?.First_Name || ''} ${provider?.Last_Name || ''}`.trim() || fallbackName || 'Provider';
+        const imageUrl = getProviderProfileImage(provider || {});
+        const categories = Array.isArray(provider?.categories) ? provider.categories : [];
+        const skills = Array.isArray(provider?.skills) ? provider.skills : [];
+        const socialLinks = Array.isArray(provider?.social_links)
+            ? provider.social_links.filter(social => String(social?.link || '').trim())
+            : [];
+        const categoriesHTML = categories.length ? categories.map(item => `<span class="skill-tag">${escapeHtml(item)}</span>`).join('') : '<span class="skill-tag">No categories listed</span>';
+        const skillsHTML = skills.length ? skills.map(item => `<span class="skill-tag">${escapeHtml(item)}</span>`).join('') : '<span class="skill-tag">No skills listed</span>';
+        const socialHTML = socialLinks.length ? socialLinks.map(social => {
+            const iconPrefix = (social.icon_class === 'fa-envelope' || social.icon_class === 'fa-link') ? 'fa-solid' : 'fa-brands';
+            return `<a href="${escapeHtml(social.link || '#')}" title="${escapeHtml(social.name || 'Link')}" target="_blank" rel="noopener noreferrer" style="display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:50%; color:#fff; text-decoration:none; background-color:${escapeHtml(social.color || '#008500')};"><i class="${iconPrefix} ${escapeHtml(social.icon_class || 'fa-link')}"></i></a>`;
+        }).join('') : '<span style="font-size: 13px; color: #94a3b8;">No social links</span>';
+
+        return `
+            <div style="display:grid; gap:18px; padding:0 20px 16px;">
+                <div style="position:relative; overflow:hidden; border-radius:22px; border:1px solid #e5e7eb; background:linear-gradient(135deg, #0f172a 0%, #0f3d2e 48%, #008500 100%); color:#fff; box-shadow:0 18px 40px rgba(15,23,42,0.18);">
+                    <div style="position:absolute; inset:0; background: radial-gradient(circle at top right, rgba(255,255,255,0.16), transparent 28%), radial-gradient(circle at left bottom, rgba(255,255,255,0.12), transparent 22%);"></div>
+                    <div style="position:relative; padding:28px; display:grid; grid-template-columns: 132px minmax(0,1fr) auto; gap:22px; align-items:center;">
+                        <div style="width:132px; height:132px; border-radius:28px; padding:5px; background:rgba(255,255,255,0.16); box-shadow:0 16px 30px rgba(0,0,0,0.18);">
+                            ${imageUrl ? `<img src="${imageUrl}" alt="${escapeHtml(displayName)}" style="width:100%; height:100%; object-fit:cover; border-radius:23px; background:#fff;">` : '<div style="width:100%; height:100%; border-radius:23px; background:#fff; display:flex; align-items:center; justify-content:center; color:#15803d;"><i class="fa-solid fa-user" style="font-size:30px;"></i></div>'}
+                        </div>
+                        <div style="min-width:0;">
+                            <div style="font-size:12px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; opacity:0.85; margin-bottom:8px;">Provider Profile</div>
+                            <h2 style="margin:0; font-size:30px; line-height:1.2; font-weight:800;">${escapeHtml(displayName)}</h2>
+                            <div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:10px; align-items:center; color:rgba(255,255,255,0.92); font-size:14px;">
+                                <span style="display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background:rgba(255,255,255,0.14);"><i class="fa-solid fa-star" style="color:#fbbf24;"></i>${escapeHtml(provider?.rating || '0.0')}</span>
+                            </div>
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:10px; justify-self:end;">
+                            <button type="button" class="action-btn btn-view" style="border-color: rgba(255,255,255,0.3); color:#fff; background:rgba(255,255,255,0.08);" onclick="openProjectProviderServicesModal(${numericId}, '${escapeHtml(displayName).replace(/'/g, "\\'")}')"><i class="fa-solid fa-briefcase"></i> Services</button>
+                        </div>
+                    </div>
+                </div>
+                <div style="display:grid; grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.85fr); gap:18px; align-items:start;">
+                    <div style="display:grid; gap:18px;">
+                        <div style="padding:18px 20px; border:1px solid #e5e7eb; border-radius:18px; background:#fff;"><div style="font-size:13px; font-weight:800; color:#008500; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:10px;">About</div><p style="margin:0; color:#334155; line-height:1.8; font-size:14px; white-space:pre-wrap;">${escapeHtml(provider?.Bio || 'Experienced professional ready to help with your project.')}</p></div>
+                        <div style="padding:18px 20px; border:1px solid #e5e7eb; border-radius:18px; background:#fff;"><div style="font-size:13px; font-weight:800; color:#008500; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:12px;">Categories</div><div style="display:flex; flex-wrap:wrap; gap:8px;">${categoriesHTML}</div></div>
+                        <div style="padding:18px 20px; border:1px solid #e5e7eb; border-radius:18px; background:#fff;"><div style="font-size:13px; font-weight:800; color:#008500; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:12px;">Skills</div><div style="display:flex; flex-wrap:wrap; gap:8px;">${skillsHTML}</div></div>
+                    </div>
+                    <div style="display:grid; gap:18px;">
+                        <div style="padding:18px 20px; border:1px solid #e5e7eb; border-radius:18px; background:linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);">
+                            <div style="font-size:13px; font-weight:800; color:#008500; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:12px;">Stats</div>
+                            <div style="display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:10px;">
+                                <div class="stat-pill" style="background:#eff6ff; border-color:#bfdbfe;"><b>${escapeHtml(provider?.rating || 0)}</b><br>Rating</div>
+                                <div class="stat-pill" style="background:#f8fafc; border-color:#e2e8f0;"><b>${categories.length}</b><br>Categories</div>
+                                <div class="stat-pill" style="background:#fdf4ff; border-color:#f5d0fe;"><b>${socialLinks.length}</b><br>Links</div>
+                            </div>
+                        </div>
+                        <div style="padding:18px 20px; border:1px solid #e5e7eb; border-radius:18px; background:#fff;"><div style="font-size:13px; font-weight:800; color:#008500; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:12px;">Social Links</div><div class="provider-social" style="justify-content:flex-start; gap:10px; padding-top:0; border-top:none;">${socialHTML}</div></div>
+                    </div>
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:10px; padding-top:2px;"><button type="button" class="action-btn btn-delete" onclick="closeProjectProviderProfileModal()">Close</button></div>
+            </div>
+        `;
+    }
+
+    function openProjectProviderProfileModal(providerId, providerName = '', providerPicture = '', providerRating = '') {
+        const numericId = Number(providerId) || 0;
+        if (!numericId) return;
+
+        if (!providerProfileCache[numericId]) {
+            providerProfileCache[numericId] = normalizeProviderProfile(numericId, providerName, providerPicture, providerRating);
+        }
+        const modal = document.getElementById('provider-profile-modal');
+        const content = document.getElementById('provider-profile-content');
+        if (!modal || !content) return;
+
+        viewDialogBox('provider-profile-modal');
+
+        content.innerHTML = '<div style="text-align: center; padding: 60px 20px; color: #6b7280;"><i class="fa-solid fa-spinner fa-spin" style="font-size: 48px; margin-bottom: 20px; color: #008500; opacity: 0.8;"></i><p style="font-size: 16px; font-weight: 500; color: #1f2937;">Loading provider profile...</p></div>';
+
+        const fallbackProvider = providerProfileCache[numericId];
+        fetch(`${window.BASE_URL}/providers/profile?provider_id=${numericId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                const dbProvider = data && data.success && data.provider ? data.provider : fallbackProvider;
+                if (!dbProvider) {
+                    throw new Error('Provider profile could not be loaded.');
+                }
+
+                providerProfileCache[numericId] = Object.assign({}, fallbackProvider || {}, dbProvider);
+                content.innerHTML = renderProjectProviderProfileContent(providerProfileCache[numericId], providerName || 'Provider');
+            })
+            .catch(error => {
+                console.error('Error loading provider profile:', error);
+                content.innerHTML = renderProjectProviderProfileContent(fallbackProvider, providerName || 'Provider');
+            });
+    }
+
+    function closeProjectProviderProfileModal() {
+        closeDialogBox('provider-profile-modal');
+    }
+
+    function openProjectProviderServicesModal(providerId, providerName = 'Provider') {
+        const numericId = Number(providerId) || 0;
+        if (!numericId) return;
+
+        const modal = document.getElementById('provider-services-modal');
+        const modalTitle = document.getElementById('modal-provider-name');
+        if (!modal || !modalTitle) return;
+
+        modalTitle.textContent = providerName || 'Provider';
+        viewDialogBox('provider-services-modal');
+        loadProjectProviderServices(numericId);
+    }
+
+    function closeProjectProviderServicesModal() {
+        closeDialogBox('provider-services-modal');
+    }
+
+    function renderProjectProviderServiceCard(service) {
+        const serviceId = Number(service.Provider_Categories_ID) || 0;
+        if (serviceId) {
+            providerServiceCache[serviceId] = service;
+        }
+
+        const skillsHTML = (service.skills || []).map(skill => `<span class="skill-tag">${escapeHtml(skill)}</span>`).join('');
+        const linksHTML = (service.show_links || []).map(link => {
+            const label = escapeHtml(link.label || 'Link');
+            const url = escapeHtml(link.url || '#');
+            return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="action-btn btn-view" style="padding: 7px 12px; font-size: 12px; text-decoration: none;"><i class="fa-solid fa-link"></i> ${label}</a>`;
+        }).join('');
+        const successiveRate = service.success_rate_display || `${Math.max(0, Math.min(100, Math.round(Number(service.Rating || 0))))}%`;
+
+        return `
+            <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; background: #f9fafb; transition: all 0.2s ease;">
+                <div style="margin-bottom: 12px;">
+                    <h3 style="font-size: 16px; font-weight: 600; color: #1f2937; margin: 0 0 8px 0; line-height: 1.4;">${escapeHtml(service.Title || 'Untitled Service')}</h3>
+                    <p style="font-size: 14px; color: #6b7280; margin: 0 0 12px 0; line-height: 1.5;">${escapeHtml(service.Description ? service.Description.substring(0, 150) + (service.Description.length > 150 ? '...' : '') : 'No description')}</p>
+                </div>
+                ${skillsHTML ? `<div style="margin-bottom: 12px; display: flex; flex-wrap: wrap; gap: 6px;">${skillsHTML}</div>` : ''}
+                ${linksHTML ? `<div style="margin-bottom: 12px; display: flex; flex-wrap: wrap; gap: 8px;">${linksHTML}</div>` : ''}
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #e5e7eb;">
+                    <div style="font-size: 14px; color: #4b5563;">
+                        <span style="font-weight: 600; color: #008500;">${escapeHtml(service.price_display || 'Contact for price')}</span>
+                        <span style="color: #9ca3af; font-size: 13px;"> • ${escapeHtml(service.rate_type_display || service.Price_Type || 'N/A')}</span>
+                    </div>
+                    <span style="font-size: 12px; color: #9ca3af;">${escapeHtml(service.Category_Name || service.CategoryName || 'Service')}</span>
+                </div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                    <span class="skill-tag" style="background:#fff7ed; color:#9a3412; border-color:#fed7aa;">Successive Rate: ${escapeHtml(successiveRate)}</span>
+                </div>
+            </div>
+        `;
+    }
+
+    function loadProjectProviderServices(providerId) {
+        const modalContent = document.getElementById('modal-services-content');
+        if (!modalContent) return;
+
+        modalContent.innerHTML = '<div style="text-align: center; padding: 60px 20px; color: #6b7280;"><i class="fa-solid fa-spinner fa-spin" style="font-size: 48px; margin-bottom: 20px; color: #008500; opacity: 0.8;"></i><p style="font-size: 16px; font-weight: 500; color: #1f2937;">Loading services...</p></div>';
+
+        fetch(`<?= BASE_URL ?>/providers/services?provider_id=${providerId}&limit=10`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.text();
+            })
+            .then(data => JSON.parse(data))
+            .then(data => {
+                if (!data.success) {
+                    modalContent.innerHTML = `<p style="text-align: center; padding: 40px; color: #ef4444;">${escapeHtml(data.message || 'Failed to load services')}</p>`;
+                    return;
+                }
+
+                if (!data.services || data.services.length === 0) {
+                    modalContent.innerHTML = '<p style="text-align: center; padding: 40px; color: #6b7280;">No services found for this provider.</p>';
+                    return;
+                }
+
+                const servicesHTML = data.services.map(service => renderProjectProviderServiceCard(service)).join('');
+                modalContent.innerHTML = `<div style="display: grid; grid-template-columns: 1fr; gap: 16px; padding: 0 20px;">${servicesHTML}</div>`;
+            })
+            .catch(error => {
+                console.error('Error loading services:', error);
+                modalContent.innerHTML = `<p style="text-align: center; padding: 40px; color: #ef4444;">Error loading services: ${escapeHtml(error.message)}</p>`;
+            });
+    }
 
     function getListContainer(status) {
         return document.querySelector(`.${status} .item-list`);
@@ -520,20 +772,7 @@
         container.innerHTML = '';
         visiblePosts.forEach(item => {
             console.log('Rendering post:', item);
-            let postHTML;
-            if (status === 'pending') {
-                postHTML = createPendingCard(item.post, item.skills);
-            } else if (status === 'accepted') {
-                postHTML = createAcceptedCard(item.post, item.skills);
-            } else if (status === 'ongoing') {
-                postHTML = createOngoingCard(item.post, item.skills);
-            } else if (status === 'pending-review') {
-                postHTML = createPendingReviewCard(item.post, item.skills);
-            } else if (status === 'completed') {
-                postHTML = createCompletedCard(item.post, item.skills);
-            } else {
-                postHTML = createPostCard(item.post, item.skills, status);
-            }
+            const postHTML = createPostCard(item.post, item.skills, status);
             container.insertAdjacentHTML('beforeend', postHTML);
         });
 
@@ -581,9 +820,16 @@
     }
 
     function createPostCard(post, skills, status = 'pending') {
-        //const skillsHTML = skills && skills.length > 0
-        //    ? skills.map(skill => `<span class="skill-tag">${escapeHtml(skill)}</span>`).join('')
-        //    : '<span class="no-skills">---No skills specified---</span>';
+        const normalizedSkills = Array.isArray(skills)
+            ? skills.map(skill => {
+                if (typeof skill === 'string') return skill;
+                return skill?.Skill || skill?.name || skill?.Name || '';
+            }).filter(Boolean)
+            : [];
+
+        const skillsHTML = normalizedSkills.length > 0
+            ? normalizedSkills.map(skill => `<span class="skill-tag">${escapeHtml(skill)}</span>`).join('')
+            : '<span class="skill-tag">No skills specified</span>';
 
         const description = post.Description || '';
         const snippet = description.length > 300
@@ -591,6 +837,16 @@
             : escapeHtml(description);
 
         const providerName = post.Provider_Name || 'Unassigned provider';
+        const providerPicture = post.Provider_Picture
+            ? `${window.BASE_URL}/file/user-files/${post.Provider_Picture}`
+            : null;
+        const providerRatingRaw = Number(post.Provider_Star_Rating ?? post.Provider_Rating ?? post.Provider_Score ?? 0);
+        const providerRating = Math.max(0, Math.min(5, providerRatingRaw > 5 ? providerRatingRaw / 20 : providerRatingRaw)).toFixed(1);
+        const messageHref = post.Provider_ID
+            ? `${window.BASE_URL}/messages?new=${post.Provider_ID}`
+            : `${window.BASE_URL}/messages`;
+        const providerProfileNameAttr = escapeHtml(providerName).replace(/'/g, "\\'");
+        providerProfileCache[Number(post.Provider_ID) || 0] = normalizeProviderProfile(post.Provider_ID, providerName, providerPicture, providerRating);
 
         //const publishedDate = formatDate(post.Published_At || post.Created_At);
         //const daysLeft = calculateDaysLeft(post.End_At);
@@ -602,11 +858,11 @@
         let actionsHTML = '';
         if (status === 'pending') {
             actionsHTML = `
-                <a href="<?= $navRight[0]['href'] ?>" class="action-btn btn-edit <?= ('./' . basename( $_SERVER['REQUEST_URI'])) === $navRight[0]['href'] ? 'active' : '' ?>"
+                <a href="${messageHref}" class="action-btn btn-edit"
                 aria-label="Messages">
                     <i class="fas fa-comments"></i>Messages
                 </a>
-                <button class="action-btn btn-view" onclick="viewPost(${post.Post_ID})">
+                <button class="action-btn btn-view" onclick="viewPost(${post.Post_ID}, 'pending')">
                     <i class="fas fa-eye"></i> View
                 </button>
                 <button class="action-btn btn-delete" onclick="cancelRequest(${post.Post_ID})">
@@ -615,14 +871,14 @@
             `;
         } else if (status === 'accepted') {
             actionsHTML = `
-                <a href="<?= $navRight[0]['href'] ?>" class="action-btn btn-edit <?= ('./' . basename( $_SERVER['REQUEST_URI'])) === $navRight[0]['href'] ? 'active' : '' ?>"
+                <a href="${messageHref}" class="action-btn btn-edit"
                 aria-label="Messages">
                     <i class="fas fa-comments"></i>Messages
                 </a>
                 <button class="action-btn btn-edit" onclick="payPayment(${post.Post_ID})">
                     <i class="fas fa-credit-card"></i> Pay
                 </button>
-                <button class="action-btn btn-view" onclick="viewPost(${post.Post_ID})">
+                <button class="action-btn btn-view" onclick="viewPost(${post.Post_ID}, 'accepted')">
                     <i class="fas fa-eye"></i> View
                 </button>
                 <button class="action-btn btn-delete" onclick="cancelRequest(${post.Post_ID})">
@@ -631,10 +887,10 @@
             `;
         } else if (status === 'ongoing') {
             actionsHTML = `
-                <button class="action-btn btn-edit" onclick="updateRequest(${post.Post_ID})">
+                <button class="action-btn btn-edit" onclick="updateRequest(${post.Post_ID}, ${Number(post.Project_ID || 0)})">
                     <i class="fas fa-redo"></i> Update
                 </button>
-                <button class="action-btn btn-view" onclick="viewPost(${post.Post_ID})">
+                <button class="action-btn btn-view" onclick="viewPost(${post.Post_ID}, 'ongoing')">
                     <i class="fas fa-eye"></i> View
                 </button>
                 <button class="action-btn btn-delete" onclick="cancelOngoingProject(${post.Post_ID})">
@@ -644,24 +900,24 @@
         }
         else if (status === 'pending-review') {
             actionsHTML = `
-                <button class="action-btn btn-edit" onclick="submitReview(${post.Post_ID})">
+                <button class="action-btn btn-edit" onclick="completePendingReviewProject(${post.Post_ID})">
                     <i class="fas fa-star"></i> Submit Review
                 </button>
-                <button class="action-btn btn-view" onclick="viewPost(${post.Post_ID})">
+                <button class="action-btn btn-view" onclick="viewPost(${post.Post_ID}, 'pending-review')">
                     <i class="fas fa-eye"></i> View
                 </button>
             `;
         }
         else if (status === 'completed') {
             actionsHTML = `
-                <a href="<?= $navRight[0]['href'] ?>" class="action-btn btn-edit <?= ('./' . basename( $_SERVER['REQUEST_URI'])) === $navRight[0]['href'] ? 'active' : '' ?>"
+                <a href="${messageHref}" class="action-btn btn-edit"
                 aria-label="Messages">
                     <i class="fas fa-comments"></i>Messages
                 </a>
-                <button class="action-btn btn-edit" onclick="updateRequest(${post.Post_ID})">
+                <button class="action-btn btn-edit" onclick="updateRequest(${post.Post_ID}, ${Number(post.Project_ID || 0)})">
                     <i class="fas fa-redo"></i> Change Requirements
                 </button>
-                <button class="action-btn btn-view" onclick="viewPost(${post.Post_ID})">
+                <button class="action-btn btn-view" onclick="viewPost(${post.Post_ID}, 'completed')">
                     <i class="fas fa-eye"></i> View
                 </button>
             `;
@@ -686,7 +942,7 @@
                     <div class="post-details">
                         <div class="detail-item">
                             <span class="detail-label">Budget</span>
-                            <span class="detail-value budget-amount">LKR ${post.Requesting_Price || 0}/= (${post.Price_Type || 'Fixed'})</span>
+                            <span class="detail-value budget-amount">LKR ${post.Requesting_Price || 0}/=</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Final Proposals</span>
@@ -705,7 +961,7 @@
                     <div class="post-details">
                         <div class="detail-item">
                             <span class="detail-label">Budget</span>
-                            <span class="detail-value budget-amount">LKR ${post.Requesting_Price || 0}/= (${post.Price_Type || 'Fixed'})</span>
+                            <span class="detail-value budget-amount">LKR ${post.Requesting_Price || 0}/=</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Proposals Received</span>
@@ -756,19 +1012,15 @@
             `;
         }*/
 
-        // Post type badge
-        console.log('Post :', post);
         const postTypeLabel = post.Post_Type === 'direct' ? 'Direct Request' : 'Bid Request';
-        const postTypeHTML = `
-            <div class="post-type-badge">
-                <span class="badge-label ${post.Post_Type === 'direct' ? 'direct' : 'bid'}">${postTypeLabel}</span>
-            </div>
-        `;
+        const postedDate = formatDate(post.Published_At || post.Created_At);
+        const category = post.Category_Name || 'N/A';
+        const budget = `LKR ${post.Requesting_Price || 0}/=`;
+        const estDate = formatEstDate(post.Est_Date);
+        const progress = Math.max(0, Math.min(100, Number(post.Progress || 0)));
 
         let progressHTML = '';
-        if (status === 'ongoing') {
-            const progress = post.Progress || 0;
-            // const hoursWorked = Math.round((progress / 100) * 80);
+        if (status === 'ongoing' || status === 'pending-review' || status === 'completed') {
             progressHTML = `<div class="progress-container" aria-label="Project progress">
                 <div class="progress-label">Progress: <span class="progress-percent">${progress}%</span> </div>
                 <div class="progress-track"><div class="progress-fill" style="width: ${progress}%;"></div></div>
@@ -778,23 +1030,54 @@
         return `
             <div class="search-item">
                 <input type="hidden" class="post-id" value="${post.Post_ID}">
-                <div class="item-head">
-                    <div class="item-main-dets">
-                        <div class="item-name"><i class="fas fa-user"></i><span>${escapeHtml(providerName)}</span></div>
-                        <div class="item-title">${escapeHtml(post.Title)}</div>
-                        <div class="item-description">
-                            ${snippet}
+                
+                        <div class="post-date" style='margin:5px'><i class="fas fa-calendar"></i><span>${postedDate}</span></div>
+                <div class="post-header">
+                    <div class="post-meta">
+                        <div style="display:flex; align-items:center; gap:10px; margin-top:6px;">
+                            ${providerPicture
+                                ? `<img src="${providerPicture}" alt="${escapeHtml(providerName)}" style="width:42px; height:42px; border-radius:50%; object-fit:cover; border:2px solid #22c55e;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';">`
+                                : ''}
+                            <span style="width:42px; height:42px; border-radius:50%; background:#e8f5eb; border:2px solid #22c55e; align-items:center; justify-content:center; color:#15803d; flex:0 0 42px; display:${providerPicture ? 'none' : 'inline-flex'};"><i class="fas fa-user"></i></span>
+                            <span style="display:flex; flex-direction:column; line-height:1.25;">
+                                <span style="font-size:16px; font-weight:800; color:#0f172a;">${escapeHtml(providerName)}</span>
+                                <span style="font-size:13px; font-weight:700; color:#f59e0b;"><i class="fas fa-star" style="margin-right:4px;"></i>${providerRating}</span>
+                            </span>
                         </div>
                     </div>
                     <div class="post-actions">
-                         ${actionsHTML}
-                     </div>
+                        ${actionsHTML}
+                    </div>
                 </div>
-                <div class="item-middle">
-                    <div><i class="fa-solid fa-tag"></i> Proposed: LKR ${post.Requesting_Price || 0}/= (${post.Price_Type || 'Fixed'})</div>
+                
+                <h3 class="post-title">${escapeHtml(post.Title)}</h3>
+                <div class="post-description">${snippet}</div>
+                <div class="post-footer">
+                    <div class="post-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Budget</span>
+                            <span class="detail-value budget-amount">${budget}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Category</span>
+                            <span class="detail-value">${escapeHtml(category)}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Estimated Date</span>
+                            <span class="detail-value">${estDate}</span>
+                        </div>
+                        ${(status === 'ongoing' || status === 'pending-review' || status === 'completed') ? `
+                        <div class="detail-item">
+                            <span class="detail-label">Progress</span>
+                            <span class="detail-value">${progress}%</span>
+                        </div>
+                        ` : ''}
+                    </div>
                 </div>
                 ${progressHTML}
-                ${postTypeHTML}
+                <div style="display:flex; justify-content:flex-end; margin-top:10px;">
+                    <span class="skill-tag" style="background:#f1f5f9; color:#0f172a; border:1px solid #cbd5e1;">${postTypeLabel}</span>
+                </div>
             </div>
         `;
     }
@@ -807,7 +1090,7 @@
         const rating = post.Provider_Rating ? parseFloat(post.Provider_Rating).toFixed(1) : '0.0';
         const category = post.Category_Name || 'N/A';
         const estDate = formatEstDate(post.Est_Date);
-        const budget = `Rs. ${Number(post.Requesting_Price || 0).toLocaleString('en-US', {minimumFractionDigits:2})} (${post.Price_Type || 'Fixed'})`;
+        const budget = `Rs. ${Number(post.Requesting_Price || 0).toLocaleString('en-US', {minimumFractionDigits:2})}`;
         const description = post.Description || '';
         const snippet = description.length > 200
             ? escapeHtml(description.substring(0, 200)) + '...'
@@ -831,7 +1114,7 @@
                         </div>
                     </div>
                     <div class="request-actions">
-                        <button class="btn-outline" onclick="viewPost(${post.Post_ID})" title="View Request">
+                        <button class="btn-outline" onclick="viewPost(${post.Post_ID}, 'pending')" title="View Request">
                             <i class="fa-solid fa-eye"></i> View
                         </button>
                         <a href="${window.BASE_URL}/messages?new=${post.Provider_ID}" style="text-decoration:none;">
@@ -889,7 +1172,7 @@
         const rating = post.Provider_Rating ? parseFloat(post.Provider_Rating).toFixed(1) : '0.0';
         const category = post.Category_Name || 'N/A';
         const estDate = formatEstDate(post.Est_Date);
-        const budget = `LKR ${post.Requesting_Price || 0}/= (${post.Price_Type || 'Fixed'})`;
+        const budget = `LKR ${post.Requesting_Price || 0}/=`;
         const description = post.Description || '';
         const snippet = description.length > 300
             ? escapeHtml(description.substring(0, 300)) + '...'
@@ -911,7 +1194,7 @@
                             ${avatarImg}
                         </div>
                         <div class="accepted-provider-info">
-                            <div class="accepted-provider-name">${escapeHtml(providerName)}</div>
+                            ${renderProjectProviderNameLink(post.Provider_ID, providerName, 'accepted-provider-name')}
                             <div class="accepted-provider-rating">⭐ ${rating}</div>
                         </div>
                     </div>
@@ -922,7 +1205,7 @@
                         <button class="action-btn btn-edit" onclick="payPayment(${post.Post_ID})">
                             <i class="fas fa-credit-card"></i> Pay
                         </button>
-                        <button class="action-btn btn-view" onclick="viewPost(${post.Post_ID})">
+                        <button class="action-btn btn-view" onclick="viewPost(${post.Post_ID}, 'accepted')">
                             <i class="fas fa-eye"></i> View
                         </button>
                         <button class="action-btn btn-delete" onclick="cancelRequest(${post.Post_ID})">
@@ -964,7 +1247,7 @@
         const progress    = parseInt(post.Progress) || 0;
         const estDate     = formatEstDate(post.Est_Date);
         const startedDate = post.Started_At ? formatDate(post.Started_At) : formatDate(post.Created_At);
-        const budget      = `LKR ${post.Requesting_Price || 0}/= (${post.Price_Type || 'Fixed'})`;
+        const budget      = `LKR ${post.Requesting_Price || 0}/=`;
         const description = post.Description || '';
         const snippet     = description.length > 300
             ? escapeHtml(description.substring(0, 300)) + '...'
@@ -986,7 +1269,7 @@
                             ${avatarImg}
                         </div>
                         <div class="ongoing-provider-info">
-                            <div class="ongoing-provider-name">${escapeHtml(providerName)}</div>
+                            ${renderProjectProviderNameLink(post.Provider_ID, providerName, 'ongoing-provider-name')}
                             <div class="ongoing-provider-rating">&#11088; ${rating}</div>
                         </div>
                     </div>
@@ -997,7 +1280,7 @@
                         <button class="action-btn btn-view" onclick="ProjectDetailView.open(${post.Post_ID}, { role: 'client' })">
                             <i class="fas fa-eye"></i> View
                         </button>
-                        <button class="action-btn btn-edit" onclick="updateRequest(${post.Post_ID})">
+                        <button class="action-btn btn-edit" onclick="updateRequest(${post.Post_ID}, ${Number(post.Project_ID || 0)})">
                             <i class="fas fa-file-alt"></i> Requirements
                         </button>
                         <button class="action-btn btn-delete" onclick="cancelOngoingProject(${post.Post_ID})">
@@ -1048,7 +1331,7 @@
         const progress    = parseInt(post.Progress) || 0;
         const estDate     = formatEstDate(post.Est_Date);
         const submittedAt = post.Ended_At ? formatDate(post.Ended_At) : formatDate(post.Created_At);
-        const budget      = `LKR ${post.Requesting_Price || 0}/= (${post.Price_Type || 'Fixed'})`;
+        const budget      = `LKR ${post.Requesting_Price || 0}/=`;
         const description = post.Description || '';
         const snippet     = description.length > 300
             ? escapeHtml(description.substring(0, 300)) + '...'
@@ -1069,7 +1352,7 @@
                             ${avatarImg}
                         </div>
                         <div class="ongoing-provider-info">
-                            <div class="ongoing-provider-name">${escapeHtml(providerName)}</div>
+                            ${renderProjectProviderNameLink(post.Provider_ID, providerName, 'ongoing-provider-name')}
                             <div class="ongoing-provider-rating">&#11088; ${rating}</div>
                         </div>
                     </div>
@@ -1130,7 +1413,7 @@
         const category    = post.Category_Name || 'N/A';
         const completedAt = post.Ended_At ? formatDate(post.Ended_At) : formatDate(post.Created_At);
         const startedAt   = post.Started_At ? formatDate(post.Started_At) : '—';
-        const budget      = `LKR ${post.Requesting_Price || 0}/= (${post.Price_Type || 'Fixed'})`;
+        const budget      = `LKR ${post.Requesting_Price || 0}/=`;
         const description = post.Description || '';
         const snippet     = description.length > 300
             ? escapeHtml(description.substring(0, 300)) + '...'
@@ -1189,7 +1472,7 @@
                             ${avatarImg}
                         </div>
                         <div class="ongoing-provider-info">
-                            <div class="ongoing-provider-name">${escapeHtml(providerName)}</div>
+                            ${renderProjectProviderNameLink(post.Provider_ID, providerName, 'ongoing-provider-name')}
                             <div class="ongoing-provider-rating">&#11088; ${rating}</div>
                         </div>
                     </div>
@@ -1318,6 +1601,161 @@
         return `${diffDays} days left`;
     }
 
+    let viewPostUpdatesChart = null;
+
+    function getViewPostProgressColor(pct) {
+        if (pct >= 75) return '#22c55e';
+        if (pct >= 40) return '#f59e0b';
+        return '#3b82f6';
+    }
+
+    function renderViewDialogUpdateTimeline(events) {
+        if (!Array.isArray(events) || events.length === 0) {
+            return `<div class="pd-timeline-empty">
+                <i class="fa-solid fa-timeline"></i>
+                <p>No activity recorded yet.</p>
+            </div>`;
+        }
+
+        return `<div class="pd-timeline">${events.map(ev => {
+            const dotClass = 'pd-timeline-dot-' + (ev.color || 'gray');
+            const title = escapeHtml(ev.title || 'Update');
+            const desc = ev.description ? `<div class="pd-timeline-desc">${escapeHtml(ev.description)}</div>` : '';
+            const date = ev.date
+                ? new Date(ev.date).toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+                : 'N/A';
+
+            let meta = '';
+            if (ev.type === 'progress_update') {
+                const parts = [];
+                if ((Number(ev.progress_completed) || 0) > 0) {
+                    parts.push(`<span><i class="fa-solid fa-chart-simple"></i> Progress: ${Number(ev.progress_completed)}%</span>`);
+                }
+                if ((Number(ev.worked_hours) || 0) > 0) {
+                    parts.push(`<span><i class="fa-solid fa-clock"></i> ${Number(ev.worked_hours)}h worked</span>`);
+                }
+                if (parts.length) {
+                    meta = `<div class="pd-timeline-meta">${parts.join('')}</div>`;
+                }
+            }
+
+            const files = Array.isArray(ev.files) ? ev.files : [];
+            const filesHtml = files.length
+                ? `<div class="pd-timeline-files">${files.map(f => {
+                    const name = escapeHtml(String(f).split('/').pop() || 'Attachment');
+                    const url = `${window.BASE_URL}/file/project-updates/${f}`;
+                    return `<a href="${url}" target="_blank" class="pd-timeline-file" title="${name}"><i class="fa-solid fa-file"></i> ${name}</a>`;
+                }).join('')}</div>`
+                : '';
+
+            return `
+                <div class="pd-timeline-item">
+                    <div class="pd-timeline-dot ${dotClass}">
+                        <i class="fa-solid ${escapeHtml(ev.icon || 'fa-circle')}"></i>
+                    </div>
+                    <div class="pd-timeline-content">
+                        <div class="pd-timeline-head">
+                            <div class="pd-timeline-title">${title}</div>
+                            <div class="pd-timeline-date">${escapeHtml(date)}</div>
+                        </div>
+                        ${desc}
+                        ${meta}
+                        ${filesHtml}
+                    </div>
+                </div>`;
+        }).join('')}</div>`;
+    }
+
+    function initViewDialogUpdatesChart(points) {
+        const canvas = document.getElementById('viewPostProgressChart');
+        if (!canvas || typeof Chart === 'undefined') return;
+
+        if (viewPostUpdatesChart) {
+            viewPostUpdatesChart.destroy();
+            viewPostUpdatesChart = null;
+        }
+
+        if (!Array.isArray(points) || points.length < 2) {
+            const wrap = document.getElementById('view-post-updates-chart-wrap');
+            if (wrap) {
+                wrap.innerHTML = `<div class="pd-chart-empty"><i class="fa-solid fa-chart-line"></i><p>Not enough data to display chart yet.</p></div>`;
+            }
+            return;
+        }
+
+        const labels = points.map(p => new Date(p.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+        const data = points.map(p => Number(p.progress) || 0);
+
+        viewPostUpdatesChart = new Chart(canvas.getContext('2d'), {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [{
+                    data,
+                    borderColor: '#008500',
+                    backgroundColor: 'rgba(0, 133, 0, 0.08)',
+                    borderWidth: 2.5,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#008500',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    fill: true,
+                    tension: 0.35,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: {
+                        min: 0,
+                        max: 100,
+                        ticks: { stepSize: 25, callback: v => `${v}%`, color: '#9ca3af', font: { size: 11 } },
+                        grid: { color: '#f3f4f6' },
+                        border: { display: false },
+                    },
+                    x: {
+                        ticks: { color: '#9ca3af', font: { size: 11 }, maxRotation: 45 },
+                        grid: { display: false },
+                        border: { display: false },
+                    }
+                },
+                interaction: { intersect: false, mode: 'index' },
+            }
+        });
+    }
+
+    function renderViewDialogProjectUpdates(details) {
+        const progress = Math.max(0, Math.min(100, Number(details?.progress || 0)));
+        const progressColor = getViewPostProgressColor(progress);
+        const timeline = Array.isArray(details?.timeline) ? details.timeline : [];
+
+        return `
+            <div class="pd-progress-section" style="margin-bottom:14px;">
+                <div class="pd-section-title"><i class="fa-solid fa-chart-simple"></i> Current Progress</div>
+                <div class="pd-progress-bar-wrap">
+                    <div class="pd-progress-header">
+                        <span class="pd-progress-label">Completion</span>
+                        <span class="pd-progress-pct" style="color:${progressColor}">${progress}%</span>
+                    </div>
+                    <div class="pd-progress-track">
+                        <div class="pd-progress-fill" style="width:${progress}%; background:${progressColor};"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="pd-chart-section" style="margin-bottom:14px;">
+                <div class="pd-section-title"><i class="fa-solid fa-chart-line"></i> Progress Over Time</div>
+                <div class="pd-chart-container" id="view-post-updates-chart-wrap" style="height:220px;">
+                    <canvas id="viewPostProgressChart"></canvas>
+                </div>
+            </div>
+            <div class="pd-timeline-section">
+                <div class="pd-section-title"><i class="fa-solid fa-timeline"></i> Project Milestones</div>
+                ${renderViewDialogUpdateTimeline(timeline)}
+            </div>`;
+    }
+
     loadPosts('pending');
 
     const tabButtons = {
@@ -1385,7 +1823,12 @@
             showSection('pending');
         });
 
-    function viewPost(id) {
+    function viewPost(id, status = '') {
+        const activeStatus = document.querySelector('.tab-buttons .buttons.active')?.dataset?.target || '';
+        const normalizedStatus = (status || window._viewPostStatus || activeStatus || '').toLowerCase();
+        window._viewPostStatus = normalizedStatus;
+        const shouldShowProjectUpdates = !['pending', 'accepted'].includes(normalizedStatus);
+
         viewDialogBox('view-post-popup');
 
         // Show loading state
@@ -1410,12 +1853,29 @@
                         <div class="error-state">
                             <i class="fas fa-exclamation-circle"></i>
                             <p>Failed to load post details</p>
-                            <button onclick="viewPost(${id})" class="retry-btn">Retry</button>
+                            <button onclick="viewPost(${id}, window._viewPostStatus)" class="retry-btn">Retry</button>
                         </div>
                     `;
                     return;
                 }
-                const providerName = post.Provider_Name || 'Unassigned provider';
+                const providerName = post.Provider_Name || post.provider_name || post.Provider?.Name || 'Unassigned provider';
+                const providerPictureRaw = post.Provider_Picture || post.provider_picture || post.Provider_Image || post.provider_image || post.Provider_Avatar || post.provider_avatar || '';
+                const providerPicture = providerPictureRaw
+                    ? (/^(https?:)?\/\//.test(providerPictureRaw) || providerPictureRaw.startsWith('/')
+                        ? providerPictureRaw
+                        : `${window.BASE_URL}/file/user-files/${providerPictureRaw}`)
+                    : null;
+                const providerRatingRaw = Number(
+                    post.Provider_Star_Rating
+                    ?? post.Provider_Rating
+                    ?? post.Provider_Score
+                    ?? post.provider_rating
+                    ?? post.provider_score
+                    ?? post.Provider?.Rating
+                    ?? 0
+                );
+                const providerRating = Math.max(0, Math.min(5, providerRatingRaw > 5 ? providerRatingRaw / 20 : providerRatingRaw)).toFixed(1);
+                providerProfileCache[Number(post.Provider_ID) || 0] = normalizeProviderProfile(post.Provider_ID, providerName, providerPicture, providerRating);
                 console.log('Fetched post details:', post);
                 // Format date
                 const publishDate = post.Published_At ?
@@ -1425,10 +1885,17 @@
                         day: 'numeric'
                     }) : 'N/A';
 
-                // Build skills HTML
-                const skillsHTML = post.skills && post.skills.length > 0
-                    ? post.skills.map(skill => `<span class="skill-tag">${escapeHtml(skill)}</span>`).join('')
-                    : '<span>No skills specified</span>';
+                const durationValue = (post.Duration ?? '').toString().trim();
+                const durationType = (post.Duration_Type ?? '').toString().trim();
+                const durationText = durationValue
+                    ? `${durationValue}${durationType ? ' ' + durationType : ''}`
+                    : (post.Est_Date ? formatEstDate(post.Est_Date) : 'N/A');
+                const projectUpdatesSectionHTML = shouldShowProjectUpdates
+                    ? `<div class="post-view-section">
+                        <div class="section-title">Project Updates</div>
+                        <div id="view-post-updates" class="section-body" style="padding:0; color:#6b7280;">Loading project updates...</div>
+                    </div>`
+                    : '';
 
                 // Replace form content with a div wrapper for proper styling
                 formContainer.innerHTML = `
@@ -1443,29 +1910,46 @@
                     </div>
                     <div class="post-view-section">
                         <div class="section-title">Provider</div>
-                        <div class="post-provider">${escapeHtml(providerName)}</div>
+                        <div class="post-provider" style="display:flex; align-items:center; gap:12px;">
+                            ${providerPicture
+                                ? `<img src="${providerPicture}" alt="${escapeHtml(providerName)}" style="width:48px; height:48px; border-radius:50%; object-fit:cover; border:2px solid #22c55e;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';">`
+                                : ''}
+                            <span style="width:48px; height:48px; border-radius:50%; background:#e8f5eb; border:2px solid #22c55e; align-items:center; justify-content:center; color:#15803d; display:${providerPicture ? 'none' : 'inline-flex'};"><i class="fas fa-user"></i></span>
+                            <span style="display:flex; flex-direction:column; line-height:1.25;">
+                                ${renderProjectProviderNameLink(post.Provider_ID, providerName)}
+                                <span style="font-size:13px; font-weight:700; color:#f59e0b;"><i class="fas fa-star" style="margin-right:4px;"></i>${providerRating}</span>
+                            </span>
+                        </div>
                     </div> 
-                    <div class="post-view-section">
-                        <div class="section-title">Required Skills</div>
-                        <div class="skills-row">${skillsHTML}</div>
-                    </div>
                     <div class="post-view-section">
                         <div class="section-title">Details</div>
                         <div class="kv-grid">
-                            <div class="kv-item"><span class="kv-label">Budget:</span><span class="kv-value">LKR ${post.Requesting_Price || '0'}/= (${post.Price_Type || 'N/A'})</span></div>
+                            <div class="kv-item"><span class="kv-label">Budget:</span><span class="kv-value">LKR ${post.Requesting_Price || '0'}/=</span></div>
                             <div class="kv-item"><span class="kv-label">Level:</span><span class="kv-value">${post.Level || 'N/A'}</span></div>
-                            <div class="kv-item"><span class="kv-label">Duration:</span><span class="kv-value">${post.Duration || 'N/A'} ${post.Duration_Type || 'N/A'}</span></div>
-                            <div class="kv-item"><span class="kv-label">Proposals:</span><span class="kv-value">${post.Proposal_Count || '0'}</span></div>
+                            <div class="kv-item"><span class="kv-label">Est Date:</span><span class="kv-value">${durationText}</span></div>
                         </div>
                     </div>
-                    <div class="post-view-section">
-                        <div class="section-title">Engagement</div>
-                        <div class="engagement-row">
-                            <span class="chip"><i class="fa-solid fa-eye"></i> ${post.Views || '0'} views</span>
-                        </div>
-                    </div>
+                    ${projectUpdatesSectionHTML}
                 </div>
             `;
+
+                if (shouldShowProjectUpdates) {
+                    const updatesContainer = document.getElementById('view-post-updates');
+
+                    fetch(`${window.BASE_URL}/project/details/${id}`)
+                        .then(response => response.json())
+                        .then(json => {
+                            if (!updatesContainer) return;
+                            if (!json.success) throw new Error(json.error || 'Failed to load updates');
+                            updatesContainer.innerHTML = renderViewDialogProjectUpdates(json?.data || {});
+                            initViewDialogUpdatesChart(json?.data?.progress_history || []);
+                        })
+                        .catch(() => {
+                            if (updatesContainer) {
+                                updatesContainer.innerHTML = '<div class="section-body" style="color:#ef4444;">Unable to load project updates.</div>';
+                            }
+                        });
+                }
             })
             .catch(error => {
                 console.error('Error fetching post:', error);
@@ -1473,7 +1957,7 @@
                     <div class="error-state">
                         <i class="fas fa-exclamation-circle"></i>
                         <p>Failed to load post details. Please try again.</p>
-                        <button onclick="viewPost(${id})" class="retry-btn">Retry</button>
+                        <button onclick="viewPost(${id}, window._viewPostStatus)" class="retry-btn">Retry</button>
                     </div>
                 `;
             });
@@ -1587,16 +2071,9 @@
                     <div class="post-view-section">
                         <div class="section-title">Details</div>
                         <div class="kv-grid">
-                            <div class="kv-item"><span class="kv-label">Budget:</span><span class="kv-value">LKR ${post.Requesting_Price || '0'}/= (${post.Price_Type || 'N/A'})</span></div>
+                            <div class="kv-item"><span class="kv-label">Budget:</span><span class="kv-value">LKR ${post.Requesting_Price || '0'}/=</span></div>
                             <div class="kv-item"><span class="kv-label">Level:</span><span class="kv-value">${post.Level || 'N/A'}</span></div>
-                            <div class="kv-item"><span class="kv-label">Duration:</span><span class="kv-value">${post.Duration || 'N/A'} ${post.Duration_Type || 'N/A'}</span></div>
-                            <div class="kv-item"><span class="kv-label">Proposals:</span><span class="kv-value">${post.Proposal_Count || '0'}</span></div>
-                        </div>
-                    </div>
-                    <div class="post-view-section">
-                        <div class="section-title">Engagement</div>
-                        <div class="engagement-row">
-                            <span class="chip"><i class="fa-solid fa-eye"></i> ${post.Views || '0'} views</span>
+                            <div class="kv-item"><span class="kv-label">Est Date:</span><span class="kv-value">${post.Duration || 'N/A'} ${post.Duration_Type || 'N/A'}</span></div>
                         </div>
                     </div>
                 </div>
@@ -1669,8 +2146,8 @@
         });
     }
 
-    function updateRequest(postId) {
-        window._reqCurrentProjectId = null;
+    function updateRequest(postId, projectId = 0) {
+        window._reqCurrentProjectId = Number(projectId || 0) || null;
         window._reqCurrentPostId    = postId;
 
         // Reset to list tab and show dialog
@@ -1708,13 +2185,42 @@
     }
 
     function reqLoadRequirements(postId) {
+        const normalizedPostId = Number(postId || window._reqCurrentPostId || 0);
+        if (normalizedPostId > 0) {
+            window._reqCurrentPostId = normalizedPostId;
+        }
+
         const loading = document.getElementById('req-loading');
         const body    = document.getElementById('req-list-body');
         if (loading) loading.style.display = '';
         if (body)    body.style.display    = 'none';
 
-        fetch(`${window.BASE_URL}/project/getrequirements/${postId}`)
-            .then(r => r.json())
+        if (normalizedPostId <= 0) {
+            if (loading) {
+                loading.innerHTML = `
+                    <div class="error-state">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <p>Invalid project reference. Please reopen the dialog.</p>
+                    </div>`;
+            }
+            return;
+        }
+
+        fetch(`${window.BASE_URL}/project/getrequirements/${normalizedPostId}`)
+            .then(async (r) => {
+                const raw = await r.text();
+                let json;
+                try {
+                    json = JSON.parse(raw);
+                } catch (parseErr) {
+                    const preview = String(raw || '').replace(/\s+/g, ' ').trim().slice(0, 180);
+                    throw new Error(preview || 'Invalid JSON response from server');
+                }
+                if (!r.ok) {
+                    throw new Error(json?.error || json?.message || `HTTP ${r.status}`);
+                }
+                return json;
+            })
             .then(json => {
                 if (!json.success) throw new Error(json.error || 'Failed to load');
 
@@ -1728,13 +2234,50 @@
                 }
             })
             .catch(err => {
+                const message = err?.message || 'Failed to load requirements.';
                 if (loading) loading.innerHTML = `
                     <div class="error-state">
                         <i class="fas fa-exclamation-circle"></i>
-                        <p>Failed to load requirements.</p>
-                        <button onclick="reqLoadRequirements(${postId})" class="retry-btn">Retry</button>
+                        <p>${escapeHtml(message)}</p>
+                        <button onclick="reqLoadRequirements(${normalizedPostId})" class="retry-btn">Retry</button>
                     </div>`;
             });
+    }
+
+    async function ensureRequirementProjectLoaded(postId) {
+        if (window._reqCurrentProjectId) {
+            return window._reqCurrentProjectId;
+        }
+
+        if (!postId) {
+            return 0;
+        }
+
+        try {
+            const response = await fetch(`${window.BASE_URL}/project/getrequirements/${postId}`);
+            const raw = await response.text();
+            const json = JSON.parse(raw);
+            if (json?.success && Number(json?.data?.project_id) > 0) {
+                window._reqCurrentProjectId = Number(json.data.project_id);
+                return window._reqCurrentProjectId;
+            }
+        } catch (err) {
+            console.error('ensureRequirementProjectLoaded error:', err);
+        }
+
+        // Fallback: resolve from project detail endpoint when requirements are empty/not yet available.
+        try {
+            const detailsResponse = await fetch(`${window.BASE_URL}/project/details/${postId}`);
+            const detailsJson = await detailsResponse.json();
+            if (detailsJson?.success && Number(detailsJson?.data?.project_id) > 0) {
+                window._reqCurrentProjectId = Number(detailsJson.data.project_id);
+                return window._reqCurrentProjectId;
+            }
+        } catch (err) {
+            console.error('ensureRequirementProjectLoaded details fallback error:', err);
+        }
+
+        return 0;
     }
 
     function reqBuildListHTML(requirements) {
@@ -1813,15 +2356,16 @@
     }
 
     async function submitNewRequirement() {
-        const projectId   = window._reqCurrentProjectId;
+        let projectId   = Number(window._reqCurrentProjectId || 0);
+        const postId    = Number(window._reqCurrentPostId || 0);
         const title       = document.getElementById('reqTitle')?.value.trim()       || '';
         const description = document.getElementById('reqDescription')?.value.trim() || '';
         const filesInput  = document.getElementById('reqFiles');
 
         if (!projectId) {
-            window.showErrorToast('Error', 'Project not loaded. Please reopen the dialog.');
-            return;
+            projectId = await ensureRequirementProjectLoaded(postId);
         }
+
         if (!title) {
             document.getElementById('reqTitle')?.focus();
             window.showErrorToast('Error', 'Please enter a requirement title.');
@@ -1832,7 +2376,12 @@
         if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving…'; }
 
         const fd = new FormData();
-        fd.append('project_id',   projectId);
+        if (projectId > 0) {
+            fd.append('project_id', projectId);
+        }
+        if (postId > 0) {
+            fd.append('post_id', postId);
+        }
         fd.append('title',        title);
         fd.append('description',  description);
         if (filesInput && filesInput.files.length) {
@@ -1844,7 +2393,7 @@
             const data = await res.json();
 
             if (!data.success) {
-                window.showErrorToast('Error', data.error || 'Failed to submit requirement.');
+                window.showErrorToast('Error', data.error || `Failed to submit requirement (HTTP ${res.status}).`);
                 return;
             }
 
@@ -1853,7 +2402,7 @@
 
             // Switch back to list tab and refresh
             reqSwitchTab('req-list-pane');
-            reqLoadRequirements(window._reqCurrentPostId);
+            reqLoadRequirements(postId || window._reqCurrentPostId);
         } catch (err) {
             window.showErrorToast('Error', 'An error occurred: ' + err.message);
         } finally {
@@ -1968,7 +2517,7 @@ function submitCompleteProject() {
         .then(data => {
             if (data.success) {
                 closeDialogBox('complete-project-popup');
-                window.showSuccessToast('Success!', 'Project completed and review submitted.');
+                window.showSuccessToast('Success!', 'Project completed, payment released, and review submitted.');
                 loadPosts('pending-review');
                 loadPosts('completed');
             } else {
@@ -2105,33 +2654,55 @@ document.addEventListener('DOMContentLoaded', function () {
     const stars     = document.querySelectorAll('#starRatingInput i');
     const ratingIn  = document.getElementById('reviewRating');
 
+    function toHalfStep(value) {
+        return Math.max(0.5, Math.min(5, Math.round(value * 2) / 2));
+    }
+
+    function getStarValue(star, event) {
+        const baseValue = Number(star.dataset.value) || 0;
+        if (!event) return baseValue;
+
+        const rect = star.getBoundingClientRect();
+        const isLeftHalf = (event.clientX - rect.left) <= rect.width / 2;
+        return isLeftHalf ? baseValue - 0.5 : baseValue;
+    }
+
+    function renderStars(val) {
+        const selected = Number(val) || 0;
+        stars.forEach((star, index) => {
+            const starValue = index + 1;
+            if (selected >= starValue) {
+                star.className = 'fa-solid fa-star';
+                star.style.color = '#f59e0b';
+            } else if (selected >= starValue - 0.5) {
+                star.className = 'fa-solid fa-star-half-stroke';
+                star.style.color = '#f59e0b';
+            } else {
+                star.className = 'fa-regular fa-star';
+                star.style.color = '#d1d5db';
+            }
+        });
+    }
+
     stars.forEach(star => {
-        star.addEventListener('click', function () {
-            const val = parseInt(this.dataset.value);
-            if (ratingIn) ratingIn.value = val;
-            updateStars(val);
+        star.addEventListener('click', function (event) {
+            const val = toHalfStep(getStarValue(this, event));
+            if (ratingIn) ratingIn.value = val.toString();
+            renderStars(val);
         });
 
-        star.addEventListener('mouseenter', function () {
-            const val = parseInt(this.dataset.value);
-            stars.forEach((s, i) => {
-                s.className   = i < val ? 'fa-solid fa-star' : 'fa-regular fa-star';
-                s.style.color = i < val ? '#f59e0b' : '#d1d5db';
-            });
+        star.addEventListener('mousemove', function (event) {
+            const val = toHalfStep(getStarValue(this, event));
+            renderStars(val);
         });
 
         star.addEventListener('mouseleave', function () {
-            const selected = parseInt(ratingIn?.value) || 0;
-            updateStars(selected);
+            const selected = Number(ratingIn?.value) || 0;
+            renderStars(selected);
         });
     });
 
-    function updateStars(val) {
-        stars.forEach((s, i) => {
-            s.className   = i < val ? 'fa-solid fa-star' : 'fa-regular fa-star';
-            s.style.color = i < val ? '#f59e0b' : '';
-        });
-    }
+    renderStars(Number(ratingIn?.value) || 0);
 });
 
 </script>
