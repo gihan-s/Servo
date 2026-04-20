@@ -15,6 +15,7 @@ require_once '../app/controllers/LoginController.php';
 require_once '../app/controllers/MessageController.php';
 require_once '../app/controllers/NotificationController.php';
 require_once '../app/controllers/PaymentController.php';
+require_once '../app/controllers/PayHereWebhookController.php';
 require_once '../app/controllers/ProviderController.php';
 require_once '../app/controllers/EarningsController.php';
 require_once '../app/controllers/FeedController.php';
@@ -370,6 +371,22 @@ switch ($url) {
 
     case 'payments/report':
         (new PaymentController())->report();
+        break;
+
+    case (preg_match('#^payments/payhere/(\d+)$#', $url, $m) ? true : false):
+        (new PaymentController())->payhereRedirect((int) $m[1]);
+        break;
+
+    case 'payments/payhere-notify':
+        (new PayHereWebhookController())->notify();
+        break;
+
+    case 'payments/payhere-return':
+        (new PayHereWebhookController())->returnPage();
+        break;
+
+    case 'payments/payhere-cancel':
+        (new PayHereWebhookController())->cancelPage();
         break;
 
     case 'providers':

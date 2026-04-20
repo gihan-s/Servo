@@ -191,4 +191,86 @@ class PaymentController extends BaseController
 
         include __DIR__ . '/../views/client/Payments/invoice.php';
     }
+
+    /**
+     * Initiates a PayHere checkout for the given Post_ID.
+     * Called via POST form from the confirm-payment dialog.
+     */
+    public function payhereRedirect(int $postId): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405); echo 'Method not allowed'; exit;
+        }
+        if (($_SESSION['role'] ?? '') !== 'Client') {
+            http_response_code(403); echo 'Forbidden'; exit;
+        }
+
+        $clientId = (int) $_SESSION['user_id'];
+        $details  = $this->paymentModel->getPaymentDetailsForPayHere($postId, $clientId);
+
+        if (!$details) {
+            $_SESSION['flash'] = ['type' => 'error', 'message' => 'Payment record not found or already processed.'];
+            header('Location: ' . BASE_URL . '/projects');
+            exit;
+        }
+
+        $amount    = number_format((float) ($details['Requesting_Price'] ?? 0), 2, '.', '');
+        $orderId   = 'SERVO-POST-' . $postId;
+        $currency  = 'LKR';
+
+        // Generate hash: MD5(merchant_id + order_id + amount + currency + strtoupper(MD5(merchant_secret)))
+        $hash = strtoupper(md5(
+            PAYHERE_MERCHANT_ID .
+            $orderId .
+            $amount .
+            $currency .
+            strtoupper(md5(PAYHERE_MERCHANT_SECRET))
+        ));
+
+        $firstName = htmlspecialchars($details['First_Name'] ?? 'Customer', ENT_QUOTES, 'UTF-8');
+        $lastName  = htmlspecialchars($details['Last_Name']  ?? '', ENT_QUOTES, 'UTF-8');
+        $email     = htmlspecialchars($details['Email']      ?? '', ENT_QUOTES, 'UTF-8');
+        $phone     = preg_replace('/[^0-9+\-\s()]/', '', $details['Contact_No'] ?? '0000000000');
+        if (empty($phone)) $phone = '0000000000';
+
+        $checkoutUrl = PAYHERE_CHECKOUT_URL;
+
+        $returnUrl = APP_URL . '/payments/payhere-return';
+        $cancelUrl = APP_URL . '/payments/payhere-cancel';
+        $notifyUrl = APP_URL . '/payments/payhere-notify';
+
+        $itemName = htmlspecialchars(substr($details['Project_Title'] ?? 'Service Payment', 0, 100), ENT_QUOTES, 'UTF-8');
+
+        // Store minimal order info in session for the return page
+        $_SESSION['payhere_order'] = [
+            'order_id' => $orderId,
+            'post_id'  => $postId,
+            'title'    => $details['Project_Title'],
+            'amount'   => $amount,
+            'currency' => $currency,
+        ];
+
+        $fields = [
+            'merchant_id' => PAYHERE_MERCHANT_ID,
+            'return_url'  => $returnUrl,
+            'cancel_url'  => $cancelUrl,
+            'notify_url'  => $notifyUrl,
+            'order_id'    => $orderId,
+            'items'       => $itemName,
+            'currency'    => $currency,
+            'amount'      => $amount,
+            'first_name'  => $firstName,
+            'last_name'   => $lastName,
+            'email'       => $email,
+            'phone'       => $phone,
+            'address'     => 'N/A',
+            'city'        => 'Colombo',
+            'country'     => 'Sri Lanka',
+            'hash'        => $hash,
+        ];
+
+        // Render auto-submit redirect page
+        include __DIR__ . '/../views/client/Payments/payhere_redirect.php';
+        exit;
+    }
 }
