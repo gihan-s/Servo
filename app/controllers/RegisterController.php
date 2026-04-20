@@ -286,8 +286,8 @@ class RegisterController
         $_SESSION['otp'] = random_int(100000, 999999);
         $_SESSION['otp_expire'] = time() + 300;
 
+        $_SESSION['otp'] = 111111; // hardcode for testing, comment out in production
 
-        $_SESSION['otp'] = 111111;
 
         $EmailTemplate = '
         <!DOCTYPE html>
