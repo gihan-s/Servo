@@ -1,0 +1,184 @@
+2026-04-20 05:17:42 RETURN hit | post_id=6 | amount=5000 | order=SERVO-POST-6 | session=YES | GET={"url":"payments\/payhere-return","order_id":"SERVO-POST-6","post_id":"6","amount":"5000.00"}
+2026-04-20 05:17:42 createProjectAndPayment result=false
+2026-04-20 05:21:38 RETURN hit | post_id=6 | amount=5000 | order=SERVO-POST-6 | session=YES | GET={"url":"payments\/payhere-return","order_id":"SERVO-POST-6","post_id":"6","amount":"5000.00"}
+2026-04-20 05:21:38 createProjectAndPayment result=true
+2026-04-20 13:33:28Array
+(
+    [merchant_id] => 1233738
+    [return_url] => https://leverage-prologue-snaking.ngrok-free.dev/payments/payhere-return
+    [cancel_url] => https://leverage-prologue-snaking.ngrok-free.dev/payments/payhere-cancel
+    [notify_url] => https://leverage-prologue-snaking.ngrok-free.dev/payments/payhere-notify
+    [order_id] => SERVO-POST-11
+    [items] => jbkbb
+    [currency] => LKR
+    [amount] => 5689.00
+    [first_name] => Pasindu
+    [last_name] => Gihan
+    [email] => pasindu7086@gmail.com
+    [phone] => 0717476839
+    [address] => N/A
+    [city] => Colombo
+    [country] => Sri Lanka
+    [hash] => D156363AE1A661B3E8AA847C3301DE4C
+)
+
+2026-04-20 13:33:53 IPN: HIT — method=GET POST=[]
+2026-04-20 13:33:53 IPN: REJECTED: not POST
+2026-04-20 13:38:03Array
+(
+    [merchant_id] => 1233738
+    [return_url] => https://leverage-prologue-snaking.ngrok-free.dev/payments/payhere-return
+    [cancel_url] => https://leverage-prologue-snaking.ngrok-free.dev/payments/payhere-cancel
+    [notify_url] => https://leverage-prologue-snaking.ngrok-free.dev/payments/payhere-notify
+    [order_id] => SERVO-POST-11
+    [items] => jbkbb
+    [currency] => LKR
+    [amount] => 5689.00
+    [first_name] => Pasindu
+    [last_name] => Gihan
+    [email] => pasindu7086@gmail.com
+    [phone] => 0717476839
+    [address] => N/A
+    [city] => Colombo
+    [country] => Sri Lanka
+    [hash] => D156363AE1A661B3E8AA847C3301DE4C
+)
+
+2026-04-20 13:44:43Array
+(
+    [merchant_id] => 1233738
+    [return_url] => https://leverage-prologue-snaking.ngrok-free.dev/payments/payhere-return
+    [cancel_url] => https://leverage-prologue-snaking.ngrok-free.dev/payments/payhere-cancel
+    [notify_url] => https://leverage-prologue-snaking.ngrok-free.dev/payments/payhere-notify
+    [order_id] => SERVO-POST-11
+    [items] => jbkbb
+    [currency] => LKR
+    [amount] => 5689.00
+    [first_name] => Pasindu
+    [last_name] => Gihan
+    [email] => pasindu7086@gmail.com
+    [phone] => 0717476839
+    [address] => N/A
+    [city] => Colombo
+    [country] => Sri Lanka
+    [hash] => D156363AE1A661B3E8AA847C3301DE4C
+)
+
+2026-04-20 13:47:02Array
+(
+    [merchant_id] => 1233738
+    [return_url] => https://leverage-prologue-snaking.ngrok-free.dev/payments/payhere-return
+    [cancel_url] => https://leverage-prologue-snaking.ngrok-free.dev/payments/payhere-cancel
+    [notify_url] => https://leverage-prologue-snaking.ngrok-free.dev/payments/payhere-notify
+    [order_id] => SERVO-POST-11
+    [items] => jbkbb
+    [currency] => LKR
+    [amount] => 5689.00
+    [first_name] => Pasindu
+    [last_name] => Gihan
+    [email] => pasindu7086@gmail.com
+    [phone] => 0717476839
+    [address] => N/A
+    [city] => Colombo
+    [country] => Sri Lanka
+    [hash] => D156363AE1A661B3E8AA847C3301DE4C
+)
+
+2026-04-20 13:47:28 IPN: HIT — method=POST POST={"merchant_id":"1233738","order_id":"SERVO-POST-11","payment_id":"320032594737","captured_amount":"5689.00","payhere_amount":"5689.00","payhere_currency":"LKR","status_code":"2","md5sig":"C50ED24649FBC096C05E639DDE0F0EBE","custom_1":"","custom_2":"","status_message":"Successfully received the VISA payment","method":"VISA","card_holder_name":"Gihan Samaraweera","card_no":"************1292","card_expiry":"12\/28","recurring":"0"}
+2026-04-20 13:51:28Array
+(
+    [merchant_id] => 1233738
+    [return_url] => https://leverage-prologue-snaking.ngrok-free.dev/payments/payhere-return
+    [cancel_url] => https://leverage-prologue-snaking.ngrok-free.dev/payments/payhere-cancel
+    [notify_url] => https://leverage-prologue-snaking.ngrok-free.dev/payments/payhere-notify
+    [order_id] => SERVO-POST-11
+    [items] => jbkbb
+    [currency] => LKR
+    [amount] => 5689.00
+    [first_name] => Pasindu
+    [last_name] => Gihan
+    [email] => pasindu7086@gmail.com
+    [phone] => 0717476839
+    [address] => N/A
+    [city] => Colombo
+    [country] => Sri Lanka
+    [hash] => D156363AE1A661B3E8AA847C3301DE4C
+)
+
+2026-04-20 13:51:53 NOTIFY HIT — method=POST POST={"merchant_id":"1233738","order_id":"SERVO-POST-11","payment_id":"320032594740","captured_amount":"5689.00","payhere_amount":"5689.00","payhere_currency":"LKR","status_code":"2","md5sig":"C50ED24649FBC096C05E639DDE0F0EBE","custom_1":"","custom_2":"","status_message":"Successfully received the VISA payment","method":"VISA","card_holder_name":"Gihan Samaraweera","card_no":"************1292","card_expiry":"12\/30","recurring":"0"}
+2026-04-20 13:51:53 NOTIFY createProjectAndPayment postId=11 amount=5689.00 result=OK
+2026-04-20 13:51:58 RETURN HIT | session_order={"order_id":"SERVO-POST-11","post_id":11,"title":"jbkbb","amount":"5689.00","currency":"LKR"} | GET={"url":"payments\/payhere-return","order_id":"SERVO-POST-11"}
+2026-04-20 13:51:58 RETURN createProjectAndPayment postId=11 result=OK
+2026-04-20 13:57:06Array
+(
+    [merchant_id] => 1233738
+    [return_url] => https://leverage-prologue-snaking.ngrok-free.dev/payments/payhere-return
+    [cancel_url] => https://leverage-prologue-snaking.ngrok-free.dev/payments/payhere-cancel
+    [notify_url] => https://leverage-prologue-snaking.ngrok-free.dev/payments/payhere-notify
+    [order_id] => SERVO-POST-11
+    [items] => jbkbb
+    [currency] => LKR
+    [amount] => 5689.00
+    [first_name] => Pasindu
+    [last_name] => Gihan
+    [email] => pasindu7086@gmail.com
+    [phone] => 0717476839
+    [address] => N/A
+    [city] => Colombo
+    [country] => Sri Lanka
+    [hash] => D156363AE1A661B3E8AA847C3301DE4C
+)
+
+2026-04-20 13:57:45 NOTIFY HIT — method=POST POST={"merchant_id":"1233738","order_id":"SERVO-POST-11","payment_id":"320032594747","captured_amount":"5689.00","payhere_amount":"5689.00","payhere_currency":"LKR","status_code":"2","md5sig":"C50ED24649FBC096C05E639DDE0F0EBE","custom_1":"","custom_2":"","status_message":"Successfully received the VISA payment","method":"VISA","card_holder_name":"Gihan Samaraweera","card_no":"************1292","card_expiry":"12\/28","recurring":"0"}
+2026-04-20 13:57:45 NOTIFY createProjectAndPayment postId=11 amount=5689.00 result=OK
+2026-04-20 13:57:49 RETURN HIT | session_order={"order_id":"SERVO-POST-11","post_id":11,"title":"jbkbb","amount":"5689.00","currency":"LKR"} | GET={"url":"payments\/payhere-return","order_id":"SERVO-POST-11"}
+2026-04-20 13:57:49 RETURN createProjectAndPayment postId=11 result=OK
+2026-04-20 14:03:51Array
+(
+    [merchant_id] => 1233738
+    [return_url] => https://leverage-prologue-snaking.ngrok-free.dev/payments/payhere-return
+    [cancel_url] => https://leverage-prologue-snaking.ngrok-free.dev/payments/payhere-cancel
+    [notify_url] => https://leverage-prologue-snaking.ngrok-free.dev/payments/payhere-notify
+    [order_id] => SERVO-POST-11
+    [items] => jbkbb
+    [currency] => LKR
+    [amount] => 5689.00
+    [first_name] => Pasindu
+    [last_name] => Gihan
+    [email] => pasindu7086@gmail.com
+    [phone] => 0717476839
+    [address] => N/A
+    [city] => Colombo
+    [country] => Sri Lanka
+    [hash] => D156363AE1A661B3E8AA847C3301DE4C
+)
+
+2026-04-20 14:04:14 NOTIFY HIT — method=POST POST={"merchant_id":"1233738","order_id":"SERVO-POST-11","payment_id":"320032594753","captured_amount":"5689.00","payhere_amount":"5689.00","payhere_currency":"LKR","status_code":"2","md5sig":"C50ED24649FBC096C05E639DDE0F0EBE","custom_1":"","custom_2":"","status_message":"Successfully received the VISA payment","method":"VISA","card_holder_name":"Gihan Samaraweera","card_no":"************1292","card_expiry":"12\/28","recurring":"0"}
+2026-04-20 14:04:14 NOTIFY createProjectAndPayment postId=11 amount=5689.00 result=OK
+2026-04-20 14:04:19 RETURN HIT | session_order={"order_id":"SERVO-POST-11","post_id":11,"title":"jbkbb","amount":"5689.00","currency":"LKR"} | GET={"url":"payments\/payhere-return","order_id":"SERVO-POST-11"}
+2026-04-20 14:04:19 RETURN createProjectAndPayment postId=11 result=OK
+2026-04-20 14:25:10Array
+(
+    [merchant_id] => 1233738
+    [return_url] => http://servo.test/payments/payhere-return
+    [cancel_url] => http://servo.test/payments/payhere-cancel
+    [notify_url] => http://servo.test/payments/payhere-notify
+    [order_id] => SERVO-POST-14
+    [items] => Web Designing
+    [currency] => LKR
+    [amount] => 35000.00
+    [first_name] => Pasindu
+    [last_name] => Gihan
+    [email] => pasindu7086@gmail.com
+    [phone] => 0717476839
+    [address] => N/A
+    [city] => Colombo
+    [country] => Sri Lanka
+    [hash] => B23771CC46410FEE0ACD92C1AB545DF7
+)
+
+2026-04-20 14:25:33 RETURN HIT | session_order=null | GET={"url":"payments\/payhere-return","order_id":"SERVO-POST-14"}
+2026-04-20 14:30:58 NOTIFY HIT — method=POST POST={"merchant_id":"1233738","order_id":"SERVO-POST-14","payment_id":"320032594771","captured_amount":"35000.00","payhere_amount":"35000.00","payhere_currency":"LKR","status_code":"2","md5sig":"7EF18D13E7342053581BFE24FF49A956","custom_1":"","custom_2":"","status_message":"Successfully received the VISA payment","method":"VISA","card_holder_name":"Gihan Samaraweera","card_no":"************1292","card_expiry":"12\/26","recurring":"0"}
+2026-04-20 14:30:58 NOTIFY createProjectAndPayment postId=14 amount=35000.00 result=OK
+2026-04-20 14:31:02 RETURN HIT | session_order={"order_id":"SERVO-POST-14","post_id":14,"title":"Web Designing","amount":"35000.00","currency":"LKR"} | GET={"url":"payments\/payhere-return","order_id":"SERVO-POST-14"}
+2026-04-20 14:31:02 RETURN createProjectAndPayment postId=14 result=OK

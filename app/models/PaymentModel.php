@@ -45,8 +45,9 @@ class PaymentModel extends Database
         }
 
         foreach ($rows as $row) {
-            $amount     = (float) ($row['Requesting_Price'] ?? 0);
-            $commission = round($amount * self::COMMISSION_RATE, 2);
+            $projectValue = (float) ($row['Requesting_Price'] ?? 0);
+            $commission = round($projectValue * self::COMMISSION_RATE, 2);
+            $amount = max(0.0, round($projectValue - $commission, 2));
             $projectId  = (int) $row['Project_ID'];
             $paymentId  = $nextId++;
             $ins->bind_param('iddi', $paymentId, $amount, $commission, $projectId);
@@ -225,6 +226,120 @@ class PaymentModel extends Database
         ];
     }
 
+    /**
+     * Fetches post + client + provider details needed for PayHere checkout.
+     * Queries directly from the post table — no project/payment needed yet.
+     */
+    public function getPaymentDetailsForPayHere(int $postId, int $clientId): ?array
+    {
+        $sql = "SELECT
+                    po.Post_ID,
+                    po.Title          AS Project_Title,
+                    po.Description,
+                    po.Price_Type,
+                    po.Requesting_Price,
+                    po.Post_Type,
+                    po.Provider_ID,
+                    cl.First_Name,
+                    cl.Last_Name,
+                    cl.Email,
+                    cl.Contact_No,
+                    pr.First_Name  AS Provider_First,
+                    pr.Last_Name   AS Provider_Last
+                FROM post po
+                JOIN client cl  ON po.Client_ID = cl.Client_ID
+                LEFT JOIN provider pr ON po.Provider_ID = pr.Provider_ID
+                WHERE po.Post_ID   = ?
+                  AND po.Client_ID = ?
+                  AND po.Request_Status IN ('Accepted', 'ongoing')
+                LIMIT 1";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('PaymentModel::getPaymentDetailsForPayHere prepare: ' . $this->conn->error);
+            return null;
+        }
+        $stmt->bind_param('ii', $postId, $clientId);
+        if (!$stmt->execute()) {
+            error_log('PaymentModel::getPaymentDetailsForPayHere exec: ' . $stmt->error);
+            $stmt->close();
+            return null;
+        }
+        $row = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        return $row ?: null;
+    }
+
+    /**
+     * Creates project + payment records after a successful PayHere payment.
+     * Called from the IPN notify handler.
+     */
+    public function createProjectAndPayment(int $postId, float $amount): bool
+    {
+        // Guard: skip if a project already exists for this post
+        $check = $this->conn->prepare("SELECT Project_ID FROM project WHERE Post_ID = ? LIMIT 1");
+        $check->bind_param('i', $postId);
+        $check->execute();
+        $existing = $check->get_result()->fetch_assoc();
+        $check->close();
+        if ($existing) return true; // already created
+
+        // $this->conn->begin_transaction();
+        // try {
+            // Create project
+            $sql1 = "INSERT INTO project (Post_ID, Project_Status, Started_At)
+                     VALUES (?, 'Ongoing', NOW())";
+            $stmt1 = $this->conn->prepare($sql1);
+            $stmt1->bind_param('i', $postId);
+            $stmt1->execute();
+            $projectId = $this->conn->insert_id;
+            $stmt1->close();
+
+            
+            $sql2 = "INSERT INTO payment (Amount, Status, Paid_Time, Commission, Project_ID)
+                     VALUES (?, 'Paid', NOW(), 0, ?)";
+            $stmt2 = $this->conn->prepare($sql2);
+            $stmt2->bind_param('di', $amount, $projectId);
+            $stmt2->execute();
+            $stmt2->close();
+
+            $sql3 = "UPDATE post SET Request_Status = 'Ongoing' WHERE Post_ID = ?";
+            $stmt3 = $this->conn->prepare($sql3);
+            $stmt3->bind_param('i', $postId);
+            $stmt3->execute();
+            $stmt3->close();
+
+            // $this->conn->commit();
+            return true;
+        // } catch (\Exception $e) {
+        //     $this->conn->rollback();
+        //     error_log('PaymentModel::createProjectAndPayment failed: ' . $e->getMessage());
+        //     return false;
+        // }
+    }
+
+    /**
+     * Marks a payment as Paid after successful PayHere IPN verification.
+     * Uses the order_id format SERVO-{payment_id} to identify the record.
+     */
+    public function confirmPayHerePayment(int $paymentId): bool
+    {
+        $sql = "UPDATE payment
+                SET Status = 'Paid', Paid_Time = NOW(),
+                    Hold_Time = COALESCE(Hold_Time, NOW())
+                WHERE Payment_ID = ? AND Status IN ('Awaiting', 'Pending', 'Hold')";
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('PaymentModel::confirmPayHerePayment prepare: ' . $this->conn->error);
+            return false;
+        }
+        $stmt->bind_param('i', $paymentId);
+        $ok = $stmt->execute() && $stmt->affected_rows > 0;
+        if (!$ok) error_log('PaymentModel::confirmPayHerePayment: ' . $stmt->error);
+        $stmt->close();
+        return $ok;
+    }
+
     public function getPaymentOwnerClientId(int $paymentId): ?int
     {
         $sql = "SELECT po.Client_ID
@@ -251,19 +366,25 @@ class PaymentModel extends Database
 
     public function capturePayment(int $paymentId): bool
     {
-        // TODO: sandbox gateway integration hook — swap Status='Paid' for a real capture
-        //       (e.g., Stripe test mode) once the gateway is added. Paid_Time should be
-        //       stamped from the gateway response, not NOW(), when real.
-        $sql = "UPDATE payment
-                SET Status = 'Paid', Paid_Time = NOW(),
-                    Hold_Time = COALESCE(Hold_Time, NOW())
-                WHERE Payment_ID = ? AND Status IN ('Awaiting', 'Pending', 'Hold')";
+        // Capture at client payment time: place funds on hold and store net provider amount.
+        // Paid_Time is intentionally not set here; it will be set on final release.
+        $sql = "UPDATE payment pay
+                JOIN project pr ON pr.Project_ID = pay.Project_ID
+                JOIN post po ON po.Post_ID = pr.Post_ID
+                SET pay.Commission = ROUND(COALESCE(po.Requesting_Price, 0) * ?, 2),
+                    pay.Amount = GREATEST(0, ROUND(COALESCE(po.Requesting_Price, 0)
+                        - ROUND(COALESCE(po.Requesting_Price, 0) * ?, 2), 2)),
+                    pay.Status = 'Hold',
+                    pay.Hold_Time = COALESCE(pay.Hold_Time, NOW()),
+                    pay.Paid_Time = NULL
+                WHERE pay.Payment_ID = ? AND pay.Status IN ('Awaiting', 'Pending', 'Hold')";
         $stmt = $this->conn->prepare($sql);
         if (!$stmt) {
             error_log('PaymentModel::capturePayment prepare: ' . $this->conn->error);
             return false;
         }
-        $stmt->bind_param('i', $paymentId);
+        $commissionRate = self::COMMISSION_RATE;
+        $stmt->bind_param('ddi', $commissionRate, $commissionRate, $paymentId);
         $ok = $stmt->execute() && $stmt->affected_rows > 0;
         if (!$ok) error_log('PaymentModel::capturePayment exec: ' . $stmt->error);
         $stmt->close();

@@ -69,6 +69,15 @@ class ProjectModel extends Database {
         return (int) ($row['next_id'] ?? 10501);
     }
 
+    private function splitProjectValue(float $projectValue): array
+    {
+        $projectValue = max(0.0, $projectValue);
+        $commission = round($projectValue * self::PAYMENT_COMMISSION_RATE, 2);
+        $netAmount = max(0.0, round($projectValue - $commission, 2));
+
+        return [$commission, $netAmount];
+    }
+
     private function resolveProviderCategoryId(int $providerCategoryId, int $providerId, int $categoryId): int
     {
         if ($providerCategoryId > 0) {
@@ -142,25 +151,22 @@ class ProjectModel extends Database {
         return $percentage;
     }
 
-    private function refreshProviderRating(int $providerId): float
+    private function refreshProviderRatingFromCategories(int $providerId): float
     {
         $stmt = $this->conn->prepare(
-                        'SELECT COALESCE(AVG(r.Rating), 0) AS avg_rating
-                         FROM reviews r
-                         JOIN project proj ON proj.Project_ID = r.Project_ID
-                         JOIN post p ON p.Post_ID = proj.Post_ID
-                         WHERE p.Provider_ID = ?
-                             AND proj.Project_Status = "completed"
-                             AND r.Rating IS NOT NULL'
+            'SELECT COALESCE(AVG(pc.Rating), 0) AS avg_rating
+             FROM provider_categories pc
+             WHERE pc.Provider_ID = ?
+               AND pc.Rating IS NOT NULL'
         );
         if (!$stmt) {
-            error_log('ProjectModel::refreshProviderRating prepare: ' . $this->conn->error);
+            error_log('ProjectModel::refreshProviderRatingFromCategories prepare: ' . $this->conn->error);
             return 0.0;
         }
 
         $stmt->bind_param('i', $providerId);
         if (!$stmt->execute()) {
-            error_log('ProjectModel::refreshProviderRating exec: ' . $stmt->error);
+            error_log('ProjectModel::refreshProviderRatingFromCategories exec: ' . $stmt->error);
             $stmt->close();
             return 0.0;
         }
@@ -172,13 +178,13 @@ class ProjectModel extends Database {
 
         $update = $this->conn->prepare('UPDATE provider SET Rating = ? WHERE Provider_ID = ?');
         if (!$update) {
-            error_log('ProjectModel::refreshProviderRating update prepare: ' . $this->conn->error);
+            error_log('ProjectModel::refreshProviderRatingFromCategories update prepare: ' . $this->conn->error);
             return $rating;
         }
 
         $update->bind_param('di', $rating, $providerId);
         if (!$update->execute()) {
-            error_log('ProjectModel::refreshProviderRating update exec: ' . $update->error);
+            error_log('ProjectModel::refreshProviderRatingFromCategories update exec: ' . $update->error);
         }
         $update->close();
 
@@ -216,17 +222,27 @@ class ProjectModel extends Database {
         }
 
         $paymentId = (int) ($row['Payment_ID'] ?? 0);
-        $amount = (float) ($row['Requesting_Price'] ?? 0);
+        $projectValue = (float) ($row['Requesting_Price'] ?? 0);
         $status = strtolower(trim((string) ($row['Status'] ?? '')));
+        [$commission, $netAmount] = $this->splitProjectValue($projectValue);
 
         if ($paymentId > 0) {
             if ($status === 'paid') {
                 return true;
             }
 
+            if (!in_array($status, ['hold', 'pending'], true)) {
+                error_log('ProjectModel::releasePaymentForProject: payment is not on hold/pending before release');
+                return false;
+            }
+
             $update = $this->conn->prepare(
                 "UPDATE payment
-                 SET Status = 'Paid', Paid_Time = NOW(), Hold_Time = COALESCE(Hold_Time, NOW())
+                 SET Status = 'Paid',
+                     Amount = ?,
+                     Commission = ?,
+                     Paid_Time = NOW(),
+                     Hold_Time = COALESCE(Hold_Time, NOW())
                  WHERE Payment_ID = ?"
             );
             if (!$update) {
@@ -234,7 +250,7 @@ class ProjectModel extends Database {
                 return false;
             }
 
-            $update->bind_param('i', $paymentId);
+            $update->bind_param('ddi', $netAmount, $commission, $paymentId);
             $ok = $update->execute();
             if (!$ok) {
                 error_log('ProjectModel::releasePaymentForProject update exec: ' . $update->error);
@@ -243,24 +259,234 @@ class ProjectModel extends Database {
             return (bool) $ok;
         }
 
-        $paymentId = $this->getNextPaymentId();
-        $commission = round($amount * self::PAYMENT_COMMISSION_RATE, 2);
-        $insert = $this->conn->prepare(
-            "INSERT INTO payment (Payment_ID, Amount, Status, Hold_Time, Paid_Time, Commission, Project_ID)
-             VALUES (?, ?, 'Paid', NOW(), NOW(), ?, ?)"
+        error_log('ProjectModel::releasePaymentForProject: missing payment row for project release');
+        return false;
+    }
+
+    private function getPaidPaymentAmountForProject(int $projectId): ?float
+    {
+        $stmt = $this->conn->prepare(
+            "SELECT Amount
+             FROM payment
+             WHERE Project_ID = ? AND Status = 'Paid'
+             ORDER BY COALESCE(Paid_Time, Hold_Time) DESC, Payment_ID DESC
+             LIMIT 1"
         );
-        if (!$insert) {
-            error_log('ProjectModel::releasePaymentForProject insert prepare: ' . $this->conn->error);
+        if (!$stmt) {
+            error_log('ProjectModel::getPaidPaymentAmountForProject prepare: ' . $this->conn->error);
+            return null;
+        }
+
+        $stmt->bind_param('i', $projectId);
+        if (!$stmt->execute()) {
+            error_log('ProjectModel::getPaidPaymentAmountForProject exec: ' . $stmt->error);
+            $stmt->close();
+            return null;
+        }
+
+        $row = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        if (!$row) {
+            return null;
+        }
+
+        return max(0.0, (float) ($row['Amount'] ?? 0));
+    }
+
+    private function applyEarningsFromProjectPayment(int $projectId, int $providerCategoryId, int $providerId): bool
+    {
+        if ($providerCategoryId <= 0 || $providerId <= 0) {
+            error_log('ProjectModel::applyEarningsFromProjectPayment invalid provider/category reference');
             return false;
         }
 
-        $insert->bind_param('iddi', $paymentId, $amount, $commission, $projectId);
-        $ok = $insert->execute();
-        if (!$ok) {
-            error_log('ProjectModel::releasePaymentForProject insert exec: ' . $insert->error);
+        if (!$this->hasColumn('provider_categories', 'Total_Earning') || !$this->hasColumn('provider', 'Total_Earning')) {
+            error_log('ProjectModel::applyEarningsFromProjectPayment missing Total_Earning column');
+            return false;
         }
-        $insert->close();
-        return (bool) $ok;
+
+        $paymentAmount = $this->getPaidPaymentAmountForProject($projectId);
+        if ($paymentAmount === null) {
+            error_log('ProjectModel::applyEarningsFromProjectPayment no paid payment amount found');
+            return false;
+        }
+
+        $updateCategory = $this->conn->prepare(
+            'UPDATE provider_categories
+             SET Total_Earning = COALESCE(Total_Earning, 0) + ?
+             WHERE ID = ? AND Provider_ID = ?'
+        );
+        if (!$updateCategory) {
+            error_log('ProjectModel::applyEarningsFromProjectPayment category prepare: ' . $this->conn->error);
+            return false;
+        }
+
+        $updateCategory->bind_param('dii', $paymentAmount, $providerCategoryId, $providerId);
+        if (!$updateCategory->execute()) {
+            error_log('ProjectModel::applyEarningsFromProjectPayment category exec: ' . $updateCategory->error);
+            $updateCategory->close();
+            return false;
+        }
+        if ($updateCategory->affected_rows <= 0) {
+            $updateCategory->close();
+            error_log('ProjectModel::applyEarningsFromProjectPayment category row not updated');
+            return false;
+        }
+        $updateCategory->close();
+
+        $updateProvider = $this->conn->prepare(
+            'UPDATE provider
+             SET Total_Earning = COALESCE(Total_Earning, 0) + ?
+             WHERE Provider_ID = ?'
+        );
+        if (!$updateProvider) {
+            error_log('ProjectModel::applyEarningsFromProjectPayment provider prepare: ' . $this->conn->error);
+            return false;
+        }
+
+        $updateProvider->bind_param('di', $paymentAmount, $providerId);
+        if (!$updateProvider->execute()) {
+            error_log('ProjectModel::applyEarningsFromProjectPayment provider exec: ' . $updateProvider->error);
+            $updateProvider->close();
+            return false;
+        }
+        if ($updateProvider->affected_rows <= 0) {
+            $updateProvider->close();
+            error_log('ProjectModel::applyEarningsFromProjectPayment provider row not updated');
+            return false;
+        }
+        $updateProvider->close();
+
+        return true;
+    }
+
+    public function createProjectAndHoldPayment(int $postId): array
+    {
+        $this->conn->begin_transaction();
+
+        try {
+            $priceStmt = $this->conn->prepare('SELECT Requesting_Price FROM post WHERE Post_ID = ? LIMIT 1');
+            if (!$priceStmt) {
+                throw new Exception('createProjectAndHoldPayment prepare price: ' . $this->conn->error);
+            }
+            $priceStmt->bind_param('i', $postId);
+            if (!$priceStmt->execute()) {
+                throw new Exception('createProjectAndHoldPayment exec price: ' . $priceStmt->error);
+            }
+            $priceRow = $priceStmt->get_result()->fetch_assoc();
+            $priceStmt->close();
+
+            if (!$priceRow) {
+                throw new Exception('createProjectAndHoldPayment post not found');
+            }
+
+            $projectValue = (float) ($priceRow['Requesting_Price'] ?? 0);
+            [$commission, $netAmount] = $this->splitProjectValue($projectValue);
+
+            $projectId = 0;
+            $existingProjectStmt = $this->conn->prepare('SELECT Project_ID FROM project WHERE Post_ID = ? LIMIT 1');
+            if (!$existingProjectStmt) {
+                throw new Exception('createProjectAndHoldPayment prepare existing project: ' . $this->conn->error);
+            }
+            $existingProjectStmt->bind_param('i', $postId);
+            if (!$existingProjectStmt->execute()) {
+                throw new Exception('createProjectAndHoldPayment exec existing project: ' . $existingProjectStmt->error);
+            }
+            $existingProject = $existingProjectStmt->get_result()->fetch_assoc();
+            $existingProjectStmt->close();
+
+            if ($existingProject) {
+                $projectId = (int) ($existingProject['Project_ID'] ?? 0);
+
+                $updateProjectStmt = $this->conn->prepare(
+                    'UPDATE project SET Project_Status = "ongoing", Started_At = COALESCE(Started_At, NOW()), Ended_At = NULL WHERE Project_ID = ?'
+                );
+                if (!$updateProjectStmt) {
+                    throw new Exception('createProjectAndHoldPayment prepare project update: ' . $this->conn->error);
+                }
+                $updateProjectStmt->bind_param('i', $projectId);
+                if (!$updateProjectStmt->execute()) {
+                    throw new Exception('createProjectAndHoldPayment exec project update: ' . $updateProjectStmt->error);
+                }
+                $updateProjectStmt->close();
+            } else {
+                $createProjectStmt = $this->conn->prepare(
+                    "INSERT INTO project (Post_ID, Project_Status, Started_At) VALUES (?, 'ongoing', NOW())"
+                );
+                if (!$createProjectStmt) {
+                    throw new Exception('createProjectAndHoldPayment prepare project insert: ' . $this->conn->error);
+                }
+                $createProjectStmt->bind_param('i', $postId);
+                if (!$createProjectStmt->execute()) {
+                    throw new Exception('createProjectAndHoldPayment exec project insert: ' . $createProjectStmt->error);
+                }
+                $projectId = (int) $createProjectStmt->insert_id;
+                $createProjectStmt->close();
+            }
+
+            if ($projectId <= 0) {
+                throw new Exception('createProjectAndHoldPayment invalid project id');
+            }
+
+            $existingPaymentStmt = $this->conn->prepare('SELECT Payment_ID FROM payment WHERE Project_ID = ? LIMIT 1');
+            if (!$existingPaymentStmt) {
+                throw new Exception('createProjectAndHoldPayment prepare existing payment: ' . $this->conn->error);
+            }
+            $existingPaymentStmt->bind_param('i', $projectId);
+            if (!$existingPaymentStmt->execute()) {
+                throw new Exception('createProjectAndHoldPayment exec existing payment: ' . $existingPaymentStmt->error);
+            }
+            $existingPayment = $existingPaymentStmt->get_result()->fetch_assoc();
+            $existingPaymentStmt->close();
+
+            if ($existingPayment) {
+                $paymentId = (int) ($existingPayment['Payment_ID'] ?? 0);
+                $updatePaymentStmt = $this->conn->prepare(
+                    "UPDATE payment
+                     SET Amount = ?, Commission = ?, Status = 'Hold', Hold_Time = COALESCE(Hold_Time, NOW()), Paid_Time = NULL
+                     WHERE Payment_ID = ?"
+                );
+                if (!$updatePaymentStmt) {
+                    throw new Exception('createProjectAndHoldPayment prepare payment update: ' . $this->conn->error);
+                }
+                $updatePaymentStmt->bind_param('ddi', $netAmount, $commission, $paymentId);
+                if (!$updatePaymentStmt->execute()) {
+                    throw new Exception('createProjectAndHoldPayment exec payment update: ' . $updatePaymentStmt->error);
+                }
+                $updatePaymentStmt->close();
+            } else {
+                $paymentId = $this->getNextPaymentId();
+                $insertPaymentStmt = $this->conn->prepare(
+                    "INSERT INTO payment (Payment_ID, Amount, Status, Hold_Time, Paid_Time, Commission, Project_ID)
+                     VALUES (?, ?, 'Hold', NOW(), NULL, ?, ?)"
+                );
+                if (!$insertPaymentStmt) {
+                    throw new Exception('createProjectAndHoldPayment prepare payment insert: ' . $this->conn->error);
+                }
+                $insertPaymentStmt->bind_param('iddi', $paymentId, $netAmount, $commission, $projectId);
+                if (!$insertPaymentStmt->execute()) {
+                    throw new Exception('createProjectAndHoldPayment exec payment insert: ' . $insertPaymentStmt->error);
+                }
+                $insertPaymentStmt->close();
+            }
+
+            $updatePostStmt = $this->conn->prepare("UPDATE post SET Request_Status = 'completed' WHERE Post_ID = ?");
+            if (!$updatePostStmt) {
+                throw new Exception('createProjectAndHoldPayment prepare post update: ' . $this->conn->error);
+            }
+            $updatePostStmt->bind_param('i', $postId);
+            if (!$updatePostStmt->execute()) {
+                throw new Exception('createProjectAndHoldPayment exec post update: ' . $updatePostStmt->error);
+            }
+            $updatePostStmt->close();
+
+            $this->conn->commit();
+            return ['success' => true, 'project_id' => $projectId];
+        } catch (Throwable $e) {
+            $this->conn->rollback();
+            error_log('ProjectModel::createProjectAndHoldPayment error: ' . $e->getMessage());
+            return ['success' => false, 'project_id' => 0];
+        }
     }
 
   public function getByPostId(int $postId): ?array {
@@ -1881,9 +2107,8 @@ class ProjectModel extends Database {
                 throw new Exception('completeProjectByClient payment release failed');
             }
 
-            $this->refreshProviderCategoryRating($providerCategoryId);
-            if ($providerId > 0) {
-                $this->refreshProviderRating($providerId);
+            if (!$this->applyEarningsFromProjectPayment($projectId, $providerCategoryId, $providerId)) {
+                throw new Exception('completeProjectByClient earnings update failed');
             }
 
             // Log the status change
@@ -1934,6 +2159,11 @@ class ProjectModel extends Database {
                 throw new Exception('completeProjectByClient exec review: ' . $revStmt->error);
             }
             $revStmt->close();
+
+            $this->refreshProviderCategoryRating($providerCategoryId);
+            if ($providerId > 0) {
+                $this->refreshProviderRatingFromCategories($providerId);
+            }
 
             // Insert review files
             if (!empty($reviewFileNames) && $hasReviewFilesTable) {

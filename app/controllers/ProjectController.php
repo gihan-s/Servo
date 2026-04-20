@@ -284,10 +284,9 @@ class ProjectController extends BaseController
             return;
         }
 
-        $projectId = $this->projectModel->createProject($PostID);
-        $success = $this->postModel->changePostRequestStatus($PostID, 'completed');
+        $result = $this->projectModel->createProjectAndHoldPayment($PostID);
 
-        if ($success) {
+        if (!empty($result['success'])) {
             echo json_encode(['success' => true, 'message' => 'Payment initiated successfully']);
         } else {
             http_response_code(500);
