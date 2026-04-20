@@ -78,7 +78,7 @@ class BidsController extends BaseController
             return;
         }
 
-        $durationDays = $this->durationToDays($durationValue, $durationUnit);
+        $durationHours = $this->durationToHours($durationValue, $durationUnit);
 
         if ($comment === '') {
             $this->jsonError('Proposal note cannot be empty', 400, 'invalid_input');
@@ -90,7 +90,7 @@ class BidsController extends BaseController
             return;
         }
 
-        $result = $this->bidModel->updateBidForProvider($providerId, $bidId, $amount, $comment, $durationDays);
+        $result = $this->bidModel->updateBidForProvider($providerId, $bidId, $amount, $comment, $durationHours);
 
         if (!($result['success'] ?? false)) {
             $errorCode = (string) ($result['errorCode'] ?? 'unknown');
@@ -107,7 +107,8 @@ class BidsController extends BaseController
         }
 
         $updatedAmount = (float) ($result['amount'] ?? $amount);
-        $updatedDurationDays = (int) ($result['durationDays'] ?? $durationDays);
+        $updatedDurationHours = (int) ($result['durationHours'] ?? $durationHours);
+        $updatedDurationState = $this->hoursToDurationState($updatedDurationHours);
         $updatedComment = (string) ($result['comment'] ?? $comment);
         $updatedAt = (string) ($result['updatedAt'] ?? date('Y-m-d H:i:s'));
 
@@ -118,8 +119,10 @@ class BidsController extends BaseController
                 'bidId' => $bidId,
                 'amount' => $updatedAmount,
                 'amountFormatted' => 'LKR ' . number_format($updatedAmount, 2),
-                'durationDays' => $updatedDurationDays,
-                'durationLabel' => $this->formatDurationLabel($updatedDurationDays),
+                'durationHours' => $updatedDurationHours,
+                'durationUnitValue' => $updatedDurationState['value'],
+                'durationUnit' => $updatedDurationState['unit'],
+                'durationLabel' => $this->formatDurationLabel($updatedDurationHours),
                 'comment' => $updatedComment,
                 'status' => 'Active',
                 'statusKey' => 'active',
@@ -236,12 +239,12 @@ class BidsController extends BaseController
         foreach ($bids as &$bid) {
             $bid['Client_Name'] = $bid['Client_First_Name'] . ' ' . $bid['Client_Last_Name'];
             $bid['Bid_Amount'] = 'LKR ' . number_format($bid['Amount'], 2);
-            $durationDays = (int) ($bid['Duration'] ?? 0);
-            $durationState = $this->daysToDurationState($durationDays);
-            $bid['Duration_Days'] = $durationDays;
+            $durationHours = (int) ($bid['Duration'] ?? 0);
+            $durationState = $this->hoursToDurationState($durationHours);
+            $bid['Duration_Hours'] = $durationHours;
             $bid['Duration_Unit_Value'] = $durationState['value'];
             $bid['Duration_Unit'] = $durationState['unit'];
-            $bid['Duration'] = $this->formatDurationLabel($durationDays);
+            $bid['Duration'] = $this->formatDurationLabel($durationHours);
             $bid['Bid_Ref'] = 'BID-' . str_pad((string) ($bid['Bid_ID'] ?? 0), 6, '0', STR_PAD_LEFT);
             $bid['Bid_Date'] = timeAgo($bid['Created_At']);
         }
@@ -249,30 +252,52 @@ class BidsController extends BaseController
         return $bids;
     }
 
-    private function formatDurationLabel(int $durationDays): string
+    private function formatDurationLabel(int $durationHours): string
     {
-        return $durationDays . ' day' . ($durationDays > 1 ? 's' : '');
+        $durationState = $this->hoursToDurationState($durationHours);
+        $value = (int) ($durationState['value'] ?? 0);
+        $unit = (string) ($durationState['unit'] ?? 'd');
+
+        if ($value <= 0) {
+            return '0 days';
+        }
+
+        if ($unit === 'm') {
+            return $value . ' month' . ($value > 1 ? 's' : '');
+        }
+
+        if ($unit === 'w') {
+            return $value . ' week' . ($value > 1 ? 's' : '');
+        }
+
+        return $value . ' day' . ($value > 1 ? 's' : '');
     }
 
-    private function durationToDays(int $durationValue, string $durationUnit): int
+    private function durationToHours(int $durationValue, string $durationUnit): int
     {
         if ($durationValue <= 0) {
             return 0;
         }
 
         if ($durationUnit === 'w') {
-            return $durationValue * 7;
+            return $durationValue * 7 * 24;
         }
 
         if ($durationUnit === 'm') {
-            return $durationValue * 30;
+            return $durationValue * 30 * 24;
         }
 
-        return $durationValue;
+        return $durationValue * 24;
     }
 
-    private function daysToDurationState(int $durationDays): array
+    private function hoursToDurationState(int $durationHours): array
     {
+        if ($durationHours <= 0) {
+            return ['value' => 0, 'unit' => 'd'];
+        }
+
+        $durationDays = (int) ceil($durationHours / 24);
+
         if ($durationDays > 0 && $durationDays % 30 === 0) {
             return ['value' => (int) ($durationDays / 30), 'unit' => 'm'];
         }
@@ -281,7 +306,7 @@ class BidsController extends BaseController
             return ['value' => (int) ($durationDays / 7), 'unit' => 'w'];
         }
 
-        return ['value' => max(1, $durationDays), 'unit' => 'd'];
+        return ['value' => $durationDays, 'unit' => 'd'];
     }
 
 }

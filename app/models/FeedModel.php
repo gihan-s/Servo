@@ -44,7 +44,7 @@ class FeedModel extends Database
                 WHERE p.Post_Status = 'active'
                 AND p.Post_Type = 'post'
                 AND p.Request_Status = 'open'
-                AND p.Est_Date > NOW()
+                AND p.Est_Date > CURDATE()
                 AND p.Category_ID IN (
                     SELECT Category_ID FROM provider_categories WHERE Provider_ID = ?
                 )

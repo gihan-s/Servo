@@ -205,7 +205,7 @@ class BidModel extends Database
         return ($bid['Status_Key'] ?? '') === self::STATUS_ACTIVE;
     }
 
-    public function submitBid($providerId, $postId, $amount, $comment, $durationDays)
+    public function submitBid($providerId, $postId, $amount, $comment, $durationHours)
     {
         // add entry to database, bids table with status 'active' and current timestamp for created_at
         $sql = "INSERT INTO bids (Provider_ID, Post_ID, Amount, Comment, Duration, Status, Created_At) VALUES (?, ?, ?, ?, ?, 'active', NOW())";
@@ -214,8 +214,8 @@ class BidModel extends Database
             error_log('BidModel::submitBid prepare: ' . $this->conn->error);
             return ['success' => false, 'error' => 'Database error'];
         }
-        $durationDays = (int) $durationDays;
-        $stmt->bind_param('iidsi', $providerId, $postId, $amount, $comment, $durationDays);
+        $durationHours = (int) $durationHours;
+        $stmt->bind_param('iidsi', $providerId, $postId, $amount, $comment, $durationHours);
         if (!$stmt->execute()) {
             error_log('BidModel::submitBid exec: ' . $stmt->error);
             $stmt->close();
@@ -231,12 +231,12 @@ class BidModel extends Database
     {
         $amount = (float) ($newBidData['amount'] ?? 0);
         $comment = (string) ($newBidData['comment'] ?? '');
-        $durationDays = (int) ($newBidData['durationDays'] ?? 0);
+        $durationHours = (int) ($newBidData['durationHours'] ?? 0);
 
-        return $this->updateBidForProvider((int) $providerId, (int) $bidRef, $amount, $comment, $durationDays);
+        return $this->updateBidForProvider((int) $providerId, (int) $bidRef, $amount, $comment, $durationHours);
     }
 
-    public function updateBidForProvider(int $providerId, int $bidId, float $amount, string $comment, int $durationDays): array
+    public function updateBidForProvider(int $providerId, int $bidId, float $amount, string $comment, int $durationHours): array
     {
         if ($providerId <= 0 || $bidId <= 0) {
             return [
@@ -246,7 +246,7 @@ class BidModel extends Database
             ];
         }
 
-        if ($amount <= 0 || $durationDays <= 0) {
+        if ($amount <= 0 || $durationHours <= 0) {
             return [
                 'success' => false,
                 'errorCode' => 'invalid_input',
@@ -277,7 +277,7 @@ class BidModel extends Database
                 ];
             }
 
-            $stmt->bind_param('dsiii', $amount, $comment, $durationDays, $bidId, $providerId);
+            $stmt->bind_param('dsiii', $amount, $comment, $durationHours, $bidId, $providerId);
             if (!$stmt->execute()) {
                 error_log('BidModel::updateBidForProvider exec: ' . $stmt->error);
                 $stmt->close();
@@ -294,46 +294,14 @@ class BidModel extends Database
                 'bidId' => $bidId,
                 'amount' => $amount,
                 'comment' => $comment,
-                'durationDays' => $durationDays,
+                'durationHours' => $durationHours,
                 'updatedAt' => date('Y-m-d H:i:s'),
             ];
         }
-
-        // Fallback for current dummy-data mode so UI flow can be validated end-to-end.
-        $providerBids = $this->getProviderBids($providerId);
-        $target = null;
-        foreach ($providerBids as $bid) {
-            if ((int) ($bid['Bid_ID'] ?? 0) === $bidId) {
-                $target = $bid;
-                break;
-            }
-        }
-
-        if ($target === null) {
-            return [
-                'success' => false,
-                'errorCode' => 'not_found',
-                'message' => 'Bid not found',
-            ];
-        }
-
-        $statusLower = strtolower((string) ($target['Status'] ?? ''));
-        if (!in_array($statusLower, ['active', 'pending', 'open'], true)) {
-            return [
-                'success' => false,
-                'errorCode' => 'not_editable',
-                'message' => 'Only active bids can be edited',
-            ];
-        }
-
         return [
-            'success' => true,
-            'bidId' => $bidId,
-            'amount' => $amount,
-            'comment' => $comment,
-            'durationDays' => $durationDays,
-            'updatedAt' => date('Y-m-d H:i:s'),
-            'isSimulated' => true,
+            'success' => false,
+            'errorCode' => 'not_found',
+            'message' => 'Bid not found or cannot be edited',
         ];
     }
 
@@ -456,8 +424,8 @@ class BidModel extends Database
         foreach ($rows as &$row) {
             $row['Client_Name'] = formatFullName($row['Client_First_Name'], $row['Client_Last_Name']);
             $row['Bid_Amount'] = formatCurrency($row['Amount']);
-            $durationDays = (int) ($row['Duration'] ?? 0);
-            $row['Timeline'] = $durationDays . ' day' . ($durationDays === 1 ? '' : 's');
+            $durationHours = (int) ($row['Duration'] ?? 0);
+            $row['Timeline'] = $this->formatDurationFromHours($durationHours);
             $row['Bid_Date'] = timeAgo($row['Created_At']);
             $row['Bid_Ref'] = 'BID-' . str_pad($row['Bid_ID'], 6, '0', STR_PAD_LEFT);
             
@@ -579,6 +547,27 @@ class BidModel extends Database
 
         $row['canEdit'] = $isOpenPost && $isPendingRequest && $isUnassignedPost && $isActiveBid;
         return $row;
+    }
+
+    private function formatDurationFromHours(int $durationHours): string
+    {
+        if ($durationHours <= 0) {
+            return '0 days';
+        }
+
+        $durationDays = (int) ceil($durationHours / 24);
+
+        if ($durationDays % 30 === 0) {
+            $months = (int) ($durationDays / 30);
+            return $months . ' month' . ($months > 1 ? 's' : '');
+        }
+
+        if ($durationDays % 7 === 0) {
+            $weeks = (int) ($durationDays / 7);
+            return $weeks . ' week' . ($weeks > 1 ? 's' : '');
+        }
+
+        return $durationDays . ' day' . ($durationDays > 1 ? 's' : '');
     }
 
     private function getProviderBidRecord(int $providerId, int $bidId): ?array

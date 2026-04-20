@@ -83,14 +83,9 @@ class FeedController extends BaseController
             $this->htmlError(400);
             return;
         }
-        switch ($bidDurationUnit) {
-            case 'd': $durationDays = (int) $duration; break;
-            case 'w': $durationDays = (int) $duration * 7; break;
-            case 'm': $durationDays = (int) $duration * 30; break;
-            default:  $durationDays = (int) $duration;
-        }
+        $durationHours = $this->durationToHours((int) $duration, $bidDurationUnit);
 
-        $result = $this->feedModel->submitBid($userId, $postId, (float) $bidAmount, $bidComment, $durationDays);
+        $result = $this->feedModel->submitBid($userId, $postId, (float) $bidAmount, $bidComment, $durationHours);
 
         if ($result['success']) {
             header('Location: ' . BASE_URL . '/feed');
@@ -134,14 +129,9 @@ class FeedController extends BaseController
             $this->htmlError(400);
             return;
         }
-        switch ($bidDurationUnit) {
-            case 'd': $durationDays = (int) $duration; break;
-            case 'w': $durationDays = (int) $duration * 7; break;
-            case 'm': $durationDays = (int) $duration * 30; break;
-            default:  $durationDays = (int) $duration;
-        }
+        $durationHours = $this->durationToHours((int) $duration, $bidDurationUnit);
 
-        $result = $this->feedModel->updateBid($bidId, $userId, (float) $bidAmount, $bidComment, $durationDays);
+        $result = $this->feedModel->updateBid($bidId, $userId, (float) $bidAmount, $bidComment, $durationHours);
 
         if ($result['success']) {
             header('Location: ' . BASE_URL . '/feed');
@@ -183,6 +173,23 @@ class FeedController extends BaseController
         } else {
             $this->htmlError(500);
             return;
+        }
+    }
+
+    private function durationToHours(int $durationValue, string $durationUnit): int
+    {
+        if ($durationValue <= 0) {
+            return 0;
+        }
+
+        switch ($durationUnit) {
+            case 'w':
+                return $durationValue * 7 * 24;
+            case 'm':
+                return $durationValue * 30 * 24;
+            case 'd':
+            default:
+                return $durationValue * 24;
         }
     }
 
