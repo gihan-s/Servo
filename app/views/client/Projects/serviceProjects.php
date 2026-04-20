@@ -22,7 +22,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 
-    <script src="<?= BASE_URL ?>/assets/js/elementScript.js" defer></script>
+    <!-- <script src="<?= BASE_URL ?>/assets/js/elementScript.js" defer></script> -->
     <script src="<?= BASE_URL ?>/assets/js/projectDetailView.js" defer></script>
     <script src="<?= BASE_URL ?>/assets/js/cardList.js" defer></script>
 </head>
@@ -44,37 +44,9 @@
             </div>
         </div>
         <div class="request-content">
-            <div class="search-header">
 
-                <div class="search-button">
-                    <input type="text" id="searchInput" placeholder="Search my service requests...">
-                    <button id="searchButton"><i class="fa-solid fa-magnifying-glass"></i></button>
-                </div>
-                <button class="filter" id="filter-pop-up"><i class="fa-solid fa-filter"
-                        onclick="window.showSuccessToast('Test','Test Message')"></i><span>filter</span></button>
 
-                <div class="advance-search">
-                    <span>Sort By: </span>
-                    <div class="select-container" style="width: 150px;">
 
-                        <div class="text-container">
-                                <div class="label dropdown-label" style="visibility: hidden;"></div>
-                                <input type="text" id="sortDropdown" class="text-field-dropdown"
-                                    style="padding: 10px; background-color: var(--containerColor);" value="Date (Newest)"
-                                    readonly>
-                        </div>
-
-                        <div class="options" id="sortOptions" style='max-height:none;'>
-                                <div data-sort="date_desc">Date (Newest)</div>
-                                <div data-sort="date_asc">Date (Oldest)</div>
-                                <div data-sort="price_desc">Price (High)</div>
-                                <div data-sort="price_asc">Price (Low)</div>
-                                <div data-sort="views_desc">Views (Most)</div>
-                                <div data-sort="views_asc">Views (Least)</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
             <!-- PENDING REQUESTS SECTION -->
             <div class="pending requests-section">
                 <div class="item-list">
@@ -1412,10 +1384,6 @@
             // Initial load
             showSection('pending');
         });
-    }
-
-    function payPayment(id) {
-        viewDialogBox('confirm-payment');
 
     function viewPost(id) {
         viewDialogBox('view-post-popup');

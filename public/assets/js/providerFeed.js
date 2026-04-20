@@ -9,49 +9,88 @@ import {
 	setupEscapeKeyHandler
 } from './providerCommon.js';
 
-const bidModalRoot = document.getElementById('bidModalRoot');
-const bidModalClose = document.getElementById('bidModalClose');
-const bidForm = document.getElementById('bidForm');
-const bidPostId = document.getElementById('bidPostId');
+// ── DOM refs ──────────────────────────────────────────────────────────────────
+const bidModalRoot    = document.getElementById('bidModalRoot');
+const bidModalTitle   = document.getElementById('bidModalTitle');
+const bidModalClose   = document.getElementById('bidModalClose');
+const bidForm         = document.getElementById('bidForm');
+const bidFormAction   = document.getElementById('bidFormAction');
+const bidPostId       = document.getElementById('bidPostId');
+const bidIdField      = document.getElementById('bidIdField');
 const bidProjectTitle = document.getElementById('bidProjectTitle');
-const bidClientName = document.getElementById('bidClientName');
-const bidAmount = document.getElementById('bidAmount');
-const bidDuration = document.getElementById('bidDuration');
+const bidClientName   = document.getElementById('bidClientName');
+const bidAmount       = document.getElementById('bidAmount');
+const bidDuration     = document.getElementById('bidDuration');
 const bidDurationUnit = document.getElementById('bidDurationUnit');
-const searchInput = document.getElementById('feedSearchInput');
-const searchBtn = document.getElementById('feedSearchBtn');
-const filterRoot = document.getElementById('feedFilterRoot');
-const filterModal = document.getElementById('feedFilterModal');
-const filterBtn = document.getElementById('feedFilterBtn');
-const filterClose = document.getElementById('feedFilterClose');
-const filterApply = document.getElementById('feedFilterApply');
-const filterClear = document.getElementById('feedFilterClear');
+const bidMessage      = document.getElementById('bidMessage');
+
+const searchInput  = document.getElementById('feedSearchInput');
+const searchBtn    = document.getElementById('feedSearchBtn');
+const filterRoot   = document.getElementById('feedFilterRoot');
+const filterModal  = document.getElementById('feedFilterModal');
+const filterBtn    = document.getElementById('feedFilterBtn');
+const filterClose  = document.getElementById('feedFilterClose');
+const filterApply  = document.getElementById('feedFilterApply');
+const filterClear  = document.getElementById('feedFilterClear');
 const categoryList = document.getElementById('feedCategoryList');
-const viewRoot = document.getElementById('feedViewRoot');
-const viewClose = document.getElementById('feedViewClose');
-const viewTitle = document.getElementById('feedViewTitle');
-const viewClient = document.getElementById('feedViewClient');
-const viewDetails = document.getElementById('feedViewDetails');
-const cards = Array.from(document.querySelectorAll('.search-item'));
+
+const viewRoot     = document.getElementById('feedViewRoot');
+const viewClose    = document.getElementById('feedViewClose');
+const viewTitle    = document.getElementById('feedViewTitle');
+const viewClient   = document.getElementById('feedViewClient');
+const viewDetails  = document.getElementById('feedViewDetails');
+const viewBids     = document.getElementById('feedViewBids');
+const viewBidsList = document.getElementById('feedViewBidsList');
+
+const cancelBidForm = document.getElementById('cancelBidForm');
+const cancelBidId   = document.getElementById('cancelBidId');
+
+const cards = Array.from(document.querySelectorAll('.feed-card'));
 let selectedCategories = new Set();
 
-const viewFieldMap = [
-	{ key: 'category', label: 'Category' },
-	{ key: 'budget', label: 'Budget' },
-	{ key: 'deadline', label: 'Deadline' },
-	{ key: 'posted', label: 'Posted' },
-	{ key: 'status', label: 'Status' },
-	{ key: 'description', label: 'Description' }
-];
-
-function openBidModal(card) {
-	const postId = card.dataset.postid || '';
-	bidProjectTitle.textContent = card.dataset.title || 'Project';
-	bidClientName.textContent = card.dataset.client || 'Client';
-	if (bidPostId) bidPostId.value = postId;
-	bidAmount.value = '';
+// ── Bid Modal ─────────────────────────────────────────────────────────────────
+function openNewBidModal(card) {
+	if (!bidModalRoot) return;
+	bidModalTitle.textContent   = 'Submit Bid';
+	if (bidFormAction) bidFormAction.value = 'submit';
+	bidPostId.value             = card.dataset.postid || '';
+	if (bidIdField) bidIdField.value = '';
+	bidProjectTitle.textContent = card.dataset.title  || 'Project';
+	bidClientName.textContent   = card.dataset.client || 'Client';
+	bidAmount.value  = '';
 	bidDuration.value = '';
 	if (bidDurationUnit) bidDurationUnit.value = 'd';
+	if (bidMessage) bidMessage.value = '';
+	bidForm.action = (window.BASE_URL || '') + '/feed/submit-bid';
+	openModal(bidModalRoot);
+	bidAmount.focus();
+}
+
+function openEditBidModal(card) {
+	if (!bidModalRoot) return;
+	bidModalTitle.textContent   = 'Edit Your Bid';
+	if (bidFormAction) bidFormAction.value = 'edit';
+	bidPostId.value             = card.dataset.postid || '';
+	if (bidIdField) bidIdField.value = card.dataset.mybidid || '';
+	bidProjectTitle.textContent = card.dataset.title  || 'Project';
+	bidClientName.textContent   = card.dataset.client || 'Client';
+	bidAmount.value = card.dataset.mybidamount  || '';
+	if (bidMessage) bidMessage.value = card.dataset.mybidcomment || '';
+
+	// Restore duration unit intelligently
+	const days = parseInt(card.dataset.mybidduration, 10) || 1;
+	if (days % 30 === 0) {
+		bidDuration.value = days / 30;
+		if (bidDurationUnit) bidDurationUnit.value = 'm';
+	} else if (days % 7 === 0) {
+		bidDuration.value = days / 7;
+		if (bidDurationUnit) bidDurationUnit.value = 'w';
+	} else {
+		bidDuration.value = days;
+		if (bidDurationUnit) bidDurationUnit.value = 'd';
+	}
+
+	bidForm.action = (window.BASE_URL || '') + '/feed/edit-bid';
 	openModal(bidModalRoot);
 	bidAmount.focus();
 }
@@ -60,41 +99,79 @@ function closeBidModal() {
 	closeModal(bidModalRoot);
 }
 
+// ── View Modal ────────────────────────────────────────────────────────────────
 function openViewModal(card) {
 	if (!viewRoot || !viewDetails) return;
 
-	viewTitle.textContent = card.dataset.title || '-';
+	viewTitle.textContent  = card.dataset.title  || '-';
 	viewClient.textContent = card.dataset.client || '-';
+
+	const hasBid   = !!card.dataset.mybidid;
+	const duration = card.dataset.mybidduration ? formatDays(parseInt(card.dataset.mybidduration, 10)) : '-';
+
+	const rows = [
+		{ label: 'Category',    value: card.dataset.category    || '-' },
+		{ label: 'Budget',      value: card.dataset.budget       || '-' },
+		{ label: 'Price Type',  value: card.dataset.pricetype    || '-' },
+		{ label: 'Level',       value: card.dataset.level        || '-' },
+		{ label: 'Deadline',    value: calculateDeadline(card.dataset.deadlineraw) },
+		{ label: 'Posted',      value: card.dataset.posted        || '-' },
+		{ label: 'Description', value: card.dataset.description  || '-', wide: true },
+	];
+
+	if (hasBid) {
+		rows.push(
+			{ label: 'Your Bid Amount', value: 'Rs. ' + (card.dataset.mybidamount || '-'), highlight: true },
+			{ label: 'Your Duration',   value: duration, highlight: true },
+			{ label: 'Your Proposal',   value: card.dataset.mybidcomment || '-', wide: true, highlight: true },
+		);
+	}
+
 	viewDetails.innerHTML = '';
-
-	viewFieldMap.forEach((field) => {
-		let value = card.dataset[field.key] || '-';
-
-		// Format deadline as calculated time remaining
-		if (field.key === 'deadline') {
-			value = calculateDeadline(card.dataset.deadline);
+	rows.forEach(({ label, value, wide, highlight }) => {
+		const row = document.createElement('div');
+		row.style.cssText = `display:grid; grid-template-columns:${wide ? '1fr' : '150px 1fr'}; gap:6px; align-items:start;`;
+		if (highlight) {
+			row.style.background   = '#f0fdf4';
+			row.style.padding      = '6px 8px';
+			row.style.borderRadius = '8px';
 		}
 
-		const row = document.createElement('div');
-		row.style.display = 'grid';
-		row.style.gridTemplateColumns = '140px 1fr';
-		row.style.gap = '10px';
-		row.style.alignItems = 'start';
+		const lbl = document.createElement('div');
+		lbl.style.cssText = 'font-weight:700; color:#111827; font-size:13px;';
+		lbl.textContent   = label;
 
-		const label = document.createElement('div');
-		label.style.fontWeight = '700';
-		label.style.color = '#111827';
-		label.textContent = field.label;
+		const val = document.createElement('div');
+		val.style.cssText = `color:#334155; font-size:13px; white-space:${wide ? 'pre-wrap' : 'normal'};`;
+		val.textContent   = value;
 
-		const content = document.createElement('div');
-		content.style.color = '#334155';
-		content.style.whiteSpace = field.key === 'description' ? 'pre-wrap' : 'normal';
-		content.textContent = value;
-
-		row.appendChild(label);
-		row.appendChild(content);
+		if (wide) row.style.gridTemplateColumns = '1fr';
+		row.appendChild(lbl);
+		row.appendChild(val);
 		viewDetails.appendChild(row);
 	});
+
+	// Populate bids list
+	if (viewBids && viewBidsList) {
+		let bids = [];
+		try { bids = JSON.parse(card.dataset.bids || '[]'); } catch (e) { bids = []; }
+		if (bids.length > 0) {
+			viewBidsList.innerHTML = '';
+			bids.forEach(b => {
+				const row = document.createElement('div');
+				row.className = 'view-bid-row' + (b.is_mine ? ' is-mine' : '');
+				row.innerHTML = `
+					<span class="view-bid-name">${b.name}${b.is_mine ? ' <em style="font-size:11px;color:#16a34a;">(You)</em>' : ''}</span>
+					<span class="view-bid-amount">Rs. ${Number(b.amount).toLocaleString('en-US', {minimumFractionDigits:2})}</span>
+					<span class="view-bid-duration">${formatDays(b.duration)}</span>
+				`;
+				viewBidsList.appendChild(row);
+			});
+			viewBids.style.display = '';
+		} else {
+			viewBids.style.display = 'none';
+		}
+	}
 
 	openModal(viewRoot);
 }
@@ -104,58 +181,78 @@ function closeViewModal() {
 	closeModal(viewRoot);
 }
 
-function applyFiltersWrapper() {
-	applyFilters(cards, searchInput, selectedCategories);
+// ── Utility ───────────────────────────────────────────────────────────────────
+function formatDays(days) {
+	if (!days || days < 1) return '-';
+	if (days % 30 === 0) return `${days / 30} month${days / 30 > 1 ? 's' : ''}`;
+	if (days % 7  === 0) return `${days / 7} week${days / 7 > 1 ? 's' : ''}`;
+	return `${days} day${days > 1 ? 's' : ''}`;
 }
 
 function formatDuration(diffMs) {
 	const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
 	if (days < 1) return 'deadline has passed';
 	if (days < 7) return `in ${days} day${days > 1 ? 's' : ''}`;
-
 	const weeks = Math.floor(days / 7);
 	if (weeks < 4) return `in ${weeks} week${weeks > 1 ? 's' : ''}`;
-
 	const months = Math.floor(days / 30);
 	return `in ${months} month${months > 1 ? 's' : ''}`;
 }
 
 function calculateDeadline(dateStr) {
 	if (!dateStr) return 'N/A';
-	const now = new Date();
-	const deadline = new Date(dateStr);
-	const diffMs = deadline - now;
-	if (diffMs <= 0) return 'deadline has passed';
+	const diffMs = new Date(dateStr) - new Date();
+	if (diffMs <= 0) return 'Deadline has passed';
 	return formatDuration(diffMs);
 }
 
-// Bid-specific button handlers
-document.querySelectorAll('.search-item .btn-bid').forEach((btn) => {
+function applyFiltersWrapper() {
+	applyFilters(cards, searchInput, selectedCategories);
+}
+
+// ── Card button handlers ──────────────────────────────────────────────────────
+document.querySelectorAll('.feed-card .btn-bid').forEach((btn) => {
 	btn.addEventListener('click', function () {
-		const card = this.closest('.search-item');
-		if (card) openBidModal(card);
+		const card = this.closest('.feed-card');
+		if (card) openNewBidModal(card);
 	});
 });
 
-document.querySelectorAll('.search-item .btn-message').forEach((btn) => {
+document.querySelectorAll('.feed-card .btn-edit-bid').forEach((btn) => {
 	btn.addEventListener('click', function () {
-		const card = this.closest('.search-item');
-		const client = card ? (card.dataset.client || 'client') : 'client';
-		alert('Open message thread with ' + client + ' (placeholder)');
+		const card = this.closest('.feed-card');
+		if (card) openEditBidModal(card);
 	});
 });
 
-document.querySelectorAll('.search-item .btn-view').forEach((btn) => {
+document.querySelectorAll('.feed-card .btn-cancel-bid').forEach((btn) => {
 	btn.addEventListener('click', function () {
-		const card = this.closest('.search-item');
+		const bidId = this.dataset.bidid || '';
+		if (!bidId) return;
+		if (!confirm('Are you sure you want to cancel your bid?')) return;
+		if (cancelBidId) cancelBidId.value = bidId;
+		if (cancelBidForm) cancelBidForm.submit();
+	});
+});
+
+document.querySelectorAll('.feed-card .btn-message').forEach((btn) => {
+	btn.addEventListener('click', function () {
+		const card  = this.closest('.feed-card');
+		const cid   = card ? (card.dataset.clientid || '') : '';
+		if (cid) window.location.href = (window.BASE_URL || '') + '/messages?new=' + cid;
+	});
+});
+
+document.querySelectorAll('.feed-card .btn-view').forEach((btn) => {
+	btn.addEventListener('click', function () {
+		const card = this.closest('.feed-card');
 		if (card) openViewModal(card);
 	});
 });
 
-// Bid modal handlers
+// ── Bid modal handlers ────────────────────────────────────────────────────────
 bidModalClose && bidModalClose.addEventListener('click', closeBidModal);
-bidModalRoot && bidModalRoot.addEventListener('click', (e) => {
+bidModalRoot  && bidModalRoot.addEventListener('click', (e) => {
 	if (e.target === bidModalRoot) closeBidModal();
 });
 
@@ -163,20 +260,18 @@ bidForm && bidForm.addEventListener('submit', function (e) {
 	if (!bidPostId || !bidPostId.value) {
 		e.preventDefault();
 		alert('Missing project ID for this bid.');
-		return;
 	}
 });
 
-// View modal handlers
+// ── View modal handlers ───────────────────────────────────────────────────────
 viewClose && viewClose.addEventListener('click', closeViewModal);
-viewRoot && viewRoot.addEventListener('click', (e) => {
+viewRoot  && viewRoot.addEventListener('click', (e) => {
 	if (e.target === viewRoot) closeViewModal();
 });
 
-// Setup search handlers using common module
+// ── Search / Filter ───────────────────────────────────────────────────────────
 setupSearchHandlers(searchInput, searchBtn, applyFiltersWrapper);
 
-// Setup filter handlers using common module
 setupFilterHandlers({
 	filterBtn,
 	filterRoot,
@@ -195,26 +290,12 @@ setupFilterHandlers({
 	}
 });
 
-// Setup escape key handler for all modals
 setupEscapeKeyHandler([
 	{ root: bidModalRoot },
 	{ root: viewRoot },
 	{ root: filterRoot, element: filterModal }
 ]);
 
-// Initialize
+// ── Init ──────────────────────────────────────────────────────────────────────
 populateCategoryFilters(categoryList, cards, 'feedCategory');
 applyFiltersWrapper();
-
-// Update deadline displays with calculated time remaining
-cards.forEach(card => {
-	const deadline = card.dataset.deadline;
-	if (deadline) {
-		const deadlineElements = card.querySelectorAll('div');
-		deadlineElements.forEach(el => {
-			if (el.textContent.startsWith('Deadline:')) {
-				el.innerHTML = `<i class="fa-solid fa-calendar-days"></i> Deadline: ${calculateDeadline(deadline)}`;
-			}
-		});
-	}
-});

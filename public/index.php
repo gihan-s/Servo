@@ -445,6 +445,16 @@ switch ($url) {
         $controller->submitBid();
         break;
 
+    case 'feed/edit-bid':
+        $controller = new FeedController();
+        $controller->editBid();
+        break;
+
+    case 'feed/cancel-bid':
+        $controller = new FeedController();
+        $controller->cancelBid();
+        break;
+
     case 'bids':
         $controller = new BidsController();
         $controller->index();

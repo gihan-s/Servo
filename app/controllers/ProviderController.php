@@ -306,7 +306,7 @@ class ProviderController extends BaseController
                     'level' => $request['Level'],
                     'category' => $request['Category_Name'],
                     'client_name' => $request['Client_Name'],
-                    'request_type' => ucfirst(strtolower($request['Post_Type'] ?? 'direct')),
+                    'request_type' => strtolower($request['Post_Type'] ?? 'direct') === 'post' ? 'Bid' : 'Direct',
                     'client_avatar' => $request['Profile_Picture'] ? BASE_URL . $request['Profile_Picture'] : BASE_URL . '/assets/img/default-avatar.jpg',
                     'posted_date' => date('M d, Y', strtotime($request['Created_At'])),
                     'posted_date_relative' => $this->getTimeAgo($request['Created_At'])
@@ -690,7 +690,7 @@ class ProviderController extends BaseController
                     'level'              => $request['Level'],
                     'category'           => $request['Category_Name'],
                     'client_name'        => $request['Client_Name'],
-                    'request_type'       => ucfirst(strtolower($request['Post_Type'] ?? 'direct')),
+                    'request_type'       => strtolower($request['Post_Type'] ?? 'direct') === 'post' ? 'Bid' : 'Direct',
                     'client_avatar'      => !empty($request['Profile_Picture'])
                         ? BASE_URL . $request['Profile_Picture']
                         : BASE_URL . '/assets/img/default-avatar.jpg',
