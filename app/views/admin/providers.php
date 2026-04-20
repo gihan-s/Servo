@@ -40,7 +40,7 @@ $TopBarHeader = "Providers";
 
             <div>
                 <h3>Total Providers</h3>
-                <h1>115</h1>
+                <h1><?= number_format($totalProviders) ?></h1>
                 <span>Total Providers in System</span>
             </div>
 
@@ -52,7 +52,7 @@ $TopBarHeader = "Providers";
 
             <div>
                 <h3>Pending Providers</h3>
-                <h1>12</h1>
+                <h1><?= number_format($pendingProviders) ?></h1>
                 <span>Pending for Approval</span>
             </div>
 
@@ -64,7 +64,7 @@ $TopBarHeader = "Providers";
 
             <div>
                 <h3>Active Providers</h3>
-                <h1>90</h1>
+                <h1><?= number_format($activeProviders) ?></h1>
                 <span>Currently Providing Service</span>
             </div>
 
@@ -77,7 +77,7 @@ $TopBarHeader = "Providers";
 
             <div>
                 <h3>Banned Providers</h3>
-                <h1>13</h1>
+                <h1><?= number_format($bannedProviders) ?></h1>
                 <span>Banned by System</span>
             </div>
 
@@ -143,9 +143,11 @@ $TopBarHeader = "Providers";
 
                                     <div class='option-menu-content'>
                                         <div class='option-menu-item' onclick="viewProvider('<?= htmlspecialchars($user['Provider_ID']) ?>')"><i class='fa-solid fa-eye'></i> View</div>
-                                        <div class='option-menu-item'><i class='fa-solid fa-pen-to-square'></i> Edit</div>
-                                        <div class='option-menu-item red'><i class="fa-solid fa-ban"></i>Ban</div>
-                                        <div class='option-menu-item red'><i class='fa-solid fa-trash'></i>Delete</div>
+                                        <?php if (strtolower($user['Status']) !== 'banned'): ?>
+                                        <div class='option-menu-item red' onclick="openBanDialog('<?= $user['Provider_ID'] ?>', '<?= htmlspecialchars($user['First_Name'] . ' ' . $user['Last_Name'], ENT_QUOTES) ?>')"><i class="fa-solid fa-ban"></i> Ban</div>
+                                        <?php else: ?>
+                                        <div class='option-menu-item' onclick="openUnbanDialog(<?= (int)$user['Provider_ID'] ?>, '<?= htmlspecialchars($user['First_Name'] . ' ' . $user['Last_Name'], ENT_QUOTES) ?>')"><i class="fa-solid fa-circle-check"></i> Unban</div>
+                                        <?php endif; ?>
                                     </div>
 
                                 </div>
@@ -196,6 +198,81 @@ $TopBarHeader = "Providers";
 
     </div>
 
+
+    <!-- Ban Provider Dialog -->
+    <div class="dialog-box-2" id="BanProviderDialog">
+        <div class="dialog-content" style="width: 500px;">
+            <div class="dialog-title">
+                <div class="title">Ban Provider</div>
+                <div>
+                    <i class="fa-solid fa-xmark dialog-close-button-2"
+                        onclick="closeDialogBox('BanProviderDialog')"></i>
+                </div>
+            </div>
+            <div>
+                <p id="BanProviderName" style="font-weight:600; margin-bottom:16px;"></p>
+
+                <form method="POST" action="/admin/providers/ban" id="BanProviderForm">
+                    <input type="hidden" name="provider_id" id="ban_provider_id" class="notreset">
+
+                    <div class="form-group" style="margin-bottom:16px;">
+                        <label for="ban_reason" style="display:block; margin-bottom:6px; font-weight:500;">Reason for Ban <span style="color:red;">*</span></label>
+                        <textarea name="ban_reason" id="ban_reason" rows="4"
+                            placeholder="Enter the reason for banning this provider..."
+                            style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; resize:vertical; box-sizing:border-box;"
+                            required></textarea>
+                    </div>
+
+                    <div style="display:flex; justify-content:flex-end; gap:10px;">
+                        <button type="submit" class="button button-red" style="background:#c0392b; color:#fff;">
+                            <i class="fa-solid fa-ban" style="margin-right: 8px;"></i>
+                            Confirm Ban
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Unban Provider Dialog -->
+    <div class="dialog-box-2" id="UnbanProviderDialog">
+        <div class="dialog-content" style="width: 460px;">
+            <div class="dialog-title">
+                <div class="title">Unban Provider</div>
+                <div>
+                    <i class="fa-solid fa-xmark dialog-close-button-2"
+                        onclick="closeDialogBox('UnbanProviderDialog')"></i>
+                </div>
+            </div>
+            <div>
+                <p id="UnbanProviderName" style="font-weight:600; margin-bottom:12px;"></p>
+                <p style="color:#555; font-size:14px; margin-bottom:20px;">Are you sure you want to reinstate this provider? Their account will be set back to Active and they will be notified by email.</p>
+
+                <form method="POST" action="/admin/providers/unban">
+                    <input type="hidden" name="provider_id" id="unban_provider_id" class="notreset">
+                    <div style="display:flex; justify-content:flex-end; gap:10px;">
+                        <button type="submit" class="button" style="background:#27ae60; color:#fff;">
+                            <i class="fa-solid fa-circle-check" style="margin-right:8px;"></i>Confirm Unban
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openBanDialog(providerId, providerName) {
+            viewDialogBox('BanProviderDialog');
+            document.getElementById('ban_provider_id').value = providerId;
+            document.getElementById('BanProviderName').textContent = 'Provider: ' + providerName;
+        }
+
+        function openUnbanDialog(providerId, providerName) {
+            viewDialogBox('UnbanProviderDialog');
+            document.getElementById('unban_provider_id').value = providerId;
+            document.getElementById('UnbanProviderName').textContent = 'Provider: ' + providerName;
+        }
+    </script>
 
 </body>
 

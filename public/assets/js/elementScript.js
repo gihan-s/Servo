@@ -382,8 +382,10 @@ for (let i = 0; i < searchDropdowns.length; i++) {
 
 
 // Dialog Boxes
-function viewDialogBox(id) {
-    inputReset(id);
+function viewDialogBox(id, reset = true) {
+    if (reset) {
+        inputReset(id);
+    }
     document.getElementById(id).classList.add("dialog-box-2-view");
 }
 
