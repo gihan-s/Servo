@@ -6,12 +6,11 @@
 
 .filter-container {
   min-width: 250px;
-} 
+}
 
 .item-container {
   width: 100%;
 }
-
 
 .buttons {
   padding: 12px 24px;
@@ -117,7 +116,6 @@
   align-items: center;
   gap: 6px;
   text-transform: none;
-  
 }
 
 .btn-edit {
@@ -146,8 +144,8 @@
 
 .btn-delete {
   color: white;
-  background-color: #DC3545;
-  border: 2px solid #DC3545;
+  background-color: #dc3545;
+  border: 2px solid #dc3545;
 }
 
 .btn-delete:hover {
@@ -185,7 +183,6 @@
   font-size: 15px;
   font-weight: 600;
 }
-
 
 .post-skills {
   margin-bottom: 24px;
@@ -833,8 +830,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .loading-state p {
@@ -981,20 +982,20 @@
   .empty-state {
     padding: 40px 15px;
   }
-  
+
   .loading-state i,
   .error-state i {
     font-size: 36px;
   }
-  
+
   .empty-state i {
     font-size: 48px;
   }
-  
+
   .empty-state h2 {
     font-size: 18px;
   }
-  
+
   .empty-state p {
     font-size: 14px;
   }
@@ -1002,4 +1003,143 @@
   .empty-state.search-no-results h3 {
     font-size: 18px;
   }
+}
+
+.post-view {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 14px;
+}
+.post-view-title {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #0f172a;
+}
+.post-view-meta {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.post-view-meta .chip {
+  border: 1px solid #dbe4ee;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+.post-view-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0 16px;
+  padding: 6px;
+  border: 1px solid #dbe4ee;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+.post-view-tab {
+  border: 1px solid transparent;
+  background: transparent;
+  color: #334155;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.post-view-tab:hover {
+  background: #ffffff;
+  border-color: #d1d5db;
+}
+.post-view-tab.active {
+  background: #008500;
+  border-color: #008500;
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(0, 133, 0, 0.22);
+}
+.post-view-pane {
+  display: none;
+}
+.post-view-pane.active {
+  display: block;
+  animation: postPaneIn 0.22s ease;
+}
+@keyframes postPaneIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.post-quick-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  margin: 12px 0 6px;
+}
+.post-quick-stat {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 10px 12px;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+.post-quick-stat:hover {
+  transform: translateY(-2px);
+  border-color: #b9d8b9;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+}
+.post-quick-stat .label {
+  display: block;
+  font-size: 11px;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+.post-quick-stat .value {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+}
+.post-view-section {
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+.post-view-section .section-title {
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed #e2e8f0;
+}
+.provider-bid-card {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+}
+.provider-bid-card:hover {
+  transform: translateY(-2px);
+  border-color: #bfdbbf;
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.1);
+}
+.request-status-note {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 12px;
+  margin-bottom: 10px;
 }
