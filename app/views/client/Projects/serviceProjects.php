@@ -98,26 +98,19 @@
 </div>
 
 <div class="dialog-box-2" id="confirm-payment">
-    <div class="dialog-content">
-        <div class="dialog-title">
-            <div class="title">Confirm Payment</div>
-
-            <div>
-                <i class="fa-solid fa-xmark dialog-close-button-2" onclick="closeDialogBox('confirm-payment')"></i>
+    <div class="dialog-content" style="width:580px; max-width:96vw;">
+        <div class="dialog-title" style="display:flex; align-items:center; justify-content:space-between; padding-bottom:12px; border-bottom:1px solid #e5e7eb;">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <div style="width:38px;height:38px;border-radius:50%;background:#f0fdf4;display:flex;align-items:center;justify-content:center;">
+                    <i class="fa-solid fa-credit-card" style="color:#008500; font-size:16px;"></i>
+                </div>
+                <div class="title" style="font-size:17px; font-weight:700; color:#111827;">Confirm Payment</div>
             </div>
+            <i class="fa-solid fa-xmark dialog-close-button-2" onclick="closeDialogBox('confirm-payment')" style="cursor:pointer; color:#6b7280; font-size:18px;"></i>
         </div>
         <div class="dialog-body"></div>
-        <div class="pop-up-content">
-            Are you sure you want to confirm this payment?
-        </div>
-        <div class="modal-actions">
-            <button class="action-btn btn-delete" id="confirmKeep"
-                onclick="closeDialogBox('confirm-payment')">Cancel</button>
-            <button class="action-btn btn-edit" id="confirmPaymentBtn"><i class="fa-solid fa-check"></i> Confirm</button>
-        </div>
-
+        <div id="payhere-form-container"></div>
     </div>
-
 </div>
 
 <div class="dialog-box-2" id="confirm-cancel">
@@ -1535,138 +1528,91 @@
         viewDialogBox('confirm-payment');
 
         const formContainer = document.querySelector("#confirm-payment .dialog-body");
+        const payhereFormContainer = document.getElementById('payhere-form-container');
+        if (payhereFormContainer) payhereFormContainer.innerHTML = '';
+
         formContainer.innerHTML = `
             <div class="loading-state">
                 <i class="fas fa-spinner fa-spin"></i>
-                <p>Loading post details...</p>
+                <p>Loading payment details...</p>
             </div>
         `;
 
         fetch("<?= BASE_URL ?>/requests/view/" + id)
             .then(response => response.json())
-            .then(post => {
-                // Add delay to make loading animation visible
-                return new Promise(resolve => setTimeout(() => resolve(post), 300));
-            })
+            .then(post => new Promise(resolve => setTimeout(() => resolve(post), 300)))
             .then(post => {
                 if (post.error) {
-                    console.error('Error fetching post:', post.error);
                     formContainer.innerHTML = `
                         <div class="error-state">
                             <i class="fas fa-exclamation-circle"></i>
                             <p>Failed to load post details</p>
                             <button onclick="payPayment(${id})" class="retry-btn">Retry</button>
-                        </div>
-                    `;
+                        </div>`;
                     return;
                 }
-                const providerName = post.Provider_Name || 'Unassigned provider';
-                // Format date
-               
-                // Build skills HTML
-                const skillsHTML = post.skills && post.skills.length > 0
-                    ? post.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')
-                    : '<span>No skills specified</span>';
 
-                // Replace form content with a div wrapper for proper styling
+                const providerName = escapeHtml(post.Provider_Name || 'Assigned Provider');
+                const amount       = parseFloat(post.Requesting_Price || 0);
+                const priceType    = post.Price_Type || 'Fixed';
+
                 formContainer.innerHTML = `
-                <div class="post-view">
-                    <div class="post-view-title">${post.Title || 'Untitled'}</div>
-                    <div class="post-view-section">
-                        <div class="section-title">Description</div>
-                        <div class="section-body">${post.Description || 'No description provided'}</div>
-                    </div>
-                    <div class="post-view-section">
-                        <div class="section-title">Provider</div>
-                        <div class="post-provider">${providerName}</div>
-                    </div> 
-                    <div class="post-view-section">
-                        <div class="section-title">Required Skills</div>
-                        <div class="skills-row">${skillsHTML}</div>
-                    </div>
-                    <div class="post-view-section">
-                        <div class="section-title">Details</div>
-                        <div class="kv-grid">
-                            <div class="kv-item"><span class="kv-label">Budget:</span><span class="kv-value">LKR ${post.Requesting_Price || '0'}/= (${post.Price_Type || 'N/A'})</span></div>
-                            <div class="kv-item"><span class="kv-label">Level:</span><span class="kv-value">${post.Level || 'N/A'}</span></div>
-                            <div class="kv-item"><span class="kv-label">Duration:</span><span class="kv-value">${post.Duration || 'N/A'} ${post.Duration_Type || 'N/A'}</span></div>
-                            <div class="kv-item"><span class="kv-label">Proposals:</span><span class="kv-value">${post.Proposal_Count || '0'}</span></div>
+                <div style="padding:4px 0 16px;">
+
+                    <!-- Project info summary -->
+                    <div style="background:#f9fafb; border:1px solid #e5e7eb; border-radius:12px; padding:14px 16px; margin-bottom:16px;">
+                        <div style="font-size:15px; font-weight:700; color:#111827; margin-bottom:6px;">${escapeHtml(post.Title || 'Untitled Project')}</div>
+                        <div style="display:flex; gap:16px; flex-wrap:wrap; font-size:13px; color:#6b7280;">
+                            <span><i class="fa-solid fa-user" style="color:#008500;"></i> ${providerName}</span>
+                            <span><i class="fa-solid fa-layer-group" style="color:#008500;"></i> ${escapeHtml(post.Category_Name || 'N/A')}</span>
+                            <span><i class="fa-solid fa-tag" style="color:#008500;"></i> ${priceType}</span>
                         </div>
+                        ${post.Description ? `<div style="font-size:13px; color:#374151; margin-top:8px; line-height:1.5;">${escapeHtml(post.Description.substring(0, 160))}${post.Description.length > 160 ? '…' : ''}</div>` : ''}
                     </div>
-                    <div class="post-view-section">
-                        <div class="section-title">Engagement</div>
-                        <div class="engagement-row">
-                            <span class="chip"><i class="fa-solid fa-eye"></i> ${post.Views || '0'} views</span>
-                        </div>
+
+                    <!-- Amount highlighted -->
+                    <div style="background:linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border:2px solid #86efac; border-radius:14px; padding:18px 20px; margin-bottom:20px; text-align:center;">
+                        <div style="font-size:12px; font-weight:600; color:#166534; letter-spacing:0.05em; text-transform:uppercase; margin-bottom:6px;">Amount to Pay</div>
+                        <div style="font-size:32px; font-weight:800; color:#15803d; line-height:1.1;">LKR ${amount.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</div>
                     </div>
-                </div>
-            `;
+
+                    <!-- PayHere branding -->
+                    <div style="display:flex; align-items:center; justify-content:center; gap:8px; font-size:12px; color:#6b7280; margin-bottom:16px;">
+                        <i class="fa-solid fa-shield-halved" style="color:#008500;"></i>
+                        <span>Secured by <strong style="color:#111827;">PayHere</strong> — Sri Lanka's trusted payment gateway</span>
+                        ${<?= PAYHERE_SANDBOX ? 'true' : 'false' ?> ? '<span style="background:#fef3c7; color:#92400e; font-size:11px; font-weight:600; padding:2px 8px; border-radius:99px; border:1px solid #fde68a;">SANDBOX</span>' : ''}
+                    </div>
+
+                    <!-- Actions -->
+                    <div style="display:flex; gap:10px; justify-content:flex-end;">
+                        <button class="action-btn btn-delete" type="button" onclick="closeDialogBox('confirm-payment')">
+                            <i class="fa-solid fa-xmark"></i> Cancel
+                        </button>
+                        <button class="action-btn btn-edit" id="confirmPaymentBtn" type="button" data-post-id="${id}">
+                            <i class="fa-solid fa-credit-card"></i> Proceed to PayHere
+                        </button>
+                    </div>
+                </div>`;
+
+                // Wire up the proceed button — submit a form POST to payhereRedirect
+                document.getElementById('confirmPaymentBtn').addEventListener('click', function () {
+                    this.disabled = true;
+                    this.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Redirecting…';
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '<?= BASE_URL ?>/payments/payhere/' + id;
+                    document.body.appendChild(form);
+                    form.submit();
+                });
             })
-            // document.getElementById('confirmPaymentBtn').addEventListener('click', function () {
-                
-            //     closeDialogBox('confirm-payment');
-            //     window.showSuccessToast("Payment Initiated", "You will be redirected to the payment gateway.");
-            //     console.log(`Redirecting to payment for Post ID: ${id}`);
-        
-            .catch(error => {
-                console.error('Error fetching post:', error);
+            .catch(() => {
                 formContainer.innerHTML = `
                     <div class="error-state">
                         <i class="fas fa-exclamation-circle"></i>
-                        <p>Failed to load post details. Please try again.</p>
-                        <button onclick="viewPost(${id})" class="retry-btn">Retry</button>
-                    </div>
-                `;
+                        <p>Failed to load payment details. Please try again.</p>
+                        <button onclick="payPayment(${id})" class="retry-btn">Retry</button>
+                    </div>`;
             });
-
-        const confirmPaymentBtn = document.getElementById('confirmPaymentBtn');
-
-        // Remove previous event listeners to avoid multiple triggers
-        const newconfirmPaymentBtn = confirmPaymentBtn.cloneNode(true);
-        confirmPaymentBtn.parentNode.replaceChild(newconfirmPaymentBtn, confirmPaymentBtn);
-
-        newconfirmPaymentBtn.addEventListener('click', function () {
-            fetch("<?= BASE_URL ?>/requests/payment/" + id, {
-                method: 'POST'
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        closeDialogBox('confirm-payment');
-                        window.showSuccessToast("Success!", "Payment initiated successfully");
-
-                        // Remove from DOM with animation
-                        const postElement = document.querySelector(`.search-item input[value="${id}"]`)?.closest('.search-item');
-                        if (postElement) {
-                            postElement.style.transition = 'all 0.3s ease';
-                            postElement.style.opacity = '0';
-                            postElement.style.transform = 'translateX(-20px)';
-
-                            setTimeout(() => {
-                                postElement.remove();
-
-                                // Check if section is now empty
-                                const activeSection = document.querySelector('.requests-section:not([style*="display: none"])');
-                                const itemList = activeSection?.querySelector('.item-list');
-                                const remainingPosts = itemList?.querySelectorAll('.search-item');
-
-                                if (remainingPosts && remainingPosts.length === 0) {
-                                    const status = activeSection.classList.contains('pending') ? 'pending' :
-                                        activeSection.classList.contains('accepted') ? 'accepted' : 'ongoing';
-                                    showEmptyState(status, itemList);
-                                }
-                            }, 300);
-                        }
-                    } else {
-                        window.showErrorToast("Error", data.error || 'Failed to initiate payment');
-                    }
-                })
-                .catch(error => {
-                    console.log('cancelRequest error:', error);
-                    console.error('Error:', error);
-                    showErrorToast("Error", 'An error occurred while cancelling the request. Please try again.');
-                });
-        });
     }
 
     function updateRequest(postId) {
