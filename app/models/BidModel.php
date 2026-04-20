@@ -53,6 +53,7 @@ class BidModel extends Database
             ) pr
                 ON pr.Provider_ID = b.Provider_ID
             WHERE b.Post_ID = ?
+            AND b.Status IN ('active', 'accepted')
             ORDER BY b.Created_At DESC
         ";
 
