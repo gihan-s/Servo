@@ -77,18 +77,9 @@ function openEditBidModal(card) {
 	bidAmount.value = card.dataset.mybidamount  || '';
 	if (bidMessage) bidMessage.value = card.dataset.mybidcomment || '';
 
-	// Restore duration unit intelligently
-	const days = parseInt(card.dataset.mybidduration, 10) || 1;
-	if (days % 30 === 0) {
-		bidDuration.value = days / 30;
-		if (bidDurationUnit) bidDurationUnit.value = 'm';
-	} else if (days % 7 === 0) {
-		bidDuration.value = days / 7;
-		if (bidDurationUnit) bidDurationUnit.value = 'w';
-	} else {
-		bidDuration.value = days;
-		if (bidDurationUnit) bidDurationUnit.value = 'd';
-	}
+	const durationState = durationHoursToEditableValue(card.dataset.mybidduration);
+	bidDuration.value = durationState.value;
+	if (bidDurationUnit) bidDurationUnit.value = durationState.unit;
 
 	bidForm.action = (window.BASE_URL || '') + '/feed/edit-bid';
 	openModal(bidModalRoot);
@@ -107,7 +98,7 @@ function openViewModal(card) {
 	viewClient.textContent = card.dataset.client || '-';
 
 	const hasBid   = !!card.dataset.mybidid;
-	const duration = card.dataset.mybidduration ? formatDays(parseInt(card.dataset.mybidduration, 10)) : '-';
+	const duration = card.dataset.mybidduration ? formatDurationFromHours(parseInt(card.dataset.mybidduration, 10)) : '-';
 
 	const rows = [
 		{ label: 'Category',    value: card.dataset.category    || '-' },
@@ -163,7 +154,7 @@ function openViewModal(card) {
 				row.innerHTML = `
 					<span class="view-bid-name">${b.name}${b.is_mine ? ' <em style="font-size:11px;color:#16a34a;">(You)</em>' : ''}</span>
 					<span class="view-bid-amount">Rs. ${Number(b.amount).toLocaleString('en-US', {minimumFractionDigits:2})}</span>
-					<span class="view-bid-duration">${formatDays(b.duration)}</span>
+					<span class="view-bid-duration">${formatDurationFromHours(b.duration)}</span>
 				`;
 				viewBidsList.appendChild(row);
 			});
@@ -182,8 +173,32 @@ function closeViewModal() {
 }
 
 // ── Utility ───────────────────────────────────────────────────────────────────
-function formatDays(days) {
-	if (!days || days < 1) return '-';
+function durationHoursToEditableValue(durationHours) {
+	const hours = Number.parseInt(String(durationHours || '').trim(), 10);
+	if (!Number.isFinite(hours) || hours <= 0) {
+		return { value: '1', unit: 'd' };
+	}
+
+	if (hours % 720 === 0) {
+		return { value: String(hours / 720), unit: 'm' };
+	}
+
+	if (hours % 168 === 0) {
+		return { value: String(hours / 168), unit: 'w' };
+	}
+
+	if (hours % 24 === 0) {
+		return { value: String(hours / 24), unit: 'd' };
+	}
+
+	return { value: String(Math.max(1, Math.ceil(hours / 24))), unit: 'd' };
+}
+
+function formatDurationFromHours(durationHours) {
+	const hours = Number.parseInt(String(durationHours || '').trim(), 10);
+	if (!Number.isFinite(hours) || hours <= 0) return '-';
+
+	const days = Math.max(1, Math.ceil(hours / 24));
 	if (days % 30 === 0) return `${days / 30} month${days / 30 > 1 ? 's' : ''}`;
 	if (days % 7  === 0) return `${days / 7} week${days / 7 > 1 ? 's' : ''}`;
 	return `${days} day${days > 1 ? 's' : ''}`;
