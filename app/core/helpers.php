@@ -29,19 +29,19 @@ function formatDuration($date) {
     $timestamp = strtotime($date);
     $diff = $timestamp - time();
     if ($diff <= 0) return '0 days';
-    $days = floor($diff / 86400);
+    $days = (int) floor($diff / 86400);
     if ($days == 1) return '1 day';
     if ($days < 7) return $days . ' days';
-    $weeks = floor($days / 7);
+    $weeks = (int) floor($days / 7);
     if ($weeks == 1) return '1 week';
     if ($weeks < 4) return $weeks . ' weeks';
-    $months = floor($days / 30);
-    return $months . ' month' . ($months == 1 ? '' : 's');
+    $months = (int) floor($days / 30);
+    return $months . ' month' . ($months > 1 ? 's' : '');
 }
 
 function formatCurrency($amount) {
     if ($amount === NULL) return NULL;
-    return '$' . number_format($amount, 0);
+    return 'LKR ' . number_format($amount, 0);
 }
 
 function formatFullName($firstName, $lastName) {

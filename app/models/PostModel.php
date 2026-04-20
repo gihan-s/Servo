@@ -405,6 +405,8 @@ class PostModel extends Database
                 p.Provider_ID, 
                 p.Request_Status,
                 CONCAT(pr.First_Name, ' ', pr.Last_Name) AS Provider_Name,
+                pr.Profile_Picture AS Provider_Picture,
+                pr.Rating AS Provider_Rating,
                 c.Name AS CategoryName
             FROM post p
             LEFT JOIN category c ON c.Category_ID = p.Category_ID
@@ -596,47 +598,23 @@ class PostModel extends Database
 
     public function countActiveRequests($clientId)
     {
-        $count = 3; // Replace with actual data fetching logic
-        // $stmt = $this->conn->prepare("SELECT COUNT(*) as count FROM Post WHERE Client_ID = ? AND Post_Status = 'Published'");
-        // $stmt->bind_param("i", $clientId);
-        // $stmt->execute();
-        // $result = $stmt->get_result();
-        // $count = $result->fetch_assoc()['count'];
-        // $stmt->close();
+        $stmt = $this->conn->prepare("SELECT COUNT(*) as count FROM Post WHERE Client_ID = ? AND Post_Status = 'Published'");
+        $stmt->bind_param("i", $clientId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $count = $result->fetch_assoc()['count'];
+        $stmt->close();
         return $count;
     }
 
     public function getRecentRequests($clientId, $limit = 3)
     {
-        // $stmt = $this->conn->prepare("SELECT * FROM Post WHERE Client_ID = ? ORDER BY Created_At DESC LIMIT ?");
-        // $stmt->bind_param("ii", $clientId, $limit);
-        // $stmt->execute();
-        // $result = $stmt->get_result();
-        // $stmt->close();
-        // return $result->fetch_all(MYSQLI_ASSOC);
-        return [
-            [
-                'Title' => 'Full-Stack E‑commerce Platform',
-                'Post_Status' => 'Open',
-                'Created_At' => '2025-12-12',
-                'Proposals' => 23,
-                'End_At' => '2025-12-31'
-            ],
-            [
-                'Title' => 'Mobile App UI/UX Design',
-                'Post_Status' => 'Open',
-                'Created_At' => '2025-11-30',
-                'Proposals' => 47,
-                'End_At' => '2025-12-30'
-            ],
-            [
-                'Title' => 'Digital Marketing Campaign Plan',
-                'Post_Status' => 'Draft',
-                'Created_At' => '2025-11-28',
-                'Proposals' => NULL,
-                'End_At' => NULL
-            ]
-        ]; // fetch actual data from model
+        $stmt = $this->conn->prepare("SELECT * FROM Post WHERE Client_ID = ? ORDER BY Created_At DESC LIMIT ?");
+        $stmt->bind_param("ii", $clientId, $limit);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+        return $result->fetch_all(MYSQLI_ASSOC);
     }
 
     public function deletePost(int $postId): bool

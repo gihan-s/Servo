@@ -120,17 +120,21 @@ function parseAmount(rawAmount, formattedAmount) {
 	return Number.isFinite(parsedFormatted) && parsedFormatted > 0 ? parsedFormatted : 1;
 }
 
-function durationDaysToEditableValue(durationDays) {
-	const days = parsePositiveInt(durationDays, 1);
-	if (days % 30 === 0) {
-		return { value: String(days / 30), unit: 'm' };
+function durationHoursToEditableValue(durationHours) {
+	const hours = parsePositiveInt(durationHours, 24);
+	if (hours % 720 === 0) {
+		return { value: String(hours / 720), unit: 'm' };
 	}
 
-	if (days % 7 === 0) {
-		return { value: String(days / 7), unit: 'w' };
+	if (hours % 168 === 0) {
+		return { value: String(hours / 168), unit: 'w' };
 	}
 
-	return { value: String(days), unit: 'd' };
+	if (hours % 24 === 0) {
+		return { value: String(hours / 24), unit: 'd' };
+	}
+
+	return { value: String(Math.max(1, Math.ceil(hours / 24))), unit: 'd' };
 }
 
 function updateCardAfterEdit(card, bidData) {
@@ -139,8 +143,8 @@ function updateCardAfterEdit(card, bidData) {
 	const amountFormatted = bidData.amountFormatted || card.dataset.amount || '-';
 	const amountRaw = String(bidData.amount ?? card.dataset.amountRaw ?? '').trim();
 	const durationLabel = bidData.durationLabel || card.dataset.duration || '-';
-	const durationDays = String(bidData.durationDays ?? card.dataset.durationDays ?? '').trim();
-	const durationState = durationDaysToEditableValue(durationDays);
+	const durationHours = String(bidData.durationHours ?? card.dataset.durationHours ?? '').trim();
+	const durationState = durationHoursToEditableValue(durationHours);
 	const comment = bidData.comment || card.dataset.description || '';
 	const status = bidData.status || card.dataset.status || 'Active';
 	const statusKey = bidData.statusKey || card.dataset.statusKey || 'active';
@@ -149,7 +153,7 @@ function updateCardAfterEdit(card, bidData) {
 	card.dataset.amount = amountFormatted;
 	card.dataset.amountRaw = amountRaw;
 	card.dataset.duration = durationLabel;
-	card.dataset.durationDays = durationDays;
+	card.dataset.durationHours = durationHours;
 	card.dataset.durationUnitValue = durationState.value;
 	card.dataset.durationUnit = durationState.unit;
 	card.dataset.description = comment;
@@ -199,7 +203,7 @@ function openEditModal(card) {
 	const datasetDurationUnit = (card.dataset.durationUnit || '').trim().toLowerCase();
 	const durationState = datasetDurationValue > 0 && ['d', 'w', 'm'].includes(datasetDurationUnit)
 		? { value: String(datasetDurationValue), unit: datasetDurationUnit }
-		: durationDaysToEditableValue(card.dataset.durationDays);
+		: durationHoursToEditableValue(card.dataset.durationHours);
 	const comment = card.dataset.description || '';
 
 	editForm.reset();

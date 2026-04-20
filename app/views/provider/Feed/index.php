@@ -65,10 +65,11 @@
 		.feed-card-actions button {
 			padding: 7px 12px;
 			font-size: 13px;
-			border-radius: 7px;
+			border-radius: 8px;
 			cursor: pointer;
 			display: inline-flex; align-items: center; gap: 6px;
 			white-space: nowrap;
+			font-weight: 600;
 		}
 		.feed-card-actions .btn-bid-placed {
 			background: #f3f4f6 !important; color: #6b7280 !important;
@@ -207,7 +208,7 @@
 						<?php foreach ($feedItems as $item):
 							$myBidId      = $item['My_Bid_ID']      ?? null;
 							$myBidAmount  = $item['My_Bid_Amount']   ?? null;
-							$myBidDays    = (int) ($item['My_Bid_Duration'] ?? 0);
+							$myBidHours   = (int) ($item['My_Bid_Duration'] ?? 0);
 							$myBidComment = $item['My_Bid_Comment']  ?? '';
 							$totalBids    = (int) ($item['Total_Bids'] ?? 0);
 							$postBids     = $allBids[$item['Post_ID']] ?? [];
@@ -244,7 +245,7 @@
 							<?php if ($myBidId): ?>
 							data-mybidid="<?= htmlspecialchars($myBidId, ENT_QUOTES, 'UTF-8') ?>"
 							data-mybidamount="<?= htmlspecialchars($myBidAmount, ENT_QUOTES, 'UTF-8') ?>"
-							data-mybidduration="<?= htmlspecialchars($myBidDays, ENT_QUOTES, 'UTF-8') ?>"
+							data-mybidduration="<?= htmlspecialchars($myBidHours, ENT_QUOTES, 'UTF-8') ?>"
 							data-mybidcomment="<?= htmlspecialchars($myBidComment, ENT_QUOTES, 'UTF-8') ?>"
 							<?php endif; ?>>
 
@@ -294,14 +295,15 @@
 										<span class="feed-bid-banner-label">Duration</span>
 										<span class="feed-bid-banner-value">
 											<?php
+											$myBidDays = $myBidHours > 0 ? (int) ceil($myBidHours / 24) : 0;
 											if ($myBidDays % 30 === 0 && $myBidDays >= 30) echo ($myBidDays / 30) . ' month' . ($myBidDays / 30 > 1 ? 's' : '');
 											elseif ($myBidDays % 7 === 0 && $myBidDays >= 7)  echo ($myBidDays / 7)  . ' week'  . ($myBidDays / 7  > 1 ? 's' : '');
-											else echo $myBidDays . ' day' . ($myBidDays > 1 ? 's' : '');
+											else echo max(1, $myBidDays) . ' day' . (max(1, $myBidDays) > 1 ? 's' : '');
 											?>
 										</span>
 									</div>
 								</div>
-								<span style="font-size:12px; color:#16a34a; font-weight:600;"><i class="fa-solid fa-circle-check"></i> Bid Submitted</span>
+								<span style="font-size:12px; color:#008500; font-weight:600;"><i class="fa-solid fa-circle-check"></i> Bid Submitted</span>
 							</div>
 							<?php endif; ?>
 
@@ -312,10 +314,11 @@
 								<?php foreach ($postBids as $bid):
 									$isMe    = ($myBidId && (int)$bid['Bid_ID'] === (int)$myBidId);
 									$bidName = $bid['First_Name'] . ' ' . substr($bid['Last_Name'], 0, 1) . '.';
-									$bidDays = (int) $bid['Duration'];
+									$bidHours = (int) $bid['Duration'];
+									$bidDays = $bidHours > 0 ? (int) ceil($bidHours / 24) : 0;
 									if ($bidDays % 30 === 0 && $bidDays >= 30) $durStr = ($bidDays/30) . ' mo';
 									elseif ($bidDays % 7 === 0 && $bidDays >= 7) $durStr = ($bidDays/7) . ' wk';
-									else $durStr = $bidDays . 'd';
+									else $durStr = max(1, $bidDays) . 'd';
 								?>
 								<div class="feed-bid-row<?= $isMe ? ' feed-bid-row-you' : '' ?>">
 									<span class="feed-bid-row-name"><?= htmlspecialchars($bidName, ENT_QUOTES, 'UTF-8') ?><?= $isMe ? ' <em style="font-size:11px;color:#16a34a;">(You)</em>' : '' ?></span>
