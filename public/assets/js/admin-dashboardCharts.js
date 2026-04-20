@@ -1,16 +1,14 @@
+const chartData = window.dashboardChartData || { postActivity: { labels: [], counts: [] }, projectCounts: { pending: 0, ongoing: 0, completed: 0, rejected: 0 } };
+
 const ctx = document.getElementById('NoOfSoftwaresChart').getContext('2d');
     
 new Chart(ctx, {
     type: 'line',
     data: {
-      labels: [
-        "2024-11-01", "2024-11-02", "2024-11-03", "2024-11-04", "2024-11-05",
-        "2024-11-06", "2024-11-07", "2024-11-08", "2024-11-09", "2024-11-10",
-        "2024-11-11", "2024-11-12",
-      ],
+      labels: chartData.postActivity.labels,
       datasets: [{
-        label: 'Active Posts',
-        data: [89, 256, 421, 1428, 1567, 1940, 2786,2330,  3170, 3721, 4012, 4395, 4501],
+        label: 'Total Requests',
+        data: chartData.postActivity.counts,
         borderColor: 'rgba(75, 192, 192, 1)',
         backgroundColor: 'rgba(75, 192, 192, 0.2)',
         borderWidth: 2,
@@ -57,7 +55,7 @@ new Chart(ctx, {
         y: {
           title: {
             display: true,
-            text: 'Active Posts',
+            text: 'Total Requests',
             color: 'black',
             font: {
               weight: 'bold',
@@ -84,7 +82,12 @@ new Chart(ctx, {
     data: {
       labels: ['Pending', 'Ongoing', 'Completed', 'Rejected'],
       datasets: [{
-        data: [1250, 520, 1260, 80],
+        data: [
+          chartData.projectCounts.pending,
+          chartData.projectCounts.ongoing,
+          chartData.projectCounts.completed,
+          chartData.projectCounts.rejected
+        ],
         backgroundColor: ['#fdb614', '#21aaffff', '#03c04a', '#FF0000'],
         hoverBackgroundColor: ['#fdb614', '#21aaffff', '#03c04a', '#FF0000']
       }]

@@ -25,6 +25,32 @@ $TopBarHeader = "Dashboard";
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script src="/assets/js/admin-script.js" defer></script>
+
+    <?php
+        // Prepare chart data for JavaScript
+        $chartLabels = [];
+        $chartCounts = [];
+        foreach ($postActivity as $row) {
+            $chartLabels[] = $row['day'];
+            $chartCounts[] = (int)$row['total_count'];
+        }
+        $projectCounts = $projectCounts ?? ['pending' => 0, 'ongoing' => 0, 'completed' => 0, 'rejected' => 0, 'total' => 0];
+    ?>
+    <script>
+        window.dashboardChartData = {
+            postActivity: {
+                labels: <?= json_encode($chartLabels) ?>,
+                counts: <?= json_encode($chartCounts) ?>
+            },
+            projectCounts: {
+                pending:   <?= (int)($projectCounts['pending']   ?? 0) ?>,
+                ongoing:   <?= (int)($projectCounts['ongoing']   ?? 0) ?>,
+                completed: <?= (int)($projectCounts['completed'] ?? 0) ?>,
+                rejected:  <?= (int)($projectCounts['rejected']  ?? 0) ?>
+            }
+        };
+    </script>
+
     <script src="/assets/js/admin-dashboardCharts.js" defer></script>
 
 </head>
@@ -44,7 +70,7 @@ $TopBarHeader = "Dashboard";
 
             <div>
                 <h3>Active Clients</h3>
-                <h1>458</h1>
+                <h1><?= number_format($activeClients) ?></h1>
                 <span>Currently Using the System</span>
             </div>
 
@@ -56,7 +82,7 @@ $TopBarHeader = "Dashboard";
 
             <div>
                 <h3>Active Providers</h3>
-                <h1>56</h1>
+                <h1><?= number_format($activeProviders) ?></h1>
                 <span>Currently Delivering Services</span>
             </div>
 
@@ -68,7 +94,7 @@ $TopBarHeader = "Dashboard";
 
             <div>
                 <h3>Total Active Posts</h3>
-                <h1>4,526</h1>
+                <h1><?= number_format($activePosts) ?></h1>
                 <span>Currently Published</span>
             </div>
 
@@ -80,8 +106,8 @@ $TopBarHeader = "Dashboard";
 
             <div>
                 <h3>Payment Received</h3>
-                <h1>835,000.00</h1>
-                <span>No of Customers Added</span>
+                <h1><?= number_format($totalPayment, 2) ?></h1>
+                <span>Total Completed Payments</span>
             </div>
 
             <img src="/assets/img/admin-icon/accounting.png" alt="">
@@ -112,27 +138,27 @@ $TopBarHeader = "Dashboard";
                 <table class="visit-table">
                     <tr>
                         <td>Pending Projects</td>
-                        <td>1250</td>
+                        <td><?= number_format((int)($projectCounts['pending'] ?? 0)) ?></td>
                     </tr>
 
                     <tr>
                         <td>Ongoing Projects</td>
-                        <td>520</td>
+                        <td><?= number_format((int)($projectCounts['ongoing'] ?? 0)) ?></td>
                     </tr>
 
                     <tr>
                         <td>Completed Projects</td>
-                        <td>1260</td>
+                        <td><?= number_format((int)($projectCounts['completed'] ?? 0)) ?></td>
                     </tr>
 
                     <tr>
                         <td>Rejected Projects</td>
-                        <td>80</td>
+                        <td><?= number_format((int)($projectCounts['rejected'] ?? 0)) ?></td>
                     </tr>
 
                     <tr>
                         <th>Total</th>
-                        <th>3050</th>
+                        <th><?= number_format((int)($projectCounts['total'] ?? 0)) ?></th>
                     </tr>
 
                 </table>
@@ -146,50 +172,27 @@ $TopBarHeader = "Dashboard";
 
                 <h3>Most Engaging Providers</h3>
 
+                <?php
+                $maxBids = !empty($topBidProviders) ? (int)$topBidProviders[0]['bid_count'] : 1;
+                foreach ($topBidProviders as $provider):
+                    $progress = $maxBids > 0 ? round(((int)$provider['bid_count'] / $maxBids) * 100) : 0;
+                    $name = htmlspecialchars($provider['First_Name'] . ' ' . $provider['Last_Name']);
+                    $imgSrc = !empty($provider['Profile_Picture'])
+                        ? BASE_URL . '/file/user-files/' . urlencode($provider['Profile_Picture'])
+                        : '/assets/img/default-avatar.png';
+                ?>
                 <div class="customer-progress-card">
-                    <img src="https://randomuser.me/api/portraits/med/men/75.jpg" alt="">
+                    <img src="<?= $imgSrc ?>" alt="<?= $name ?>">
                     <div>
-                        <h4>Chethiya Bandara</h4>
-                        <div class="progress-bar" style="--progress: 0%" data-progress="80"></div>
-                        <span>Bids : 1245</span>
+                        <h4><?= $name ?></h4>
+                        <div class="progress-bar" style="--progress: 0%" data-progress="<?= $progress ?>"></div>
+                        <span>Bids : <?= number_format((int)$provider['bid_count']) ?></span>
                     </div>
                 </div>
-
-                <div class="customer-progress-card">
-                    <img src="https://randomuser.me/api/portraits/med/men/74.jpg" alt="">
-                    <div>
-                        <h4>Himath Adithya</h4>
-                        <div class="progress-bar" style="--progress: 0%" data-progress="70"></div>
-                        <span>Bids : 760</span>
-                    </div>
-                </div>
-
-                <div class="customer-progress-card">
-                    <img src="https://randomuser.me/api/portraits/med/men/73.jpg" alt="">
-                    <div>
-                        <h4>Akila Prabhashwara</h4>
-                        <div class="progress-bar" style="--progress: 0%" data-progress="55"></div>
-                        <span>Bids : 600</span>
-                    </div>
-                </div>
-
-                <div class="customer-progress-card">
-                    <img src="https://randomuser.me/api/portraits/med/men/72.jpg" alt="">
-                    <div>
-                        <h4>Bhashitha Sandeepa</h4>
-                        <div class="progress-bar" style="--progress: 0%" data-progress="40"></div>
-                        <span>Bids : 452</span>
-                    </div>
-                </div>
-
-                <div class="customer-progress-card">
-                    <img src="https://randomuser.me/api/portraits/med/men/71.jpg" alt="">
-                    <div>
-                        <h4>Pasindu Gihan</h4>
-                        <div class="progress-bar" style="--progress: 0%" data-progress="25"></div>
-                        <span>Bids : 325</span>
-                    </div>
-                </div>
+                <?php endforeach; ?>
+                <?php if (empty($topBidProviders)): ?>
+                <p>No data available.</p>
+                <?php endif; ?>
 
             </div>
 
@@ -197,53 +200,27 @@ $TopBarHeader = "Dashboard";
 
                 <h3>Most Earned Providers</h3>
 
+                <?php
+                $maxEarning = !empty($topEarnProviders) ? (float)$topEarnProviders[0]['Total_Earning'] : 1;
+                foreach ($topEarnProviders as $provider):
+                    $progress = $maxEarning > 0 ? round(((float)$provider['Total_Earning'] / $maxEarning) * 100) : 0;
+                    $name = htmlspecialchars($provider['First_Name'] . ' ' . $provider['Last_Name']);
+                    $imgSrc = !empty($provider['Profile_Picture'])
+                        ? BASE_URL . '/file/user-files/' . urlencode($provider['Profile_Picture'])
+                        : '/assets/img/default-avatar.png';
+                ?>
                 <div class="customer-progress-card">
-                    <img src="https://randomuser.me/api/portraits/med/men/74.jpg" alt="">
+                    <img src="<?= $imgSrc ?>" alt="<?= $name ?>">
                     <div>
-                        <h4>Himath Adithya</h4>
-                        <div class="progress-bar" style="--progress: 0%" data-progress="80"></div>
-                        <span>Amount : Rs. 3,261,124.005</span>
+                        <h4><?= $name ?></h4>
+                        <div class="progress-bar" style="--progress: 0%" data-progress="<?= $progress ?>"></div>
+                        <span>Amount : Rs. <?= number_format((float)$provider['Total_Earning'], 2) ?></span>
                     </div>
                 </div>
-
-                <div class="customer-progress-card">
-                    <img src="https://randomuser.me/api/portraits/med/men/73.jpg" alt="">
-                    <div>
-                        <h4>Akila Prabhashwara</h4>
-                        <div class="progress-bar" style="--progress: 0%" data-progress="50"></div>
-                        <span>Amount : Rs. 2,756,510.00</span>
-                    </div>
-                </div>
-
-                <div class="customer-progress-card">
-                    <img src="https://randomuser.me/api/portraits/med/men/75.jpg" alt="">
-                    <div>
-                        <h4>Chethiya Bandara</h4>
-                        <div class="progress-bar" style="--progress: 0%" data-progress="35"></div>
-                        <span>Amount : Rs. 1,261,600.00</span>
-                    </div>
-                </div>
-
-                <div class="customer-progress-card">
-                    <img src="https://randomuser.me/api/portraits/med/men/72.jpg" alt="">
-                    <div>
-                        <h4>Bhashitha Sandeepa</h4>
-                        <div class="progress-bar" style="--progress: 0%" data-progress="15"></div>
-                        <span>Amount : Rs. 561,452.00</span>
-                    </div>
-                </div>
-
-                <div class="customer-progress-card">
-                    <img src="https://randomuser.me/api/portraits/med/men/71.jpg" alt="">
-                    <div>
-                        <h4>Pasindu Gihan</h4>
-                        <div class="progress-bar" style="--progress: 0%" data-progress="8"></div>
-                        <span>Amount : Rs. 361,325.00</span>
-                    </div>
-                </div>
-
-
-
+                <?php endforeach; ?>
+                <?php if (empty($topEarnProviders)): ?>
+                <p>No data available.</p>
+                <?php endif; ?>
 
             </div>
 
@@ -252,50 +229,27 @@ $TopBarHeader = "Dashboard";
 
                 <h3>Most Spending Clients</h3>
 
+                <?php
+                $maxSpent = !empty($topClients) ? (float)$topClients[0]['total_spent'] : 1;
+                foreach ($topClients as $client):
+                    $progress = $maxSpent > 0 ? round(((float)$client['total_spent'] / $maxSpent) * 100) : 0;
+                    $name = htmlspecialchars($client['First_Name'] . ' ' . $client['Last_Name']);
+                    $imgSrc = !empty($client['Profile_Picture'])
+                        ? BASE_URL . '/file/user-files/' . urlencode($client['Profile_Picture'])
+                        : '/assets/img/default-avatar.png';
+                ?>
                 <div class="customer-progress-card">
-                    <img src="https://randomuser.me/api/portraits/med/men/65.jpg" alt="">
+                    <img src="<?= $imgSrc ?>" alt="<?= $name ?>">
                     <div>
-                        <h4>Hirusha Randika</h4>
-                        <div class="progress-bar" style="--progress: 0%" data-progress="80"></div>
-                        <span>Amount : Rs. 325,600.00</span>
+                        <h4><?= $name ?></h4>
+                        <div class="progress-bar" style="--progress: 0%" data-progress="<?= $progress ?>"></div>
+                        <span>Amount : Rs. <?= number_format((float)$client['total_spent'], 2) ?></span>
                     </div>
                 </div>
-
-                <div class="customer-progress-card">
-                    <img src="https://randomuser.me/api/portraits/med/men/64.jpg" alt="">
-                    <div>
-                        <h4>Pasan Dhananjaya</h4>
-                        <div class="progress-bar" style="--progress: 0%" data-progress="70"></div>
-                        <span>Amount : Rs. 250,000.00</span>
-                    </div>
-                </div>
-
-                <div class="customer-progress-card">
-                    <img src="https://randomuser.me/api/portraits/med/men/63.jpg" alt="">
-                    <div>
-                        <h4>Charith Shehan</h4>
-                        <div class="progress-bar" style="--progress: 0%" data-progress="55"></div>
-                        <span>Amount : Rs. 160,000.00</span>
-                    </div>
-                </div>
-
-                <div class="customer-progress-card">
-                    <img src="https://randomuser.me/api/portraits/med/men/62.jpg" alt="">
-                    <div>
-                        <h4>Chinthaka Prasad</h4>
-                        <div class="progress-bar" style="--progress: 0%" data-progress="40"></div>
-                        <span>Amount : Rs. 88,500.00</span>
-                    </div>
-                </div>
-
-                <div class="customer-progress-card">
-                    <img src="https://randomuser.me/api/portraits/med/men/61.jpg" alt="">
-                    <div>
-                        <h4>Kalindu Dilshan</h4>
-                        <div class="progress-bar" style="--progress: 0%" data-progress="25"></div>
-                        <span>Amount : Rs. 65,325.00</span>
-                    </div>
-                </div>
+                <?php endforeach; ?>
+                <?php if (empty($topClients)): ?>
+                <p>No data available.</p>
+                <?php endif; ?>
 
             </div>
 

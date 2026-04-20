@@ -5,7 +5,7 @@
     <div style="width: 100%;">
 
         <div class="option" onclick="window.location = './Dashboard'" id="SM_Dashboard">
-            <i class="fa-solid fa-grid-2"></i>Dashboard
+            <i class="fa-solid fa-layer-group"></i>Dashboard
         </div>
 
         <div class="option" onclick="window.location = './Providers'" id="SM_Providers">
@@ -21,7 +21,7 @@
         </div>
 
         <div class="option" onclick="window.location = './Payments'" id="SM_Payments">
-            <i class="fa-solid fa-circle-dollar"></i>Payments
+            <i class="fa-solid fa-coins"></i>Payments
         </div>
 
         <div class="option" onclick="window.location = './Complaints'" id="SM_Complaints">
