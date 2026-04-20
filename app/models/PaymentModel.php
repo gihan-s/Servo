@@ -45,8 +45,9 @@ class PaymentModel extends Database
         }
 
         foreach ($rows as $row) {
-            $amount     = (float) ($row['Requesting_Price'] ?? 0);
-            $commission = round($amount * self::COMMISSION_RATE, 2);
+            $projectValue = (float) ($row['Requesting_Price'] ?? 0);
+            $commission = round($projectValue * self::COMMISSION_RATE, 2);
+            $amount = max(0.0, round($projectValue - $commission, 2));
             $projectId  = (int) $row['Project_ID'];
             $paymentId  = $nextId++;
             $ins->bind_param('iddi', $paymentId, $amount, $commission, $projectId);
@@ -251,19 +252,25 @@ class PaymentModel extends Database
 
     public function capturePayment(int $paymentId): bool
     {
-        // TODO: sandbox gateway integration hook — swap Status='Paid' for a real capture
-        //       (e.g., Stripe test mode) once the gateway is added. Paid_Time should be
-        //       stamped from the gateway response, not NOW(), when real.
-        $sql = "UPDATE payment
-                SET Status = 'Paid', Paid_Time = NOW(),
-                    Hold_Time = COALESCE(Hold_Time, NOW())
-                WHERE Payment_ID = ? AND Status IN ('Awaiting', 'Pending', 'Hold')";
+        // Capture at client payment time: place funds on hold and store net provider amount.
+        // Paid_Time is intentionally not set here; it will be set on final release.
+        $sql = "UPDATE payment pay
+                JOIN project pr ON pr.Project_ID = pay.Project_ID
+                JOIN post po ON po.Post_ID = pr.Post_ID
+                SET pay.Commission = ROUND(COALESCE(po.Requesting_Price, 0) * ?, 2),
+                    pay.Amount = GREATEST(0, ROUND(COALESCE(po.Requesting_Price, 0)
+                        - ROUND(COALESCE(po.Requesting_Price, 0) * ?, 2), 2)),
+                    pay.Status = 'Hold',
+                    pay.Hold_Time = COALESCE(pay.Hold_Time, NOW()),
+                    pay.Paid_Time = NULL
+                WHERE pay.Payment_ID = ? AND pay.Status IN ('Awaiting', 'Pending', 'Hold')";
         $stmt = $this->conn->prepare($sql);
         if (!$stmt) {
             error_log('PaymentModel::capturePayment prepare: ' . $this->conn->error);
             return false;
         }
-        $stmt->bind_param('i', $paymentId);
+        $commissionRate = self::COMMISSION_RATE;
+        $stmt->bind_param('ddi', $commissionRate, $commissionRate, $paymentId);
         $ok = $stmt->execute() && $stmt->affected_rows > 0;
         if (!$ok) error_log('PaymentModel::capturePayment exec: ' . $stmt->error);
         $stmt->close();
