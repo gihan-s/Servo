@@ -20,7 +20,7 @@ class PayHereWebhookController
 
     private function log(string $msg): void
     {
-        file_put_contents($this->logFile, date('Y-m-d H:i:s') . ' ' . $msg . PHP_EOL, FILE_APPEND);
+        // file_put_contents($this->logFile, date('Y-m-d H:i:s') . ' ' . $msg . PHP_EOL, FILE_APPEND);
     }
 
     /**
