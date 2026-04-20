@@ -105,7 +105,7 @@ $TopBarHeader = "Dashboard";
         <div class="container top-card">
 
             <div>
-                <h3>Payment Received</h3>
+                <h3>Total Payments</h3>
                 <h1><?= number_format($totalPayment, 2) ?></h1>
                 <span>Total Completed Payments</span>
             </div>
