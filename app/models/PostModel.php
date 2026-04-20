@@ -405,6 +405,8 @@ class PostModel extends Database
                 p.Provider_ID, 
                 p.Request_Status,
                 CONCAT(pr.First_Name, ' ', pr.Last_Name) AS Provider_Name,
+                pr.Profile_Picture AS Provider_Picture,
+                pr.Rating AS Provider_Rating,
                 c.Name AS CategoryName
             FROM post p
             LEFT JOIN category c ON c.Category_ID = p.Category_ID

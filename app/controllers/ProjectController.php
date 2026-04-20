@@ -427,10 +427,17 @@ class ProjectController extends BaseController
             return;
         }
 
-        $rating = (int) ($_POST['rating'] ?? 0);
-        if ($rating < 1 || $rating > 5) {
+        $rating = (float) ($_POST['rating'] ?? 0);
+        $ratingStep = round($rating * 2) / 2;
+        if ($ratingStep < 0.5 || $ratingStep > 5) {
             http_response_code(400);
-            echo json_encode(['success' => false, 'error' => 'A rating between 1 and 5 is required']);
+            echo json_encode(['success' => false, 'error' => 'A rating between 0.5 and 5 is required']);
+            return;
+        }
+
+        if (abs($rating - $ratingStep) > 0.01) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => 'Rating must be in 0.5 increments']);
             return;
         }
 
@@ -460,7 +467,7 @@ class ProjectController extends BaseController
         }
 
         $clientId = (int) ($_SESSION['user_id'] ?? 0);
-        $success = $this->projectModel->completeProjectByClient($clientId, $postId, $rating, $title, $description, $reviewFileNames);
+        $success = $this->projectModel->completeProjectByClient($clientId, $postId, $ratingStep, $title, $description, $reviewFileNames);
         if ($success) {
             echo json_encode(['success' => true, 'message' => 'Project marked as completed']);
         } else {
@@ -670,12 +677,22 @@ class ProjectController extends BaseController
         $this->ensureAuth();
 
         $projectId   = (int) ($_POST['project_id']   ?? 0);
+        $postId      = (int) ($_POST['post_id']      ?? 0);
         $title       = trim((string) ($_POST['title']       ?? ''));
         $description = trim((string) ($_POST['description'] ?? ''));
 
+        // Fallback for cases where client-side project_id is not ready yet.
+        if ($projectId <= 0 && $postId > 0) {
+            $project = $this->projectModel->getByPostId($postId);
+            $projectId = (int) ($project['Project_ID'] ?? 0);
+        }
+
         if ($projectId <= 0 || $title === '') {
             http_response_code(400);
-            echo json_encode(['success' => false, 'error' => 'project_id and title are required']);
+            $error = $title === ''
+                ? 'title is required'
+                : 'project_id could not be resolved (missing/invalid post_id or project row)';
+            echo json_encode(['success' => false, 'error' => $error]);
             return;
         }
 
