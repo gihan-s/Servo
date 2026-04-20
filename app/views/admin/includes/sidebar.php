@@ -15,7 +15,7 @@
         <div class="option" onclick="window.location = '/admin/Clients'" id="SM_Clients">
             <i class="fa-solid fa-users"></i>Clients
         </div>
-
+<!-- 
         <div class="option" onclick="window.location = '/admin/Posts'" id="SM_Posts">
             <i class="fa-solid fa-address-card"></i></i>Posts
         </div>
@@ -30,10 +30,14 @@
 
         <div class="option" onclick="window.location = '/admin/Analytics'" id="SM_Analytics">
             <i class="fa-solid fa-chart-simple"></i> Analytics
+        </div> -->
+
+        <div class="option" onclick="window.location = '/admin/categories'" id="SM_Categories">
+            <i class="fa-solid fa-list"></i> Categories
         </div>
 
-        <div class="option" onclick="window.location = '/admin/Categories'" id="SM_Categories">
-            <i class="fa-solid fa-list"></i> Categories
+        <div class="option" onclick="window.location = '/admin/locations'" id="SM_Locations">
+            <i class="fa-solid fa-location-dot"></i> Locations
         </div>
 
 
