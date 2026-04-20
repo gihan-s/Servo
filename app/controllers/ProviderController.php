@@ -22,12 +22,39 @@ class ProviderController extends BaseController
         $userId = $_SESSION['user_id'];
         $role   = $_SESSION['role'];
         $categories = [];
+        $locationTree = [];
 
         // Choose view by role
         if ($role === 'Client') {
             require_once __DIR__ . '/../models/CategoryModel.php';
+            require_once __DIR__ . '/../models/LocationModel.php';
             $categoryModel = new CategoryModel();
+            $locationModel = new LocationModel();
             $categories = $categoryModel->getCategories();
+
+            $districtRows = $locationModel->getDistricts();
+            foreach ($districtRows as $districtRow) {
+                $district = trim((string) ($districtRow['District'] ?? ''));
+                if ($district === '' || strcasecmp($district, 'All') === 0) {
+                    continue;
+                }
+
+                $cityRows = $locationModel->getCities($district);
+                $cities = [];
+                foreach ($cityRows as $cityRow) {
+                    $city = trim((string) ($cityRow['City'] ?? ''));
+                    if ($city === '' || strcasecmp($city, 'All') === 0) {
+                        continue;
+                    }
+                    $cities[] = $city;
+                }
+
+                $locationTree[] = [
+                    'district' => $district,
+                    'cities' => array_values(array_unique($cities)),
+                ];
+            }
+
             $viewFile = __DIR__ . '/../views/client/Providers/index.php';
         }
         // elseif ($role === 'Provider') {
@@ -178,6 +205,8 @@ class ProviderController extends BaseController
                 'completion_range' => trim((string) ($_GET['completion_range'] ?? '')),
                 'price_types' => trim((string) ($_GET['price_types'] ?? '')),
                 'category_ids' => trim((string) ($_GET['category_ids'] ?? '')),
+                'location_districts' => trim((string) ($_GET['location_districts'] ?? '')),
+                'location_cities' => trim((string) ($_GET['location_cities'] ?? '')),
             ];
 
             $services = $providerCategoriesModel->getServicesForListing($providerId, $limit, $offset, $filters);
@@ -231,6 +260,119 @@ class ProviderController extends BaseController
                     'current_page' => $page,
                     'total_pages' => (int) ceil($totalCount / max(1, $limit))
                 ]
+            ]);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    // GET /providers/profile - Get a provider profile by provider_id
+    public function getProfile()
+    {
+        header('Content-Type: application/json');
+
+        try {
+            require_once __DIR__ . '/../models/ProviderModel.php';
+            require_once __DIR__ . '/../models/ProviderSocialModel.php';
+            require_once __DIR__ . '/../models/CategoryModel.php';
+            require_once __DIR__ . '/../models/LocationModel.php';
+            require_once __DIR__ . '/../../helpers/socialmedia.php';
+
+            $providerId = isset($_GET['provider_id']) ? (int) $_GET['provider_id'] : 0;
+            if ($providerId <= 0) {
+                http_response_code(400);
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Invalid provider id'
+                ]);
+                return;
+            }
+
+            $providerModel = new ProviderModel();
+            $socialModel = new ProviderSocialModel();
+            $categoryModel = new CategoryModel();
+            $locationModel = new LocationModel();
+
+            $provider = $providerModel->getProviderById($providerId);
+            if (!$provider) {
+                http_response_code(404);
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Provider not found'
+                ]);
+                return;
+            }
+
+            $providerSkills = $providerModel->getSkillsByProviderId($providerId);
+            $providerCategoriesRaw = $categoryModel->getByProviderId($providerId);
+            $providerCategories = [];
+            $providerCategoryIds = [];
+
+            foreach ($providerCategoriesRaw as $categoryRow) {
+                $categoryName = trim((string) ($categoryRow['Category_Type'] ?? ''));
+                if ($categoryName !== '') {
+                    $providerCategories[] = $categoryName;
+                }
+
+                $providerCategoryId = (int) ($categoryRow['ID'] ?? 0);
+                if ($providerCategoryId > 0) {
+                    $providerCategoryIds[] = $providerCategoryId;
+                }
+            }
+
+            $providerCategories = array_values(array_unique($providerCategories));
+            $providerCategoryIds = array_values(array_unique($providerCategoryIds));
+
+            $providerLocations = [];
+            if (!empty($providerCategoryIds)) {
+                $locationsByCategory = $locationModel->getByProviderCategoryIds($providerCategoryIds);
+                foreach ($providerCategoryIds as $providerCategoryId) {
+                    if (!empty($locationsByCategory[$providerCategoryId]) && is_array($locationsByCategory[$providerCategoryId])) {
+                        $providerLocations = array_merge($providerLocations, $locationsByCategory[$providerCategoryId]);
+                    }
+                }
+            }
+
+            $formattedLocation = '';
+            if (!empty($providerLocations)) {
+                $formattedLocation = formatLocations($providerLocations);
+            }
+
+            $socialLinks = $socialModel->getByProviderId($providerId);
+            $formattedSocialLinks = [];
+
+            foreach ($socialLinks as $social) {
+                $type = strtolower($social['Social_Type']);
+                $iconClass = getSocialMediaIconClass($type);
+                $color = getSocialMediaColor($type);
+
+                $formattedSocialLinks[] = [
+                    'type' => $type,
+                    'link' => $social['Social_Link'],
+                    'icon_class' => $iconClass ?? 'fa-link',
+                    'color' => $color ?? '#666666',
+                    'name' => getSocialMediaName($type) ?? $social['Social_Type']
+                ];
+            }
+
+            $ratingRaw = isset($provider['Rating']) ? (float) $provider['Rating'] : 0.0;
+            $provider['skills'] = $providerSkills;
+            $provider['categories'] = $providerCategories;
+            $provider['social_links'] = $formattedSocialLinks;
+            $provider['avatar'] = $provider['Profile_Picture'] ?? '';
+            $provider['formatted_location'] = $formattedLocation;
+            $provider['rating'] = round(max(0.0, min(5.0, $ratingRaw > 5 ? ($ratingRaw / 20) : $ratingRaw)), 1);
+            $provider['total_earning_formatted'] = !empty($provider['Total_Earning']) && (float) $provider['Total_Earning'] > 0
+                ? 'LKR ' . number_format((float) $provider['Total_Earning'], 2)
+                : 'LKR 0.00';
+
+            echo json_encode([
+                'success' => true,
+                'provider' => $provider
             ]);
         } catch (Exception $e) {
             http_response_code(500);

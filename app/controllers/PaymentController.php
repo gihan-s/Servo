@@ -100,10 +100,10 @@ class PaymentController extends BaseController
     {
         $this->requirePostAndOwnership($paymentId);
         if ($this->paymentModel->capturePayment($paymentId)) {
-            $_SESSION['flash'] = ['type' => 'success', 'message' => 'Payment captured successfully.'];
-            $this->redirectBack('completed');
+            $_SESSION['flash'] = ['type' => 'success', 'message' => 'Payment placed on hold successfully.'];
+            $this->redirectBack('pending');
         } else {
-            $_SESSION['flash'] = ['type' => 'error', 'message' => 'Payment could not be captured. Please try again.'];
+            $_SESSION['flash'] = ['type' => 'error', 'message' => 'Payment could not be placed on hold. Please try again.'];
             $this->redirectBack();
         }
     }

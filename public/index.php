@@ -404,6 +404,11 @@ switch ($url) {
         $controller->getServices();
         break;
 
+    case 'providers/profile':
+        $controller = new ProviderController();
+        $controller->getProfile();
+        break;
+
     case 'provider/incoming-requests':
         $controller = new ProviderController();
         $controller->getIncomingRequests();
