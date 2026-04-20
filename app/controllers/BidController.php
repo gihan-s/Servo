@@ -189,12 +189,14 @@ class BidsController extends BaseController
     {
         // Post-level state is the source of truth because bid status can be stale.
         $grouped = ['active' => [], 'accepted' => [], 'closed' => []];
+
         foreach ($bids as &$bid) {
             $statusKey = $this->resolveBidSection($bid, $providerId);
-            $bid['Status_Key'] = $statusKey;
-            $bid['Status'] = ucfirst($statusKey);
 
-            if (isset($grouped[$statusKey])) {
+            // if Status_Key = 'deleted', then it is skipped
+            if(array_key_exists($statusKey, $grouped)) {
+                $bid['Status_Key'] = $statusKey;
+                $bid['Status'] = ucfirst($statusKey);
                 $grouped[$statusKey][] = $bid;
             }
         }
@@ -207,6 +209,10 @@ class BidsController extends BaseController
     {
         $postStatus = strtolower(trim((string) ($bid['Post_Status'] ?? '')));
         $requestStatus = strtolower(trim((string) ($bid['Post_Request_Status'] ?? $bid['Request_Status'] ?? '')));
+
+        if ($bid['Status_Key'] === 'deleted') {
+            return 'deleted';
+        }
 
         if ($postStatus !== '' && !$this->isOpenPostStatus($postStatus)) {
             return 'closed';

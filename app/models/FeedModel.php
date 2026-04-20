@@ -249,7 +249,7 @@ class FeedModel extends Database
     public function cancelBid($bidId, $providerId)
     {
         // Only allow cancelling own active bids
-        $sql = "UPDATE bids SET Status = 'cancelled' WHERE Bid_ID = ? AND Provider_ID = ? AND Status = 'active'";
+        $sql = "UPDATE bids SET Status = 'deleted' WHERE Bid_ID = ? AND Provider_ID = ? AND Status = 'active'";
         $stmt = $this->conn->prepare($sql);
         if (!$stmt) {
             error_log('FeedModel::cancelBid prepare: ' . $this->conn->error);
