@@ -1186,6 +1186,29 @@ class ProjectModel extends Database {
         return $ok;
     }
 
+    public function addReviewComments($project_id, $comments)
+    {
+        $sql = "UPDATE project SET Comments = ?, Project_Status = 'finished' WHERE Project_ID = ?";
+        $sql2 = "UPDATE post SET Request_Status = 'finished' WHERE Post_ID = (SELECT Post_ID FROM project WHERE Project_ID = ?)";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) return false;
+
+        $stmt->bind_param("si", $comments, $project_id);
+
+        $result = $stmt->execute();
+
+        if ($result) {
+            $stmt2 = $this->conn->prepare($sql2);
+            $stmt2->bind_param("i", $project_id);
+            $stmt2->execute();
+            $stmt2->close();
+        }
+
+        $stmt->close();
+        return $result;
+    }
+
     public function getProviderByProject($project_id)
     {
         $sql = "SELECT p.Provider_ID
@@ -2434,6 +2457,37 @@ class ProjectModel extends Database {
             error_log('ProjectModel::moveProjectBackToOngoingByClient error: ' . $e->getMessage());
             return false;
         }
+    }
+
+    public function markCompleteProject(int $id): bool
+    {
+        
+        $sql = "UPDATE project SET Project_Status = 'pending-review', Ended_At = NOW() WHERE Post_ID = ?";
+        $sql2 = "UPDATE post SET Request_Status = 'pending-review' WHERE Post_ID = ?";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt2 = $this->conn->prepare($sql2);
+        if (!$stmt || !$stmt2) {
+            error_log('completeProject prepare: ' . $this->conn->error);
+            return false;
+        }
+
+        $stmt->bind_param('i', $postId);
+        $stmt2->bind_param('i', $postId);
+
+        if (!$stmt->execute()) {
+            error_log('completeProject exec: ' . $stmt->error);
+            return false;
+        }
+
+        if (!$stmt2->execute()) {
+            error_log('completeProject exec: ' . $stmt2->error);
+            return false;
+        }
+
+        $stmt->close();
+        $stmt2->close();
+        return true;
     }
 
 }

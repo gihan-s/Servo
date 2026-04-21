@@ -318,9 +318,9 @@
             </div>
         </div>
         <div class="modal-actions">
-            <button class="action-btn btn-delete" onclick="closeDialogBox('reopen-project-popup')">Cancel</button>
-            <button class="action-btn btn-edit" id="btnConfirmReopenProject">
-                <i class="fa-solid fa-rotate-left"></i> Move to Ongoing
+            <button class="action-btn btn-delete" onclick="closeDialogBox('review-popup')">Cancel</button>
+            <button class="action-btn btn-edit" id="saveReviewCommentsBtn" onclick="addReviewComments()">
+                <i class="fa-solid fa-check"></i> Submit
             </button>
         </div>
     </div>
@@ -677,6 +677,7 @@
 
         fetch(apiUrl)
             //.then(response => response.text())
+            
             .then(response => {
                 console.log('Response status:', response.status);
                 console.log('Response headers:', response.headers.get('content-type'));
@@ -912,6 +913,9 @@
                 </button>
                 <button class="action-btn btn-view" onclick="viewPost(${post.Post_ID}, 'completed')">
                     <i class="fas fa-eye"></i> View
+                </button>
+                <button class="action-btn btn-view" onclick="Complete(${post.Post_ID})">
+                    <i class="fas fa-check"></i> Complete
                 </button>
             `;
         }
@@ -2345,8 +2349,10 @@
                 return;
             }
 
-            window.showSuccessToast('Success!', 'Requirement submitted successfully.');
-            document.getElementById('req-add-form')?.reset();
+    if (projectId < 0) {
+        window.showErrorToast("Error", "No project selected. Please refresh and try again.");
+        return;
+    }
 
             // Switch back to list tab and refresh
             reqSwitchTab('req-list-pane');
@@ -2356,7 +2362,13 @@
         } finally {
             if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Requirement'; }
         }
-    }
+    })
+    .catch(err => {
+        console.error("Error:", err);
+        window.showErrorToast("Error", "Error adding requirement: " + err.message);
+    });
+}
+
 
     function cancelOngoingProject(id) {
     viewDialogBox('cancel-ongoing-project');
@@ -2410,52 +2422,19 @@
     });
 }
 
-function completePendingReviewProject(postId) {
-    window._completeProjectPostId = postId;
+function submitReview(id) {
+    //window.currentReviewPostId = postId;
 
-    // Reset form
-    document.getElementById('reviewRating').value = '';
-    const titleEl = document.getElementById('reviewTitle');
-    const descEl  = document.getElementById('reviewDescription');
-    const filesEl = document.getElementById('reviewFiles');
-    if (titleEl)  titleEl.value = '';
-    if (descEl)   descEl.value  = '';
-    if (filesEl)  filesEl.value = '';
-    document.getElementById('ratingError').style.display = 'none';
+    viewDialogBox('review-popup');
 
-    // Reset star display
-    document.querySelectorAll('#starRatingInput i').forEach(s => {
-        s.className   = 'fa-regular fa-star';
-        s.style.color = '';
-    });
+    const container = document.querySelector("#review-popup .dialog-body");
 
-    // Wire confirm button (clone to prevent duplicate listeners)
-    const btn    = document.getElementById('btnConfirmCompleteProject');
-    const newBtn = btn.cloneNode(true);
-    btn.parentNode.replaceChild(newBtn, btn);
-    newBtn.addEventListener('click', submitCompleteProject);
-
-    viewDialogBox('complete-project-popup');
-}
-
-function submitCompleteProject() {
-    const postId = window._completeProjectPostId;
-    const rating = document.getElementById('reviewRating').value;
-
-    if (!rating) {
-        document.getElementById('ratingError').style.display = '';
-        return;
-    }
-    document.getElementById('ratingError').style.display = 'none';
-
-    const btn = document.getElementById('btnConfirmCompleteProject');
-    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...'; }
-
-    const fd = new FormData();
-    fd.append('rating',      rating);
-    fd.append('title',       document.getElementById('reviewTitle')?.value.trim()       || '');
-    fd.append('description', document.getElementById('reviewDescription')?.value.trim() || '');
-    Array.from(document.getElementById('reviewFiles')?.files || []).forEach(f => fd.append('review_files[]', f));
+    container.innerHTML = `
+        <div class="loading-state">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Loading project...</p>
+        </div>
+    `;
 
     fetch(`${window.BASE_URL}/project/complete/${postId}`, {
         method: 'POST',
@@ -2472,86 +2451,136 @@ function submitCompleteProject() {
                 window.showErrorToast('Error', data.error || 'Failed to complete project.');
             }
         })
-        .catch(error => {
-            console.error('submitCompleteProject error:', error);
-            window.showErrorToast('Error', 'An error occurred while completing the project.');
+        .then(text => {
+            console.log('view raw response:', text); // see what's actually returned
+            return JSON.parse(text); // then parse manually
         })
-        .finally(() => {
-            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Complete &amp; Submit Review'; }
+        .then(post => {
+            window.currentProjectId = post.Project_ID; // Store project ID for later use
+            console.log('currentProjectId set to:', window.currentProjectId);
+            const providerName = post.Provider_Name || 'Unassigned provider';
+            container.innerHTML = `
+                <div class="post-view">
+                    <div class="post-view-title">${post.Title || 'Untitled'}</div>
+                    <div class="post-view-section">
+                        <div class="section-title">Description</div>
+                        <div class="section-body">${post.Description || 'No description provided'}</div>
+                    </div>
+                    <div class="post-view-section">
+                        <div class="section-title">Provider</div>
+                        <div class="post-provider">${providerName}</div>
+                    </div>
+                    <div class="post-view-section">
+                        <div class="section-title">Category</div>
+                        <div class="post-category">${post.CategoryName || 'No category specified'}</div>
+                    </div>
+                    <div class="post-view-section">
+                        <div class="section-title">Rating(1-5)</div>
+                        <div class="post-rating"><select id="reviewRating" class="text-field">
+                        <option value="5">5 - Excellent</option>
+                        <option value="4">4 - Good</option>
+                        <option value="3">3 - Average</option>
+                        <option value="2">2 - Poor</option>
+                        <option value="1">1 - Very Bad</option>
+                    </select></div>
+                    </div>
+                    <div class="post-view-section">
+                        <div class="section-title">Add Comments</div>
+                        <textarea class="text-field" id="reviewComments" placeholder="Enter your comments..."></textarea>
+                    </div>
+                    
+                </div>
+                
+            `;
+        })
+        .catch(err => {
+            console.error(err);
+            container.innerHTML = `<p>Error loading project</p>`;
         });
 }
 
-function openReopenProjectModal(postId) {
-    window._reopenProjectPostId = postId;
-    const reasonInput = document.getElementById('reopenReason');
-    const filesInput  = document.getElementById('reopenFiles');
-    if (reasonInput) reasonInput.value = '';
-    if (filesInput) filesInput.value = '';
-
-    const confirmBtn = document.getElementById('btnConfirmReopenProject');
-    if (confirmBtn) {
-        const newBtn = confirmBtn.cloneNode(true);
-        confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
-        newBtn.addEventListener('click', submitReopenProject);
+document.addEventListener("click", function (e) {
+    if (e.target.closest("#saveReviewBtn")) {
+        addReviewComments();
     }
+});
 
-    viewDialogBox('reopen-project-popup');
-}
-
-function submitReopenProject() {
-    const postId = window._reopenProjectPostId;
-    const reason = document.getElementById('reopenReason')?.value.trim() || '';
-    const files  = document.getElementById('reopenFiles')?.files || [];
-
-    if (!postId) {
-        window.showErrorToast('Error', 'Project not selected.');
+function addReviewComments() {
+    const text = document.getElementById("reviewComments").value;
+    const projectId = window.currentProjectId;
+    console.log("Adding review comments:", { projectId, text });
+    if (!text.trim()) {
+        window.showErrorToast("Error", "Please enter review comments");
         return;
     }
 
-    if (!reason) {
-        window.showErrorToast('Error', 'Please provide a reason before moving back to ongoing.');
-        document.getElementById('reopenReason')?.focus();
+    if (projectId < 0) {
+        window.showErrorToast("Error", "No project selected. Please refresh and try again.");
         return;
     }
 
-    const btn = document.getElementById('btnConfirmReopenProject');
-    if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-    }
-
-    const fd = new FormData();
-    fd.append('reason', reason);
-    Array.from(files).forEach(file => fd.append('reopen_files[]', file));
-
-    fetch(`${window.BASE_URL}/project/reopen/${postId}`, {
-        method: 'POST',
-        body: fd,
+    fetch(window.BASE_URL + "/project/submit-review-comments", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            project_id: projectId,
+            review_comments: text
+        })
     })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                closeDialogBox('reopen-project-popup');
-                window.showSuccessToast('Success!', 'Project moved back to ongoing.');
-                loadPosts('pending-review');
-                loadPosts('ongoing');
-            } else {
-                window.showErrorToast('Error', data.error || 'Failed to move project back to ongoing.');
-            }
-        })
-        .catch(error => {
-            console.error('submitReopenProject error:', error);
-            window.showErrorToast('Error', 'An error occurred while saving your request.');
-        })
-        .finally(() => {
-            if (btn) {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-rotate-left"></i> Move to Ongoing';
-            }
-        });
+    .then(res => res.text())
+    .then(text => {
+        console.log("RAW RESPONSE:", text);
+        return JSON.parse(text);
+    })
+    .then(data => {
+        console.log("submitReviewComments response:", data);
+        if (data.success) {
+            window.showSuccessToast("Success!", "Review comments added successfully.");
+            document.getElementById("reviewComments").value = "";
+            closeDialogBox('review-popup');
+        } else {
+            window.showErrorToast("Error", "Failed to add review comments");
+        }
+    })
+    .catch(err => {
+        console.error("Error:", err);
+        window.showErrorToast("Error", "Error adding review comments: " + err.message);
+    });
 }
 
-    /*document.addEventListener('DOMContentLoaded', function () {
+    function Complete(id) {
+        fetch(window.BASE_URL + "/project/complete/" + id, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ id: id })
+        })
+            
+        
+        .then(response => response.text())
+        .then(text => {
+            console.log('Complete response:', text);
+            return JSON.parse(text); // return raw text for now
+        });
+        // .then(response => response.json())
+        // .then(data => {
+        //     if (data.success) {
+        //         window.showSuccessToast("Success!", "Project marked as completed.");
+        //         // Optionally, you can remove the project from the list or update its status in the UI here
+        //     } else {
+        //         window.showErrorToast("Error", data.error || 'Failed to complete project');
+        //     }
+        // })
+        // .catch(error => {
+        //     console.log('Complete error:', error);
+        //     window.showErrorToast("Error", 'An error occurred while completing the project.');
+        // });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
         // Setup search input handler with debouncing
         document.getElementById('searchInput').addEventListener('change', handleSearch);
         document.getElementById('searchButton').addEventListener('click', handleSearch);
@@ -2568,7 +2597,9 @@ function submitReopenProject() {
                 // Reload posts with search filter
                 const activeSection = document.querySelector('.requests-section:not([style*="display: none"])');
                 const status = activeSection.classList.contains('pending') ? 'pending' :
-                        activeSection.classList.contains('accepted') ? 'accepted' : 'ongoing';
+                        activeSection.classList.contains('accepted') ? 'accepted' : 
+                        activeSection.classList.contains('ongoing') ? 'ongoing' : 
+                        activeSection.classList.contains('completed') ? 'completed' : pending-review;
                 loadPosts(status);
             }, 300);
         }
@@ -2581,12 +2612,12 @@ function submitReopenProject() {
                 if (option) {
                     const sortValue = option.dataset.sort;
                     const sortText = option.textContent;
-
+                    const providerName = post.Provider_Name || 'Unassigned provider';
                     // Update dropdown display
                     document.getElementById('sortDropdown').value = sortText;
 
                     // Update global sort variable
-                    currentSort = sortValue;                    const providerName = post.Provider_Name || 'Unassigned provider';                    const providerName = post.Provider_Name || 'Unassigned provider';
+                    currentSort = sortValue;                                        
 
                     // Reload posts with new sort
                     const activeSection = document.querySelector('.requests-section:not([style*="display: none"])');
@@ -2595,12 +2626,9 @@ function submitReopenProject() {
                     loadPosts(status);
                 }
             });
-        }*/
+        }});
 
-// Star rating interaction for complete-project modal
-document.addEventListener('DOMContentLoaded', function () {
-    const stars     = document.querySelectorAll('#starRatingInput i');
-    const ratingIn  = document.getElementById('reviewRating');
+        loadPosts('pending');
 
     function toHalfStep(value) {
         return Math.max(0.5, Math.min(5, Math.round(value * 2) / 2));

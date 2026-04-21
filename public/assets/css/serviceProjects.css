@@ -700,7 +700,7 @@
     transition: width .4s ease;
 }
 
-#newRequirement {
+#newRequirement, #reviewComments {
     width: 100%;
     min-height: 100px;
     padding: 10px;
@@ -710,7 +710,7 @@
     outline: none;
 }
 
-#newRequirement:focus {
+#newRequirement:focus, #reviewComments:focus {
     border-color: #4CAF50;
 }
 

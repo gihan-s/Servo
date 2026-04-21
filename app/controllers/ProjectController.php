@@ -723,4 +723,97 @@ class ProjectController extends BaseController
             echo json_encode(['success' => false, 'error' => 'Failed to add requirement']);
         }
     }
+
+    public function submitReviewComments()
+    {
+        header('Content-Type: application/json');
+        ob_clean();
+        try {
+            $data = json_decode(file_get_contents("php://input"), true);
+
+            if (!$data) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Invalid JSON data']);
+                return;
+            }
+
+            $project_id = $data['project_id'] ?? null;
+            $comments = $data['review_comments'] ?? null;
+
+            if ($project_id <= 0 || !$comments) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Missing project_id or comments']);
+                return;
+            }
+
+            // 1. add review comments
+            $ok = $this->projectModel->addReviewComments($project_id, $comments);
+
+            if (!$ok) {
+                http_response_code(500);
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'DB insert failed'
+                ]);
+                return;
+            }
+            
+            // 2. get provider
+            $provider = $this->projectModel->getProviderByProject($project_id);
+
+            if (!$provider) {
+                echo json_encode(['success' => true, 'message' => 'Added but provider not found']);
+                return;
+            }
+
+            // 3. send notification / request
+            // $this->notificationModel->create([
+            //     'User_ID' => $provider['Provider_ID'],
+            //     'Message' => "New review comments added for your project #$project_id",
+            //     'Type' => 'project_update'
+            // ]);
+
+            echo json_encode(['success' => true, 'message' => 'Review comments added successfully']);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
+    public function completeProject($id)
+    {   
+        header('Content-Type: application/json');
+        ob_clean();
+        try {
+            $data = json_decode(file_get_contents("php://input"), true);
+            error_log("Received data: " . print_r($data, true));
+
+            if (!$data) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Invalid JSON data']);
+                return;
+            }
+
+
+            $ok = $this->projectModel->markCompleteProject($id);
+            error_log("markCompleteProject result: " . ($ok ? "success" : "failure"));
+
+            if (!$ok) {
+                http_response_code(500);
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'Failed to mark project as complete'
+                ]);
+                return;
+            }
+
+            echo json_encode(['success' => true, 'message' => 'Project marked as complete', 'ok' => $ok, 'id' => $id]);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
 }
+
+
