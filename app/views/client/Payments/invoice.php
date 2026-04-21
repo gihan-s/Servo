@@ -123,22 +123,22 @@ $postType     = $invoice['Post_Type'] ?? '—';
                 <?php endif; ?>
               </div>
               <div><?= htmlspecialchars($postType) ?></div>
-              <div class="invoice-col-right">$<?= number_format($subtotal, 2) ?></div>
+              <div class="invoice-col-right">LKR <?= number_format($subtotal, 2) ?></div>
             </div>
           </section>
 
           <section class="invoice-totals">
             <div class="invoice-total-row">
               <span>Subtotal</span>
-              <span>$<?= number_format($subtotal, 2) ?></span>
+              <span>LKR <?= number_format($subtotal, 2) ?></span>
             </div>
             <div class="invoice-total-row">
               <span>Platform Fee (10%)</span>
-              <span>$<?= number_format($commission, 2) ?></span>
+              <span>LKR <?= number_format($commission, 2) ?></span>
             </div>
             <div class="invoice-total-row invoice-total-grand">
               <span>Total</span>
-              <span>$<?= number_format($amount, 2) ?></span>
+              <span>LKR <?= number_format($amount, 2) ?></span>
             </div>
           </section>
 
