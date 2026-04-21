@@ -24,31 +24,25 @@ class PaymentController extends BaseController
 
         $this->paymentModel->ensureAwaitingRowsForClient((int) $userId);
 
-        $tab    = $_GET['tab']  ?? 'awaiting';
+        $tab    = $_GET['tab']  ?? 'completed';
         $search = trim((string) ($_GET['q'] ?? ''));
         $sort   = $_GET['sort'] ?? 'recent';
         $page   = max(1, (int) ($_GET['page'] ?? 1));
 
-        $validTabs  = ['awaiting', 'pending', 'completed', 'refunded'];
+        $validTabs  = ['completed', 'refunded'];
         $validSorts = ['recent', 'oldest', 'amount-desc', 'amount-asc'];
-        if (!in_array($tab,  $validTabs,  true)) $tab  = 'awaiting';
+        if (!in_array($tab,  $validTabs,  true)) $tab  = 'completed';
         if (!in_array($sort, $validSorts, true)) $sort = 'recent';
 
         $clientId = (int) $userId;
         $pageSize = PaymentModel::PAGE_SIZE;
 
-        $awaitingTotal  = $this->paymentModel->countAwaitingByClientId($clientId, $tab === 'awaiting'  ? $search : '');
-        $pendingTotal   = $this->paymentModel->countPendingByClientId($clientId,   $tab === 'pending'   ? $search : '');
         $completedTotal = $this->paymentModel->countCompletedByClientId($clientId, $tab === 'completed' ? $search : '');
         $refundedTotal  = $this->paymentModel->countRefundedByClientId($clientId,  $tab === 'refunded'  ? $search : '');
 
-        $awaitingPages  = (int) max(1, ceil($awaitingTotal  / $pageSize));
-        $pendingPages   = (int) max(1, ceil($pendingTotal   / $pageSize));
         $completedPages = (int) max(1, ceil($completedTotal / $pageSize));
         $refundedPages  = (int) max(1, ceil($refundedTotal  / $pageSize));
 
-        $awaitingPayments  = $tab === 'awaiting'  ? $this->paymentModel->getAwaitingPaymentsByClientId($clientId,  $search, $sort, $page) : [];
-        $pendingPayments   = $tab === 'pending'   ? $this->paymentModel->getPendingPaymentsByClientId($clientId,   $search, $sort, $page) : [];
         $completedPayments = $tab === 'completed' ? $this->paymentModel->getCompletedPaymentsByClientId($clientId, $search, $sort, $page) : [];
         $refundedPayments  = $tab === 'refunded'  ? $this->paymentModel->getRefundedPaymentsByClientId($clientId,  $search, $sort, $page) : [];
 
@@ -101,7 +95,7 @@ class PaymentController extends BaseController
         $this->requirePostAndOwnership($paymentId);
         if ($this->paymentModel->capturePayment($paymentId)) {
             $_SESSION['flash'] = ['type' => 'success', 'message' => 'Payment placed on hold successfully.'];
-            $this->redirectBack('pending');
+            $this->redirectBack('completed');
         } else {
             $_SESSION['flash'] = ['type' => 'error', 'message' => 'Payment could not be placed on hold. Please try again.'];
             $this->redirectBack();

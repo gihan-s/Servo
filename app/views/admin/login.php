@@ -38,7 +38,7 @@ $baseURL = "../../../";
             <h2>Admin Panel</h2>
         </div>
 
-        <form class="login-form" method="POST" action="<?= BASE_URL ?>/login/authenticate">
+        <form class="login-form" method="POST" action="<?= BASE_URL ?>/admin/login/authenticate">
 
             <div class="input-group">
                 <i class="fa-solid fa-user"></i>

@@ -44,7 +44,7 @@ class FeedModel extends Database
                 WHERE p.Post_Status = 'active'
                 AND p.Post_Type = 'post'
                 AND p.Request_Status = 'open'
-                AND p.Est_Date > NOW()
+                AND p.Est_Date > CURDATE()
                 AND p.Category_ID IN (
                     SELECT Category_ID FROM provider_categories WHERE Provider_ID = ?
                 )
@@ -249,7 +249,7 @@ class FeedModel extends Database
     public function cancelBid($bidId, $providerId)
     {
         // Only allow cancelling own active bids
-        $sql = "UPDATE bids SET Status = 'cancelled' WHERE Bid_ID = ? AND Provider_ID = ? AND Status = 'active'";
+        $sql = "UPDATE bids SET Status = 'deleted' WHERE Bid_ID = ? AND Provider_ID = ? AND Status = 'active'";
         $stmt = $this->conn->prepare($sql);
         if (!$stmt) {
             error_log('FeedModel::cancelBid prepare: ' . $this->conn->error);

@@ -26,8 +26,8 @@ $renderTxnRow    = function (array $txn) {
         <td><?= $formattedDate ?></td>
         <td><?= htmlspecialchars($clientName) ?></td>
         <td>
-            <div class="transaction-amount">$<?= number_format((float) $txn['Amount'] - (float) $txn['Commission'], 2) ?></div>
-            <div class="transaction-fee">Fee: $<?= number_format((float) $txn['Commission'], 2) ?></div>
+            <div class="transaction-amount">LKR <?= number_format((float) $txn['Amount'] - (float) $txn['Commission'], 2) ?></div>
+            <div class="transaction-fee">Fee: LKR <?= number_format((float) $txn['Commission'], 2) ?></div>
         </td>
         <td><span class="transaction-status status-<?= $statusClass ?>"><?= htmlspecialchars($statusRaw) ?></span></td>
         <td style="text-align: right;">
@@ -73,7 +73,7 @@ $renderTxnRow    = function (array $txn) {
                     <i class="fas fa-wallet"></i>
                 </div>
                 <div class="metric-title">Total Earnings</div>
-                <div class="metric-value">$<?= number_format($totalEarnings, 0) ?></div>
+                <div class="metric-value">LKR <?= number_format($totalEarnings, 0) ?></div>
                 <div class="metric-delta <?= $earningsChange >= 0 ? 'delta-up' : 'delta-down' ?>">
                     <i class="fa-solid fa-arrow-<?= $earningsChange >= 0 ? 'up' : 'down' ?>"></i> <?= abs($earningsChange) ?>% from last month
                 </div>
@@ -83,7 +83,7 @@ $renderTxnRow    = function (array $txn) {
                     <i class="fas fa-clock"></i>
                 </div>
                 <div class="metric-title">Pending Payout</div>
-                <div class="metric-value">$<?= number_format($pendingPayout, 0) ?></div>
+                <div class="metric-value">LKR <?= number_format($pendingPayout, 0) ?></div>
                 <div class="metric-delta" style="color:#b45309;">
                     <i class="fa-solid fa-hourglass"></i> Awaiting clearance
                 </div>
@@ -93,7 +93,7 @@ $renderTxnRow    = function (array $txn) {
                     <i class="fas fa-chart-line"></i>
                 </div>
                 <div class="metric-title">Avg. Project Value</div>
-                <div class="metric-value">$<?= number_format($avgProjectValue, 0) ?></div>
+                <div class="metric-value">LKR <?= number_format($avgProjectValue, 0) ?></div>
                 <div class="metric-delta delta-up">
                     <i class="fa-solid fa-arrow-up"></i> Per project
                 </div>
@@ -165,15 +165,15 @@ $renderTxnRow    = function (array $txn) {
                     <div class="report-summary-grid">
                         <div class="report-stat">
                             <div class="report-stat-label">Total Earnings</div>
-                            <div class="report-stat-value" id="rpt-total">$0.00</div>
+                            <div class="report-stat-value" id="rpt-total">LKR 0.00</div>
                         </div>
                         <div class="report-stat">
                             <div class="report-stat-label">Platform Fees</div>
-                            <div class="report-stat-value" id="rpt-fees" style="color:#b91c1c;">$0.00</div>
+                            <div class="report-stat-value" id="rpt-fees" style="color:#b91c1c;">LKR 0.00</div>
                         </div>
                         <div class="report-stat">
                             <div class="report-stat-label">Net Earnings</div>
-                            <div class="report-stat-value" id="rpt-net" style="color:#008500;">$0.00</div>
+                            <div class="report-stat-value" id="rpt-net" style="color:#008500;">LKR 0.00</div>
                         </div>
                         <div class="report-stat">
                             <div class="report-stat-label">Transactions</div>
@@ -318,7 +318,7 @@ $renderTxnRow    = function (array $txn) {
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    return context.dataset.label + ': $' + context.raw.toLocaleString();
+                                    return context.dataset.label + ': LKR ' + context.raw.toLocaleString();
                                 }
                             }
                         }
@@ -327,7 +327,7 @@ $renderTxnRow    = function (array $txn) {
                         y: {
                             beginAtZero: true,
                             ticks: {
-                                callback: function(value) { return '$' + value.toLocaleString(); }
+                                callback: function(value) { return 'LKR ' + value.toLocaleString(); }
                             },
                             grid: { color: '#f1f5f9' }
                         },
@@ -359,7 +359,7 @@ $renderTxnRow    = function (array $txn) {
             document.getElementById('report-start').value = thirtyDaysAgo.toISOString().split('T')[0];
             document.getElementById('report-end').value = today.toISOString().split('T')[0];
 
-            const fmtCurrency = n => '$' + Number(n || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            const fmtCurrency = n => 'LKR ' + Number(n || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
             document.getElementById('btn-preview-report').addEventListener('click', function() {
                 const startDate = document.getElementById('report-start').value;

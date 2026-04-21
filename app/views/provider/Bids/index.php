@@ -91,7 +91,7 @@
 									data-amount="<?= htmlspecialchars($bid['Bid_Amount'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
 									data-amount-raw="<?= htmlspecialchars((string) ($bid['Amount'] ?? ''), ENT_QUOTES, 'UTF-8') ?>"
 									data-duration="<?= htmlspecialchars($bid['Duration'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
-									data-duration-days="<?= htmlspecialchars((string) ($bid['Duration_Days'] ?? ''), ENT_QUOTES, 'UTF-8') ?>"
+									data-duration-hours="<?= htmlspecialchars((string) ($bid['Duration_Hours'] ?? ''), ENT_QUOTES, 'UTF-8') ?>"
 									data-duration-unit-value="<?= htmlspecialchars((string) ($bid['Duration_Unit_Value'] ?? ''), ENT_QUOTES, 'UTF-8') ?>"
 									data-duration-unit="<?= htmlspecialchars((string) ($bid['Duration_Unit'] ?? 'd'), ENT_QUOTES, 'UTF-8') ?>"
 									data-ref="<?= htmlspecialchars($bid['Bid_Ref'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
