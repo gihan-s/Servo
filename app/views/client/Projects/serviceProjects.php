@@ -451,7 +451,7 @@
             apiUrl = `${window.BASE_URL}/projects/completed?sort=${currentSort}&search=${encodeURIComponent(currentSearch)}`;
         } else {
             // Map tab name to actual Request_Status value
-            const statusMap = { 'pending': 'ongoing', 'accepted': 'accepted', 'completed': 'completed' };
+            const statusMap = { 'pending': 'pending', 'accepted': 'accepted', 'completed': 'completed' };
             const apiStatus = statusMap[tab] || tab;
             apiUrl = `${window.BASE_URL}/projects/list?status=${apiStatus}&sort=${currentSort}&search=${encodeURIComponent(currentSearch)}`;
         }
@@ -821,7 +821,7 @@
                      </div>
                 </div>
                 <div class="item-middle">
-                    <div><i class="fa-solid fa-tag"></i> Proposed: LKR ${post.Requesting_Price || 0}/= (${post.Price_Type || 'Fixed'})</div>
+                    <div><i class="fa-solid fa-tag"></i> Proposed: Rs. ${Number(post.Requesting_Price || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })} (${post.Price_Type || 'Fixed'})</div>
                 </div>
                 ${progressHTML}
                 ${postTypeHTML}
@@ -844,7 +844,7 @@
             : escapeHtml(description);
         const postedDate = formatDate(post.Created_At);
         const postTypeLabel = post.Post_Type === 'direct' ? 'Direct' : 'Bid';
-
+    
         const avatarHTML = providerPicture
             ? `<img src="${providerPicture}" alt="${escapeHtml(providerName)}" class="request-avatar" onerror="this.style.display='none'">`
             : `<div class="request-avatar" style="width:56px;height:56px;border-radius:50%;background:#e5e7eb;display:flex;align-items:center;justify-content:center;"><i class="fas fa-user" style="color:#9ca3af;font-size:22px;"></i></div>`;
@@ -919,7 +919,7 @@
         const rating = post.Provider_Rating ? parseFloat(post.Provider_Rating).toFixed(1) : '0.0';
         const category = post.Category_Name || 'N/A';
         const estDate = formatEstDate(post.Est_Date);
-        const budget = `LKR ${post.Requesting_Price || 0}/= (${post.Price_Type || 'Fixed'})`;
+        const budget = `Rs. ${Number(post.Requesting_Price || 0).toLocaleString('en-US', {minimumFractionDigits:2})} (${post.Price_Type || 'Fixed'})`;
         const description = post.Description || '';
         const snippet = description.length > 300
             ? escapeHtml(description.substring(0, 300)) + '...'
@@ -994,7 +994,7 @@
         const progress    = parseInt(post.Progress) || 0;
         const estDate     = formatEstDate(post.Est_Date);
         const startedDate = post.Started_At ? formatDate(post.Started_At) : formatDate(post.Created_At);
-        const budget      = `LKR ${post.Requesting_Price || 0}/= (${post.Price_Type || 'Fixed'})`;
+        const budget      = `Rs. ${Number(post.Requesting_Price || 0).toLocaleString('en-US', {minimumFractionDigits:2})} (${post.Price_Type || 'Fixed'})`;
         const description = post.Description || '';
         const snippet     = description.length > 300
             ? escapeHtml(description.substring(0, 300)) + '...'
@@ -1078,7 +1078,7 @@
         const progress    = parseInt(post.Progress) || 0;
         const estDate     = formatEstDate(post.Est_Date);
         const submittedAt = post.Ended_At ? formatDate(post.Ended_At) : formatDate(post.Created_At);
-        const budget      = `LKR ${post.Requesting_Price || 0}/= (${post.Price_Type || 'Fixed'})`;
+        const budget      = `Rs. ${Number(post.Requesting_Price || 0).toLocaleString('en-US', {minimumFractionDigits:2})} (${post.Price_Type || 'Fixed'})`;
         const description = post.Description || '';
         const snippet     = description.length > 300
             ? escapeHtml(description.substring(0, 300)) + '...'
@@ -1160,7 +1160,7 @@
         const category    = post.Category_Name || 'N/A';
         const completedAt = post.Ended_At ? formatDate(post.Ended_At) : formatDate(post.Created_At);
         const startedAt   = post.Started_At ? formatDate(post.Started_At) : '—';
-        const budget      = `LKR ${post.Requesting_Price || 0}/= (${post.Price_Type || 'Fixed'})`;
+        const budget      = `Rs. ${Number(post.Requesting_Price || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })} (${post.Price_Type || 'Fixed'})`;
         const description = post.Description || '';
         const snippet     = description.length > 300
             ? escapeHtml(description.substring(0, 300)) + '...'
@@ -1450,7 +1450,7 @@
                     <div class="post-view-section">
                         <div class="section-title">Details</div>
                         <div class="kv-grid">
-                            <div class="kv-item"><span class="kv-label">Budget:</span><span class="kv-value">LKR ${post.Requesting_Price || '0'}/= (${post.Price_Type || 'N/A'})</span></div>
+                            <div class="kv-item"><span class="kv-label">Budget:</span><span class="kv-value">Rs. ${Number(post.Requesting_Price || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })} (${post.Price_Type || 'N/A'})</span></div>
                             <div class="kv-item"><span class="kv-label">Level:</span><span class="kv-value">${post.Level || 'N/A'}</span></div>
                             <div class="kv-item"><span class="kv-label">Duration:</span><span class="kv-value">${post.Duration || 'N/A'} ${post.Duration_Type || 'N/A'}</span></div>
                             <div class="kv-item"><span class="kv-label">Proposals:</span><span class="kv-value">${post.Proposal_Count || '0'}</span></div>
@@ -1585,7 +1585,7 @@
                     <div class="post-view-section">
                         <div class="section-title">Details</div>
                         <div class="kv-grid">
-                            <div class="kv-item"><span class="kv-label">Budget:</span><span class="kv-value">LKR ${post.Requesting_Price || '0'}/= (${post.Price_Type || 'N/A'})</span></div>
+                            <div class="kv-item"><span class="kv-label">Budget:</span><span class="kv-value">Rs. ${Number(post.Requesting_Price || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })} (${post.Price_Type || 'N/A'})</span></div>
                             <div class="kv-item"><span class="kv-label">Level:</span><span class="kv-value">${post.Level || 'N/A'}</span></div>
                             <div class="kv-item"><span class="kv-label">Duration:</span><span class="kv-value">${post.Duration || 'N/A'} ${post.Duration_Type || 'N/A'}</span></div>
                             <div class="kv-item"><span class="kv-label">Proposals:</span><span class="kv-value">${post.Proposal_Count || '0'}</span></div>
@@ -1810,7 +1810,7 @@
         }).join('');
     }
 
-    async function submitNewRequirement() {
+    function submitNewRequirement() {
         const projectId   = window._reqCurrentProjectId;
         const title       = document.getElementById('reqTitle')?.value.trim()       || '';
         const description = document.getElementById('reqDescription')?.value.trim() || '';
@@ -1838,8 +1838,8 @@
         }
 
         try {
-            const res  = await fetch(`${window.BASE_URL}/project/add-requirement`, { method: 'POST', body: fd });
-            const data = await res.json();
+            const res  =  fetch(`${window.BASE_URL}/project/add-requirement`, { method: 'POST', body: fd });
+            const data =  res.json();
 
             if (!data.success) {
                 window.showErrorToast('Error', data.error || 'Failed to submit requirement.');
@@ -1861,11 +1861,8 @@
             new_requirement: text
         })
     })
-    .then(res => res.text())
-    .then(text => {
-        console.log("RAW RESPONSE:", text);
-        return JSON.parse(text);
-    })
+    .then(res => res.json())
+    
     .then(data => {
         if (data.success) {
             window.showSuccessToast("Success!", "Requirement added successfully.");
@@ -1879,7 +1876,13 @@
         console.error("Error:", err);
         window.showErrorToast("Error", "Error adding requirement: " + err.message);
     });
-}
+        } catch (err) {
+            console.error('Error submitting requirement:', err);
+            window.showErrorToast('Error', 'An error occurred while submitting the requirement. Please try again.');
+        } finally {
+            if (btn) { btn.disabled = false; btn.innerHTML = 'Submit'; }
+        }
+    }
 
 
     function cancelOngoingProject(id) {
@@ -2062,24 +2065,24 @@ function addReviewComments() {
         })
             
         
-        .then(response => response.text())
-        .then(text => {
-            console.log('Complete response:', text);
-            return JSON.parse(text); // return raw text for now
-        });
-        // .then(response => response.json())
-        // .then(data => {
-        //     if (data.success) {
-        //         window.showSuccessToast("Success!", "Project marked as completed.");
-        //         // Optionally, you can remove the project from the list or update its status in the UI here
-        //     } else {
-        //         window.showErrorToast("Error", data.error || 'Failed to complete project');
-        //     }
-        // })
-        // .catch(error => {
-        //     console.log('Complete error:', error);
-        //     window.showErrorToast("Error", 'An error occurred while completing the project.');
+        // .then(response => response.text())
+        // .then(text => {
+        //     console.log('Complete response:', text);
+        //     return JSON.parse(text); // return raw text for now
         // });
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.showSuccessToast("Success!", "Project marked as completed.");
+                // Optionally, you can remove the project from the list or update its status in the UI here
+            } else {
+                window.showErrorToast("Error", data.error || 'Failed to complete project');
+            }
+        })
+        .catch(error => {
+            console.log('Complete error:', error);
+            window.showErrorToast("Error", 'An error occurred while completing the project.');
+        });
     }
 
     document.addEventListener('DOMContentLoaded', function () {
