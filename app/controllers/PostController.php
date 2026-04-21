@@ -257,8 +257,11 @@ class PostController extends BaseController
             return;
         }
 
+        $budgetSource = strtolower(trim((string) ($_GET['budget_source'] ?? 'post')));
+        $useBidBudget = ($budgetSource === 'bid');
+
         // Implement this in PostModel to return ONE row (or rename to your actual method)
-        $post = $this->postModel->getPostById($id);
+        $post = $this->postModel->getPostById($id, $useBidBudget);
 
         if (!$post) {
             http_response_code(404);

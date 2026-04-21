@@ -78,6 +78,103 @@ class ProjectModel extends Database {
         return [$commission, $netAmount];
     }
 
+    private function getAcceptedBidTermsForPost(int $postId, int $providerId): ?array
+    {
+        if ($postId <= 0 || $providerId <= 0) {
+            return null;
+        }
+
+        $stmt = $this->conn->prepare(
+            "SELECT Amount, Duration
+             FROM bids
+             WHERE Post_ID = ? AND Provider_ID = ?
+               AND LOWER(COALESCE(Status, '')) NOT IN ('cancelled', 'deleted')
+             ORDER BY
+               CASE
+                 WHEN LOWER(COALESCE(Status, '')) IN ('active', 'accepted', 'pending', 'open') THEN 0
+                 ELSE 1
+               END,
+               COALESCE(Created_At, NOW()) DESC,
+               Bid_ID DESC
+             LIMIT 1"
+        );
+        if (!$stmt) {
+            error_log('ProjectModel::getAcceptedBidTermsForPost prepare: ' . $this->conn->error);
+            return null;
+        }
+
+        $stmt->bind_param('ii', $postId, $providerId);
+        if (!$stmt->execute()) {
+            error_log('ProjectModel::getAcceptedBidTermsForPost exec: ' . $stmt->error);
+            $stmt->close();
+            return null;
+        }
+
+        $row = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        if (!$row) {
+            return null;
+        }
+
+        return [
+            'amount' => max(0.0, (float) ($row['Amount'] ?? 0)),
+            'duration' => max(0, (int) ($row['Duration'] ?? 0)),
+        ];
+    }
+
+    private function resolveProjectValueByPost(int $postId, int $providerId, string $postType, float $defaultPrice): float
+    {
+        if (strtolower(trim($postType)) !== 'post') {
+            return max(0.0, $defaultPrice);
+        }
+
+        $bidTerms = $this->getAcceptedBidTermsForPost($postId, $providerId);
+        if (!$bidTerms) {
+            return max(0.0, $defaultPrice);
+        }
+
+        return max(0.0, (float) $bidTerms['amount']);
+    }
+
+    private function applyBidTermsToProjectRows(array $rows): array
+    {
+        foreach ($rows as &$row) {
+            $postType = strtolower(trim((string) ($row['Post_Type'] ?? '')));
+            if ($postType !== 'post') {
+                continue;
+            }
+
+            $postId = (int) ($row['Post_ID'] ?? 0);
+            $providerId = (int) ($row['Provider_ID'] ?? 0);
+            if ($postId <= 0 || $providerId <= 0) {
+                continue;
+            }
+
+            $bidTerms = $this->getAcceptedBidTermsForPost($postId, $providerId);
+            if (!$bidTerms) {
+                continue;
+            }
+
+            $row['Requesting_Price'] = $bidTerms['amount'];
+
+            if ($bidTerms['duration'] > 0) {
+                $baseDateRaw = $row['Started_At'] ?? $row['Published_At'] ?? $row['Created_At'] ?? null;
+                $baseTimestamp = $baseDateRaw ? strtotime((string) $baseDateRaw) : false;
+                if ($baseTimestamp === false) {
+                    $baseTimestamp = time();
+                }
+
+                $etaTimestamp = strtotime('+' . $bidTerms['duration'] . ' days', $baseTimestamp);
+                if ($etaTimestamp !== false) {
+                    $row['Est_Date'] = date('Y-m-d', $etaTimestamp);
+                }
+            }
+        }
+        unset($row);
+
+        return $rows;
+    }
+
     private function resolveProviderCategoryId(int $providerCategoryId, int $providerId, int $categoryId): int
     {
         if ($providerCategoryId > 0) {
@@ -114,8 +211,9 @@ class ProjectModel extends Database {
                         'SELECT COALESCE(AVG(r.Rating), 0) AS avg_rating
                          FROM reviews r
                          JOIN project proj ON proj.Project_ID = r.Project_ID
-             JOIN post p ON p.Post_ID = proj.Post_ID
-             WHERE p.Provider_Categories_ID = ?
+                                                 JOIN post p ON p.Post_ID = proj.Post_ID
+                                                 JOIN provider_categories pc ON pc.Provider_ID = p.Provider_ID AND pc.Category_ID = p.Category_ID
+                         WHERE pc.ID = ?
                AND proj.Project_Status = "completed"
                              AND r.Rating IS NOT NULL'
         );
@@ -154,10 +252,21 @@ class ProjectModel extends Database {
     private function refreshProviderRatingFromCategories(int $providerId): float
     {
         $stmt = $this->conn->prepare(
-            'SELECT COALESCE(AVG(pc.Rating), 0) AS avg_rating
-             FROM provider_categories pc
-             WHERE pc.Provider_ID = ?
-               AND pc.Rating IS NOT NULL'
+                        'SELECT COALESCE(AVG(pc.Rating), 0) AS avg_rating
+                         FROM provider_categories pc
+                         WHERE pc.Provider_ID = ?
+                             AND pc.Rating IS NOT NULL
+                             AND EXISTS (
+                                     SELECT 1
+                                     FROM project proj
+                                     INNER JOIN post p ON p.Post_ID = proj.Post_ID
+                                     INNER JOIN reviews r ON r.Project_ID = proj.Project_ID
+                                     WHERE p.Provider_ID = pc.Provider_ID
+                                         AND p.Category_ID = pc.Category_ID
+                                         AND proj.Project_Status = "completed"
+                                         AND r.Rating IS NOT NULL
+                                     LIMIT 1
+                             )'
         );
         if (!$stmt) {
             error_log('ProjectModel::refreshProviderRatingFromCategories prepare: ' . $this->conn->error);
@@ -194,7 +303,7 @@ class ProjectModel extends Database {
     private function releasePaymentForProject(int $projectId): bool
     {
         $stmt = $this->conn->prepare(
-            'SELECT pay.Payment_ID, pay.Status, po.Requesting_Price
+            'SELECT pay.Payment_ID, pay.Status, po.Requesting_Price, po.Post_Type, po.Provider_ID, po.Post_ID
              FROM project proj
              JOIN post po ON po.Post_ID = proj.Post_ID
              LEFT JOIN payment pay ON pay.Project_ID = proj.Project_ID
@@ -222,9 +331,15 @@ class ProjectModel extends Database {
         }
 
         $paymentId = (int) ($row['Payment_ID'] ?? 0);
-        $projectValue = (float) ($row['Requesting_Price'] ?? 0);
+        $projectValue = $this->resolveProjectValueByPost(
+            (int) ($row['Post_ID'] ?? 0),
+            (int) ($row['Provider_ID'] ?? 0),
+            (string) ($row['Post_Type'] ?? ''),
+            (float) ($row['Requesting_Price'] ?? 0)
+        );
         $status = strtolower(trim((string) ($row['Status'] ?? '')));
-        [$commission, $netAmount] = $this->splitProjectValue($projectValue);
+        [$commission] = $this->splitProjectValue($projectValue);
+        $grossAmount = max(0.0, round($projectValue, 2));
 
         if ($paymentId > 0) {
             if ($status === 'paid') {
@@ -250,7 +365,7 @@ class ProjectModel extends Database {
                 return false;
             }
 
-            $update->bind_param('ddi', $netAmount, $commission, $paymentId);
+            $update->bind_param('ddi', $grossAmount, $commission, $paymentId);
             $ok = $update->execute();
             if (!$ok) {
                 error_log('ProjectModel::releasePaymentForProject update exec: ' . $update->error);
@@ -263,23 +378,23 @@ class ProjectModel extends Database {
         return false;
     }
 
-    private function getPaidPaymentAmountForProject(int $projectId): ?float
+    private function getPaidPaymentFinancialsForProject(int $projectId): ?array
     {
         $stmt = $this->conn->prepare(
-            "SELECT Amount
+            "SELECT Amount, Commission
              FROM payment
              WHERE Project_ID = ? AND Status = 'Paid'
              ORDER BY COALESCE(Paid_Time, Hold_Time) DESC, Payment_ID DESC
              LIMIT 1"
         );
         if (!$stmt) {
-            error_log('ProjectModel::getPaidPaymentAmountForProject prepare: ' . $this->conn->error);
+            error_log('ProjectModel::getPaidPaymentFinancialsForProject prepare: ' . $this->conn->error);
             return null;
         }
 
         $stmt->bind_param('i', $projectId);
         if (!$stmt->execute()) {
-            error_log('ProjectModel::getPaidPaymentAmountForProject exec: ' . $stmt->error);
+            error_log('ProjectModel::getPaidPaymentFinancialsForProject exec: ' . $stmt->error);
             $stmt->close();
             return null;
         }
@@ -290,7 +405,13 @@ class ProjectModel extends Database {
             return null;
         }
 
-        return max(0.0, (float) ($row['Amount'] ?? 0));
+        $amount = max(0.0, (float) ($row['Amount'] ?? 0));
+        $commission = max(0.0, (float) ($row['Commission'] ?? 0));
+
+        return [
+            'amount' => $amount,
+            'commission' => $commission,
+        ];
     }
 
     private function applyEarningsFromProjectPayment(int $projectId, int $providerCategoryId, int $providerId): bool
@@ -305,11 +426,13 @@ class ProjectModel extends Database {
             return false;
         }
 
-        $paymentAmount = $this->getPaidPaymentAmountForProject($projectId);
-        if ($paymentAmount === null) {
-            error_log('ProjectModel::applyEarningsFromProjectPayment no paid payment amount found');
+        $payment = $this->getPaidPaymentFinancialsForProject($projectId);
+        if ($payment === null) {
+            error_log('ProjectModel::applyEarningsFromProjectPayment no paid payment financials found');
             return false;
         }
+
+        $netEarning = max(0.0, round(((float) $payment['amount']) - ((float) $payment['commission']), 2));
 
         $updateCategory = $this->conn->prepare(
             'UPDATE provider_categories
@@ -321,7 +444,7 @@ class ProjectModel extends Database {
             return false;
         }
 
-        $updateCategory->bind_param('dii', $paymentAmount, $providerCategoryId, $providerId);
+        $updateCategory->bind_param('dii', $netEarning, $providerCategoryId, $providerId);
         if (!$updateCategory->execute()) {
             error_log('ProjectModel::applyEarningsFromProjectPayment category exec: ' . $updateCategory->error);
             $updateCategory->close();
@@ -344,7 +467,7 @@ class ProjectModel extends Database {
             return false;
         }
 
-        $updateProvider->bind_param('di', $paymentAmount, $providerId);
+        $updateProvider->bind_param('di', $netEarning, $providerId);
         if (!$updateProvider->execute()) {
             error_log('ProjectModel::applyEarningsFromProjectPayment provider exec: ' . $updateProvider->error);
             $updateProvider->close();
@@ -365,7 +488,7 @@ class ProjectModel extends Database {
         $this->conn->begin_transaction();
 
         try {
-            $priceStmt = $this->conn->prepare('SELECT Requesting_Price FROM post WHERE Post_ID = ? LIMIT 1');
+            $priceStmt = $this->conn->prepare('SELECT Requesting_Price, Post_Type, Provider_ID FROM post WHERE Post_ID = ? LIMIT 1');
             if (!$priceStmt) {
                 throw new Exception('createProjectAndHoldPayment prepare price: ' . $this->conn->error);
             }
@@ -380,8 +503,14 @@ class ProjectModel extends Database {
                 throw new Exception('createProjectAndHoldPayment post not found');
             }
 
-            $projectValue = (float) ($priceRow['Requesting_Price'] ?? 0);
-            [$commission, $netAmount] = $this->splitProjectValue($projectValue);
+            $projectValue = $this->resolveProjectValueByPost(
+                $postId,
+                (int) ($priceRow['Provider_ID'] ?? 0),
+                (string) ($priceRow['Post_Type'] ?? ''),
+                (float) ($priceRow['Requesting_Price'] ?? 0)
+            );
+            [$commission] = $this->splitProjectValue($projectValue);
+            $grossAmount = max(0.0, round($projectValue, 2));
 
             $projectId = 0;
             $existingProjectStmt = $this->conn->prepare('SELECT Project_ID FROM project WHERE Post_ID = ? LIMIT 1');
@@ -449,7 +578,7 @@ class ProjectModel extends Database {
                 if (!$updatePaymentStmt) {
                     throw new Exception('createProjectAndHoldPayment prepare payment update: ' . $this->conn->error);
                 }
-                $updatePaymentStmt->bind_param('ddi', $netAmount, $commission, $paymentId);
+                $updatePaymentStmt->bind_param('ddi', $grossAmount, $commission, $paymentId);
                 if (!$updatePaymentStmt->execute()) {
                     throw new Exception('createProjectAndHoldPayment exec payment update: ' . $updatePaymentStmt->error);
                 }
@@ -463,7 +592,7 @@ class ProjectModel extends Database {
                 if (!$insertPaymentStmt) {
                     throw new Exception('createProjectAndHoldPayment prepare payment insert: ' . $this->conn->error);
                 }
-                $insertPaymentStmt->bind_param('iddi', $paymentId, $netAmount, $commission, $projectId);
+                $insertPaymentStmt->bind_param('iddi', $paymentId, $grossAmount, $commission, $projectId);
                 if (!$insertPaymentStmt->execute()) {
                     throw new Exception('createProjectAndHoldPayment exec payment insert: ' . $insertPaymentStmt->error);
                 }
@@ -548,8 +677,47 @@ class ProjectModel extends Database {
   }
 
   public function countProjectsByClientId($clientId, $status = null) {
-    // TODO: Implement actual database query
-    return 0;
+        $sql = "SELECT COUNT(*) AS total
+                        FROM project pr
+                        INNER JOIN post p ON p.Post_ID = pr.Post_ID
+                        WHERE p.Client_ID = ?";
+
+        $types = 'i';
+        $params = [$clientId];
+
+        if ($status !== null) {
+            $normalizedStatus = strtolower(trim((string) $status));
+            if ($normalizedStatus === 'active') {
+                $sql .= " AND pr.Project_Status IN ('ongoing', 'pending-review')";
+            } elseif ($normalizedStatus === 'completed') {
+                $sql .= " AND pr.Project_Status = 'completed'";
+            } elseif ($normalizedStatus === 'pending') {
+                $sql .= " AND pr.Project_Status = 'pending'";
+            } elseif ($normalizedStatus === 'cancelled') {
+                $sql .= " AND pr.Project_Status = 'cancelled'";
+            } else {
+                $sql .= " AND pr.Project_Status = ?";
+                $types .= 's';
+                $params[] = $status;
+            }
+        }
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('ProjectModel::countProjectsByClientId prepare: ' . $this->conn->error);
+            return 0;
+        }
+
+        $stmt->bind_param($types, ...$params);
+        if (!$stmt->execute()) {
+            error_log('ProjectModel::countProjectsByClientId exec: ' . $stmt->error);
+            $stmt->close();
+            return 0;
+        }
+
+        $row = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        return (int) ($row['total'] ?? 0);
   }
 
   public function getPendingRequestsByClientId($clientId) {
@@ -1773,7 +1941,9 @@ class ProjectModel extends Database {
         $stmt->execute();
         $result = $stmt->get_result();
         $stmt->close();
-        return $result->fetch_all(MYSQLI_ASSOC);
+
+        $rows = $result->fetch_all(MYSQLI_ASSOC);
+        return $this->applyBidTermsToProjectRows($rows);
     }
 
     public function getOngoingProjectsForClient(int $clientId, string $sort = 'date_desc', string $search = ''): array
@@ -2056,7 +2226,6 @@ class ProjectModel extends Database {
         $idStmt = $this->conn->prepare(
             'SELECT proj.Project_ID, COALESCE(proj.Progress, 0) AS Progress,
                     COALESCE(p.Provider_ID, 0) AS Provider_ID,
-                    COALESCE(p.Provider_Categories_ID, 0) AS Provider_Categories_ID,
                     COALESCE(p.Category_ID, 0) AS Category_ID
              FROM project proj
              JOIN post p ON p.Post_ID = proj.Post_ID
@@ -2078,7 +2247,7 @@ class ProjectModel extends Database {
         $progress  = (int) $row['Progress'];
         $providerId = (int) ($row['Provider_ID'] ?? 0);
         $providerCategoryId = $this->resolveProviderCategoryId(
-            (int) ($row['Provider_Categories_ID'] ?? 0),
+            0,
             $providerId,
             (int) ($row['Category_ID'] ?? 0)
         );

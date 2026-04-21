@@ -36,9 +36,9 @@ if ($_SESSION['role'] === 'Provider') {
 } elseif ($_SESSION['role'] === 'Client') {
     $navLinks = [
         ['label' => 'Dashboard', 'href' => BASE_URL . '/dashboard', 'class' => '"fas fa-chart-simple"'],
-        ['label' => 'Projects', 'href' => BASE_URL . '/projects', 'class' => '"fas fa-briefcase"'],
-        ['label' => 'Providers', 'href' => BASE_URL . '/providers', 'class' => '"fas fa-users"'],
         ['label' => 'Requests', 'href' => BASE_URL . '/requests', 'class' => '"fas fa-layer-group"'],
+        ['label' => 'Providers', 'href' => BASE_URL . '/providers', 'class' => '"fas fa-users"'],
+        ['label' => 'Projects', 'href' => BASE_URL . '/projects', 'class' => '"fas fa-briefcase"'],
         ['label' => 'Payments', 'href' => BASE_URL . '/payments', 'class' => '"fas fa-credit-card"'],
     ];
 }

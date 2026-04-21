@@ -17,6 +17,23 @@
 <body>
     <?php // Use filesystem path for includes (BASE_URL is for URLs, not filesystem)
     require_once __DIR__ . '/../../includes/navbar.php'; ?>
+    <?php
+    $activeProjectsCount = isset($activeProjectsCount) ? (int) $activeProjectsCount : 0;
+    $pendingProjectsCount = isset($pendingProjectsCount) ? (int) $pendingProjectsCount : 0;
+    $totalBids = isset($totalBids) ? (int) $totalBids : 0;
+    $totalRevenue = isset($totalRevenue) ? (float) $totalRevenue : 0.0;
+    $earningsChange = isset($earningsChange) ? (float) $earningsChange : 0.0;
+    $completedThisMonth = isset($completedThisMonth) ? (int) $completedThisMonth : 0;
+    $recentPayments = isset($recentPayments) && is_array($recentPayments) ? $recentPayments : [];
+    $recentBids = isset($recentBids) && is_array($recentBids) ? $recentBids : [];
+    $activeProjects = isset($activeProjects) && is_array($activeProjects) ? $activeProjects : [];
+    $dashboardChartSeries = isset($dashboardChartSeries) && is_array($dashboardChartSeries) ? $dashboardChartSeries : [
+        '6m' => ['labels' => [], 'values' => []],
+        '12m' => ['labels' => [], 'values' => []],
+        '36m' => ['labels' => [], 'values' => []],
+        'all' => ['labels' => [], 'values' => []],
+    ];
+    ?>
     <main class="dashboard-wrapper">
         <header class="dashboard">
             <h1>Welcome Back</h1>
@@ -30,30 +47,33 @@
                 <div class="metric-icon" style="background:#ecfdf5; color:#008500;"><i class="fas fa-briefcase"></i>
                 </div>
                 <div class="metric-title">Active Projects</div>
-                <div class="metric-value">3</div>
-                <div class="metric-delta delta-up"><i class="fa-solid fa-arrow-up"></i> +1 this week</div>
+                <div class="metric-value"><?= number_format($activeProjectsCount) ?></div>
+                <div class="metric-delta" style="color:#64748b;"><i class="fa-solid fa-layer-group"></i> Ongoing now</div>
             </div>
             <!-- Pending Projects -->
             <div class="metric-card">
                 <div class="metric-icon" style="background:#fefce8; color:#b45309;"><i class="fas fa-hourglass"></i></div>
                 <div class="metric-title">Pending Projects</div>
-                <div class="metric-value">2</div>
+                <div class="metric-value"><?= number_format($pendingProjectsCount) ?></div>
                 <div class="metric-delta" style="color:#b45309;"><i class="fa-solid fa-hourglass"></i> Awaiting action</div>
             </div>
             <!-- Total Bids -->
             <div class="metric-card">
                 <div class="metric-icon" style="background:#eff6ff; color:#008500;"><i class="fas fa-gavel"></i></div>
                 <div class="metric-title">Total Bids</div>
-                <div class="metric-value">5</div>
-                <div class="metric-delta delta-up"><i class="fa-solid fa-arrow-up"></i> +2</div>
+                <div class="metric-value"><?= number_format($totalBids) ?></div>
+                <div class="metric-delta" style="color:#64748b;"><i class="fa-solid fa-list"></i> Across all posts</div>
             </div>
             <!-- Total Revenue -->
             <div class="metric-card">
                 <div class="metric-icon" style="background:#ecfdf5; color:#008500;"><i class="fas fa-sack-dollar"></i>
                 </div>
                 <div class="metric-title">Total Revenue</div>
-                <div class="metric-value">$4,200</div>
-                <div class="metric-delta delta-up"><i class="fa-solid fa-arrow-up"></i> +8% vs last month</div>
+                <div class="metric-value">LKR <?= number_format($totalRevenue, 2) ?></div>
+                <div class="metric-delta <?= $earningsChange >= 0 ? 'delta-up' : '' ?>">
+                    <i class="fa-solid <?= $earningsChange >= 0 ? 'fa-arrow-up' : 'fa-arrow-down' ?>"></i>
+                    <?= number_format(abs($earningsChange), 1) ?>% vs last month
+                </div>
             </div>
         </section>
 
@@ -82,83 +102,87 @@
             <div class="activity-card">
                 <h3><i class="fas fa-file-invoice"></i> Recent Payments</h3>
                 <ul class="list">
-                    <li class="list-item">
-                        <div class="item-top">
-                            <div class="item-title">Invoice #INV-10452 • Sprint 3 Development</div>
-                            <span class="status-badge status-pending">Pending</span>
-                        </div>
-                        <div class="item-meta">
-                            <span><i class="fa-solid fa-calendar"></i> Sep 02, 2025</span>
-                            <span><i class="fa-solid fa-coins"></i> $1,200.00</span>
-                            <span><i class="fa-solid fa-credit-card"></i> Visa</span>
-                        </div>
-                    </li>
-                    <li class="list-item">
-                        <div class="item-top">
-                            <div class="item-title">Invoice #INV-10398 • Brand Pack Delivery</div>
-                            <span class="status-badge status-paid">Paid</span>
-                        </div>
-                        <div class="item-meta">
-                            <span><i class="fa-solid fa-calendar"></i> Aug 28, 2025</span>
-                            <span><i class="fa-solid fa-coins"></i> $950.00</span>
-                            <span><i class="fa-solid fa-credit-card"></i> Stripe</span>
-                        </div>
-                    </li>
-                    <li class="list-item">
-                        <div class="item-top">
-                            <div class="item-title">Invoice #INV-10321 • QA Cycle Refund</div>
-                            <span class="status-badge status-refunded">Refunded</span>
-                        </div>
-                        <div class="item-meta">
-                            <span><i class="fa-solid fa-calendar"></i> Aug 30, 2025</span>
-                            <span><i class="fa-solid fa-coins"></i> $420.00</span>
-                            <span><i class="fa-solid fa-credit-card"></i> Stripe</span>
-                        </div>
-                    </li>
+                    <?php if (!empty($recentPayments)): ?>
+                        <?php foreach ($recentPayments as $payment): ?>
+                            <?php
+                            $statusRaw = strtolower(trim((string) ($payment['Status'] ?? '')));
+                            $statusClass = 'status-pending';
+                            if ($statusRaw === 'paid') {
+                                $statusClass = 'status-paid';
+                            } elseif (in_array($statusRaw, ['refunded', 'refund requested'], true)) {
+                                $statusClass = 'status-refunded';
+                            }
+                            $timeRaw = $payment['Paid_Time'] ?? $payment['Hold_Time'] ?? null;
+                            $timeLabel = $timeRaw ? date('M d, Y', strtotime((string) $timeRaw)) : 'N/A';
+                            ?>
+                            <li class="list-item">
+                                <div class="item-top">
+                                    <div class="item-title">Invoice #<?= (int) ($payment['Payment_ID'] ?? 0) ?> • <?= htmlspecialchars((string) ($payment['Project_Title'] ?? 'Project')) ?></div>
+                                    <span class="status-badge <?= $statusClass ?>"><?= htmlspecialchars((string) ($payment['Status'] ?? 'Unknown')) ?></span>
+                                </div>
+                                <div class="item-meta">
+                                    <span><i class="fa-solid fa-calendar"></i> <?= $timeLabel ?></span>
+                                    <span><i class="fa-solid fa-coins"></i> LKR <?= number_format((float) ($payment['Amount'] ?? 0), 2) ?></span>
+                                    <span><i class="fa-solid fa-check-double"></i> Net after commission</span>
+                                </div>
+                            </li>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <li class="list-item">
+                            <div class="item-top">
+                                <div class="item-title">No recent payments</div>
+                                <span class="status-badge status-pending">-</span>
+                            </div>
+                            <div class="item-meta">
+                                <span><i class="fa-solid fa-circle-info"></i> Payments appear here after transactions are recorded.</span>
+                            </div>
+                        </li>
+                    <?php endif; ?>
                 </ul>
                 <div style="margin-top:18px; text-align:right;">
-                    <button class="link-btn"><i class="fa-solid fa-arrow-right"></i> View All Payments</button>
+                    <a class="link-btn" href="<?= BASE_URL ?>/earnings"><i class="fa-solid fa-arrow-right"></i> View All Payments</a>
                 </div>
             </div>
             <div class="activity-card">
-                <h3><i class="fas fa-clipboard-list"></i> Recent Posts</h3>
+                <h3><i class="fas fa-clipboard-list"></i> Recent Bids</h3>
                 <ul class="list">
-                    <li class="list-item">
-                        <div class="item-top">
-                            <div class="item-title">Full-Stack E‑commerce Platform</div>
-                            <span class="status-badge status-open">Open</span>
-                        </div>
-                        <div class="item-meta">
-                            <span><i class="fa-solid fa-calendar"></i> 2d ago</span>
-                            <span><i class="fa-solid fa-users"></i> 23 proposals</span>
-                            <span><i class="fa-solid fa-hourglass"></i> 5 days left</span>
-                        </div>
-                    </li>
-                    <li class="list-item">
-                        <div class="item-top">
-                            <div class="item-title">Mobile App UI/UX Design</div>
-                            <span class="status-badge status-open">Open</span>
-                        </div>
-                        <div class="item-meta">
-                            <span><i class="fa-solid fa-calendar"></i> 1w ago</span>
-                            <span><i class="fa-solid fa-users"></i> 47 proposals</span>
-                            <span><i class="fa-solid fa-hourglass"></i> 12 days left</span>
-                        </div>
-                    </li>
-                    <li class="list-item">
-                        <div class="item-top">
-                            <div class="item-title">Digital Marketing Campaign Plan</div>
-                            <span class="status-badge status-draft">Draft</span>
-                        </div>
-                        <div class="item-meta">
-                            <span><i class="fa-solid fa-calendar"></i> 3d ago</span>
-                            <span><i class="fa-solid fa-pen"></i> 75% complete</span>
-                            <span><i class="fa-solid fa-layer-group"></i> Draft</span>
-                        </div>
-                    </li>
+                    <?php if (!empty($recentBids)): ?>
+                        <?php foreach ($recentBids as $bid): ?>
+                            <?php
+                            $statusKey = strtolower((string) ($bid['Status_Key'] ?? 'active'));
+                            $statusClass = 'status-open';
+                            if ($statusKey === 'accepted') {
+                                $statusClass = 'status-paid';
+                            } elseif (in_array($statusKey, ['rejected', 'closed', 'deleted'], true)) {
+                                $statusClass = 'status-refunded';
+                            }
+                            ?>
+                            <li class="list-item">
+                                <div class="item-top">
+                                    <div class="item-title"><?= htmlspecialchars((string) ($bid['Title'] ?? 'Untitled Post')) ?></div>
+                                    <span class="status-badge <?= $statusClass ?>"><?= htmlspecialchars((string) ucfirst($statusKey)) ?></span>
+                                </div>
+                                <div class="item-meta">
+                                    <span><i class="fa-solid fa-calendar"></i> <?= htmlspecialchars((string) ($bid['Bid_Date'] ?? 'N/A')) ?></span>
+                                    <span><i class="fa-solid fa-coins"></i> <?= htmlspecialchars((string) ($bid['Bid_Amount'] ?? 'LKR 0.00')) ?></span>
+                                    <span><i class="fa-solid fa-hourglass"></i> <?= htmlspecialchars((string) ($bid['Timeline'] ?? 'N/A')) ?></span>
+                                </div>
+                            </li>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <li class="list-item">
+                            <div class="item-top">
+                                <div class="item-title">No recent bids</div>
+                                <span class="status-badge status-open">-</span>
+                            </div>
+                            <div class="item-meta">
+                                <span><i class="fa-solid fa-circle-info"></i> Submit bids from the feed to see them here.</span>
+                            </div>
+                        </li>
+                    <?php endif; ?>
                 </ul>
                 <div style="margin-top:18px; text-align:right;">
-                    <button class="link-btn"><i class="fa-solid fa-arrow-right"></i> Manage Posts</button>
+                    <a class="link-btn" href="<?= BASE_URL ?>/bids"><i class="fa-solid fa-arrow-right"></i> Manage Bids</a>
                 </div>
             </div>
         </section>
@@ -168,8 +192,8 @@
             <div class="section-header">
                 <h2>Active Projects</h2>
                 <div class="section-actions">
-                    <button class="link-btn"><i class="fa-solid fa-eye"></i> View All</button>
-                    <button class="link-btn"><i class="fa-solid fa-plus"></i> New Project</button>
+                    <a class="link-btn" href="<?= BASE_URL ?>/projects"><i class="fa-solid fa-eye"></i> View All</a>
+                    <a class="link-btn" href="<?= BASE_URL ?>/projects"><i class="fa-solid fa-plus"></i> New Project</a>
                 </div>
             </div>
             <div class="card" style="padding:0; overflow:hidden;">
@@ -179,64 +203,39 @@
                         <tr>
                             <th style="padding:14px 20px;">Project</th>
                             <th style="padding:14px 20px;">Stage</th>
-                            <th style="padding:14px 20px;">Provider</th>
+                            <th style="padding:14px 20px;">Client</th>
                             <th style="padding:14px 20px;">Budget</th>
                             <th style="padding:14px 20px;">Progress</th>
                             <th style="padding:14px 20px; text-align:right;">Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr style="border-top:1px solid #e5e7eb;">
-                            <td style="padding:16px 20px; font-weight:600; color:#111827;">E‑commerce Platform</td>
-                            <td style="padding:16px 20px;">Sprint 3</td>
-                            <td style="padding:16px 20px;">DevStudio Labs</td>
-                            <td style="padding:16px 20px; color:#008500; font-weight:600;">$6,500</td>
-                            <td style="padding:16px 20px;">
-                                <div
-                                    style="background:#e2e8f0; height:8px; border-radius:6px; position:relative; overflow:hidden;">
-                                    <div
-                                        style="background:#008500; width:60%; position:absolute; inset:0; border-radius:6px;">
-                                    </div>
-                                </div>
-                            </td>
-                            <td style="padding:16px 20px; text-align:right;">
-                                <button class="ghost-btn"><i class="fa-solid fa-eye"></i> Details</button>
-                            </td>
-                        </tr>
-                        <tr style="border-top:1px solid #e5e7eb;">
-                            <td style="padding:16px 20px; font-weight:600; color:#111827;">Analytics Dashboard</td>
-                            <td style="padding:16px 20px;">QA</td>
-                            <td style="padding:16px 20px;">DataCraft</td>
-                            <td style="padding:16px 20px; color:#008500; font-weight:600;">$4,800</td>
-                            <td style="padding:16px 20px;">
-                                <div
-                                    style="background:#e2e8f0; height:8px; border-radius:6px; position:relative; overflow:hidden;">
-                                    <div
-                                        style="background:#008500; width:82%; position:absolute; inset:0; border-radius:6px;">
-                                    </div>
-                                </div>
-                            </td>
-                            <td style="padding:16px 20px; text-align:right;">
-                                <button class="ghost-btn"><i class="fa-solid fa-eye"></i> Details</button>
-                            </td>
-                        </tr>
-                        <tr style="border-top:1px solid #e5e7eb;">
-                            <td style="padding:16px 20px; font-weight:600; color:#111827;">Mobile Fitness App</td>
-                            <td style="padding:16px 20px;">Design</td>
-                            <td style="padding:16px 20px;">UXPro Studio</td>
-                            <td style="padding:16px 20px; color:#008500; font-weight:600;">$3,200</td>
-                            <td style="padding:16px 20px;">
-                                <div
-                                    style="background:#e2e8f0; height:8px; border-radius:6px; position:relative; overflow:hidden;">
-                                    <div
-                                        style="background:#008500; width:35%; position:absolute; inset:0; border-radius:6px;">
-                                    </div>
-                                </div>
-                            </td>
-                            <td style="padding:16px 20px; text-align:right;">
-                                <button class="ghost-btn"><i class="fa-solid fa-eye"></i> Details</button>
-                            </td>
-                        </tr>
+                        <?php if (!empty($activeProjects)): ?>
+                            <?php foreach ($activeProjects as $project): ?>
+                                <?php $progress = max(0, min(100, (int) ($project['Progress'] ?? 0))); ?>
+                                <tr style="border-top:1px solid #e5e7eb;">
+                                    <td style="padding:16px 20px; font-weight:600; color:#111827;"><?= htmlspecialchars((string) ($project['Title'] ?? 'Untitled')) ?></td>
+                                    <td style="padding:16px 20px;"><?= htmlspecialchars(ucwords(str_replace(['-', '_'], ' ', (string) ($project['Project_Status'] ?? 'ongoing')))) ?></td>
+                                    <td style="padding:16px 20px;"><?= htmlspecialchars((string) ($project['Client_Name'] ?? 'Unknown Client')) ?></td>
+                                    <td style="padding:16px 20px; color:#008500; font-weight:600;">LKR <?= number_format((float) ($project['Requesting_Price'] ?? 0), 2) ?></td>
+                                    <td style="padding:16px 20px;">
+                                        <div
+                                            style="background:#e2e8f0; height:8px; border-radius:6px; position:relative; overflow:hidden;">
+                                            <div
+                                                style="background:#008500; width:<?= $progress ?>%; position:absolute; inset:0; border-radius:6px;">
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="padding:16px 20px; text-align:right;">
+                                        <a class="ghost-btn" href="<?= BASE_URL ?>/projects"><i class="fa-solid fa-eye"></i> Details</a>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr style="border-top:1px solid #e5e7eb;">
+                                <td colspan="6" style="padding:18px 20px; color:#64748b;">No active projects found.</td>
+                            </tr>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
@@ -251,22 +250,22 @@
                 <div class="action-card">
                     <h3>Create a New Post</h3>
                     <p>Describe the work you need and start receiving proposals from verified providers.</p>
-                    <button class="primary-btn"><i class="fa-solid fa-plus"></i> New Post</button>
+                    <a class="primary-btn" href="<?= BASE_URL ?>/feed"><i class="fa-solid fa-plus"></i> New Bid</a>
                 </div>
                 <div class="action-card">
-                    <h3>Start a Project</h3>
-                    <p>Scope multi-milestone work with structured timelines and payment stages.</p>
-                    <button class="primary-btn"><i class="fa-solid fa-folder-plus"></i> New Project</button>
+                    <h3>Manage Projects</h3>
+                    <p>Track ongoing deliveries, pending reviews, and completed work in one place.</p>
+                    <a class="primary-btn" href="<?= BASE_URL ?>/projects"><i class="fa-solid fa-folder-plus"></i> Projects</a>
                 </div>
                 <div class="action-card">
-                    <h3>Find Providers</h3>
-                    <p>Search and filter professionals by skill, rating, price and availability.</p>
-                    <button class="primary-btn"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+                    <h3>Browse Feed</h3>
+                    <p>Find matching requests and submit new bids with clear timelines and pricing.</p>
+                    <a class="primary-btn" href="<?= BASE_URL ?>/feed"><i class="fa-solid fa-magnifying-glass"></i> Browse</a>
                 </div>
                 <div class="action-card">
                     <h3>Manage Payments</h3>
                     <p>Review pending invoices, download receipts or request a refund.</p>
-                    <button class="primary-btn"><i class="fa-solid fa-file-invoice-dollar"></i> Payments</button>
+                    <a class="primary-btn" href="<?= BASE_URL ?>/earnings"><i class="fa-solid fa-file-invoice-dollar"></i> Payments</a>
                 </div>
             </div>
         </section>
@@ -309,29 +308,11 @@
     (function(){
         const svg = document.getElementById('revenueChart');
         if (!svg) return;
-        const ranges = {
-            '6m': 6,
-            '12m': 12,
-            '36m': 36,
-            'all': 60 // fallback for demo; replace with total months of data
-        };
-        // Demo monthly revenue data (last 60 months). Replace with server-provided data if available.
-        const now = new Date();
-        const dataAll = Array.from({length:60}, (_,i)=>{
-            const d = new Date(now.getFullYear(), now.getMonth()- (59-i), 1);
-            // Generate a gentle uptrend with some noise
-            const base = 1200 + i*25;
-            const val = Math.max(0, Math.round(base + (Math.sin(i/3)*120) + (Math.random()*80-40)));
-            return {date: d, value: val};
-        });
+        const seriesByRange = <?= json_encode($dashboardChartSeries, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
 
-        function monthLabel(d){
-            return d.toLocaleString('en-US', {month:'short'});
-        }
-        function yearShort(d){ return String(d.getFullYear()).slice(-2); }
         function formatCurrency(n){
-            try { return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n); }
-            catch { return '$' + n.toLocaleString(); }
+            try { return new Intl.NumberFormat('en-LK',{style:'currency',currency:'LKR',maximumFractionDigits:0}).format(n); }
+            catch { return 'LKR ' + n.toLocaleString(); }
         }
 
         const viewH = 300, pad = {l:52, r:16, t:18, b:40};
@@ -347,15 +328,20 @@
         }
 
         function render(rangeKey){
-            const count = ranges[rangeKey];
-            let arr = dataAll.slice(-count);
-            if (rangeKey==='all') arr = dataAll.slice();
+            const selected = seriesByRange[rangeKey] || seriesByRange['12m'] || { labels: [], values: [] };
+            const labelsArr = Array.isArray(selected.labels) ? selected.labels : [];
+            const valuesArr = Array.isArray(selected.values) ? selected.values.map(v => Number(v) || 0) : [];
 
-            const sizes = setSvgSize(arr.length);
+            if (!valuesArr.length) {
+                labelsArr.push('No data');
+                valuesArr.push(0);
+            }
+
+            const sizes = setSvgSize(valuesArr.length);
             const viewW = sizes.viewW;
             const innerW = sizes.innerW;
             const minY = 0;
-            const rawMax = Math.max(...arr.map(d=>d.value));
+            const rawMax = Math.max(...valuesArr);
             const niceMax = niceNumber(rawMax, false);
             const maxY = Math.max(100, niceMax);
             const w = innerW;
@@ -388,10 +374,10 @@
 
             // Path
             // Fill container width for all ranges (no horizontal scroll)
-            const step = (arr.length>1) ? (w / (arr.length - 1)) : 0;
-            const points = arr.map((d, i)=>{
+            const step = (valuesArr.length>1) ? (w / (valuesArr.length - 1)) : 0;
+            const points = valuesArr.map((value, i)=>{
                 const x = pad.l + (i * step);
-                const y = pad.t + h - (h * (d.value - minY)/(maxY - minY || 1));
+                const y = pad.t + h - (h * (value - minY)/(maxY - minY || 1));
                 return {x,y};
             });
             const path = document.createElementNS('http://www.w3.org/2000/svg','path');
@@ -417,16 +403,16 @@
             const xAxis = document.createElementNS('http://www.w3.org/2000/svg','g');
             xAxis.setAttribute('class','chart-axis');
             const targetTicks = 10; // try to keep around 10 labels
-            const stepTick = Math.max(1, Math.ceil(arr.length / targetTicks));
-            arr.forEach((d,i)=>{
-                if (i%stepTick!==0 && i!==arr.length-1) return;
+            const stepTick = Math.max(1, Math.ceil(labelsArr.length / targetTicks));
+            labelsArr.forEach((label,i)=>{
+                if (i%stepTick!==0 && i!==labelsArr.length-1) return;
                 const x = pad.l + (i * step);
                 const y = pad.t + h + 18;
                 const txt = document.createElementNS('http://www.w3.org/2000/svg','text');
                 txt.setAttribute('x', x);
                 txt.setAttribute('y', y);
                 txt.setAttribute('text-anchor','middle');
-                txt.textContent = `${monthLabel(arr[i].date)} ${yearShort(arr[i].date)}`;
+                txt.textContent = String(label || '');
                 xAxis.appendChild(txt);
             });
             svg.appendChild(xAxis);
