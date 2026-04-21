@@ -63,7 +63,7 @@
                 </div>
                 <div class="metric-title">Total Spent</div>
                 <div class="metric-value">
-                    $<?= number_format($totalSpent, 2) ?>
+                    LKR <?= number_format($totalSpent, 2) ?>
                 </div>
                 <div class="metric-delta delta-up"><i class="fa-solid fa-arrow-up"></i> +5% vs last month</div>
             </div>
@@ -82,7 +82,7 @@
                         </div> 
                         <div class="item-meta">
                             <span><i class="fa-solid fa-calendar"></i> <?= $payment['Due_Date'] ?></span>
-                            <span><i class="fa-solid fa-coins"></i> $<?= number_format($payment['Amount'], 2) ?></span>
+                            <span><i class="fa-solid fa-coins"></i> LKR <?= number_format($payment['Amount'], 2) ?></span>
                             <span><i class="fa-solid fa-credit-card"></i> <?= $payment['Method'] ?></span>
                         </div>
                     </li>
@@ -106,11 +106,8 @@
                         <div class="item-meta">
                             <span><i class="fa-solid fa-calendar"></i> <?= $request['Time_Ago'] ?></span>
 
-                            <?php if ($request['Proposals'] !== null): ?>
-                            <span><i class="fa-solid fa-users"></i> <?= $request['Proposals'] ?> proposals</span>
-                            <?php else: ?>
-                            <span><i class="fa-solid fa-users"></i> 0 proposals</span>
-                            <?php endif; ?>
+                            <?php $proposalCount = (int) ($request['Proposals'] ?? 0); ?>
+                            <span><i class="fa-solid fa-users"></i> <?= $proposalCount ?> proposals</span>
 
                             <?php if ($request['Time_Left'] !== null): ?>
                             <span><i class="fa-solid fa-hourglass"></i> <?= $request['Time_Left'] ?></span>
@@ -151,7 +148,7 @@
                             <td class="project-name"><?= htmlspecialchars($project['Title']) ?></td>
                             <td><?= htmlspecialchars($project['Stage']) ?></td>
                             <td><?= htmlspecialchars($project['Provider']) ?></td>
-                            <td class="project-budget">$<?= number_format($project['Budget'], 2) ?></td>
+                            <td class="project-budget">LKR <?= number_format($project['Budget'], 2) ?></td>
                             <td>
                                 <div class="progress-bar-container">
                                     <div class="progress-bar-fill progress-<?= intval($project['Progress']) ?>"></div>

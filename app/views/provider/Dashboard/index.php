@@ -52,7 +52,7 @@
                 <div class="metric-icon" style="background:#ecfdf5; color:#008500;"><i class="fas fa-sack-dollar"></i>
                 </div>
                 <div class="metric-title">Total Revenue</div>
-                <div class="metric-value">$4,200</div>
+                <div class="metric-value">LKR 4,200</div>
                 <div class="metric-delta delta-up"><i class="fa-solid fa-arrow-up"></i> +8% vs last month</div>
             </div>
         </section>
@@ -89,7 +89,7 @@
                         </div>
                         <div class="item-meta">
                             <span><i class="fa-solid fa-calendar"></i> Sep 02, 2025</span>
-                            <span><i class="fa-solid fa-coins"></i> $1,200.00</span>
+                            <span><i class="fa-solid fa-coins"></i> LKR 1,200.00</span>
                             <span><i class="fa-solid fa-credit-card"></i> Visa</span>
                         </div>
                     </li>
@@ -100,7 +100,7 @@
                         </div>
                         <div class="item-meta">
                             <span><i class="fa-solid fa-calendar"></i> Aug 28, 2025</span>
-                            <span><i class="fa-solid fa-coins"></i> $950.00</span>
+                            <span><i class="fa-solid fa-coins"></i> LKR 950.00</span>
                             <span><i class="fa-solid fa-credit-card"></i> Stripe</span>
                         </div>
                     </li>
@@ -111,7 +111,7 @@
                         </div>
                         <div class="item-meta">
                             <span><i class="fa-solid fa-calendar"></i> Aug 30, 2025</span>
-                            <span><i class="fa-solid fa-coins"></i> $420.00</span>
+                            <span><i class="fa-solid fa-coins"></i> LKR 420.00</span>
                             <span><i class="fa-solid fa-credit-card"></i> Stripe</span>
                         </div>
                     </li>
@@ -190,7 +190,7 @@
                             <td style="padding:16px 20px; font-weight:600; color:#111827;">E‑commerce Platform</td>
                             <td style="padding:16px 20px;">Sprint 3</td>
                             <td style="padding:16px 20px;">DevStudio Labs</td>
-                            <td style="padding:16px 20px; color:#008500; font-weight:600;">$6,500</td>
+                            <td style="padding:16px 20px; color:#008500; font-weight:600;">LKR 6,500</td>
                             <td style="padding:16px 20px;">
                                 <div
                                     style="background:#e2e8f0; height:8px; border-radius:6px; position:relative; overflow:hidden;">
@@ -207,7 +207,7 @@
                             <td style="padding:16px 20px; font-weight:600; color:#111827;">Analytics Dashboard</td>
                             <td style="padding:16px 20px;">QA</td>
                             <td style="padding:16px 20px;">DataCraft</td>
-                            <td style="padding:16px 20px; color:#008500; font-weight:600;">$4,800</td>
+                            <td style="padding:16px 20px; color:#008500; font-weight:600;">LKR 4,800</td>
                             <td style="padding:16px 20px;">
                                 <div
                                     style="background:#e2e8f0; height:8px; border-radius:6px; position:relative; overflow:hidden;">
@@ -224,7 +224,7 @@
                             <td style="padding:16px 20px; font-weight:600; color:#111827;">Mobile Fitness App</td>
                             <td style="padding:16px 20px;">Design</td>
                             <td style="padding:16px 20px;">UXPro Studio</td>
-                            <td style="padding:16px 20px; color:#008500; font-weight:600;">$3,200</td>
+                            <td style="padding:16px 20px; color:#008500; font-weight:600;">LKR 3,200</td>
                             <td style="padding:16px 20px;">
                                 <div
                                     style="background:#e2e8f0; height:8px; border-radius:6px; position:relative; overflow:hidden;">
@@ -330,8 +330,8 @@
         }
         function yearShort(d){ return String(d.getFullYear()).slice(-2); }
         function formatCurrency(n){
-            try { return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n); }
-            catch { return '$' + n.toLocaleString(); }
+            try { return 'LKR ' + new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(n); }
+            catch { return 'LKR ' + n.toLocaleString(); }
         }
 
         const viewH = 300, pad = {l:52, r:16, t:18, b:40};

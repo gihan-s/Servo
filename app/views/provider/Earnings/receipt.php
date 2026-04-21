@@ -134,22 +134,22 @@ $postType     = $receipt['Post_Type']     ?? '—';
                 <?php endif; ?>
               </div>
               <div><?= htmlspecialchars($postType) ?></div>
-              <div class="invoice-col-right">$<?= number_format($amount, 2) ?></div>
+              <div class="invoice-col-right">LKR <?= number_format($amount, 2) ?></div>
             </div>
           </section>
 
           <section class="invoice-totals">
             <div class="invoice-total-row">
               <span>Gross Amount</span>
-              <span>$<?= number_format($amount, 2) ?></span>
+              <span>LKR <?= number_format($amount, 2) ?></span>
             </div>
             <div class="invoice-total-row">
               <span>Platform Fee (10%)</span>
-              <span style="color:#b91c1c;">-$<?= number_format($commission, 2) ?></span>
+              <span style="color:#b91c1c;">-LKR <?= number_format($commission, 2) ?></span>
             </div>
             <div class="invoice-total-row invoice-total-grand">
               <span>Net Earnings</span>
-              <span style="color:#008500;">$<?= number_format($net, 2) ?></span>
+              <span style="color:#008500;">LKR <?= number_format($net, 2) ?></span>
             </div>
           </section>
 

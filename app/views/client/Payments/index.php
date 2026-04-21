@@ -1,5 +1,5 @@
 <?php
-$currentTab = $_GET['tab'] ?? 'awaiting';
+$currentTab = $_GET['tab'] ?? 'completed';
 $currentSearch = trim((string) ($_GET['q'] ?? ''));
 $currentSort = $_GET['sort'] ?? 'recent';
 $currentPage = max(1, (int) ($_GET['page'] ?? 1));
@@ -12,17 +12,15 @@ $sortOptions = [
 ];
 
 $tabs = [
-    'awaiting'  => ['label' => 'Awaiting Payments',  'items' => $awaitingPayments,  'total' => $awaitingTotal,  'pages' => $awaitingPages],
-    'pending'   => ['label' => 'Pending Payments',   'items' => $pendingPayments,   'total' => $pendingTotal,   'pages' => $pendingPages],
     'completed' => ['label' => 'Completed Payments', 'items' => $completedPayments, 'total' => $completedTotal, 'pages' => $completedPages],
     'refunded'  => ['label' => 'Refunded Payments',  'items' => $refundedPayments,  'total' => $refundedTotal,  'pages' => $refundedPages],
 ];
-if (!isset($tabs[$currentTab])) $currentTab = 'awaiting';
+if (!isset($tabs[$currentTab])) $currentTab = 'completed';
 
 function paymentsUrl(array $overrides = []): string
 {
     $params = array_merge([
-        'tab'  => $_GET['tab']  ?? 'awaiting',
+      'tab'  => $_GET['tab']  ?? 'completed',
         'q'    => $_GET['q']    ?? '',
         'sort' => $_GET['sort'] ?? 'recent',
         'page' => $_GET['page'] ?? 1,
@@ -103,9 +101,9 @@ function paymentsUrl(array $overrides = []): string
             </div>
           </div>
           <div class="report-preview-bar" id="client-report-preview" style="display:none;">
-            <div class="rpt-stat"><span class="rpt-label">Total Paid</span><span class="rpt-value" id="crpt-total">$0.00</span></div>
-            <div class="rpt-stat"><span class="rpt-label">Pending</span><span class="rpt-value rpt-pending" id="crpt-pending">$0.00</span></div>
-            <div class="rpt-stat"><span class="rpt-label">Refunded</span><span class="rpt-value rpt-refunded" id="crpt-refunded">$0.00</span></div>
+            <div class="rpt-stat"><span class="rpt-label">Total Paid</span><span class="rpt-value" id="crpt-total">LKR 0.00</span></div>
+            <div class="rpt-stat"><span class="rpt-label">Pending</span><span class="rpt-value rpt-pending" id="crpt-pending">LKR 0.00</span></div>
+            <div class="rpt-stat"><span class="rpt-label">Refunded</span><span class="rpt-value rpt-refunded" id="crpt-refunded">LKR 0.00</span></div>
             <div class="rpt-stat"><span class="rpt-label">Transactions</span><span class="rpt-value" id="crpt-count">0</span></div>
           </div>
         </div>
@@ -137,7 +135,7 @@ function paymentsUrl(array $overrides = []): string
                 <?php foreach ($activeItems as $item):
                   $acceptedDate = !empty($item['Started_At']) ? date('d M Y', strtotime($item['Started_At'])) : '—';
                   $priceUnit = !empty($item['Price_Type']) ? strtolower(substr($item['Price_Type'], 0, 2)) : '—';
-                  $rate = '$' . number_format((float) $item['Requesting_Price'], 0) . '/' . $priceUnit;
+                  $rate = 'LKR ' . number_format((float) $item['Requesting_Price'], 0) . '/' . $priceUnit;
                   $estimatedTotal = (float) $item['Amount'];
                   $estDelivery = !empty($item['Est_Delivery']) ? date('d M Y', strtotime($item['Est_Delivery'])) : '—';
                   $providerName = !empty($item['Provider_Name']) ? $item['Provider_Name'] : '—';
@@ -165,12 +163,12 @@ function paymentsUrl(array $overrides = []): string
                     </div>
                     <div class="item-middle">
                       <div><i class="fa-solid fa-calendar-day"></i> Est. Delivery Date: <?= $estDelivery ?></div>
-                      <div><i class="fa-solid fa-dollar-sign"></i> Estimated Total: $<?= number_format($estimatedTotal, 2) ?></div>
+                      <div><i class="fa-solid fa-dollar-sign"></i> Estimated Total: LKR <?= number_format($estimatedTotal, 2) ?></div>
                     </div>
                     <div class="post-description"><?= htmlspecialchars($item['Description'] ?? '') ?></div>
                     <div class="post-footer">
                       <div class="post-details">
-                        <div class="detail-item"><span class="detail-label">Amount</span><span class="detail-value budget-amount">$<?= number_format($estimatedTotal, 2) ?></span></div>
+                        <div class="detail-item"><span class="detail-label">Amount</span><span class="detail-value budget-amount">LKR <?= number_format($estimatedTotal, 2) ?></span></div>
                         <div class="detail-item"><span class="detail-label">Provider</span><span class="detail-value"><?= htmlspecialchars($providerName) ?></span></div>
                         <div class="detail-item"><span class="detail-label">Type</span><span class="detail-value"><?= htmlspecialchars($item['Post_Type'] ?? '—') ?></span></div>
                       </div>
@@ -222,7 +220,7 @@ function paymentsUrl(array $overrides = []): string
                     <div class="post-description"><?= htmlspecialchars($payment['Description'] ?? '') ?></div>
                     <div class="post-footer">
                       <div class="post-details">
-                        <div class="detail-item"><span class="detail-label">Amount</span><span class="detail-value budget-amount">$<?= number_format((float) $payment['Amount'], 2) ?></span></div>
+                        <div class="detail-item"><span class="detail-label">Amount</span><span class="detail-value budget-amount">LKR <?= number_format((float) $payment['Amount'], 2) ?></span></div>
                         <div class="detail-item"><span class="detail-label">Method</span><span class="detail-value"><?= htmlspecialchars($method) ?></span></div>
                         <div class="detail-item"><span class="detail-label">Due Date</span><span class="detail-value"><?= $dueDate ?></span></div>
                         <div class="detail-item"><span class="detail-label">Project</span><span class="detail-value"><?= htmlspecialchars($projectName) ?></span></div>
@@ -272,7 +270,7 @@ function paymentsUrl(array $overrides = []): string
                     <div class="post-description"><?= htmlspecialchars($payment['Description'] ?? '') ?></div>
                     <div class="post-footer">
                       <div class="post-details">
-                        <div class="detail-item"><span class="detail-label">Amount</span><span class="detail-value budget-amount">$<?= number_format((float) $payment['Amount'], 2) ?></span></div>
+                        <div class="detail-item"><span class="detail-label">Amount</span><span class="detail-value budget-amount">LKR <?= number_format((float) $payment['Amount'], 2) ?></span></div>
                         <div class="detail-item"><span class="detail-label">Method</span><span class="detail-value"><?= htmlspecialchars($method) ?></span></div>
                         <div class="detail-item"><span class="detail-label">Txn ID</span><span class="detail-value"><?= htmlspecialchars($txnId) ?></span></div>
                         <div class="detail-item"><span class="detail-label">Project</span><span class="detail-value"><?= htmlspecialchars($projectName) ?></span></div>
@@ -318,7 +316,7 @@ function paymentsUrl(array $overrides = []): string
                     <div class="post-description"><?= htmlspecialchars($payment['Description'] ?? '') ?></div>
                     <div class="post-footer">
                       <div class="post-details">
-                        <div class="detail-item"><span class="detail-label">Amount</span><span class="detail-value budget-amount">$<?= number_format((float) $payment['Amount'], 2) ?></span></div>
+                        <div class="detail-item"><span class="detail-label">Amount</span><span class="detail-value budget-amount">LKR <?= number_format((float) $payment['Amount'], 2) ?></span></div>
                         <div class="detail-item"><span class="detail-label">Method</span><span class="detail-value"><?= htmlspecialchars($method) ?></span></div>
                         <div class="detail-item"><span class="detail-label">Refund ID</span><span class="detail-value"><?= htmlspecialchars($refundId) ?></span></div>
                         <div class="detail-item"><span class="detail-label">Project</span><span class="detail-value"><?= htmlspecialchars($projectName) ?></span></div>
@@ -388,7 +386,7 @@ function paymentsUrl(array $overrides = []): string
         if (!startDate || !endDate) { alert('Please select both start and end dates.'); return; }
         if (new Date(startDate) > new Date(endDate)) { alert('Start date must be before end date.'); return; }
 
-        const fmt = n => '$' + Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const fmt = n => 'LKR ' + Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         const originalLabel = previewBtn.innerHTML;
         previewBtn.disabled = true;
         previewBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Loading...';
