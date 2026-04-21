@@ -1,3 +1,48 @@
+<?php
+$allTransactions = $allTransactions ?? [];
+$initialBatch    = 20;
+$renderTxnRow    = function (array $txn) {
+    $date           = $txn['Paid_Time'] ?? $txn['Hold_Time'] ?? null;
+    $formattedDate  = $date ? date('M d, Y', strtotime($date)) : '—';
+    $invoiceNum     = 'INV-' . $txn['Payment_ID'];
+    $isCancelled    = ($txn['Project_Status'] ?? '') === 'Cancelled';
+    $statusRaw      = $txn['Status'] ?? 'Pending';
+    $statusClass    = strtolower(str_replace(' ', '-', $statusRaw));
+    $isCompleted    = $statusRaw === 'Paid';
+    $receiptUrl     = BASE_URL . '/earnings/receipt/' . (int) $txn['Payment_ID'];
+    $clientName     = trim((string) ($txn['Client_Name'] ?? '')) ?: '—';
+    $projectTitle   = (string) ($txn['Project_Title'] ?? '—');
+?>
+    <tr>
+        <td>
+            <div class="transaction-project"><?= htmlspecialchars($projectTitle) ?></div>
+            <div class="transaction-client">Invoice #<?= htmlspecialchars($invoiceNum) ?></div>
+            <?php if ($isCancelled): ?>
+                <span class="payment-type-label label-cancellation-penalty"><i class="fa-solid fa-triangle-exclamation"></i> Cancellation Penalty</span>
+            <?php else: ?>
+                <span class="payment-type-label label-completed-project"><i class="fa-solid fa-circle-check"></i> Completed Project</span>
+            <?php endif; ?>
+        </td>
+        <td><?= $formattedDate ?></td>
+        <td><?= htmlspecialchars($clientName) ?></td>
+        <td>
+            <div class="transaction-amount">LKR <?= number_format((float) $txn['Amount'] - (float) $txn['Commission'], 2) ?></div>
+            <div class="transaction-fee">Fee: LKR <?= number_format((float) $txn['Commission'], 2) ?></div>
+        </td>
+        <td><span class="transaction-status status-<?= $statusClass ?>"><?= htmlspecialchars($statusRaw) ?></span></td>
+        <td style="text-align: right;">
+            <a href="<?= $receiptUrl ?>" class="ghost-btn">
+                <?php if ($isCompleted): ?>
+                    <i class="fa-solid fa-receipt"></i> Receipt
+                <?php else: ?>
+                    <i class="fa-solid fa-eye"></i> View
+                <?php endif; ?>
+            </a>
+        </td>
+    </tr>
+<?php
+};
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -10,12 +55,11 @@
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/main.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/earnings.css" />
-    
+
 </head>
 
 <body>
-    <?php // Use filesystem path for includes (BASE_URL is for URLs, not filesystem)
-    require_once __DIR__ . '/../../includes/navbar.php'; ?>
+    <?php require_once __DIR__ . '/../../includes/navbar.php'; ?>
     <main class="dashboard-wrapper">
         <header class="dashboard">
             <h1>Earnings</h1>
@@ -29,9 +73,9 @@
                     <i class="fas fa-wallet"></i>
                 </div>
                 <div class="metric-title">Total Earnings</div>
-                <div class="metric-value">$42,850</div>
-                <div class="metric-delta delta-up">
-                    <i class="fa-solid fa-arrow-up"></i> 18% from last month
+                <div class="metric-value">LKR <?= number_format($totalEarnings, 0) ?></div>
+                <div class="metric-delta <?= $earningsChange >= 0 ? 'delta-up' : 'delta-down' ?>">
+                    <i class="fa-solid fa-arrow-<?= $earningsChange >= 0 ? 'up' : 'down' ?>"></i> <?= abs($earningsChange) ?>% from last month
                 </div>
             </div>
             <div class="metric-card">
@@ -39,9 +83,9 @@
                     <i class="fas fa-clock"></i>
                 </div>
                 <div class="metric-title">Pending Payout</div>
-                <div class="metric-value">$8,250</div>
+                <div class="metric-value">LKR <?= number_format($pendingPayout, 0) ?></div>
                 <div class="metric-delta" style="color:#b45309;">
-                    <i class="fa-solid fa-hourglass"></i> Next payout: Sep 15
+                    <i class="fa-solid fa-hourglass"></i> Awaiting clearance
                 </div>
             </div>
             <div class="metric-card">
@@ -49,9 +93,9 @@
                     <i class="fas fa-chart-line"></i>
                 </div>
                 <div class="metric-title">Avg. Project Value</div>
-                <div class="metric-value">$3,570</div>
+                <div class="metric-value">LKR <?= number_format($avgProjectValue, 0) ?></div>
                 <div class="metric-delta delta-up">
-                    <i class="fa-solid fa-arrow-up"></i> 12% increase
+                    <i class="fa-solid fa-arrow-up"></i> Per project
                 </div>
             </div>
             <div class="metric-card">
@@ -59,9 +103,9 @@
                     <i class="fas fa-receipt"></i>
                 </div>
                 <div class="metric-title">Completed Projects</div>
-                <div class="metric-value">12</div>
+                <div class="metric-value"><?= $completedProjects ?></div>
                 <div class="metric-delta delta-up">
-                    <i class="fa-solid fa-arrow-up"></i> 3 this month
+                    <i class="fa-solid fa-arrow-up"></i> <?= $completedThisMonth ?> this month
                 </div>
             </div>
         </section>
@@ -72,11 +116,11 @@
                 <div class="chart-header">
                     <h3 class="chart-title">Earnings Overview</h3>
                     <div class="period-selector">
-                        <button class="period-btn active">1M</button>
-                        <button class="period-btn">3M</button>
-                        <button class="period-btn">6M</button>
-                        <button class="period-btn">1Y</button>
-                        <button class="period-btn">All</button>
+                        <button class="period-btn active" data-period="1M">1M</button>
+                        <button class="period-btn" data-period="3M">3M</button>
+                        <button class="period-btn" data-period="6M">6M</button>
+                        <button class="period-btn" data-period="1Y">1Y</button>
+                        <button class="period-btn" data-period="All">All</button>
                     </div>
                 </div>
                 <div class="chart-legend">
@@ -89,12 +133,54 @@
                         <span>Platform Fees</span>
                     </div>
                 </div>
-                <div class="chart-placeholder">
-                    <div style="text-align: center;">
-                        <i class="fa-solid fa-chart-bar" style="font-size: 48px; margin-bottom: 16px; display: block;"></i>
-                        Earnings chart visualization<br>
-                        <span style="font-size: 12px;">(Interactive chart would be implemented with a charting library)</span>
+                <div class="chart-area">
+                    <canvas id="earningsChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Report Generation -->
+        <section class="report-section">
+            <div class="card">
+                <div class="report-header">
+                    <h3 class="chart-title">Generate Earnings Report</h3>
+                </div>
+                <div class="report-controls">
+                    <div class="date-range">
+                        <div class="date-field">
+                            <label for="report-start">From</label>
+                            <input type="date" id="report-start" class="date-input">
+                        </div>
+                        <div class="date-field">
+                            <label for="report-end">To</label>
+                            <input type="date" id="report-end" class="date-input">
+                        </div>
                     </div>
+                    <div class="report-actions">
+                        <button class="primary-btn" id="btn-preview-report"><i class="fa-solid fa-eye"></i> Preview</button>
+                    </div>
+                </div>
+                <!-- Report Preview Area -->
+                <div class="report-preview" id="report-preview" style="display:none;">
+                    <div class="report-summary-grid">
+                        <div class="report-stat">
+                            <div class="report-stat-label">Total Earnings</div>
+                            <div class="report-stat-value" id="rpt-total">LKR 0.00</div>
+                        </div>
+                        <div class="report-stat">
+                            <div class="report-stat-label">Platform Fees</div>
+                            <div class="report-stat-value" id="rpt-fees" style="color:#b91c1c;">LKR 0.00</div>
+                        </div>
+                        <div class="report-stat">
+                            <div class="report-stat-label">Net Earnings</div>
+                            <div class="report-stat-value" id="rpt-net" style="color:#008500;">LKR 0.00</div>
+                        </div>
+                        <div class="report-stat">
+                            <div class="report-stat-label">Transactions</div>
+                            <div class="report-stat-value" id="rpt-count">0</div>
+                        </div>
+                    </div>
+                    <div class="report-preview-error" id="rpt-error" style="display:none;"></div>
                 </div>
             </div>
         </section>
@@ -104,8 +190,9 @@
             <div class="section-header">
                 <h2>Recent Transactions</h2>
                 <div class="section-actions">
-                    <button class="ghost-btn"><i class="fa-solid fa-download"></i> Export CSV</button>
-                    <button class="link-btn"><i class="fa-solid fa-arrow-right"></i> View All</button>
+                    <button class="link-btn" id="btn-view-all" type="button">
+                        <i class="fa-solid fa-arrow-right"></i> View All
+                    </button>
                 </div>
             </div>
             <div class="card" style="padding: 0; overflow: hidden;">
@@ -121,252 +208,260 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>
-                                <div class="transaction-project">E-commerce Platform</div>
-                                <div class="transaction-client">Invoice #INV-10452</div>
-                            </td>
-                            <td>Sep 02, 2025</td>
-                            <td>TechCorp Inc</td>
-                            <td>
-                                <div class="transaction-amount">$4,200.00</div>
-                                <div class="transaction-fee">Fee: $420.00</div>
-                            </td>
-                            <td><span class="transaction-status status-completed">Completed</span></td>
-                            <td style="text-align: right;">
-                                <button class="ghost-btn"><i class="fa-solid fa-receipt"></i> Receipt</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="transaction-project">Analytics Dashboard</div>
-                                <div class="transaction-client">Invoice #INV-10398</div>
-                            </td>
-                            <td>Aug 28, 2025</td>
-                            <td>DataSolutions LLC</td>
-                            <td>
-                                <div class="transaction-amount">$3,500.00</div>
-                                <div class="transaction-fee">Fee: $350.00</div>
-                            </td>
-                            <td><span class="transaction-status status-completed">Completed</span></td>
-                            <td style="text-align: right;">
-                                <button class="ghost-btn"><i class="fa-solid fa-receipt"></i> Receipt</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="transaction-project">Mobile App UI/UX</div>
-                                <div class="transaction-client">Invoice #INV-10375</div>
-                            </td>
-                            <td>Aug 22, 2025</td>
-                            <td>FitnessPlus</td>
-                            <td>
-                                <div class="transaction-amount">$2,800.00</div>
-                                <div class="transaction-fee">Fee: $280.00</div>
-                            </td>
-                            <td><span class="transaction-status status-pending">Pending</span></td>
-                            <td style="text-align: right;">
-                                <button class="ghost-btn"><i class="fa-solid fa-eye"></i> View</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="transaction-project">CRM Integration</div>
-                                <div class="transaction-client">Invoice #INV-10321</div>
-                            </td>
-                            <td>Aug 15, 2025</td>
-                            <td>SalesForce Pro</td>
-                            <td>
-                                <div class="transaction-amount">$5,100.00</div>
-                                <div class="transaction-fee">Fee: $510.00</div>
-                            </td>
-                            <td><span class="transaction-status status-processing">Processing</span></td>
-                            <td style="text-align: right;">
-                                <button class="ghost-btn"><i class="fa-solid fa-eye"></i> View</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="transaction-project">WordPress E-commerce</div>
-                                <div class="transaction-client">Invoice #INV-10294</div>
-                            </td>
-                            <td>Aug 08, 2025</td>
-                            <td>RetailTech</td>
-                            <td>
-                                <div class="transaction-amount">$2,400.00</div>
-                                <div class="transaction-fee">Fee: $240.00</div>
-                            </td>
-                            <td><span class="transaction-status status-completed">Completed</span></td>
-                            <td style="text-align: right;">
-                                <button class="ghost-btn"><i class="fa-solid fa-receipt"></i> Receipt</button>
-                            </td>
-                        </tr>
+                        <?php if (empty($transactions)): ?>
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 40px; color: #64748b;">
+                                    No transactions found.
+                                </td>
+                            </tr>
+                        <?php else: ?>
+                            <?php foreach ($transactions as $txn) $renderTxnRow($txn); ?>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
         </section>
-
-        <!-- Payout Methods -->
-        <!--
-        <section class="payout-section">
-            <div class="section-header">
-                <h2>Payout Methods</h2>
-                <button class="primary-btn"><i class="fa-solid fa-plus"></i> Add Method</button>
-            </div>
-            <div class="payout-methods">
-                <div class="payout-method active">
-                    <div class="method-icon" style="background:#eff6ff; color:#1d4ed8;">
-                        <i class="fa-brands fa-paypal"></i>
-                    </div>
-                    <div class="method-details">
-                        <div class="method-name">PayPal</div>
-                        <div class="method-info">provider@devstudiolabs.com</div>
-                    </div>
-                    <div class="method-action">Primary</div>
-                </div>
-                <div class="payout-method">
-                    <div class="method-icon" style="background:#ecfdf5; color:#008500;">
-                        <i class="fa-solid fa-building-columns"></i>
-                    </div>
-                    <div class="method-details">
-                        <div class="method-name">Bank Transfer</div>
-                        <div class="method-info">**** 4829 • Chase Bank</div>
-                    </div>
-                    <div class="method-action">Set as Primary</div>
-                </div>
-                <div class="payout-method">
-                    <div class="method-icon" style="background:#fef3c7; color:#b45309;">
-                        <i class="fa-solid fa-credit-card"></i>
-                    </div>
-                    <div class="method-details">
-                        <div class="method-name">Direct Card</div>
-                        <div class="method-info">**** 6372 • Visa</div>
-                    </div>
-                    <div class="method-action">Set as Primary</div>
-                </div>
-            </div>
-        </section>
-        -->
-        <!-- Tax Information -->
-        <!--
-        <section class="tax-section">
-            <div class="section-header">
-                <h2>Tax Information</h2>
-                <button class="ghost-btn"><i class="fa-solid fa-download"></i> Tax Documents</button>
-            </div>
-            <div class="card">
-                <div class="tax-summary">
-                    <div class="tax-card">
-                        <div class="tax-value">$4,285.00</div>
-                        <div class="tax-label">Total Platform Fees (10%)</div>
-                    </div>
-                    <div class="tax-card">
-                        <div class="tax-value">$6,427.50</div>
-                        <div class="tax-label">Estimated Tax (15%)</div>
-                    </div>
-                    <div class="tax-card">
-                        <div class="tax-value">$32,137.50</div>
-                        <div class="tax-label">Net Income After Tax</div>
-                    </div>
-                </div>
-                <div style="font-size: 13px; color: #64748b; text-align: center;">
-                    <i class="fa-solid fa-circle-info"></i> 
-                    These are estimates for informational purposes. Consult a tax professional for accurate tax calculations.
-                </div>
-            </div>
-        </section>
-        -->
-        <!-- Next Payout -->
-         <!--
-        <section class="payout-section">
-            <div class="section-header">
-                <h2>Next Payout</h2>
-                <button class="primary-btn"><i class="fa-solid fa-arrow-down"></i> Request Early Payout</button>
-            </div>
-            <div class="card">
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
-                    <div>
-                        <div style="font-size: 24px; font-weight: 700; color: #008500; margin-bottom: 4px;">$8,250.00</div>
-                        <div style="font-size: 14px; color: #64748b;">Scheduled for September 15, 2025</div>
-                    </div>
-                    <div style="display: flex; gap: 12px; align-items: center;">
-                        <div style="text-align: right;">
-                            <div style="font-size: 14px; font-weight: 600; color: #111827;">PayPal</div>
-                            <div style="font-size: 13px; color: #64748b;">provider@devstudiolabs.com</div>
-                        </div>
-                        <div style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background: #eff6ff; color: #1d4ed8; border-radius: 12px; font-size: 20px;">
-                            <i class="fa-brands fa-paypal"></i>
-                        </div>
-                    </div>
-                </div>
-                <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
-                        <div>
-                            <div style="font-size: 13px; color: #64748b; margin-bottom: 4px;">Pending Balance</div>
-                            <div style="font-size: 16px; font-weight: 600; color: #111827;">$8,250.00</div>
-                        </div>
-                        <div>
-                            <div style="font-size: 13px; color: #64748b; margin-bottom: 4px;">Platform Fee (10%)</div>
-                            <div style="font-size: 16px; font-weight: 600; color: #b91c1c;">-$825.00</div>
-                        </div>
-                        <div>
-                            <div style="font-size: 13px; color: #64748b; margin-bottom: 4px;">Net Payout</div>
-                            <div style="font-size: 16px; font-weight: 600; color: #008500;">$7,425.00</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-        -->
     </main>
+
+    <!-- All Transactions Modal -->
+    <div class="earnings-modal" id="all-transactions-modal" aria-hidden="true">
+        <div class="earnings-modal-backdrop" data-modal-close></div>
+        <div class="earnings-modal-content" role="dialog" aria-labelledby="all-txn-title" aria-modal="true">
+            <div class="earnings-modal-header">
+                <h3 id="all-txn-title">All Transactions (<?= count($allTransactions) ?>)</h3>
+                <button class="earnings-modal-close" data-modal-close aria-label="Close">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="earnings-modal-body" id="all-txn-scroll">
+                <table class="transactions-table">
+                    <thead>
+                        <tr>
+                            <th>Project / Invoice</th>
+                            <th>Date</th>
+                            <th>Client</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th style="text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="all-txn-body">
+                        <?php if (empty($allTransactions)): ?>
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 40px; color: #64748b;">
+                                    No transactions found.
+                                </td>
+                            </tr>
+                        <?php else: ?>
+                            <?php
+                            foreach ($allTransactions as $i => $txn):
+                                if ($i >= $initialBatch) break;
+                                $renderTxnRow($txn);
+                            endforeach;
+                            ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+                <div class="earnings-modal-sentinel" id="all-txn-sentinel" style="height:1px;"></div>
+                <div class="earnings-modal-footer-note" id="all-txn-end" style="display:none;">
+                    End of transactions.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Remaining transaction rows pre-rendered, revealed on scroll -->
+    <template id="all-txn-remaining">
+        <?php if (!empty($allTransactions)):
+            foreach ($allTransactions as $i => $txn):
+                if ($i < $initialBatch) continue;
+                $renderTxnRow($txn);
+            endforeach;
+        endif; ?>
+    </template>
 
     <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <script>
-        // Period selector functionality
         document.addEventListener('DOMContentLoaded', function() {
-            const periodButtons = document.querySelectorAll('.period-btn');
-            
-            periodButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    // Remove active class from all buttons
-                    periodButtons.forEach(btn => btn.classList.remove('active'));
-                    // Add active class to clicked button
-                    this.classList.add('active');
-                    
-                    // In a real application, you would update the chart data here
-                    console.log('Selected period:', this.textContent);
-                });
-            });
-            
-            // Payout method selection
-            const payoutMethods = document.querySelectorAll('.payout-method');
-            
-            payoutMethods.forEach(method => {
-                method.addEventListener('click', function() {
-                    if (this.classList.contains('active')) return;
-                    
-                    // Remove active class from all methods
-                    payoutMethods.forEach(m => m.classList.remove('active'));
-                    // Add active class to clicked method
-                    this.classList.add('active');
-                    
-                    // Update method actions
-                    payoutMethods.forEach(m => {
-                        const action = m.querySelector('.method-action');
-                        if (m === this) {
-                            action.textContent = 'Primary';
-                        } else {
-                            action.textContent = 'Set as Primary';
+            // --- Chart Data from PHP ---
+            const chartData = <?= json_encode($chartData) ?>;
+
+            const ctx = document.getElementById('earningsChart').getContext('2d');
+            let earningsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: chartData['1M'].labels,
+                    datasets: [
+                        {
+                            label: 'Earnings',
+                            data: chartData['1M'].earnings,
+                            backgroundColor: '#008500',
+                            borderRadius: 6,
+                            barPercentage: 0.6
+                        },
+                        {
+                            label: 'Platform Fees',
+                            data: chartData['1M'].fees,
+                            backgroundColor: '#e2e8f0',
+                            borderRadius: 6,
+                            barPercentage: 0.6
                         }
-                    });
-                    
-                    console.log('Selected payout method:', this.querySelector('.method-name').textContent);
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': LKR ' + context.raw.toLocaleString();
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) { return 'LKR ' + value.toLocaleString(); }
+                            },
+                            grid: { color: '#f1f5f9' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+
+            // Period selector
+            document.querySelectorAll('.period-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    document.querySelectorAll('.period-btn').forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    const period = this.dataset.period;
+                    const data = chartData[period];
+                    earningsChart.data.labels = data.labels;
+                    earningsChart.data.datasets[0].data = data.earnings;
+                    earningsChart.data.datasets[1].data = data.fees;
+                    earningsChart.update();
                 });
             });
+
+            // --- Report Generation ---
+            const today = new Date();
+            const thirtyDaysAgo = new Date(today);
+            thirtyDaysAgo.setDate(today.getDate() - 30);
+            document.getElementById('report-start').value = thirtyDaysAgo.toISOString().split('T')[0];
+            document.getElementById('report-end').value = today.toISOString().split('T')[0];
+
+            const fmtCurrency = n => 'LKR ' + Number(n || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+            document.getElementById('btn-preview-report').addEventListener('click', function() {
+                const startDate = document.getElementById('report-start').value;
+                const endDate = document.getElementById('report-end').value;
+                const errBox = document.getElementById('rpt-error');
+                const preview = document.getElementById('report-preview');
+                errBox.style.display = 'none';
+                errBox.textContent = '';
+
+                if (!startDate || !endDate) {
+                    alert('Please select both start and end dates.');
+                    return;
+                }
+                if (new Date(startDate) > new Date(endDate)) {
+                    alert('Start date must be before end date.');
+                    return;
+                }
+
+                const url = '<?= BASE_URL ?>/earnings/report?from=' + encodeURIComponent(startDate) + '&to=' + encodeURIComponent(endDate);
+                fetch(url, { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
+                    .then(r => r.json().then(j => ({ ok: r.ok, body: j })))
+                    .then(({ ok, body }) => {
+                        if (!ok) {
+                            preview.style.display = 'block';
+                            errBox.style.display = 'block';
+                            errBox.textContent = body.error || 'Failed to load report.';
+                            return;
+                        }
+                        document.getElementById('rpt-total').textContent = fmtCurrency(body.gross);
+                        document.getElementById('rpt-fees').textContent  = '-' + fmtCurrency(body.commission);
+                        document.getElementById('rpt-net').textContent   = fmtCurrency(body.net);
+                        document.getElementById('rpt-count').textContent = Number(body.count || 0).toLocaleString();
+                        preview.style.display = 'block';
+                    })
+                    .catch(() => {
+                        preview.style.display = 'block';
+                        errBox.style.display = 'block';
+                        errBox.textContent = 'Network error while loading report.';
+                    });
+            });
+
+            // --- View All Modal with Infinite Scroll ---
+            const modal          = document.getElementById('all-transactions-modal');
+            const viewAllBtn     = document.getElementById('btn-view-all');
+            const txnBody        = document.getElementById('all-txn-body');
+            const scrollBox      = document.getElementById('all-txn-scroll');
+            const endNote        = document.getElementById('all-txn-end');
+            const remainingTpl   = document.getElementById('all-txn-remaining');
+            const batchSize      = 20;
+
+            const remainingRows = remainingTpl && remainingTpl.content
+                ? Array.from(remainingTpl.content.querySelectorAll('tr'))
+                : [];
+            let revealedCount = 0;
+
+            function openModal() {
+                modal.classList.add('is-open');
+                modal.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+            }
+            function closeModal() {
+                modal.classList.remove('is-open');
+                modal.setAttribute('aria-hidden', 'true');
+                document.body.style.overflow = '';
+            }
+
+            function appendNextBatch() {
+                if (revealedCount >= remainingRows.length) {
+                    if (remainingRows.length > 0) endNote.style.display = 'block';
+                    return;
+                }
+                const next = remainingRows.slice(revealedCount, revealedCount + batchSize);
+                next.forEach(row => txnBody.appendChild(row.cloneNode(true)));
+                revealedCount += next.length;
+                if (revealedCount >= remainingRows.length) {
+                    endNote.style.display = 'block';
+                }
+            }
+
+            if (viewAllBtn) {
+                viewAllBtn.addEventListener('click', openModal);
+            }
+
+            modal.querySelectorAll('[data-modal-close]').forEach(el => {
+                el.addEventListener('click', closeModal);
+            });
+
+            document.addEventListener('keydown', e => {
+                if (e.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
+            });
+
+            scrollBox.addEventListener('scroll', () => {
+                const nearBottom = scrollBox.scrollTop + scrollBox.clientHeight >= scrollBox.scrollHeight - 80;
+                if (nearBottom) appendNextBatch();
+            });
+
+            // If the initial rendered batch doesn't fill the scrollbox, reveal more immediately.
+            if (remainingRows.length === 0) {
+                endNote.style.display = 'block';
+            }
         });
     </script>
 </body>
 
 </html>
-

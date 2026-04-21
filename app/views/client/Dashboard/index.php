@@ -37,7 +37,6 @@
                 <div class="metric-value">
                     <?= $activeRequestCount ?>
                 </div>
-                <div class="metric-delta delta-up"><i class="fa-solid fa-arrow-up"></i> +1 this week</div>
             </div>
             <!-- Pending Payments -->
             <div class="metric-card" id="pendingPaymentsCard">
@@ -46,7 +45,6 @@
                 <div class="metric-value">
                     <?= $pendingPaymentCount ?>
                 </div>
-                <div class="metric-delta" style="color:#b45309;"><i class="fa-solid fa-hourglass"></i> Due soon</div>
             </div>
             <!-- Total Projects -->
             <div class="metric-card" id="totalProjectsCard">
@@ -55,7 +53,6 @@
                 <div class="metric-value">
                     <?= $totalProjectCount ?>
                 </div>
-                <div class="metric-delta delta-up"><i class="fa-solid fa-arrow-up"></i> +2</div>
             </div>
             <!-- Total Spent -->
             <div class="metric-card" id="totalSpentCard">
@@ -63,9 +60,8 @@
                 </div>
                 <div class="metric-title">Total Spent</div>
                 <div class="metric-value">
-                    $<?= number_format($totalSpent, 2) ?>
+                    LKR <?= number_format($totalSpent, 2) ?>
                 </div>
-                <div class="metric-delta delta-up"><i class="fa-solid fa-arrow-up"></i> +5% vs last month</div>
             </div>
         </section>
 
@@ -82,14 +78,14 @@
                         </div> 
                         <div class="item-meta">
                             <span><i class="fa-solid fa-calendar"></i> <?= $payment['Due_Date'] ?></span>
-                            <span><i class="fa-solid fa-coins"></i> $<?= number_format($payment['Amount'], 2) ?></span>
+                            <span><i class="fa-solid fa-coins"></i> LKR <?= number_format($payment['Amount'], 2) ?></span>
                             <span><i class="fa-solid fa-credit-card"></i> <?= $payment['Method'] ?></span>
                         </div>
                     </li>
                     <?php endforeach; ?>
                 </ul>
                 <div class="activity-card-actions">
-                    <button class="link-btn" id="viewPaymentsButton"><i class="fa-solid fa-arrow-right"></i>View All Payments</button>
+                    <a class="link-btn" id="viewPaymentsButton" href="<?= BASE_URL ?>/payments?tab=completed&amp;sort=recent"><i class="fa-solid fa-arrow-right"></i>View All Payments</a>
                 </div>
             </div>
 
@@ -106,11 +102,8 @@
                         <div class="item-meta">
                             <span><i class="fa-solid fa-calendar"></i> <?= $request['Time_Ago'] ?></span>
 
-                            <?php if ($request['Proposals'] !== null): ?>
-                            <span><i class="fa-solid fa-users"></i> <?= $request['Proposals'] ?> proposals</span>
-                            <?php else: ?>
-                            <span><i class="fa-solid fa-users"></i> 0 proposals</span>
-                            <?php endif; ?>
+                            <?php $proposalCount = (int) ($request['Proposals'] ?? 0); ?>
+                            <span><i class="fa-solid fa-users"></i> <?= $proposalCount ?> proposals</span>
 
                             <?php if ($request['Time_Left'] !== null): ?>
                             <span><i class="fa-solid fa-hourglass"></i> <?= $request['Time_Left'] ?></span>
@@ -119,7 +112,7 @@
                     <?php endforeach; ?>
                 </ul>
                 <div class="activity-card-actions">
-                    <button class="link-btn" id="viewRequestsButton"><i class="fa-solid fa-arrow-right"></i>Manage Requests</button>
+                    <a class="link-btn" id="viewRequestsButton" href="<?= BASE_URL ?>/requests"><i class="fa-solid fa-arrow-right"></i>Manage Requests</a>
                 </div>
             </div>
         </section>
@@ -127,10 +120,9 @@
         <!-- Projects Snapshot -->
         <section aria-label="Projects snapshot" class="section-mb-56">
             <div class="section-header">
-                <h2>Active Projects</h2>
+                <h2>Ongoing Projects</h2>
                 <div class="section-actions">
-                    <button class="link-btn" id="viewProjectsButton"><i class="fa-solid fa-eye"></i> View All</button>
-                    <button class="link-btn"><i class="fa-solid fa-plus"></i> New Project</button>
+                    <a class="link-btn" id="viewProjectsButton" href="<?= BASE_URL ?>/projects"><i class="fa-solid fa-eye"></i> View All</a>
                 </div>
             </div>
             <div class="card project-table-card">
@@ -146,22 +138,30 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($activeProjects as $project): ?>
+                        <?php if (!empty($ongoingProjects)): ?>
+                            <?php foreach ($ongoingProjects as $project): ?>
+                            <tr>
+                                <td class="project-name"><?= htmlspecialchars($project['Title']) ?></td>
+                                <td><?= htmlspecialchars($project['Stage']) ?></td>
+                                <td><?= htmlspecialchars($project['Provider']) ?></td>
+                                <td class="project-budget">$<?= number_format((float) $project['Budget'], 2) ?></td>
+                                <td>
+                                    <div class="progress-bar-container">
+                                        <div class="progress-bar-fill progress-<?= max(0, min(100, intval($project['Progress']))) ?>"></div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <button class="ghost-btn"><i class="fa-solid fa-eye"></i> Details</button>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
                         <tr>
-                            <td class="project-name"><?= htmlspecialchars($project['Title']) ?></td>
-                            <td><?= htmlspecialchars($project['Stage']) ?></td>
-                            <td><?= htmlspecialchars($project['Provider']) ?></td>
-                            <td class="project-budget">$<?= number_format($project['Budget'], 2) ?></td>
-                            <td>
-                                <div class="progress-bar-container">
-                                    <div class="progress-bar-fill progress-<?= intval($project['Progress']) ?>"></div>
-                                </div>
-                            </td>
-                            <td>
-                                <button class="ghost-btn"><i class="fa-solid fa-eye"></i> Details</button>
+                            <td colspan="6" style="padding:18px 20px; text-align:center; color:#6b7280;">
+                                No ongoing projects yet.
                             </td>
                         </tr>
-                        <?php endforeach; ?>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
@@ -176,12 +176,12 @@
                 <div class="action-card">
                     <h3>Create a New Request</h3>
                     <p>Describe the work you need and start receiving proposals from verified providers.</p>
-                    <button class="primary-btn"><i class="fa-solid fa-plus"></i> New Request</button>
+                    <button class="primary-btn" type="button" onclick="window.location.href='<?= BASE_URL ?>/requests'"><i class="fa-solid fa-plus"></i> New Request</button>
                 </div>
                 <div class="action-card">
                     <h3>Find Providers</h3>
                     <p>Search and filter professionals by skill, rating, price and availability.</p>
-                    <button class="primary-btn"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+                    <button class="primary-btn" type="button" onclick="window.location.href='<?= BASE_URL ?>/providers'"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
                 </div>
             </div>
         </section>

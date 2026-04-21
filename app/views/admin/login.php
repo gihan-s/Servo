@@ -2,6 +2,9 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
+$baseURL = "../../../";
+
 ?>
 
 <!DOCTYPE html>
@@ -21,7 +24,7 @@ if (session_status() === PHP_SESSION_NONE) {
 <body>
     <button class="button home-btn" onclick="window.location.href='/'">Home</button>
     <div class="main-section">
-        <img src="<?= BASE_URL ?>/assets/img/logo.png" alt="Servo">
+        <img src="<?= BASE_URL ?>/../assets/img/logo.png" alt="Servo">
         <?php
         $loginError = $_SESSION['login_error'] ?? null;
         ?>

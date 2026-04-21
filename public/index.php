@@ -15,6 +15,7 @@ require_once '../app/controllers/LoginController.php';
 require_once '../app/controllers/MessageController.php';
 require_once '../app/controllers/NotificationController.php';
 require_once '../app/controllers/PaymentController.php';
+require_once '../app/controllers/PayHereWebhookController.php';
 require_once '../app/controllers/ProviderController.php';
 require_once '../app/controllers/EarningsController.php';
 require_once '../app/controllers/FeedController.php';
@@ -23,6 +24,9 @@ require_once '../app/controllers/BidController.php';
 require_once '../app/controllers/admin/AdminLoginController.php';
 require_once '../app/controllers/admin/AdminDashboardController.php';
 require_once '../app/controllers/admin/AdminProviderController.php';
+require_once '../app/controllers/admin/AdminClientController.php';
+require_once '../app/controllers/admin/AdminCategoryController.php';
+require_once '../app/controllers/admin/AdminLocationController.php';
 
 // Get the URL path
 $url = $_GET['url'] ?? 'home';
@@ -356,6 +360,42 @@ switch ($url) {
         $controller->index();
         break;
 
+    case (preg_match('#^payments/invoice/(\d+)$#', $url, $m) ? true : false):
+        (new PaymentController())->invoice((int) $m[1]);
+        break;
+
+    case (preg_match('#^payments/pay/(\d+)$#', $url, $m) ? true : false):
+        (new PaymentController())->pay((int) $m[1]);
+        break;
+
+    case (preg_match('#^payments/cancel/(\d+)$#', $url, $m) ? true : false):
+        (new PaymentController())->cancel((int) $m[1]);
+        break;
+
+    case (preg_match('#^payments/refund/(\d+)$#', $url, $m) ? true : false):
+        (new PaymentController())->refund((int) $m[1]);
+        break;
+
+    case 'payments/report':
+        (new PaymentController())->report();
+        break;
+
+    case (preg_match('#^payments/payhere/(\d+)$#', $url, $m) ? true : false):
+        (new PaymentController())->payhereRedirect((int) $m[1]);
+        break;
+
+    case 'payments/payhere-notify':
+        (new PayHereWebhookController())->notify();
+        break;
+
+    case 'payments/payhere-return':
+        (new PayHereWebhookController())->returnPage();
+        break;
+
+    case 'payments/payhere-cancel':
+        (new PayHereWebhookController())->cancelPage();
+        break;
+
     case 'providers':
         $controller = new ProviderController();
         $controller->index();
@@ -369,6 +409,11 @@ switch ($url) {
     case 'providers/services':
         $controller = new ProviderController();
         $controller->getServices();
+        break;
+
+    case 'providers/profile':
+        $controller = new ProviderController();
+        $controller->getProfile();
         break;
 
     case 'provider/incoming-requests':
@@ -411,6 +456,14 @@ switch ($url) {
         $controller->index();
         break;
 
+    case 'earnings/report':
+        (new EarningsController())->report();
+        break;
+
+    case (preg_match('#^earnings/receipt/(\d+)$#', $url, $m) ? true : false):
+        (new EarningsController())->receipt((int) $m[1]);
+        break;
+
     case 'feed':
         $controller = new FeedController();
         $controller->index();
@@ -421,9 +474,29 @@ switch ($url) {
         $controller->submitBid();
         break;
 
+    case 'feed/edit-bid':
+        $controller = new FeedController();
+        $controller->editBid();
+        break;
+
+    case 'feed/cancel-bid':
+        $controller = new FeedController();
+        $controller->cancelBid();
+        break;
+
     case 'bids':
         $controller = new BidsController();
         $controller->index();
+        break;
+
+    case 'bids/edit':
+        $controller = new BidsController();
+        $controller->edit();
+        break;
+
+    case 'bids/withdraw':
+        $controller = new BidsController();
+        $controller->withdraw();
         break;
 
     case 'admin/login':
@@ -459,6 +532,81 @@ switch ($url) {
     case 'admin/providers/provider-review':
         $controller = new AdminProviderController();
         $controller->review();
+        break;
+
+    case 'admin/providers/ban':
+        $controller = new AdminProviderController();
+        $controller->ban();
+        break;
+
+    case 'admin/providers/unban':
+        $controller = new AdminProviderController();
+        $controller->unban();
+        break;
+
+    case 'admin/clients':
+        $controller = new AdminClientController();
+        $controller->index();
+        break;
+
+    case (preg_match('#^admin/clients/view/(\d+)$#', $url, $matches) ? true : false):
+        $controller = new AdminClientController();
+        $controller->view($matches[1]);
+        break;
+
+    case (preg_match('#^admin/clients/api/(\d+)$#', $url, $matches) ? true : false):
+        $controller = new AdminClientController();
+        $controller->api($matches[1]);
+        break;
+
+    case 'admin/clients/ban':
+        $controller = new AdminClientController();
+        $controller->ban();
+        break;
+
+    case 'admin/clients/unban':
+        $controller = new AdminClientController();
+        $controller->unban();
+        break;
+
+    case 'admin/categories':
+        $controller = new AdminCategoryController();
+        $controller->index();
+        break;
+
+    case 'admin/categories/create':
+        $controller = new AdminCategoryController();
+        $controller->create();
+        break;
+
+    case 'admin/categories/edit':
+        $controller = new AdminCategoryController();
+        $controller->edit();
+        break;
+
+    case 'admin/categories/delete':
+        $controller = new AdminCategoryController();
+        $controller->delete();
+        break;
+
+    case 'admin/locations':
+        $controller = new AdminLocationController();
+        $controller->index();
+        break;
+
+    case 'admin/locations/create':
+        $controller = new AdminLocationController();
+        $controller->create();
+        break;
+
+    case 'admin/locations/edit':
+        $controller = new AdminLocationController();
+        $controller->edit();
+        break;
+
+    case 'admin/locations/delete':
+        $controller = new AdminLocationController();
+        $controller->delete();
         break;
 
     case 'messages/get-messages':

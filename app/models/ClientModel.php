@@ -179,4 +179,94 @@ class ClientModel extends Database
         $stmt->bind_param("si", $status, $id);
         return $stmt->execute();
     }
+
+    public function getAllClients($limit, $offset)
+    {
+        $stmt = $this->conn->prepare(
+            "SELECT Client_ID, First_Name, Last_Name, Email, Contact_No, Status, Created_At
+             FROM client
+             WHERE Status <> 'Deleted'
+             ORDER BY Client_ID DESC
+             LIMIT ? OFFSET ?"
+        );
+        $stmt->bind_param("ii", $limit, $offset);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+        return $result;
+    }
+
+    public function getClientCount()
+    {
+        $result = $this->conn->query("SELECT COUNT(*) AS total FROM client WHERE Status <> 'Deleted'");
+        return (int)$result->fetch_assoc()['total'];
+    }
+
+    public function getCountByStatus($status)
+    {
+        $stmt = $this->conn->prepare("SELECT COUNT(*) as cnt FROM client WHERE Status = ?");
+        $stmt->bind_param("s", $status);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        return (int)$result['cnt'];
+    }
+
+    public function updateClientStatus($id, $status)
+    {
+        $stmt = $this->conn->prepare("UPDATE client SET Status = ? WHERE Client_ID = ?");
+        if (!$stmt) return false;
+        $stmt->bind_param("si", $status, $id);
+        return $stmt->execute();
+    }
+
+    public function getNewClientsThisMonth()
+    {
+        $result = $this->conn->query(
+            "SELECT COUNT(*) AS total FROM client
+             WHERE MONTH(Created_At) = MONTH(CURDATE())
+               AND YEAR(Created_At) = YEAR(CURDATE())"
+        );
+        return (int)$result->fetch_assoc()['total'];
+    }
+
+    public function getClientStats(int $id): array
+    {
+        $stmt = $this->conn->prepare(
+            "SELECT
+                (SELECT COUNT(*) FROM post WHERE Client_ID = ? AND Post_Type = 'post') AS total_posts,
+                (SELECT COUNT(*) FROM project pr JOIN post p ON pr.Post_ID = p.Post_ID WHERE p.Client_ID = ?) AS total_projects,
+                COALESCE(
+                    (SELECT SUM(pay.Amount)
+                     FROM payment pay
+                     JOIN project pr ON pay.Project_ID = pr.Project_ID
+                     JOIN post p ON pr.Post_ID = p.Post_ID
+                     WHERE p.Client_ID = ? AND pay.Status = 'Paid'), 0
+                ) AS total_spent"
+        );
+        $stmt->bind_param("iii", $id, $id, $id);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        return $row;
+    }
+
+    public function getRecentClientPosts(int $id, int $limit = 10): array
+    {
+        $stmt = $this->conn->prepare(
+            "SELECT p.Post_ID, p.Title, p.Post_Status, p.Post_Type,
+                    p.Requesting_Price, p.Price_Type, p.Created_At,
+                    c.Name AS Category_Name
+             FROM post p
+             JOIN category c ON p.Category_ID = c.Category_ID
+             WHERE p.Client_ID = ? AND p.Post_Type = 'post'
+             ORDER BY p.Created_At DESC
+             LIMIT ?"
+        );
+        $stmt->bind_param("ii", $id, $limit);
+        $stmt->execute();
+        $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+        return $rows;
+    }
 }

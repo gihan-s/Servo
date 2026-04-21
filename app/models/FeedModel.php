@@ -12,30 +12,45 @@ class FeedModel extends Database
 
     public function getFeedItemsForProvider($providerId = null, $limit = null)
     {
-        // TODO: Uncomment when ready to use actual database
-        /*
-        // Fetch posts that are open for bidding
-        // Join with Client and Category tables to get full details
+        // Fetch posts open for bidding, LEFT JOIN provider's own bid
         $sql = "SELECT 
                     p.Post_ID,
                     p.Title,
                     p.Description,
                     p.Requesting_Price,
+                    p.Price_Type,
+                    p.Level,
                     p.Created_At,
-                    p.Est_Date,
+                    p.Est_Date AS Deadline,
                     p.Post_Status,
+                    p.Request_Status,
                     p.Client_ID,
                     c.First_Name AS Client_First_Name,
                     c.Last_Name AS Client_Last_Name,
+                    c.Profile_Picture AS Client_Avatar,
                     cat.Name AS Category_Name,
-                    cat.Category_ID
+                    cat.Category_ID,
+                    (SELECT COUNT(*) FROM bids WHERE Post_ID = p.Post_ID AND Status = 'active') AS Total_Bids,
+                    b.Bid_ID       AS My_Bid_ID,
+                    b.Amount       AS My_Bid_Amount,
+                    b.Comment      AS My_Bid_Comment,
+                    b.Duration     AS My_Bid_Duration,
+                    b.Status       AS My_Bid_Status,
+                    b.Created_At   AS My_Bid_Created_At
                 FROM post p
                 INNER JOIN client c ON p.Client_ID = c.Client_ID
                 INNER JOIN category cat ON p.Category_ID = cat.Category_ID
-                WHERE p.Post_Status = 'active' 
+                LEFT JOIN bids b ON b.Post_ID = p.Post_ID AND b.Provider_ID = ? AND b.Status = 'active'
+                WHERE p.Post_Status = 'active'
                 AND p.Post_Type = 'post'
-                ORDER BY p.Created_At DESC";
-        
+                AND p.Request_Status = 'open'
+                AND p.Est_Date > CURDATE()
+                AND p.Category_ID IN (
+                    SELECT Category_ID FROM provider_categories WHERE Provider_ID = ?
+                )
+                ORDER BY p.Created_At DESC
+                ";
+
         if ($limit !== null) {
             $sql .= " LIMIT ?";
         }
@@ -47,7 +62,9 @@ class FeedModel extends Database
         }
 
         if ($limit !== null) {
-            $stmt->bind_param('i', $limit);
+            $stmt->bind_param('iii', $providerId, $providerId, $limit);
+        } else {
+            $stmt->bind_param('ii', $providerId, $providerId);
         }
 
         if (!$stmt->execute()) {
@@ -59,63 +76,37 @@ class FeedModel extends Database
         $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         $stmt->close();
 
-        // Format the data with helper functions
         foreach ($rows as &$row) {
             $row['Client_Name'] = formatFullName($row['Client_First_Name'], $row['Client_Last_Name']);
-            $row['Budget'] = formatCurrency($row['Requesting_Price']);
-            $row['Timeline'] = formatDuration($row['Est_Date']);
-            $row['Posted'] = timeAgo($row['Created_At']);
+            $row['Budget']      = formatCurrency($row['Requesting_Price']);
+            $row['Deadline']    = formatDuration($row['Deadline']);
+            $row['Posted']      = timeAgo($row['Created_At']);
         }
         unset($row);
 
         return $rows;
-        */
+    }
 
-        // Dummy data for testing
-        return [
-            [
-                'Post_ID' => 1,
-                'Title' => 'Build a Portfolio Website',
-                'Description' => 'Need a modern, responsive personal portfolio with project showcase and contact form.',
-                'Requesting_Price' => 600,
-                'Created_At' => date('Y-m-d H:i:s', strtotime('-2 hours')),
-                'Est_Date' => date('Y-m-d', strtotime('+10 days')),
-                'Post_Status' => 'Open',
-                'Client_ID' => 1,
-                'Client_First_Name' => 'Nadia', // from database join with client table
-                'Client_Last_Name' => 'Perera', // from database join with client table
-                'Category_ID' => 1,
-                'Category_Name' => 'Web Development', // from database join with category table
-            ],
-            [
-                'Post_ID' => 2,
-                'Title' => 'Logo + Brand Kit',
-                'Description' => 'Client is looking for a clean logo, color palette and typography suggestions for a new startup.',
-                'Requesting_Price' => 350,
-                'Created_At' => date('Y-m-d H:i:s', strtotime('-5 hours')),
-                'Est_Date' => date('Y-m-d', strtotime('+5 days')),
-                'Post_Status' => 'Open',
-                'Client_ID' => 2,
-                'Client_First_Name' => 'Isuru',
-                'Client_Last_Name' => 'Fernando',
-                'Category_Name' => 'Graphic Design',
-                'Category_ID' => 2,
-            ],
-            [
-                'Post_ID' => 3,
-                'Title' => 'WordPress SEO Optimization',
-                'Description' => 'On-page + technical SEO improvements for an e-commerce WordPress site to increase search visibility.',
-                'Requesting_Price' => 480,
-                'Created_At' => date('Y-m-d H:i:s', strtotime('-1 day')),
-                'Est_Date' => date('Y-m-d', strtotime('+14 days')),
-                'Post_Status' => 'Open',
-                'Client_ID' => 3,
-                'Client_First_Name' => 'Tharushi',
-                'Client_Last_Name' => 'De Silva',
-                'Category_Name' => 'SEO',
-                'Category_ID' => 3,
-            ],
-        ];
+    public function updateBid($bidId, $providerId, $amount, $comment, $duration)
+    {
+        $sql = "UPDATE bids SET Amount = ?, Comment = ?, Duration = ? WHERE Bid_ID = ? AND Provider_ID = ?";
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('FeedModel::updateBid prepare: ' . $this->conn->error);
+            return ['success' => false, 'error' => 'Database error'];
+        }
+        $stmt->bind_param('dsiii', $amount, $comment, $duration, $bidId, $providerId);
+        if (!$stmt->execute()) {
+            error_log('FeedModel::updateBid exec: ' . $stmt->error);
+            $stmt->close();
+            return ['success' => false, 'error' => 'Database error'];
+        }
+        $affected = $stmt->affected_rows;
+        $stmt->close();
+        if ($affected === 0) {
+            return ['success' => false, 'error' => 'Bid not found or not authorized'];
+        }
+        return ['success' => true];
     }
 
     public function getPostById($postId)
@@ -126,8 +117,9 @@ class FeedModel extends Database
                     p.Description,
                     p.Requesting_Price,
                     p.Created_At,
-                    p.Est_Date,
+                    p.Est_Date AS Deadline,
                     p.Post_Status,
+                    p.Request_Status,
                     p.Price_Type,
                     p.Level,
                     p.Client_ID,
@@ -160,32 +152,121 @@ class FeedModel extends Database
         if ($row) {
             $row['Client_Name'] = formatFullName($row['Client_First_Name'], $row['Client_Last_Name']);
             $row['Budget'] = formatCurrency($row['Requesting_Price']);
-            $row['Timeline'] = formatDuration($row['Est_Date']);
             $row['Posted'] = timeAgo($row['Created_At']);
         }
 
         return $row;
     }
 
-    public function submitBid($providerId, $postId, $amount, $comment, $estDate)
+    public function providerHasBidOnPost($providerId, $postId)
     {
-        // add entry to database, bids table with status 'Active' and current timestamp for created_at
-        $sql = "INSERT INTO bids (Provider_ID, Post_ID, Amount, Comment, Est_Date, Status, Created_At) VALUES (?, ?, ?, ?, ?, 'Active', NOW())";
+        $sql = "SELECT COUNT(*) FROM bids WHERE Provider_ID = ? AND Post_ID = ? AND Status = 'active'";
         $stmt = $this->conn->prepare($sql);
         if (!$stmt) {
-            error_log('BidModel::submitBid prepare: ' . $this->conn->error);
+            error_log('FeedModel::providerHasBidOnPost prepare: ' . $this->conn->error);
+            return false;
+        }
+        $stmt->bind_param('ii', $providerId, $postId);
+        if (!$stmt->execute()) {
+            error_log('FeedModel::providerHasBidOnPost exec: ' . $stmt->error);
+            $stmt->close();
+            return false;
+        }
+        $stmt->bind_result($count);
+        $stmt->fetch();
+        $stmt->close();
+        return $count > 0;
+    }
+
+    public function submitBid($providerId, $postId, $amount, $comment, $duration)
+    {
+        // add entry to database, bids table with status 'active' and current timestamp for created_at
+        $sql = "INSERT INTO bids (Provider_ID, Post_ID, Amount, Comment, Duration, Status, Created_At) VALUES (?, ?, ?, ?, ?, 'active', NOW())";
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('FeedModel::submitBid prepare: ' . $this->conn->error);
             return ['success' => false, 'error' => 'Database error'];
         }
-        $stmt->bind_param('iiiis', $providerId, $postId, $amount, $comment, $estDate);
+        $stmt->bind_param('iidsi', $providerId, $postId, $amount, $comment, $duration);
         if (!$stmt->execute()) {
-            error_log('BidModel::submitBid exec: ' . $stmt->error);
+            error_log('FeedModel::submitBid exec: ' . $stmt->error);
             $stmt->close();
             return ['success' => false, 'error' => 'Database error'];
         }
         $newBidId = $stmt->insert_id;
         $stmt->close();
-        // return success response with new bid details (including generated bid ID and reference)
         return ['success' => true, 'bidId' => $newBidId];
+    }
+
+    /**
+     * Fetch all active bids for the given post IDs, including provider name.
+     * Returns array keyed by Post_ID, each value is an array of bid rows.
+     */
+    public function getBidsForPosts(array $postIds)
+    {
+        if (empty($postIds)) return [];
+
+        $placeholders = implode(',', array_fill(0, count($postIds), '?'));
+        $types        = str_repeat('i', count($postIds));
+
+        $sql = "SELECT
+                    b.Bid_ID,
+                    b.Post_ID,
+                    b.Provider_ID,
+                    b.Amount,
+                    b.Duration,
+                    b.Comment,
+                    b.Status,
+                    p.First_Name,
+                    p.Last_Name
+                FROM bids b
+                INNER JOIN provider p ON b.Provider_ID = p.Provider_ID
+                WHERE b.Post_ID IN ($placeholders)
+                AND b.Status = 'active'
+                ORDER BY b.Amount ASC";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('FeedModel::getBidsForPosts prepare: ' . $this->conn->error);
+            return [];
+        }
+        $stmt->bind_param($types, ...$postIds);
+        if (!$stmt->execute()) {
+            error_log('FeedModel::getBidsForPosts exec: ' . $stmt->error);
+            $stmt->close();
+            return [];
+        }
+        $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+
+        $indexed = [];
+        foreach ($rows as $row) {
+            $indexed[$row['Post_ID']][] = $row;
+        }
+        return $indexed;
+    }
+
+    public function cancelBid($bidId, $providerId)
+    {
+        // Only allow cancelling own active bids
+        $sql = "UPDATE bids SET Status = 'deleted' WHERE Bid_ID = ? AND Provider_ID = ? AND Status = 'active'";
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('FeedModel::cancelBid prepare: ' . $this->conn->error);
+            return ['success' => false, 'error' => 'Database error'];
+        }
+        $stmt->bind_param('ii', $bidId, $providerId);
+        if (!$stmt->execute()) {
+            error_log('FeedModel::cancelBid exec: ' . $stmt->error);
+            $stmt->close();
+            return ['success' => false, 'error' => 'Database error'];
+        }
+        $affected = $stmt->affected_rows;
+        $stmt->close();
+        if ($affected === 0) {
+            return ['success' => false, 'error' => 'Bid not found or already cancelled'];
+        }
+        return ['success' => true];
     }
 
 }

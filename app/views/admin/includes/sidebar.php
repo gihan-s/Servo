@@ -4,36 +4,40 @@
 
     <div style="width: 100%;">
 
-        <div class="option" onclick="window.location = './Dashboard'" id="SM_Dashboard">
-            <i class="fa-solid fa-grid-2"></i>Dashboard
+        <div class="option" onclick="window.location = '/admin/Dashboard'" id="SM_Dashboard">
+            <i class="fa-solid fa-layer-group"></i>Dashboard
         </div>
 
-        <div class="option" onclick="window.location = './Providers'" id="SM_Providers">
+        <div class="option" onclick="window.location = '/admin/Providers'" id="SM_Providers">
             <i class="fa-solid fa-user-tie"></i>Providers
         </div>
 
-        <div class="option" onclick="window.location = './Clients'" id="SM_Clients">
+        <div class="option" onclick="window.location = '/admin/Clients'" id="SM_Clients">
             <i class="fa-solid fa-users"></i>Clients
         </div>
-
-        <div class="option" onclick="window.location = './Posts'" id="SM_Posts">
+<!-- 
+        <div class="option" onclick="window.location = '/admin/Posts'" id="SM_Posts">
             <i class="fa-solid fa-address-card"></i></i>Posts
         </div>
 
-        <div class="option" onclick="window.location = './Payments'" id="SM_Payments">
-            <i class="fa-solid fa-circle-dollar"></i>Payments
+        <div class="option" onclick="window.location = '/admin/Payments'" id="SM_Payments">
+            <i class="fa-solid fa-coins"></i>Payments
         </div>
 
-        <div class="option" onclick="window.location = './Complaints'" id="SM_Complaints">
+        <div class="option" onclick="window.location = '/admin/Complaints'" id="SM_Complaints">
             <i class="fa-solid fa-triangle-exclamation"></i> Complaints
         </div>
 
-        <div class="option" onclick="window.location = './Analytics'" id="SM_Analytics">
+        <div class="option" onclick="window.location = '/admin/Analytics'" id="SM_Analytics">
             <i class="fa-solid fa-chart-simple"></i> Analytics
+        </div> -->
+
+        <div class="option" onclick="window.location = '/admin/categories'" id="SM_Categories">
+            <i class="fa-solid fa-list"></i> Categories
         </div>
 
-        <div class="option" onclick="window.location = './Categories'" id="SM_Categories">
-            <i class="fa-solid fa-list"></i> Categories
+        <div class="option" onclick="window.location = '/admin/locations'" id="SM_Locations">
+            <i class="fa-solid fa-location-dot"></i> Locations
         </div>
 
 

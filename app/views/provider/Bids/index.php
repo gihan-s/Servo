@@ -53,7 +53,7 @@
 				'tabs' => [
 					['id' => 'active', 'label' => 'Active Bids', 'target' => 'active', 'active' => true],
 					['id' => 'accepted', 'label' => 'Accepted', 'target' => 'accepted'],
-					['id' => 'rejected', 'label' => 'Rejected', 'target' => 'rejected']
+					['id' => 'closed', 'label' => 'Closed', 'target' => 'closed']
 				]
 			]);
 			$searchHeader->render();
@@ -64,7 +64,7 @@
 				$sections = [
 					'active' => ['label' => 'Pending bids waiting for client acceptance or rejection.', 'items' => $activeBids],
 					'accepted' => ['label' => 'Bids accepted by clients.', 'items' => $acceptedBids],
-					'rejected' => ['label' => 'Bids rejected by clients.', 'items' => $rejectedBids],
+					'closed' => ['label' => 'Bids that are no longer viable.', 'items' => $closedBids],
 				];
 				?>
 
@@ -84,12 +84,19 @@
 
 							<?php foreach ($section['items'] as $bid): ?>
 								<article class="search-item"
+									data-bid-id="<?= htmlspecialchars((string) ($bid['Bid_ID'] ?? ''), ENT_QUOTES, 'UTF-8') ?>"
 									data-client="<?= htmlspecialchars($bid['Client_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
 									data-title="<?= htmlspecialchars($bid['Title'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
 									data-category="<?= htmlspecialchars($bid['Category_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
 									data-amount="<?= htmlspecialchars($bid['Bid_Amount'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
-									data-timeline="<?= htmlspecialchars($bid['Timeline'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+									data-amount-raw="<?= htmlspecialchars((string) ($bid['Amount'] ?? ''), ENT_QUOTES, 'UTF-8') ?>"
+									data-duration="<?= htmlspecialchars($bid['Duration'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+									data-duration-hours="<?= htmlspecialchars((string) ($bid['Duration_Hours'] ?? ''), ENT_QUOTES, 'UTF-8') ?>"
+									data-duration-unit-value="<?= htmlspecialchars((string) ($bid['Duration_Unit_Value'] ?? ''), ENT_QUOTES, 'UTF-8') ?>"
+									data-duration-unit="<?= htmlspecialchars((string) ($bid['Duration_Unit'] ?? 'd'), ENT_QUOTES, 'UTF-8') ?>"
 									data-ref="<?= htmlspecialchars($bid['Bid_Ref'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+									data-status="<?= htmlspecialchars($bid['Status'] ?? 'Closed', ENT_QUOTES, 'UTF-8') ?>"
+									data-status-key="<?= htmlspecialchars($bid['Status_Key'] ?? strtolower($bid['Status'] ?? 'closed'), ENT_QUOTES, 'UTF-8') ?>"
 									data-description="<?= htmlspecialchars($bid['Comment'] ?? $bid['Post_Description'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
 									<div class="item-head">
 										<div class="item-main-dets">
@@ -110,11 +117,11 @@
 										</div>
 									</div>
 									<div class="item-middle">
-										<div><i class="fa-solid fa-calendar-days"></i> Timeline: <?= htmlspecialchars($bid['Timeline'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
+										<div><i class="fa-solid fa-calendar-days"></i> Duration: <?= htmlspecialchars($bid['Duration'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
 										<div><i class="fa-solid fa-layer-group"></i> Category: <?= htmlspecialchars($bid['Category_Name'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
 									</div>
 									<div class="item-description"><?= htmlspecialchars($bid['Comment'] ?? $bid['Post_Description'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
-									<div class="status-bottom"><span class="status-chip status-<?= htmlspecialchars(strtolower($bid['Status'] ?? 'pending'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($bid['Status'] ?? 'Pending', ENT_QUOTES, 'UTF-8') ?></span></div>
+									<div class="status-bottom"><span class="status-chip status-<?= htmlspecialchars($bid['Status_Key'] ?? strtolower($bid['Status'] ?? 'closed'), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($bid['Status'] ?? 'Closed', ENT_QUOTES, 'UTF-8') ?></span></div>
 								</article>
 							<?php endforeach; ?>
 						</div>
@@ -129,29 +136,68 @@
 	<div class="pop-up-section request-modal deactive" id="bidDetailsModalRoot">
 		<div class="pop-up" style="max-width: 680px; border-radius: 16px;">
 			<div class="pop-up-header" style="display:flex; align-items:center; justify-content:space-between;">
-				<div class="pop-up-title">Bid Details</div>
+				<div class="pop-up-title" id="bidDetailTitle">Bid Details</div>
 				<i class="fa-solid fa-xmark" id="bidDetailsModalClose" style="cursor:pointer;"></i>
 			</div>
 			<hr>
 			<div class="pop-up-content" style="display:flex; flex-direction:column; gap:12px;">
-				<div style="display:flex; gap:12px; align-items:center;">
-					<div style="font-weight:700; color:#111827;" id="bidDetailClient">Client</div>
-					<span style="font-size:12px; color:#64748b;">•</span>
-					<div style="font-size:13px; color:#475569;">Ref: <span id="bidDetailRef">-</span></div>
-				</div>
-				<div style="font-size:16px; font-weight:700; color:#111827;" id="bidDetailTitle">Bid Title</div>
-				<div style="font-size:14px; color:#475569; line-height:1.6;" id="bidDetailDescription">Description</div>
-				<div style="display:flex; gap:10px; align-items:center;">
-					<span class="status-chip" style="background:#ecfdf5; color:#008500; border-color:#bbf7d0;">
-						<i class="fa-solid fa-tag"></i>
-						<span>Bid Amount: <span id="bidDetailAmount">$0</span></span>
-					</span>
-					<span class="status-chip" style="background:#f1f5f9; color:#0f172a; border-color:#cbd5e1;">
-						<i class="fa-solid fa-clock"></i>
-						<span>Timeline: <span id="bidDetailTimeline">-</span></span>
-					</span>
-				</div>
+				<div style="font-size:15px; color:#64748b;">Client: <strong id="bidDetailClient">-</strong></div>
+				<div id="bidDetailDetails" style="display:grid; gap:10px;"></div>
 			</div>
+		</div>
+	</div>
+
+	<div class="pop-up-section request-modal deactive" id="bidEditModalRoot">
+		<div class="pop-up" id="bidEditModal" style="max-width:680px; border-radius:16px;">
+			<div class="pop-up-header" style="display:flex; align-items:center; justify-content:space-between;">
+				<div class="pop-up-title">Edit Bid</div>
+				<i class="fa-solid fa-xmark" id="bidEditModalClose" style="cursor:pointer;"></i>
+			</div>
+			<hr>
+			<form id="bidEditForm" class="pop-up-content" style="display:flex; flex-direction:column; gap:12px;" method="POST" action="<?= BASE_URL ?>/bids/edit">
+				<input type="hidden" id="editBidId" name="bid_id" value="">
+				<div style="font-size:14px; color:#334155;">You are editing: <strong id="editBidProjectTitle">Project</strong></div>
+				<div style="font-size:13px; color:#64748b;">Client: <span id="editBidClientName">Client Name</span></div>
+
+				<label for="editBidAmount" style="font-weight:700; color:#111827;">Bid Amount</label>
+				<input id="editBidAmount" name="bid_amount" type="number" min="1" step="1" placeholder="Enter your amount" style="width:100%; border:1px solid #e5e7eb; border-radius:10px; padding:10px; font-size:14px;" required>
+
+				<label for="editBidDuration" style="font-weight:700; color:#111827;">Duration</label>
+				<div style="display:grid; grid-template-columns:1fr 170px; gap:10px;">
+					<input id="editBidDuration" name="bid_duration" type="number" min="1" step="1" placeholder="e.g. 7" style="width:100%; border:1px solid #e5e7eb; border-radius:10px; padding:10px; font-size:14px;" required>
+					<select id="editBidDurationUnit" name="bid_duration_unit" style="width:100%; border:1px solid #e5e7eb; border-radius:10px; padding:10px; font-size:14px;" required>
+						<option value="d" selected>Days</option>
+						<option value="w">Weeks</option>
+						<option value="m">Months</option>
+					</select>
+				</div>
+
+				<label for="editBidMessage" style="font-weight:700; color:#111827;">Proposal Note</label>
+				<textarea id="editBidMessage" name="bid_message" rows="5" placeholder="Write a short proposal..." style="width:100%; border:1px solid #e5e7eb; border-radius:10px; padding:10px; font-size:14px; resize:vertical;" required></textarea>
+
+				<div class="modal-actions" style="margin-top:6px;">
+					<button class="btn-primary" id="editBidSubmitBtn" type="submit"><i class="fa-solid fa-paper-plane"></i> Submit Edit</button>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<div class="pop-up-section request-modal deactive" id="bidWithdrawModalRoot">
+		<div class="pop-up" id="bidWithdrawModal" style="max-width:560px; border-radius:16px;">
+			<div class="pop-up-header" style="display:flex; align-items:center; justify-content:space-between;">
+				<div class="pop-up-title">Withdraw Bid</div>
+				<i class="fa-solid fa-xmark" id="bidWithdrawModalClose" style="cursor:pointer;"></i>
+			</div>
+			<hr>
+			<form id="bidWithdrawForm" class="pop-up-content" style="display:flex; flex-direction:column; gap:12px;" method="POST" action="<?= BASE_URL ?>/bids/withdraw">
+				<input type="hidden" id="withdrawBidId" name="bid_id" value="">
+				<div style="font-size:14px; color:#334155;">Are you sure you want to withdraw this bid?</div>
+				<div style="font-size:13px; color:#64748b;">Withdrawing this bid is permanent. If you change your mind, you'll need to submit a new bid.</div>
+				<div class="modal-actions" style="margin-top:6px;">
+					<button class="btn-outline" id="bidWithdrawCancelBtn" type="button">Cancel</button>
+					<button class="btn-danger" id="bidWithdrawConfirmBtn" type="submit"><i class="fa-solid fa-trash"></i> Withdraw</button>
+				</div>
+			</form>
 		</div>
 	</div>
 

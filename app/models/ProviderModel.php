@@ -508,6 +508,16 @@ class ProviderModel extends Database
         return $result->fetch_assoc()['Total_Providers'];
     }
 
+    public function getCountByStatus($status)
+    {
+        $stmt = $this->conn->prepare("SELECT COUNT(*) as cnt FROM provider WHERE Status = ?");
+        $stmt->bind_param("s", $status);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        return (int)$result['cnt'];
+    }
+
 
     public function updateProviderStatus($provider_id, $status, $reason_for_rejection = null)
     {

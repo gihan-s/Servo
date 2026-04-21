@@ -126,11 +126,11 @@ body {
 .search-item .item-head .item-name {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #16ba00;
+  color: #008500;
   line-height: 2rem;
 }
 .search-item .item-head .item-name:hover {
-  color: #28a745;
+  color: #333;
   text-decoration: underline;
 }
 
@@ -163,9 +163,10 @@ body {
   height: auto;
   border: 1px solid #333;
   outline: none;
-  border-radius: 50%;
+  border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.3s ease, color 0.3s ease;
+  font-weight: 600;
 }
 
 .button button:hover {
@@ -619,19 +620,19 @@ body {
 .pop-up-section .pop-up .pop-up-header .pop-up-title {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #28a745;
+  color: #008500;
 }
 
 .pop-up-section .pop-up .pop-up-header i {
   font-size: 1.5rem;
-  color: #28a745;
+  color: #008500;
   cursor: pointer;
 }
 
 .pop-up-section .pop-up hr {
   width: 100%;
   height: 2px;
-  background-color: #28a745;
+  background-color: #008500;
   margin-bottom: 1rem;
 }
 
@@ -787,13 +788,13 @@ body {
 
 .filter-item .filter-options li input {
   margin-right: 0.5rem;
-  outline-color: #28a745;
+  outline-color: #008500;
   scale: 1.5;
   cursor: pointer;
 }
 
 .button-apply button {
-  background-color: #28a745;
+  background-color: #008500;
   outline: none;
   border: none;
   padding: 0.5rem;

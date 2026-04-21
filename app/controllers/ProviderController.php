@@ -22,20 +22,46 @@ class ProviderController extends BaseController
         $userId = $_SESSION['user_id'];
         $role   = $_SESSION['role'];
         $categories = [];
+        $locationTree = [];
 
         // Choose view by role
         if ($role === 'Client') {
             require_once __DIR__ . '/../models/CategoryModel.php';
+            require_once __DIR__ . '/../models/LocationModel.php';
             $categoryModel = new CategoryModel();
+            $locationModel = new LocationModel();
             $categories = $categoryModel->getCategories();
+
+            $districtRows = $locationModel->getDistricts();
+            foreach ($districtRows as $districtRow) {
+                $district = trim((string) ($districtRow['District'] ?? ''));
+                if ($district === '' || strcasecmp($district, 'All') === 0) {
+                    continue;
+                }
+
+                $cityRows = $locationModel->getCities($district);
+                $cities = [];
+                foreach ($cityRows as $cityRow) {
+                    $city = trim((string) ($cityRow['City'] ?? ''));
+                    if ($city === '' || strcasecmp($city, 'All') === 0) {
+                        continue;
+                    }
+                    $cities[] = $city;
+                }
+
+                $locationTree[] = [
+                    'district' => $district,
+                    'cities' => array_values(array_unique($cities)),
+                ];
+            }
+
             $viewFile = __DIR__ . '/../views/client/Providers/index.php';
         }
         // elseif ($role === 'Provider') {
         //     $viewFile = __DIR__ . '/../views/provider/Providers/index.php';
         // }
         else {
-            http_response_code(403);
-            echo "Invalid role";
+            $this->notFound();
             return;
         }
 
@@ -179,6 +205,8 @@ class ProviderController extends BaseController
                 'completion_range' => trim((string) ($_GET['completion_range'] ?? '')),
                 'price_types' => trim((string) ($_GET['price_types'] ?? '')),
                 'category_ids' => trim((string) ($_GET['category_ids'] ?? '')),
+                'location_districts' => trim((string) ($_GET['location_districts'] ?? '')),
+                'location_cities' => trim((string) ($_GET['location_cities'] ?? '')),
             ];
 
             $services = $providerCategoriesModel->getServicesForListing($providerId, $limit, $offset, $filters);
@@ -242,6 +270,119 @@ class ProviderController extends BaseController
         }
     }
 
+    // GET /providers/profile - Get a provider profile by provider_id
+    public function getProfile()
+    {
+        header('Content-Type: application/json');
+
+        try {
+            require_once __DIR__ . '/../models/ProviderModel.php';
+            require_once __DIR__ . '/../models/ProviderSocialModel.php';
+            require_once __DIR__ . '/../models/CategoryModel.php';
+            require_once __DIR__ . '/../models/LocationModel.php';
+            require_once __DIR__ . '/../../helpers/socialmedia.php';
+
+            $providerId = isset($_GET['provider_id']) ? (int) $_GET['provider_id'] : 0;
+            if ($providerId <= 0) {
+                http_response_code(400);
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Invalid provider id'
+                ]);
+                return;
+            }
+
+            $providerModel = new ProviderModel();
+            $socialModel = new ProviderSocialModel();
+            $categoryModel = new CategoryModel();
+            $locationModel = new LocationModel();
+
+            $provider = $providerModel->getProviderById($providerId);
+            if (!$provider) {
+                http_response_code(404);
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Provider not found'
+                ]);
+                return;
+            }
+
+            $providerSkills = $providerModel->getSkillsByProviderId($providerId);
+            $providerCategoriesRaw = $categoryModel->getByProviderId($providerId);
+            $providerCategories = [];
+            $providerCategoryIds = [];
+
+            foreach ($providerCategoriesRaw as $categoryRow) {
+                $categoryName = trim((string) ($categoryRow['Category_Type'] ?? ''));
+                if ($categoryName !== '') {
+                    $providerCategories[] = $categoryName;
+                }
+
+                $providerCategoryId = (int) ($categoryRow['ID'] ?? 0);
+                if ($providerCategoryId > 0) {
+                    $providerCategoryIds[] = $providerCategoryId;
+                }
+            }
+
+            $providerCategories = array_values(array_unique($providerCategories));
+            $providerCategoryIds = array_values(array_unique($providerCategoryIds));
+
+            $providerLocations = [];
+            if (!empty($providerCategoryIds)) {
+                $locationsByCategory = $locationModel->getByProviderCategoryIds($providerCategoryIds);
+                foreach ($providerCategoryIds as $providerCategoryId) {
+                    if (!empty($locationsByCategory[$providerCategoryId]) && is_array($locationsByCategory[$providerCategoryId])) {
+                        $providerLocations = array_merge($providerLocations, $locationsByCategory[$providerCategoryId]);
+                    }
+                }
+            }
+
+            $formattedLocation = '';
+            if (!empty($providerLocations)) {
+                $formattedLocation = formatLocations($providerLocations);
+            }
+
+            $socialLinks = $socialModel->getByProviderId($providerId);
+            $formattedSocialLinks = [];
+
+            foreach ($socialLinks as $social) {
+                $type = strtolower($social['Social_Type']);
+                $iconClass = getSocialMediaIconClass($type);
+                $color = getSocialMediaColor($type);
+
+                $formattedSocialLinks[] = [
+                    'type' => $type,
+                    'link' => $social['Social_Link'],
+                    'icon_class' => $iconClass ?? 'fa-link',
+                    'color' => $color ?? '#666666',
+                    'name' => getSocialMediaName($type) ?? $social['Social_Type']
+                ];
+            }
+
+            $ratingRaw = isset($provider['Rating']) ? (float) $provider['Rating'] : 0.0;
+            $provider['skills'] = $providerSkills;
+            $provider['categories'] = $providerCategories;
+            $provider['social_links'] = $formattedSocialLinks;
+            $provider['avatar'] = $provider['Profile_Picture'] ?? '';
+            $provider['formatted_location'] = $formattedLocation;
+            $provider['rating'] = round(max(0.0, min(5.0, $ratingRaw > 5 ? ($ratingRaw / 20) : $ratingRaw)), 1);
+            $provider['total_earning_formatted'] = !empty($provider['Total_Earning']) && (float) $provider['Total_Earning'] > 0
+                ? 'LKR ' . number_format((float) $provider['Total_Earning'], 2)
+                : 'LKR 0.00';
+
+            echo json_encode([
+                'success' => true,
+                'provider' => $provider
+            ]);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
     // GET /provider/incoming-requests - Fetch incoming requests with pagination
     public function getIncomingRequests()
     {
@@ -278,7 +419,7 @@ class ProviderController extends BaseController
                     'level' => $request['Level'],
                     'category' => $request['Category_Name'],
                     'client_name' => $request['Client_Name'],
-                    'request_type' => ucfirst(strtolower($request['Post_Type'] ?? 'direct')),
+                    'request_type' => strtolower($request['Post_Type'] ?? 'direct') === 'post' ? 'Bid' : 'Direct',
                     'client_avatar' => $request['Profile_Picture'] ? BASE_URL . $request['Profile_Picture'] : BASE_URL . '/assets/img/default-avatar.jpg',
                     'posted_date' => date('M d, Y', strtotime($request['Created_At'])),
                     'posted_date_relative' => $this->getTimeAgo($request['Created_At'])
@@ -355,7 +496,20 @@ class ProviderController extends BaseController
             require_once __DIR__ . '/../models/PostModel.php';
 
             $postModel = new PostModel();
-            $success = $postModel->changePostRequestStatus($postId, 'rejected', $reason);
+
+            $post = $postModel->getPostById($postId);
+            if (!$post) {
+                http_response_code(404);
+                echo json_encode(['success' => false, 'message' => 'Post not found']);
+                return;
+            }
+
+            // For public posts, reset to 'open' so other providers can still see it.
+            // For direct requests, mark as 'rejected'.
+            $newStatus = ($post['Post_Type'] === 'post') ? 'open' : 'rejected';
+            $rejectReason = ($newStatus === 'rejected') ? $reason : '';
+
+            $success = $postModel->changePostRequestStatus($postId, $newStatus, $rejectReason);
 
             if ($success) {
                 echo json_encode([
@@ -649,7 +803,7 @@ class ProviderController extends BaseController
                     'level'              => $request['Level'],
                     'category'           => $request['Category_Name'],
                     'client_name'        => $request['Client_Name'],
-                    'request_type'       => ucfirst(strtolower($request['Post_Type'] ?? 'direct')),
+                    'request_type'       => strtolower($request['Post_Type'] ?? 'direct') === 'post' ? 'Bid' : 'Direct',
                     'client_avatar'      => !empty($request['Profile_Picture'])
                         ? BASE_URL . $request['Profile_Picture']
                         : BASE_URL . '/assets/img/default-avatar.jpg',

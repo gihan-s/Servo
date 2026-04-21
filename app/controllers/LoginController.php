@@ -58,6 +58,11 @@ class LoginController
                     header("Location: " . BASE_URL . "/../login");
                     return;
 
+                case 'banned':
+                    $_SESSION['login_error'] = 'Your account has been banned. Please contact support for more information.';
+                    header("Location: " . BASE_URL . "/../login");
+                    return;
+
                 case 'deleted':
                     $_SESSION['login_error'] = 'Account has been deleted.';
                     header("Location: " . BASE_URL . "/../login");

@@ -23,28 +23,8 @@
     <div class="main-content">
         <section class="service-requests">
             <div class="header-requests">
-                <h1>My Service Requests & Projects</h1>
-                <div class="search-header">
-                    <div class="search-button">
-                        <input type="text" placeholder="Search for Requests...">
-                        <button><i class="fa-solid fa-magnifying-glass"></i></button>
-                    </div>
-                    <button class="filter" id="filter-pop-up"><i
-                            class="fa-solid fa-filter"></i><span>Filter</span></button>
-                    <div class="advance-search">
-                        <div class="sort-selection">
-                            <div class="selection-input-field">
-                                <input type="selection-input" id="selection-input" name="sort" value="Sort By Relevence"
-                                    disabled><i class="fa-solid fa-chevron-down"></i>
-                            </div>
-                            <div class="selection-options" id="selection-options">
-                                <div class="opt">Sort By Relevence</div>
-                                <div class="opt">Sort By Price</div>
-                                <div class="opt">Sort By Rating</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <h1 style="margin-bottom: 15px;">My Service Requests & Projects</h1>
+              
                 <div class="container-changer">
                     <!--<div id="new-requests" class="buttons active" data-target="new-requests">New Requests</div>-->
                     <div id="pending-requests" class="buttons active" data-target="pending-requests">Incoming Requests</div>
@@ -63,11 +43,7 @@
 
                     </div>
                     <div class="pagination" aria-label="Pending Requests Pagination">
-                        <button class="page-btn prev" disabled><i class="fa-solid fa-chevron-left"></i></button>
-                        <button class="page-btn active">1</button>
-                        <button class="page-btn">2</button>
-                        <button class="page-btn">3</button>
-                        <button class="page-btn next"><i class="fa-solid fa-chevron-right"></i></button>
+                       
                     </div>
                 </div>
 

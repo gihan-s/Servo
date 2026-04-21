@@ -11,6 +11,97 @@
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/searchServices.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="<?= BASE_URL ?>/assets/js/elementScript.js" defer></script>
+    <style>
+        .location-filter-search {
+            margin: 6px 0 10px;
+        }
+
+        .location-filter-search input {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid #d6dbe2;
+            font-size: 13px;
+            background: #fff;
+        }
+
+        .location-district-group {
+            display: block !important;
+            border-top: 1px dashed #edf2f7;
+            padding-top: 8px;
+            margin-top: 4px;
+        }
+
+        .location-district-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .location-expand-toggle {
+            width: 22px;
+            height: 22px;
+            border: 1px solid #d6dbe2;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            color: #475569;
+            cursor: pointer;
+            padding: 0;
+            flex-shrink: 0;
+        }
+
+        .location-expand-toggle i {
+            font-size: 11px;
+            transition: transform 0.2s ease;
+        }
+
+        .location-district-group.expanded .location-expand-toggle i {
+            transform: rotate(90deg);
+        }
+
+        .location-city-list {
+            display: none;
+            width: 100%;
+            list-style: none;
+            margin: 6px 0 0 18px;
+            padding: 0;
+        }
+
+        .location-district-group.expanded .location-city-list {
+            display: block;
+        }
+
+        .location-city-list li {
+            display: flex;
+            align-items: center;
+            padding: 4px 0;
+        }
+
+        .location-city-list li input {
+            margin-right: 8px;
+        }
+
+        .location-city-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding-left: 8px;
+            color: #334155;
+            font-weight: 500;
+        }
+
+        .location-city-label::before {
+            content: '\21B3';
+            color: #94a3b8;
+            font-size: 12px;
+            line-height: 1;
+        }
+    </style>
     <title>Find Services and Providers</title>
 </head>
 
@@ -57,6 +148,67 @@
             <div class="results-layout">
                 <aside class="filters-panel" id="services-filters-panel">
                     <h3>Filters</h3>
+                    <div class="filter-item">
+                        <div class="filter-title"><span>Location</span><i class="fa-solid fa-chevron-down rotated"></i></div>
+                        <div class="location-filter-search">
+                            <input type="text" id="locationFilterSearch" placeholder="Search district or city...">
+                        </div>
+                        <ul class="filter-options active checkboxes" id="locationFilterOptions">
+                            <li>
+                                <input type="checkbox" id="location-all" name="location_all" value="all">
+                                <label for="location-all">All Locations</label>
+                            </li>
+                            <?php if (!empty($locationTree) && is_array($locationTree)): ?>
+                                <?php foreach ($locationTree as $districtData): ?>
+                                    <?php
+                                    $districtName = (string) ($districtData['district'] ?? '');
+                                    $districtKey = preg_replace('/[^a-z0-9_]+/i', '_', strtolower($districtName));
+                                    $cities = (array) ($districtData['cities'] ?? []);
+                                    ?>
+                                    <li class="location-district-group" data-district="<?= htmlspecialchars($districtName, ENT_QUOTES, 'UTF-8') ?>">
+                                        <div class="location-district-row">
+                                            <button
+                                                type="button"
+                                                class="location-expand-toggle"
+                                                data-district="<?= htmlspecialchars($districtName, ENT_QUOTES, 'UTF-8') ?>"
+                                                aria-label="Expand <?= htmlspecialchars($districtName, ENT_QUOTES, 'UTF-8') ?> cities"
+                                                aria-expanded="false"
+                                            >
+                                                <i class="fa-solid fa-chevron-right"></i>
+                                            </button>
+                                            <input
+                                                type="checkbox"
+                                                class="location-district-checkbox"
+                                                id="location-district-<?= htmlspecialchars($districtKey, ENT_QUOTES, 'UTF-8') ?>"
+                                                name="location_districts[]"
+                                                value="<?= htmlspecialchars($districtName, ENT_QUOTES, 'UTF-8') ?>"
+                                                data-district="<?= htmlspecialchars($districtName, ENT_QUOTES, 'UTF-8') ?>"
+                                            >
+                                            <label for="location-district-<?= htmlspecialchars($districtKey, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($districtName, ENT_QUOTES, 'UTF-8') ?></label>
+                                        </div>
+                                        <?php if (!empty($cities)): ?>
+                                            <ul class="location-city-list">
+                                                <?php foreach ($cities as $cityName): ?>
+                                                    <?php $cityKey = preg_replace('/[^a-z0-9_]+/i', '_', strtolower($districtName . '_' . (string) $cityName)); ?>
+                                                    <li data-city="<?= htmlspecialchars((string) $cityName, ENT_QUOTES, 'UTF-8') ?>">
+                                                        <input
+                                                            type="checkbox"
+                                                            class="location-city-checkbox"
+                                                            id="location-city-<?= htmlspecialchars($cityKey, ENT_QUOTES, 'UTF-8') ?>"
+                                                            name="location_cities[]"
+                                                            value="<?= htmlspecialchars((string) $cityName, ENT_QUOTES, 'UTF-8') ?>"
+                                                            data-district="<?= htmlspecialchars($districtName, ENT_QUOTES, 'UTF-8') ?>"
+                                                        >
+                                                        <label class="location-city-label" for="location-city-<?= htmlspecialchars($cityKey, ENT_QUOTES, 'UTF-8') ?>\"><?= htmlspecialchars((string) $cityName, ENT_QUOTES, 'UTF-8') ?></label>
+                                                    </li>
+                                                <?php endforeach; ?>
+                                            </ul>
+                                        <?php endif; ?>
+                                    </li>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </ul>
+                    </div>
                     <div class="filter-item">
                         <div class="filter-title"><span>Categories</span><i class="fa-solid fa-chevron-down rotated"></i></div>
                         <ul class="filter-options active checkboxes">
@@ -269,6 +421,8 @@
             completionRange: '',
             pricingTypes: [],
             categoryIds: [],
+            locationDistricts: [],
+            locationCities: [],
         };
 
         const providerState = {
@@ -312,6 +466,14 @@
             return Array.from(document.querySelectorAll('input[name="category_ids[]"]:checked')).map(input => input.value);
         }
 
+        function getServiceLocationDistrictsFromFilters() {
+            return Array.from(document.querySelectorAll('input[name="location_districts[]"]:checked')).map(input => input.value);
+        }
+
+        function getServiceLocationCitiesFromFilters() {
+            return Array.from(document.querySelectorAll('input[name="location_cities[]"]:checked')).map(input => input.value);
+        }
+
         function applyServiceFiltersFromUI() {
             const priceRange = document.querySelector('input[name="price_range"]:checked');
             const completionRange = document.querySelector('input[name="completion_range"]:checked');
@@ -319,6 +481,133 @@
             serviceState.completionRange = completionRange ? completionRange.value : '';
             serviceState.pricingTypes = getServicePriceTypesFromFilters();
             serviceState.categoryIds = getServiceCategoryIdsFromFilters();
+            serviceState.locationDistricts = getServiceLocationDistrictsFromFilters();
+            serviceState.locationCities = getServiceLocationCitiesFromFilters();
+        }
+
+        function initializeLocationFilter() {
+            const allCheckbox = document.getElementById('location-all');
+            const districtCheckboxes = Array.from(document.querySelectorAll('.location-district-checkbox'));
+            const cityCheckboxes = Array.from(document.querySelectorAll('.location-city-checkbox'));
+            const searchInput = document.getElementById('locationFilterSearch');
+            const districtGroups = Array.from(document.querySelectorAll('.location-district-group'));
+            const expandButtons = Array.from(document.querySelectorAll('.location-expand-toggle'));
+
+            const setDistrictExpanded = function (group, expanded) {
+                if (!group) return;
+                group.classList.toggle('expanded', expanded);
+                const btn = group.querySelector('.location-expand-toggle');
+                if (btn) {
+                    btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+                }
+            };
+
+            // Cities are collapsed by default.
+            districtGroups.forEach(group => setDistrictExpanded(group, false));
+
+            expandButtons.forEach(btn => {
+                btn.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    const districtName = btn.dataset.district || '';
+                    const group = districtGroups.find(g => (g.dataset.district || '') === districtName);
+                    if (!group) return;
+                    const shouldExpand = !group.classList.contains('expanded');
+                    setDistrictExpanded(group, shouldExpand);
+                });
+            });
+
+            const syncAllCheckbox = function () {
+                if (!allCheckbox) return;
+                const allCount = districtCheckboxes.length + cityCheckboxes.length;
+                const checkedCount = districtCheckboxes.filter(cb => cb.checked).length + cityCheckboxes.filter(cb => cb.checked).length;
+                allCheckbox.checked = allCount > 0 && checkedCount === allCount;
+            };
+
+            const syncDistrictCheckbox = function (districtName) {
+                const district = districtCheckboxes.find(cb => cb.dataset.district === districtName);
+                if (!district) return;
+                const districtCities = cityCheckboxes.filter(cb => cb.dataset.district === districtName);
+                if (districtCities.length === 0) {
+                    return;
+                }
+                district.checked = districtCities.every(cb => cb.checked);
+            };
+
+            if (allCheckbox) {
+                allCheckbox.addEventListener('change', function () {
+                    const checked = allCheckbox.checked;
+                    districtCheckboxes.forEach(cb => {
+                        cb.checked = checked;
+                    });
+                    cityCheckboxes.forEach(cb => {
+                        cb.checked = checked;
+                    });
+
+                    applyServiceFiltersFromUI();
+                    loadServiceCards(1);
+                });
+            }
+
+            districtCheckboxes.forEach(districtCheckbox => {
+                districtCheckbox.addEventListener('change', function () {
+                    const districtName = districtCheckbox.dataset.district;
+                    const districtCities = cityCheckboxes.filter(cb => cb.dataset.district === districtName);
+                    const group = districtGroups.find(g => (g.dataset.district || '') === districtName);
+                    districtCities.forEach(cityCheckbox => {
+                        cityCheckbox.checked = districtCheckbox.checked;
+                    });
+                    if (districtCheckbox.checked) {
+                        setDistrictExpanded(group, true);
+                    }
+                    syncAllCheckbox();
+
+                    applyServiceFiltersFromUI();
+                    loadServiceCards(1);
+                });
+            });
+
+            cityCheckboxes.forEach(cityCheckbox => {
+                cityCheckbox.addEventListener('change', function () {
+                    const districtName = cityCheckbox.dataset.district;
+                    syncDistrictCheckbox(districtName);
+                    syncAllCheckbox();
+
+                    applyServiceFiltersFromUI();
+                    loadServiceCards(1);
+                });
+            });
+
+            if (searchInput) {
+                searchInput.addEventListener('input', function () {
+                    const term = searchInput.value.trim().toLowerCase();
+
+                    districtGroups.forEach(group => {
+                        const districtName = (group.dataset.district || '').toLowerCase();
+                        const cityRows = Array.from(group.querySelectorAll('.location-city-list li'));
+                        let anyCityVisible = false;
+
+                        cityRows.forEach(cityRow => {
+                            const cityName = (cityRow.dataset.city || '').toLowerCase();
+                            const visible = term === '' || cityName.includes(term) || districtName.includes(term);
+                            cityRow.style.display = visible ? '' : 'none';
+                            if (visible) {
+                                anyCityVisible = true;
+                            }
+                        });
+
+                        const districtVisible = term === '' || districtName.includes(term) || anyCityVisible;
+                        group.style.display = districtVisible ? '' : 'none';
+
+                        if (term === '') {
+                            setDistrictExpanded(group, false);
+                        } else {
+                            const shouldExpand = districtName.includes(term) || anyCityVisible;
+                            setDistrictExpanded(group, shouldExpand);
+                        }
+                    });
+                });
+            }
         }
 
         function renderSortOptions(config, selectedValue) {
@@ -594,6 +883,8 @@
             if (serviceState.completionRange) params.set('completion_range', serviceState.completionRange);
             if (serviceState.pricingTypes.length) params.set('price_types', serviceState.pricingTypes.join(','));
             if (serviceState.categoryIds.length) params.set('category_ids', serviceState.categoryIds.join(','));
+            if (serviceState.locationDistricts.length) params.set('location_districts', serviceState.locationDistricts.join(','));
+            if (serviceState.locationCities.length) params.set('location_cities', serviceState.locationCities.join(','));
 
             return params.toString();
         }
@@ -1209,6 +1500,12 @@
 
         document.querySelectorAll('.filter-options li').forEach(function (li) {
             li.addEventListener('click', function (e) {
+                // Location filter has its own dedicated district/city checkbox logic.
+                // Skip the generic handler to avoid city clicks toggling the parent district.
+                if (li.closest('#locationFilterOptions')) {
+                    return;
+                }
+
                 if (e.target.tagName === 'INPUT') return;
                 const input = this.querySelector('input');
                 if (!input) return;
@@ -1223,6 +1520,8 @@
                 input.dispatchEvent(new Event('change', { bubbles: true }));
             });
         });
+
+        initializeLocationFilter();
 
         if (searchInput) {
             searchInput.addEventListener('input', function () {
