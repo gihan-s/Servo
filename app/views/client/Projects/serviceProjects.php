@@ -961,10 +961,6 @@
                             <span class="detail-value proposals-count">${post.Proposal_Count || post.ProposalsCount || 0}</span>
                         </div>
                         <div class="detail-item">
-                            <span class="detail-label">Level</span>
-                            <span class="detail-value project-level">${post.Level || 'N/A'}</span>
-                        </div>
-                        <div class="detail-item">
                             <span class="detail-label">Duration</span>
                             <span class="detail-value project-duration">${post.Duration || 0} ${post.Duration_Type || 'Days'}</span>
                         </div>
@@ -1146,15 +1142,13 @@
 
     function formatEstDate(estDate) {
         if (!estDate) return 'N/A';
-        const end = new Date(estDate);
-        const now = new Date();
-        now.setHours(0, 0, 0, 0);
-        end.setHours(0, 0, 0, 0);
-        const diffDays = Math.ceil((end - now) / (1000 * 60 * 60 * 24));
-        if (diffDays < 0) return `${Math.abs(diffDays)} days ago`;
-        if (diffDays === 0) return 'Today';
-        if (diffDays === 1) return 'Tomorrow';
-        return `in ${diffDays} days`;
+        const date = new Date(estDate);
+        if (Number.isNaN(date.getTime())) return estDate;
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
     }
 
     function createAcceptedCard(post, skills) {
@@ -1833,7 +1827,7 @@
             </div>
         `;
 
-        fetch("<?= BASE_URL ?>/requests/view/" + id)
+        fetch("<?= BASE_URL ?>/requests/view/" + id + "?budget_source=bid")
             .then(response => response.json())
             .then(post => {
                 // Add delay to make loading animation visible
@@ -1878,11 +1872,7 @@
                         day: 'numeric'
                     }) : 'N/A';
 
-                const durationValue = (post.Duration ?? '').toString().trim();
-                const durationType = (post.Duration_Type ?? '').toString().trim();
-                const durationText = durationValue
-                    ? `${durationValue}${durationType ? ' ' + durationType : ''}`
-                    : (post.Est_Date ? formatEstDate(post.Est_Date) : 'N/A');
+                const estDateText = post.Est_Date ? formatEstDate(post.Est_Date) : 'N/A';
                 const projectUpdatesSectionHTML = shouldShowProjectUpdates
                     ? `<div class="post-view-section">
                         <div class="section-title">Project Updates</div>
@@ -1918,8 +1908,7 @@
                         <div class="section-title">Details</div>
                         <div class="kv-grid">
                             <div class="kv-item"><span class="kv-label">Budget:</span><span class="kv-value">LKR ${post.Requesting_Price || '0'}/=</span></div>
-                            <div class="kv-item"><span class="kv-label">Level:</span><span class="kv-value">${post.Level || 'N/A'}</span></div>
-                            <div class="kv-item"><span class="kv-label">Est Date:</span><span class="kv-value">${durationText}</span></div>
+                            <div class="kv-item"><span class="kv-label">Est Date:</span><span class="kv-value">${estDateText}</span></div>
                         </div>
                     </div>
                     ${projectUpdatesSectionHTML}
@@ -2022,7 +2011,7 @@
             </div>
         `;
 
-        fetch("<?= BASE_URL ?>/requests/view/" + id)
+        fetch("<?= BASE_URL ?>/requests/view/" + id + "?budget_source=bid")
             .then(response => response.json())
             .then(post => new Promise(resolve => setTimeout(() => resolve(post), 300)))
             .then(post => {
@@ -2063,7 +2052,6 @@
                         <div class="section-title">Details</div>
                         <div class="kv-grid">
                             <div class="kv-item"><span class="kv-label">Budget:</span><span class="kv-value">LKR ${post.Requesting_Price || '0'}/=</span></div>
-                            <div class="kv-item"><span class="kv-label">Level:</span><span class="kv-value">${post.Level || 'N/A'}</span></div>
                             <div class="kv-item"><span class="kv-label">Est Date:</span><span class="kv-value">${post.Duration || 'N/A'} ${post.Duration_Type || 'N/A'}</span></div>
                         </div>
 

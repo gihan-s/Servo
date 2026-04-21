@@ -28,6 +28,76 @@ class PostModel extends Database
 {
     private ?BidModel $bidModel = null;
 
+    private function getAcceptedBidTermsForPost(int $postId, int $providerId): ?array
+    {
+        if ($postId <= 0 || $providerId <= 0) {
+            return null;
+        }
+
+        $stmt = $this->conn->prepare(
+            "SELECT Amount, Duration
+             FROM bids
+             WHERE Post_ID = ? AND Provider_ID = ?
+               AND LOWER(COALESCE(Status, '')) NOT IN ('cancelled', 'deleted')
+             ORDER BY
+               CASE
+                 WHEN LOWER(COALESCE(Status, '')) IN ('active', 'accepted', 'pending', 'open') THEN 0
+                 ELSE 1
+               END,
+               COALESCE(Created_At, NOW()) DESC,
+               Bid_ID DESC
+             LIMIT 1"
+        );
+        if (!$stmt) {
+            error_log('PostModel::getAcceptedBidTermsForPost prepare: ' . $this->conn->error);
+            return null;
+        }
+
+        $stmt->bind_param('ii', $postId, $providerId);
+        if (!$stmt->execute()) {
+            error_log('PostModel::getAcceptedBidTermsForPost exec: ' . $stmt->error);
+            $stmt->close();
+            return null;
+        }
+
+        $row = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        if (!$row) {
+            return null;
+        }
+
+        return [
+            'amount' => max(0.0, (float) ($row['Amount'] ?? 0)),
+            'duration' => max(0, (int) ($row['Duration'] ?? 0)),
+        ];
+    }
+
+    private function applyBidTermsToRows(array $rows): array
+    {
+        foreach ($rows as &$row) {
+            $postType = strtolower(trim((string) ($row['Post_Type'] ?? '')));
+            if ($postType !== 'post') {
+                continue;
+            }
+
+            $postId = (int) ($row['Post_ID'] ?? 0);
+            $providerId = (int) ($row['Provider_ID'] ?? 0);
+            if ($postId <= 0 || $providerId <= 0) {
+                continue;
+            }
+
+            $bidTerms = $this->getAcceptedBidTermsForPost($postId, $providerId);
+            if (!$bidTerms) {
+                continue;
+            }
+
+            $row['Requesting_Price'] = $bidTerms['amount'];
+        }
+        unset($row);
+
+        return $rows;
+    }
+
     public function __construct(bool $loadBidModel = true)
     {
         parent::__construct();
@@ -254,7 +324,9 @@ class PostModel extends Database
         $stmt->execute();
         $result = $stmt->get_result();
         $stmt->close();
-        return $result->fetch_all(MYSQLI_ASSOC);
+
+        $rows = $result->fetch_all(MYSQLI_ASSOC);
+        return $this->applyBidTermsToRows($rows);
     }
 
     public function createPost($data)
@@ -383,7 +455,7 @@ class PostModel extends Database
         return true;
     }
 
-    public function getPostById(int $postId): ?array
+    public function getPostById(int $postId, bool $useBidBudget = false): ?array
     {
         $sql = "SELECT 
                 p.Post_ID, 
@@ -433,7 +505,12 @@ class PostModel extends Database
         $stmt->close();
 
         if ($row) {
-            $post['Proposal_Count'] = $this->bidModel ? $this->bidModel->countByPostId((int) $postId) : 0;
+            $row['Proposal_Count'] = $this->bidModel ? $this->bidModel->countByPostId((int) $postId) : 0;
+
+            if ($useBidBudget) {
+                $resolvedRows = $this->applyBidTermsToRows([$row]);
+                $row = $resolvedRows[0] ?? $row;
+            }
         }
 
         return $row ?: null;
@@ -598,23 +675,97 @@ class PostModel extends Database
 
     public function countActiveRequests($clientId)
     {
-        $stmt = $this->conn->prepare("SELECT COUNT(*) as count FROM post WHERE Client_ID = ? AND Post_Status = 'Published'");
-        $stmt->bind_param("i", $clientId);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $count = $result->fetch_assoc()['count'];
+        $stmt = $this->conn->prepare(
+            "SELECT COUNT(*) AS total
+             FROM post
+             WHERE Client_ID = ?
+               AND (
+                    (
+                        LOWER(COALESCE(Post_Type, '')) = 'post'
+                        AND (
+                            LOWER(COALESCE(Post_Status, '')) = 'active'
+                            OR LOWER(COALESCE(Request_Status, '')) IN ('pending', 'accepted')
+                        )
+                    )
+                    OR (
+                        LOWER(COALESCE(Post_Type, '')) = 'direct'
+                        AND LOWER(COALESCE(Request_Status, '')) IN ('pending', 'accepted')
+                    )
+               )"
+        );
+        if (!$stmt) {
+            error_log('PostModel::countActiveRequests prepare: ' . $this->conn->error);
+            return 0;
+        }
+
+        $stmt->bind_param('i', $clientId);
+        if (!$stmt->execute()) {
+            error_log('PostModel::countActiveRequests exec: ' . $stmt->error);
+            $stmt->close();
+            return 0;
+        }
+
+        $row = $stmt->get_result()->fetch_assoc();
         $stmt->close();
-        return $count;
+        return (int) ($row['total'] ?? 0);
     }
 
     public function getRecentRequests($clientId, $limit = 3)
     {
-        $stmt = $this->conn->prepare("SELECT * FROM post WHERE Client_ID = ? ORDER BY Created_At DESC LIMIT ?");
-        $stmt->bind_param("ii", $clientId, $limit);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $limit = max(1, (int) $limit);
+
+        $sql = "SELECT
+                    p.Post_ID,
+                    p.Title,
+                    p.Created_At,
+                    p.End_At,
+                    CASE
+                        WHEN LOWER(COALESCE(p.Post_Type, '')) IN ('direct', 'direct request')
+                            THEN COALESCE(NULLIF(p.Request_Status, ''), p.Post_Status)
+                        WHEN LOWER(COALESCE(p.Post_Status, '')) = 'active'
+                            THEN p.Post_Status
+                        ELSE COALESCE(NULLIF(p.Request_Status, ''), p.Post_Status)
+                    END AS Post_Status,
+                    CASE
+                        WHEN LOWER(COALESCE(p.Post_Type, '')) = 'post'
+                            THEN (SELECT COUNT(*) FROM bids b WHERE b.Post_ID = p.Post_ID)
+                        ELSE NULL
+                    END AS Proposals
+                FROM post p
+                WHERE p.Client_ID = ?
+                  AND (
+                        (
+                            LOWER(COALESCE(p.Post_Type, '')) = 'post'
+                            AND (
+                                LOWER(COALESCE(p.Post_Status, '')) = 'active'
+                                OR LOWER(COALESCE(p.Request_Status, '')) IN ('pending', 'accepted')
+                            )
+                        )
+                        OR (
+                            LOWER(COALESCE(p.Post_Type, '')) IN ('direct', 'direct request')
+                            AND LOWER(COALESCE(p.Request_Status, '')) IN ('pending', 'accepted')
+                        )
+                    )
+                ORDER BY p.Created_At DESC
+                LIMIT ?";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('PostModel::getRecentRequests prepare: ' . $this->conn->error);
+            return [];
+        }
+
+        $stmt->bind_param('ii', $clientId, $limit);
+        if (!$stmt->execute()) {
+            error_log('PostModel::getRecentRequests exec: ' . $stmt->error);
+            $stmt->close();
+            return [];
+        }
+
+        $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         $stmt->close();
-        return $result->fetch_all(MYSQLI_ASSOC);
+
+        return $rows;
     }
 
     public function deletePost(int $postId): bool

@@ -58,8 +58,8 @@
                             <div data-sort="date_asc">Date (Oldest)</div>
                             <div data-sort="price_desc">Price (High)</div>
                             <div data-sort="price_asc">Price (Low)</div>
-                            <div data-sort="views_desc">Views (Most)</div>
-                            <div data-sort="views_asc">Views (Least)</div>
+                            <!-- <div data-sort="views_desc">Views (Most)</div>
+                            <div data-sort="views_asc">Views (Least)</div> -->
                         </div>
                     </div>
                 </div>
@@ -543,10 +543,10 @@
         if (status === 'expired') { // Ensure post is marked as expired
             engagementHTML = `
                 <div class="engagement-stats">
-                    <div class="stat-item">
+                    <!--<div class="stat-item">
                         <i class="fas fa-eye"></i>
                         <span>${post.Views || post.View_Count || 0} views</span>
-                    </div>
+                    </div>-->
                     <div class="stat-item">
                         <i class="fas fa-clock"></i>
                         <span>Expired</span>
@@ -558,10 +558,10 @@
         } else {
             engagementHTML = `
                 <div class="engagement-stats">
-                    <div class="stat-item">
+                    <!--<div class="stat-item">
                         <i class="fas fa-eye"></i>
                         <span>${post.Views || post.View_Count || 0} views</span>
-                    </div>
+                    </div>-->
                     <div class="stat-item">
                         <i class="fas fa-clock"></i>
                         <span>${daysLeft}</span>
@@ -1073,7 +1073,7 @@
                     <div class="post-view-meta">
                         <span class="chip"><i class="fa-solid fa-calendar"></i><span>${publishDate}</span></span>
                         <span class="chip"><i class="fa-solid fa-list-check"></i> ${proposalCount} proposals</span>
-                        <span class="chip"><i class="fa-solid fa-eye"></i> ${post.Views || '0'} views</span>
+                        <!--<span class="chip"><i class="fa-solid fa-eye"></i> ${post.Views || '0'} views</span>-->
                     </div>
 
                     <div class="post-quick-stats">
@@ -1122,7 +1122,7 @@
                         <div class="post-view-section">
                             <div class="section-title">Engagement</div>
                             <div class="engagement-row">
-                                <span class="chip"><i class="fa-solid fa-eye"></i> ${post.Views || '0'} views</span>
+                                <!--<span class="chip"><i class="fa-solid fa-eye"></i> ${post.Views || '0'} views</span>--> 
                                 <span class="chip"><i class="fa-solid fa-user-group"></i> ${proposalCount} proposals</span>
                             </div>
                         </div>
