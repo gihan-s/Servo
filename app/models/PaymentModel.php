@@ -226,6 +226,120 @@ class PaymentModel extends Database
         ];
     }
 
+    /**
+     * Fetches post + client + provider details needed for PayHere checkout.
+     * Queries directly from the post table — no project/payment needed yet.
+     */
+    public function getPaymentDetailsForPayHere(int $postId, int $clientId): ?array
+    {
+        $sql = "SELECT
+                    po.Post_ID,
+                    po.Title          AS Project_Title,
+                    po.Description,
+                    po.Price_Type,
+                    po.Requesting_Price,
+                    po.Post_Type,
+                    po.Provider_ID,
+                    cl.First_Name,
+                    cl.Last_Name,
+                    cl.Email,
+                    cl.Contact_No,
+                    pr.First_Name  AS Provider_First,
+                    pr.Last_Name   AS Provider_Last
+                FROM post po
+                JOIN client cl  ON po.Client_ID = cl.Client_ID
+                LEFT JOIN provider pr ON po.Provider_ID = pr.Provider_ID
+                WHERE po.Post_ID   = ?
+                  AND po.Client_ID = ?
+                  AND po.Request_Status IN ('Accepted', 'ongoing')
+                LIMIT 1";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('PaymentModel::getPaymentDetailsForPayHere prepare: ' . $this->conn->error);
+            return null;
+        }
+        $stmt->bind_param('ii', $postId, $clientId);
+        if (!$stmt->execute()) {
+            error_log('PaymentModel::getPaymentDetailsForPayHere exec: ' . $stmt->error);
+            $stmt->close();
+            return null;
+        }
+        $row = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        return $row ?: null;
+    }
+
+    /**
+     * Creates project + payment records after a successful PayHere payment.
+     * Called from the IPN notify handler.
+     */
+    public function createProjectAndPayment(int $postId, float $amount): bool
+    {
+        // Guard: skip if a project already exists for this post
+        $check = $this->conn->prepare("SELECT Project_ID FROM project WHERE Post_ID = ? LIMIT 1");
+        $check->bind_param('i', $postId);
+        $check->execute();
+        $existing = $check->get_result()->fetch_assoc();
+        $check->close();
+        if ($existing) return true; // already created
+
+        // $this->conn->begin_transaction();
+        // try {
+            // Create project
+            $sql1 = "INSERT INTO project (Post_ID, Project_Status, Started_At)
+                     VALUES (?, 'Ongoing', NOW())";
+            $stmt1 = $this->conn->prepare($sql1);
+            $stmt1->bind_param('i', $postId);
+            $stmt1->execute();
+            $projectId = $this->conn->insert_id;
+            $stmt1->close();
+
+            
+            $sql2 = "INSERT INTO payment (Amount, Status, Paid_Time, Commission, Project_ID)
+                     VALUES (?, 'Paid', NOW(), 0, ?)";
+            $stmt2 = $this->conn->prepare($sql2);
+            $stmt2->bind_param('di', $amount, $projectId);
+            $stmt2->execute();
+            $stmt2->close();
+
+            $sql3 = "UPDATE post SET Request_Status = 'Ongoing' WHERE Post_ID = ?";
+            $stmt3 = $this->conn->prepare($sql3);
+            $stmt3->bind_param('i', $postId);
+            $stmt3->execute();
+            $stmt3->close();
+
+            // $this->conn->commit();
+            return true;
+        // } catch (\Exception $e) {
+        //     $this->conn->rollback();
+        //     error_log('PaymentModel::createProjectAndPayment failed: ' . $e->getMessage());
+        //     return false;
+        // }
+    }
+
+    /**
+     * Marks a payment as Paid after successful PayHere IPN verification.
+     * Uses the order_id format SERVO-{payment_id} to identify the record.
+     */
+    public function confirmPayHerePayment(int $paymentId): bool
+    {
+        $sql = "UPDATE payment
+                SET Status = 'Paid', Paid_Time = NOW(),
+                    Hold_Time = COALESCE(Hold_Time, NOW())
+                WHERE Payment_ID = ? AND Status IN ('Awaiting', 'Pending', 'Hold')";
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            error_log('PaymentModel::confirmPayHerePayment prepare: ' . $this->conn->error);
+            return false;
+        }
+        $stmt->bind_param('i', $paymentId);
+        $ok = $stmt->execute() && $stmt->affected_rows > 0;
+        if (!$ok) error_log('PaymentModel::confirmPayHerePayment: ' . $stmt->error);
+        $stmt->close();
+        return $ok;
+    }
+
     public function getPaymentOwnerClientId(int $paymentId): ?int
     {
         $sql = "SELECT po.Client_ID
