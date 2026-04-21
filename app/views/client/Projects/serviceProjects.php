@@ -1090,7 +1090,7 @@
             : escapeHtml(description);
         const postedDate = formatDate(post.Created_At);
         const postTypeLabel = post.Post_Type === 'direct' ? 'Direct' : 'Bid';
-
+    
         const avatarHTML = providerPicture
             ? `<img src="${providerPicture}" alt="${escapeHtml(providerName)}" class="request-avatar" onerror="this.style.display='none'">`
             : `<div class="request-avatar" style="width:56px;height:56px;border-radius:50%;background:#e5e7eb;display:flex;align-items:center;justify-content:center;"><i class="fas fa-user" style="color:#9ca3af;font-size:22px;"></i></div>`;
@@ -2341,8 +2341,8 @@
         }
 
         try {
-            const res  = await fetch(`${window.BASE_URL}/project/add-requirement`, { method: 'POST', body: fd });
-            const data = await res.json();
+            const res  =  fetch(`${window.BASE_URL}/project/add-requirement`, { method: 'POST', body: fd });
+            const data =  res.json();
 
             if (!data.success) {
                 window.showErrorToast('Error', data.error || `Failed to submit requirement (HTTP ${res.status}).`);
@@ -2367,7 +2367,13 @@
         console.error("Error:", err);
         window.showErrorToast("Error", "Error adding requirement: " + err.message);
     });
-}
+        } catch (err) {
+            console.error('Error submitting requirement:', err);
+            window.showErrorToast('Error', 'An error occurred while submitting the requirement. Please try again.');
+        } finally {
+            if (btn) { btn.disabled = false; btn.innerHTML = 'Submit'; }
+        }
+    }
 
 
     function cancelOngoingProject(id) {
@@ -2560,24 +2566,24 @@ function addReviewComments() {
         })
             
         
-        .then(response => response.text())
-        .then(text => {
-            console.log('Complete response:', text);
-            return JSON.parse(text); // return raw text for now
-        });
-        // .then(response => response.json())
-        // .then(data => {
-        //     if (data.success) {
-        //         window.showSuccessToast("Success!", "Project marked as completed.");
-        //         // Optionally, you can remove the project from the list or update its status in the UI here
-        //     } else {
-        //         window.showErrorToast("Error", data.error || 'Failed to complete project');
-        //     }
-        // })
-        // .catch(error => {
-        //     console.log('Complete error:', error);
-        //     window.showErrorToast("Error", 'An error occurred while completing the project.');
+        // .then(response => response.text())
+        // .then(text => {
+        //     console.log('Complete response:', text);
+        //     return JSON.parse(text); // return raw text for now
         // });
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.showSuccessToast("Success!", "Project marked as completed.");
+                // Optionally, you can remove the project from the list or update its status in the UI here
+            } else {
+                window.showErrorToast("Error", data.error || 'Failed to complete project');
+            }
+        })
+        .catch(error => {
+            console.log('Complete error:', error);
+            window.showErrorToast("Error", 'An error occurred while completing the project.');
+        });
     }
 
     document.addEventListener('DOMContentLoaded', function () {

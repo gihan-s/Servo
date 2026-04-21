@@ -414,7 +414,7 @@ class ProjectController extends BaseController
         }
     }
 
-    public function completeProject(int $postId): void
+    public function completeProjects(int $postId): void
     {
         header('Content-Type: application/json');
         $this->ensureAuth();
